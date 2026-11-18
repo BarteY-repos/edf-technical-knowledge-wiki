@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="FMEP — field/terrain resource role and loader boundary FMEP is a field/terrain-related map resource role in the documented EDF map stack. It must not "><title>FMEP — field/terrain resource role and loader boundary | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / FMEP</div><h1>FMEP — field/terrain resource role and loader boundary</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>FMEP is a field/terrain-related map resource role in the documented EDF map stack. It must <strong>not</strong> be interpreted as an ordinary MDB model or assumed to share its mesh/material serialization rules.</p>
+<h2 id="what-is-actually-established">What is actually established</h2>
+<p>The existing map-stack research documents <code>.fmep</code> registrations alongside MAPB, FMB and FieldRender resources. In one studied EDF6 loader path, MAPB can name <code>.fmep</code> while the runtime derives and looks up a related <strong><code>.fmb</code></strong> resource. This is a measured loader relationship, not proof that the two file formats are interchangeable.</p>
+<p>The separate FMB resource must be correctly registered through the MAC&#39;s <code>externals.sgo</code> in that observed path. Merely placing parseable FMB bytes on disk does not establish that they will be found or used at runtime.</p>
+<h2 id="how-the-observed-edf6-resource-chain-fits-together">How the observed EDF6 resource chain fits together</h2>
+<p>The measured FieldRender path makes the roles clearer when read in order:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Resource or consumer</th>
+<th>Known responsibility</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Registration</td>
+<td>MAPB definition with <code>.fmep</code> name</td>
+<td>Identifies a terrain/field placement type in the map graph</td>
+</tr>
+<tr>
+<td>Resource lookup</td>
+<td><code>Preload_Fmex</code></td>
+<td>Resolves an associated <code>.fmb</code> resource name in the observed EDF6 path</td>
+</tr>
+<tr>
+<td>Availability</td>
+<td>MAC <code>externals.sgo</code></td>
+<td>Must register the looked-up FMB for the studied loader path</td>
+</tr>
+<tr>
+<td>Geometry/render data</td>
+<td>FMB and FieldRender</td>
+<td>Supplies terrain records, leaves, material relationships and rendered instances</td>
+</tr>
+<tr>
+<td>Collision</td>
+<td>MAD/HKT references</td>
+<td>Separate physical data; a visible field does not prove its collision</td>
+</tr>
+</tbody></table>
+<p>The native-loader experiment identified a missing-FMB lookup fault before the field reached successful rendering. Registering the FMB removed that <strong>particular lookup failure</strong> from the subsequent diagnostic, but later work encountered a separate MAC-directory problem. Neither observation proves a finished custom FMEP route in the game. The case is useful because it separates <strong>resource discovery</strong>, <strong>binary decoding</strong>, <strong>drawing</strong> and <strong>collision</strong> into different contracts.</p>
+<p>The independently sampled native terrain corpus successfully decoded <strong>1,477 FMB leaves</strong> and checked <strong>20 DDS mip payloads</strong> against reported sizes. Those are <strong>FMB/DDS validation figures</strong>, not an FMEP-header census or a general FMEP serializer specification.</p>
+<h2 id="distinguishing-the-nearby-formats">Distinguishing the nearby formats</h2>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Documented role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MDB</code></td>
+<td>Ordinary model geometry, bones and material bindings</td>
+</tr>
+<tr>
+<td><code>FMB</code></td>
+<td>Field/terrain geometry, render and spatial data in studied profiles</td>
+</tr>
+<tr>
+<td><code>FMEP</code></td>
+<td>Field/terrain registration or associated role in the map stack</td>
+</tr>
+<tr>
+<td><code>MAPB</code></td>
+<td>Registration and resource linkage for the owning map</td>
+</tr>
+</tbody></table>
+<p>The distinctions above are about <strong>observed consumers and resource roles</strong>, not a universal binary-layout table. The preserved R193 sources have substantially more detailed FMB binary evidence than a standalone, exhaustively decoded FMEP container specification.</p>
+<h2 id="what-remains-unproven">What remains unproven</h2>
+<ul>
+<li>A general FMEP header/record grammar covering all EDF generations.</li>
+<li>A universal FMEP conversion law derived from ordinary MDB materials.</li>
+<li>The conclusion that field parsing or rendering success proves native floor collision or navigation parity.</li>
+</ul>
+<p>These are explicit evidence boundaries. Unknown fields must not be replaced by guessed values to make the page appear more complete.</p>
+<h2 id="detailed-technical-references">Detailed technical references</h2>
+<ul>
+<li><a href="./maps-%26-navigation-map-container-stack-mac-mapb-mapo-fmb-fmep.html">Map container stack: MAC, MAPB, MAPO, FMB and FMEP</a>.</li>
+<li><a href="./maps-%26-navigation-fmb-binary-container-wrappers-tree-and-unknowns.html">FMB binary wrappers, tree and unresolved fields</a>.</li>
+<li><a href="./edf6-fieldrender-native-dds-leaf-capacity-and-mac-registration.html">Native FMEP/DDS and FieldRender loader evidence</a>.</li>
+<li><a href="./maps-%26-navigation-mapb-binary-header-records-and-cross-game-rebasing.html">MAPB binary registrations</a>.</li>
+</ul>
+<p><strong>Scope:</strong> accurately documents the currently recovered FMEP <em>role</em> and its known boundaries. It does not invent a binary spec absent from the retained evidence.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-mapo.html">MAPO: object records in the map stack</a></li><li><a href="format-mad.html">MAD: separate collision resource</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-is-actually-established">What is actually established</a><a href="#how-the-observed-edf6-resource-chain-fits-together">How the observed EDF6 resource chain fits together</a><a href="#distinguishing-the-nearby-formats">Distinguishing the nearby formats</a><a href="#what-remains-unproven">What remains unproven</a><a href="#detailed-technical-references">Detailed technical references</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-fmep"};</script><script src="../assets/site.js" defer></script></body></html>

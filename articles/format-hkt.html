@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="HKT — Havok collision data and its EDF container context HKT is the documented Havok collision/physics payload referenced by EDF map and object resour"><title>HKT — Havok collision data and its EDF container context | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / HKT</div><h1>HKT — Havok collision data and its EDF container context</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>HKT is the documented Havok collision/physics payload referenced by EDF map and object resources. Its interpretation depends on the game&#39;s Havok generation, the owning resource and the serialized type graph. <strong>HKT must not be confused with the MAD archive wrapper that may contain it</strong>, or with an automatically usable navigation mesh.</p>
+<h2 id="where-hkt-occurs">Where HKT occurs</h2>
+<p>The inspected native EDF6 map <code>.MAD</code> files use a <strong>MARC version-5</strong> archive wrapper. In a bounded sample of <strong>50</strong> map MADs, each archive contained one member called <code>collision.hkt</code>, with a native Havok <code>TAG0</code> tagfile as its payload. The archive wrapper begins with <code>MARC</code>, whereas the embedded collision data begins at the documented payload offset <code>0x24</code>.</p>
+<p>That observed pattern describes those 50 native examples. It does not prove that every possible MAD or object-specific collision resource has exactly one HKT member.</p>
+<h2 id="havok-version-and-data-structure-matter">Havok version and data structure matter</h2>
+<p>EDF4.1&#39;s documented original collision source includes Havok 2014-era <code>hkp</code> structures. EDF6 uses Havok 2020-era <code>hknp</code> data. Moving the outer bytes, swapping an SDK/version string or reusing one generation&#39;s shape/motion records is <strong>not</strong> a proven binary conversion.</p>
+<p>The measured EDF6 native corpus includes explicit shape classes, motion/material records, collision filter data and type/data/index sections. An acceptable HKT needs a coherent <strong>serialized object graph and physical data layout</strong>, not merely a recognizable file signature.</p>
+<h2 id="edf6-tag0-tagfile-known-section-structure">EDF6 <code>TAG0</code> tagfile: known section structure</h2>
+<p>The original EDF6 Havok source-corpus notes identify the studied payloads as <strong>Havok 2020.1 binary tagfiles</strong>, with the SDK version text <code>20200100</code>. A section begins with an <strong>8-byte header</strong>: a big-endian 32-bit word containing the two high <em>kind</em> bits and a 30-bit size (including the header), followed by a four-character tag. In that source profile, kind <code>0</code> is a nested container and kind <code>1</code> is a data section.</p>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Observed purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TAG0</code></td>
+<td>Outermost tagfile container</td>
+</tr>
+<tr>
+<td><code>SDKV</code></td>
+<td>SDK version string (<code>20200100</code> in the studied files)</td>
+</tr>
+<tr>
+<td><code>DATA</code></td>
+<td>Object and array payloads; serialized numeric fields are little-endian</td>
+</tr>
+<tr>
+<td><code>TYPE</code></td>
+<td>Type-description container</td>
+</tr>
+<tr>
+<td><code>TST1</code>, <code>TNA1</code></td>
+<td>Type-name strings, declarations and template arguments</td>
+</tr>
+<tr>
+<td><code>FST1</code>, <code>TBDY</code></td>
+<td>Field-name strings and type-member/layout descriptions</td>
+</tr>
+<tr>
+<td><code>INDX</code>, <code>ITEM</code></td>
+<td>References to indexed objects, arrays and strings</td>
+</tr>
+</tbody></table>
+<p><strong>Mixed byte order matters:</strong> the section-size header word is big-endian while the measured <code>DATA</code> values are little-endian. Reading every <code>u32</code> with one global endianness setting is not supported by this profile.</p>
+<p>The surveyed EDF6 native files did <strong>not</strong> include <code>THSH</code> hashes or a <code>PTCH</code> patch table. That is a bounded corpus observation, not a general prohibition in Havok tagfiles outside EDF6.</p>
+<h2 id="collision-is-not-navigation">Collision is not navigation</h2>
+<p>HKT can supply collision bodies and their shape/filter semantics. Navigation data and route acceptance are separate evidence. A map can have parseable collision payloads without establishing that NPCs use the intended traversability, body assignments or filter rules.</p>
+<p>Object-specific <code>SHKT</code>/HKT-style resources likewise have owner and lifecycle constraints. A visually correct object or collision mesh does not establish body identity, ragdoll references or correct gameplay reactions.</p>
+<h2 id="known-limits">Known limits</h2>
+<ul>
+<li>The <code>collision.hkt</code> membership and <code>TAG0</code> position stated above are from the bounded EDF6 MAD corpus.</li>
+<li>Source-derived physical layout rules are <strong>profile- and shape-dependent</strong>.</li>
+<li>Private Havok SDK materials are research-only; the wiki does not redistribute those originals.</li>
+<li>Offline decoding or byte-level reconstruction must not be reported as a native runtime collision/NAV pass.</li>
+</ul>
+<h2 id="detailed-technical-references">Detailed technical references</h2>
+<ul>
+<li><a href="./edf6-mad-marc-v5-collision-hkt-container.html">EDF6 MAD MARC v5 and contained collision.hkt</a> — exact outer archive fields.</li>
+<li><a href="./edf6-havok-2020-tag0-container-sdkv-type-data-index.html">EDF6 Havok TAG0 container, SDKV, TYPE, DATA and INDX</a>.</li>
+<li><a href="./maps-%26-navigation-havok-mad-shkt-collision-contracts.html">Havok MAD/SHKT collision contracts</a>.</li>
+<li><a href="./edf6-havok-tna1-tbdy-packed-integer-item-pointer-layout.html">Havok TNA1/TBDY packed integer and pointer layout</a>.</li>
+<li><a href="./maps-%26-navigation-havok-collision-and-navigation-architecture.html">Navigation and collision architecture</a>.</li>
+</ul>
+<p><strong>Scope:</strong> existing EDF4.1/EDF5/EDF6 collision research, preserving version boundaries. No new Havok decoding, converter outcome or runtime success is claimed.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-mad.html">MAD: outer map collision archive</a></li><li><a href="format-mapo.html">MAPO: map-object references</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#where-hkt-occurs">Where HKT occurs</a><a href="#havok-version-and-data-structure-matter">Havok version and data structure matter</a><a href="#edf6-tag0-tagfile-known-section-structure">EDF6 TAG0 tagfile: known section structure</a><a href="#collision-is-not-navigation">Collision is not navigation</a><a href="#known-limits">Known limits</a><a href="#detailed-technical-references">Detailed technical references</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-hkt"};</script><script src="../assets/site.js" defer></script></body></html>

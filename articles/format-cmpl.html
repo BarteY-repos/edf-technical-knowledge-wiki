@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="CMPL — compressed resource envelope inside EDF archives CMPL is the compressed-resource envelope documented within the examined EDF archive entries. I"><title>CMPL — compressed resource envelope inside EDF archives | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / CMPL</div><h1>CMPL — compressed resource envelope inside EDF archives</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>CMPL is the compressed-resource envelope documented within the examined EDF archive entries. It is <strong>not the same level of structure as the containing RAB/MRAB archive</strong>: an outer SSA entry identifies a named resource and its stored byte range, while a CMPL header describes the compressed inner payload.</p>
+<h2 id="documented-boundary">Documented boundary</h2>
+<p>The measured SSA archive entry stores <code>csize</code>, the byte count of the <strong>stored blob</strong>, including any compression envelope. For a CMPL-encoded blob, source research identifies a <strong>big-endian 32-bit uncompressed size at payload offset <code>+0x04</code></strong>.</p>
+<p>That field is inside the resource blob, not an SSA directory field. Do not reinterpret the enclosing archive&#39;s little-endian offsets as CMPL fields, or confuse stored bytes with decompressed output bytes.</p>
+<h2 id="the-documented-lzss-encoding">The documented LZSS encoding</h2>
+<p>The EDF5/EDF6 format notes describe a CMPL payload with the following structure:</p>
+<table>
+<thead>
+<tr>
+<th>Position</th>
+<th>Field</th>
+<th>Documented meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+0x00</code></td>
+<td>Four-byte <code>CMPL</code> signature</td>
+<td>Marks the compressed envelope</td>
+</tr>
+<tr>
+<td><code>+0x04</code></td>
+<td>Big-endian <code>u32</code></td>
+<td>Expected decompressed byte count</td>
+</tr>
+<tr>
+<td><code>+0x08</code> onward</td>
+<td>LZSS-coded bytes</td>
+<td>Flagged literals and ring-buffer references</td>
+</tr>
+</tbody></table>
+<p>The existing source&#39;s <code>cmpl-lzss</code> record specifies a <strong>4096-byte, initially zero-filled ring buffer</strong>, with a starting write position of <strong>4078 (<code>0xFEE</code>)</strong>. Flag bits are consumed <strong>least-significant bit first</strong>:</p>
+<ul>
+<li>Bit <strong>1</strong>: read one literal byte.</li>
+<li>Bit <strong>0</strong>: read two bytes <code>b0</code> and <code>b1</code>; the history-ring position is <code>(b0 &lt;&lt; 4) | (b1 &gt;&gt; 4)</code> and the copy length is <code>(b1 &amp; 15) + 3</code> (3–18 bytes).</li>
+</ul>
+<p>These are the byte-level rules reported by the source decoder and its tests, not newly reproduced measurements in this editorial release. A flag byte <code>0xFF</code>, followed by eight literal bytes, is valid: a stored all-literal run need not contain a back-reference.</p>
+<p>If a member <strong>does not</strong> carry the <code>CMPL</code> signature, the cited source treats it as uncompressed data. Conversely, the signature alone is not proof that an inner MDB or another resource will load successfully in the game.</p>
+<h2 id="layered-reading-process">Layered reading process</h2>
+<ol>
+<li>Parse the containing archive and resolve the named entry.</li>
+<li>Validate its absolute data offset and stored <code>csize</code> against the outer file.</li>
+<li>Inspect the stored blob and identify whether it is CMPL or another payload family.</li>
+<li>Apply the appropriate compressed-blob decoder and validate the stated output size.</li>
+<li>Only then interpret the decompressed MDB, texture or other resource with its own format rules.</li>
+</ol>
+<p>The source specifically distinguishes CMPL payloads from opaque/uncompressed entries. A parser must not assume that <strong>every</strong> archive member uses CMPL.</p>
+<h2 id="evidence-and-failure-boundaries">Evidence and failure boundaries</h2>
+<p>A valid outer archive and successfully decompressed payload can still be rejected when the game loads the inner resource. One cross-game study uses an MDB crash case to illustrate this distinction. Packaging, decompression, resource parsing and runtime compatibility are separate checks.</p>
+<h2 id="detailed-technical-references">Detailed technical references</h2>
+<ul>
+<li><a href="./formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">RAB/MRAB SSA layout and CMPL boundaries</a>.</li>
+<li><a href="./formats-%26-containers-resource-archives-and-lookup-explained.html">Archive handling and resource lookup</a>.</li>
+<li><a href="./formats-%26-containers-rab-marc-cmpl-archive-contracts.html">RAB/MARC/CMPL contracts</a>.</li>
+<li><a href="./cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Why a parseable MDB can still crash</a>.</li>
+<li><a href="./kh-edf6-file-formats.html">EDF6 source notes: <code>cmpl-lzss</code> and <code>cmpl-functions</code></a> — reported decoder behavior, provenance and original evidence scope.</li>
+</ul>
+<p><strong>Scope:</strong> this is a reader-facing restatement of the compression algorithm <strong>already documented in R193</strong>. No new decoder implementation, byte-for-byte test or runtime result is claimed.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-rab.html">RAB: named-resource container</a></li><li><a href="format-mrab.html">MRAB: sampled SSA container</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#documented-boundary">Documented boundary</a><a href="#the-documented-lzss-encoding">The documented LZSS encoding</a><a href="#layered-reading-process">Layered reading process</a><a href="#evidence-and-failure-boundaries">Evidence and failure boundaries</a><a href="#detailed-technical-references">Detailed technical references</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-cmpl"};</script><script src="../assets/site.js" defer></script></body></html>

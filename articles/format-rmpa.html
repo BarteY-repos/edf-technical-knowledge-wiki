@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="RMPA — route, shape, camera and spawn resource families RMPA is a structured resource family for routes and related spatial or mission data in the EDF"><title>RMPA — route, shape, camera and spawn resource families | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / RMPA</div><h1>RMPA — route, shape, camera and spawn resource families</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>RMPA is a structured resource family for routes and related spatial or mission data in the EDF corpus. <strong>Mission-owned</strong>, <strong>map-owned</strong> and <strong>MAE/weather-embedded</strong> RMPA have distinct evidence and conversion constraints. A single claimed universal RMPA layout would erase important distinctions present in the source research.</p>
+<h2 id="the-measured-mission-owned-profile">The measured mission-owned profile</h2>
+<p>The examined EDF5-to-EDF6 <code>MISSION.RMPA</code> work documents an EDF6 output with the <code>\0PMR</code> signature, version <strong>1</strong> and a <strong><code>0x30</code>-byte</strong> header whose primary fields are big-endian. Its four top-level sections represent routes, shapes, cameras and spawn points.</p>
+<table>
+<thead>
+<tr>
+<th>Mission record</th>
+<th>Measured footprint</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>File header</td>
+<td><code>0x30</code> bytes</td>
+</tr>
+<tr>
+<td>Group type header</td>
+<td><code>0x20</code> bytes</td>
+</tr>
+<tr>
+<td>Waypoint</td>
+<td><code>0x30</code> bytes</td>
+</tr>
+<tr>
+<td>Route group</td>
+<td><code>0x18</code> bytes</td>
+</tr>
+<tr>
+<td>Shape</td>
+<td><code>0x24</code>-byte header plus <code>0x40</code>-byte payload; normal <code>0x10</code> metadata</td>
+</tr>
+<tr>
+<td>Spawn point</td>
+<td><code>0x34</code> bytes</td>
+</tr>
+</tbody></table>
+<p>Some descriptors within the otherwise primarily big-endian file are little-endian. The source distinguishes absolute, record-relative and field-relative offsets; one blanket byte-order or pointer-base rule is unsafe.</p>
+<h2 id="waypoint-identities-and-links">Waypoint identities and links</h2>
+<p>The studied mission source can number waypoints locally within routes, while the EDF6 target profile uses a flattened global sequence. In the audited <code>MISSION.RMPA</code> writer, global waypoint ordinal and preserved original <code>gid</code> are <strong>different identifiers</strong>. Outgoing route-local links are rebased by the route&#39;s cumulative starting index.</p>
+<p>The bounded 141-mission offline audit accounted for <strong>5,103 waypoints</strong>, <strong>1,355 shapes</strong>, <strong>3,387 spawn records</strong> and <strong>6,665 literal script-to-RMPA references</strong>. These figures are validation-set counts, not binary limits or proof that every mission executes correctly in-game.</p>
+<h2 id="map-owned-and-mae-weather-resources">Map-owned and MAE/weather resources</h2>
+<p>The CAVE501/CAVE503 map-RMPA studies have target-profile constants and structural rules requiring their own measurements. A map-owned writer may depend on MAPB placement identity. <strong>Do not import</strong> those rules into the mission-owned <code>MISSION.RMPA</code> writer, which was measured without a MAPB count input.</p>
+<p>MAE/weather RMPA is a third context. Its resource bindings must be studied independently; neither the mission nor map profile automatically defines it.</p>
+<h2 id="technical-references-by-profile">Technical references by profile</h2>
+<ul>
+<li><a href="./missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">Mission RMPA binary groups and global waypoint IDs</a>.</li>
+<li><a href="./maps-%26-navigation-map-rmpa-native-structure-cave501-cave503-and-conversion-profiles.html">Map-owned RMPA structure and CAVE501/CAVE503 profiles</a>.</li>
+<li><a href="./maps-%26-navigation-mae-weather-dsgo-envmap-rmpa-binding.html">MAE weather and RMPA bindings</a>.</li>
+<li><a href="./missions-%26-scripting-how-missions-events-and-rmpa-work.html">Mission events and RMPA interactions</a>.</li>
+</ul>
+<p><strong>Scope:</strong> consolidated existing profile-specific evidence only. Source-only format reconstruction and runtime mission behavior remain separate claims.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-mission-ac.html">MISSION.AC: scripting resource</a></li><li><a href="format-mapo.html">MAPO: map-object records</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-measured-mission-owned-profile">The measured mission-owned profile</a><a href="#waypoint-identities-and-links">Waypoint identities and links</a><a href="#map-owned-and-mae-weather-resources">Map-owned and MAE/weather resources</a><a href="#technical-references-by-profile">Technical references by profile</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-rmpa"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="CANM — animation clips, channels and keyframes CANM holds keyed animation data in the documented EDF animation resources. It is distinct from CAS, whi"><title>CANM — keyframed animation data and channel encoding | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / CANM</div><h1>CANM — keyframed animation data and channel encoding</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>CANM holds keyed animation data in the documented EDF animation resources. It is distinct from <strong>CAS</strong>, which organizes players and controllers, and <strong>MAB</strong>, which carries event and locator data. Correctly decoding a CANM does not by itself guarantee that an animation matches the owning MDB skeleton or target controller.</p>
+<h2 id="the-documented-role">The documented role</h2>
+<p>The researched CANM content includes bone/object keyframes with typed, sometimes quantized channels. In the examined profiles, CAS can carry or reference CANM clip data. Keep the <strong>CAS wrapper version</strong> separate from the <strong>CANM channel generation</strong> when interpreting an animation file.</p>
+<h2 id="edf5-and-edf6-channel-differences">EDF5 and EDF6 channel differences</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Examined EDF5 profile</th>
+<th>Examined EDF6 profile</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CANM version</td>
+<td><code>0x200</code> (512)</td>
+<td><code>0x300</code> (768)</td>
+</tr>
+<tr>
+<td>Channel record size</td>
+<td><code>0x20</code> bytes</td>
+<td><code>0x30</code> bytes</td>
+</tr>
+<tr>
+<td>Documented animated rotation</td>
+<td>Euler-radian channels</td>
+<td>Absolute XYZW quaternion representation</td>
+</tr>
+<tr>
+<td>Additional channel metadata</td>
+<td>Earlier layout</td>
+<td>XYZW base/multiplier and encoding type</td>
+</tr>
+</tbody></table>
+<p>The cross-generation research also measured <strong>28-byte clips</strong>, <strong>8-byte tracks</strong> and four target channel kinds. These measurements belong to the examined conversion profiles. A simple version-field change is not equivalent to decoding older values and serializing the target channel representation.</p>
+<h2 id="clip-and-track-records">Clip and track records</h2>
+<p>The studied CANM family begins with a <strong><code>0x20</code>-byte header</strong>. Its <strong>28-byte clip records</strong> hold a name reference, duration, sampling/frame interval, frame count and track count/location. A track occupies <strong>8 bytes</strong> and links a bone to at most three channels:</p>
+<table>
+<thead>
+<tr>
+<th>Track field</th>
+<th>Stored interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>uint16</code> bone index</td>
+<td>Identifies the animated target bone in the owning model context</td>
+</tr>
+<tr>
+<td><code>int16</code> translation channel index</td>
+<td><code>-1</code> means no translation channel</td>
+</tr>
+<tr>
+<td><code>int16</code> rotation channel index</td>
+<td><code>-1</code> means no rotation channel</td>
+</tr>
+<tr>
+<td><code>int16</code> scale channel index</td>
+<td><code>-1</code> means no scale channel</td>
+</tr>
+</tbody></table>
+<p>An index only establishes a channel connection. Its payload still has to be decoded using the relevant CANM version and channel kind.</p>
+<h2 id="how-the-channel-values-are-encoded">How the channel values are encoded</h2>
+<h3 id="source-generation-canm-0x200">Source-generation CANM <code>0x200</code></h3>
+<p>The examined <strong><code>0x20</code>-byte channel</strong> includes a keyed/static indicator, key count, three float32 base components, three float32 step/multiplier components and a key-data offset. Animated XYZ components are quantized as <code>uint16</code> values. The source reconstruction evaluates a component as:</p>
+<p><code>float32(base + float32(key_uint16 * step))</code></p>
+<p>For the studied animated rotation channels, the reconstructed XYZ values are Euler <strong>radians</strong>, with the source rotation composition <code>Rz · Ry · Rx</code>. The float32 evaluation sequence is material when comparing exact converted output.</p>
+<h3 id="target-generation-canm-0x300">Target-generation CANM <code>0x300</code></h3>
+<p>The measured channel expands to <strong><code>0x30</code> bytes</strong>: eight float32 values representing base and multiplier XYZW, followed by four signed 32-bit fields (key offset, kind, count and reserved).</p>
+<table>
+<thead>
+<tr>
+<th align="right">Kind</th>
+<th>Observed meaning</th>
+<th>Key representation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right"><code>0</code></td>
+<td>Static vector</td>
+<td>Base XYZ</td>
+</tr>
+<tr>
+<td align="right"><code>1</code></td>
+<td>Animated vector</td>
+<td>Quantized <code>uint16</code> XYZ values interpreted with base and multiplier</td>
+</tr>
+<tr>
+<td align="right"><code>2</code></td>
+<td>Static rotation</td>
+<td>Base float32 XYZW quaternion</td>
+</tr>
+<tr>
+<td align="right"><code>3</code></td>
+<td>Animated rotation</td>
+<td>Float32 XYZW quaternion for each key</td>
+</tr>
+</tbody></table>
+<p>The studied native quaternion loading path requires <strong>16-byte alignment</strong> of quaternion key blocks. These record kinds and alignment constraints come from the retained target-generation corpus, not from a new parser or a claim about arbitrary future CANM variants.</p>
+<h2 id="why-a-numerical-conversion-needs-evidence">Why a numerical conversion needs evidence</h2>
+<p>In the documented EDF5/EDF6 work, animated quaternion values are not always bit-exactly reconstructible from already quantized source values. The measured conversion uses float32 Euler-to-quaternion behavior, and its correctness must be assessed within that precision boundary.</p>
+<p>Separately, a structurally valid clip can still fail to animate the intended target if its skeleton, controller names or other cross-references are wrong. Those dependencies belong to the <strong>whole animation resource graph</strong>, not the CANM bytes alone.</p>
+<h2 id="reading-order-and-validation">Reading order and validation</h2>
+<ol>
+<li>Establish the game generation and actual channel layout.</li>
+<li>Read each clip and track under its measured record structure.</li>
+<li>Decode channel kinds and stored rotation representation before changing them.</li>
+<li>Keep metadata and references required by the owning CAS and model skeleton.</li>
+<li>Report parse/round-trip correctness separately from observed in-game animation.</li>
+</ol>
+<h2 id="source-backed-technical-chapters">Source-backed technical chapters</h2>
+<ul>
+<li><a href="./animation-canm-cas-and-mab-formats-explained.html">Animation formats overview</a> — the measured cross-generation table and limits.</li>
+<li><a href="./animation-cas-canm-cross-generation-structure-and-key-conversion.html">CAS/CANM structure and key conversion</a> — exact record layouts, conversion evidence and bounded corpus.</li>
+<li><a href="./animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">CAS controllers and trackless grafts</a> — dependent controller constraints.</li>
+<li><a href="./format-cas.html">CAS — companion format</a>.</li>
+<li><a href="./animation-cas-canm-cross-generation-structure-and-key-conversion.html">Original measured CAS/CANM record and quantization study</a> — includes the exact numerical corpus and known exceptions.</li>
+</ul>
+<p><strong>Provenance:</strong> Curated from the existing R193 animation documentation and its cited measured conversion research. This page adds no independent native or runtime finding.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-cas.html">CAS: animation players/controllers</a></li><li><a href="format-mab.html">MAB: animation events and locators</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-documented-role">The documented role</a><a href="#edf5-and-edf6-channel-differences">EDF5 and EDF6 channel differences</a><a href="#clip-and-track-records">Clip and track records</a><a href="#how-the-channel-values-are-encoded">How the channel values are encoded</a><a href="#source-generation-canm-0x200">　Source-generation CANM 0x200</a><a href="#target-generation-canm-0x300">　Target-generation CANM 0x300</a><a href="#why-a-numerical-conversion-needs-evidence">Why a numerical conversion needs evidence</a><a href="#reading-order-and-validation">Reading order and validation</a><a href="#source-backed-technical-chapters">Source-backed technical chapters</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-canm"};</script><script src="../assets/site.js" defer></script></body></html>

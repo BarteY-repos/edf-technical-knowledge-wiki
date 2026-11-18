@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MRAB — named resource archive and studied SSA structure MRAB is another named-resource archive family in the EDF resource corpus. In the examined EDF5"><title>MRAB — named resource archive and studied SSA structure | EDF Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-file-formats.html">File Formats</a> / MRAB</div><h1>MRAB — named resource archive and studied SSA structure</h1><div class="meta"><span class="chip">File Formats</span><span class="chip">Source-scoped reference</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reader-oriented technical reference · Existing research only · Version-specific profiles, where documented</div><div id="articleBody">
+<p>MRAB is another named-resource archive family in the EDF resource corpus. In the <strong>examined EDF5/EDF6 sample profiles</strong>, MRAB and RAB share an <code>SSA\0</code> container grammar. That observation does not prove that the engine treats their roles identically or that every archive variation uses the same schema.</p>
+<h2 id="what-an-mrab-archive-represents">What an MRAB archive represents</h2>
+<p>The measured MRAB container holds individually named resource entries. Each entry identifies its name, resource type and byte payload through the container&#39;s entry table and associated name/type lookup structures.</p>
+<p>This is an <strong>archive</strong> format, not an animation clip, scene object or model format in itself. Its payloads must be interpreted according to their individual type and consuming subsystem.</p>
+<h2 id="header-and-entries-in-the-inspected-family">Header and entries in the inspected family</h2>
+<p>The shared measured <code>SSA\0</code> grammar has:</p>
+<ul>
+<li>A <strong><code>0x28</code>-byte little-endian header</strong> with entry count and directory offsets.</li>
+<li>A <strong><code>0x20</code>-byte entry record</strong> containing name-relative and payload-absolute offsets.</li>
+<li>UTF-16LE resource names and type-string lookup structures.</li>
+<li>An archive-local type index that must be resolved through that archive&#39;s type table.</li>
+</ul>
+<p>The source record defines <code>name_address = entry_address + signed_relative_name_offset</code>. Payload addressing uses a separate <strong>absolute</strong> file offset and the stored <code>csize</code> field. These distinctions are the same measured parsing rules documented for the sampled RAB family; the RAB article contains an introductory field table.</p>
+<h3 id="compact-binary-field-map">Compact binary field map</h3>
+<p>The independent RAB/MRAB round-trip record and the earlier RAB guide agree on the following <strong>observed</strong> header organization:</p>
+<table>
+<thead>
+<tr>
+<th>Header offset</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+0x00</code> / <code>+0x04</code></td>
+<td><code>SSA\0</code> signature and studied version word</td>
+</tr>
+<tr>
+<td><code>+0x08</code></td>
+<td>Start of resource data in the inspected serializer</td>
+</tr>
+<tr>
+<td><code>+0x0C</code> / <code>+0x10</code></td>
+<td>Maximum stored and maximum decompressed member sizes</td>
+</tr>
+<tr>
+<td><code>+0x14</code> / <code>+0x18</code></td>
+<td>Entry count and entry-table position</td>
+</tr>
+<tr>
+<td><code>+0x1C</code></td>
+<td>Name-index table position</td>
+</tr>
+<tr>
+<td><code>+0x20</code> / <code>+0x24</code></td>
+<td>Number of resource types and type-string table position</td>
+</tr>
+</tbody></table>
+<p>Each <code>0x20</code>-byte entry contains a relative name offset (<code>+0x00</code>), stored byte count (<code>+0x04</code>), archive-local type index (<code>+0x08</code>), a fourth attribute word (<code>+0x0C</code>), eight further bytes (<code>+0x10</code>) and an absolute payload offset at <code>+0x18</code> (treated as a 64-bit field by the examined round-trip reader). The later reader observed zeros in the <code>+0x10</code> region of the stock archives it reproduced; that observation does not establish a universal rule for other files.</p>
+<p>This table is intentionally bounded to the <strong>SSA layout actually researched</strong>. Do not identify a different archive family solely because its filename ends in <code>.mrab</code>, or assume that a matching signature guarantees identical resource-type semantics.</p>
+<h2 id="resource-semantics-and-limitations">Resource semantics and limitations</h2>
+<p>Correctly reading MRAB&#39;s outer structure does not identify every embedded resource schema. Keep the archive&#39;s entry metadata separate from the interpretation of an embedded MDB, DDS, effect or animation-related payload.</p>
+<p>The studied merge rules operate at <strong>entry identity</strong>, not by concatenating two binary archives. They do not justify arbitrary last-writer-wins changes inside a same-named resource.</p>
+<h2 id="detailed-technical-references">Detailed technical references</h2>
+<ul>
+<li><a href="./formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">Measured RAB/MRAB SSA binary contract</a> — full header/entry/name layouts and sample limitations.</li>
+<li><a href="./formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">Entry-level merge research</a>.</li>
+<li><a href="./formats-%26-containers-resource-archives-and-lookup-explained.html">Resource archive architecture</a>.</li>
+<li><a href="./format-rab.html">RAB — companion archive family</a>.</li>
+<li><a href="./kh-edf6-file-formats.html">EDF6 source record: <code>rab-roundtrip-layout</code></a> — underlying reader, observed table fields and original research attribution.</li>
+</ul>
+<p><strong>Scope:</strong> bounded SSA observations in EDF5/EDF6 resources. No unsupported universal distinction between RAB and MRAB is asserted.</p>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-rab.html">RAB: related SSA archive grammar</a></li><li><a href="format-cmpl.html">CMPL: compressed payload envelope</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-an-mrab-archive-represents">What an MRAB archive represents</a><a href="#header-and-entries-in-the-inspected-family">Header and entries in the inspected family</a><a href="#compact-binary-field-map">　Compact binary field map</a><a href="#resource-semantics-and-limitations">Resource semantics and limitations</a><a href="#detailed-technical-references">Detailed technical references</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-mrab"};</script><script src="../assets/site.js" defer></script></body></html>

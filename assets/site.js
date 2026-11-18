@@ -7,6 +7,36 @@
  const prefix=cfg.prefix||'';
  const $=s=>document.querySelector(s);
  const q=$('#q'),nav=$('#nav'),out=$('#out'),searchResults=$('#searchResults'),domain=$('#domain'),version=$('#version'),evidence=$('#evidence');
+ // Keep the full navigation as a no-JavaScript fallback. On narrow screens,
+ // progressively enhance it with an accessible, collapsible topic selector.
+ const sidebar=nav?.closest?.('aside');
+ let mobileNavToggle=null;
+ if(sidebar&&q){
+  sidebar.id='reader-sidebar';
+  mobileNavToggle=document.createElement('button');
+  mobileNavToggle.id='mobileNavToggle';
+  mobileNavToggle.type='button';
+  mobileNavToggle.setAttribute('aria-controls',sidebar.id);
+  mobileNavToggle.setAttribute('aria-expanded','false');
+  mobileNavToggle.textContent='Browse topics';
+  q.parentNode.insertBefore(mobileNavToggle,q);
+  document.body.classList.add('mobile-nav-ready');
+  const setMobileNav=open=>{
+   document.body.classList.toggle('mobile-nav-open',open);
+   mobileNavToggle.setAttribute('aria-expanded',String(open));
+   mobileNavToggle.textContent=open?'Hide topics':'Browse topics';
+  };
+  mobileNavToggle.addEventListener('click',()=>setMobileNav(!document.body.classList.contains('mobile-nav-open')));
+  nav.addEventListener('click',event=>{
+   if(event.target.closest('a[href="#article-start"]'))setMobileNav(false);
+  });
+  document.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&document.body.classList.contains('mobile-nav-open')){
+    setMobileNav(false);
+    mobileNavToggle.focus();
+   }
+  });
+ }
  const topicNames=['File Formats','Shaders','Models','Textures','Animation','Audio','Maps','Collision & Physics','Navigation','Missions','Scripting','Networking','Gameplay & AI','Resource Loading','Performance','Conversion','Troubleshooting'];
  const groups=['Universal','EDF 4.1','EDF 5','EDF 6','Conversion'];
  const aliases={
@@ -50,7 +80,7 @@
   const open=new Set([...nav.querySelectorAll('details[open][data-key]')].map(x=>x.dataset.key));
   html+='<details data-key="research" '+(open.has('research')||document.body.classList.contains('show-notes')?'open':'')+'><summary>Research appendices, grouped by game</summary>';
   for(const g of groups)html+=group(g,research.filter(a=>a.scope===g).sort((x,y)=>x.title.localeCompare(y.title)),'research-'+g);
-  html+='</details><p><a class="docnav featured" href="'+prefix+'all-articles.html">All 581 articles</a></p>';
+  html+='</details><p><a class="docnav featured" href="'+prefix+'all-articles.html">All 595 articles</a></p>';
   nav.innerHTML='<nav aria-label="Documentation navigation">'+html+'</nav>';
  }
  function readLegacyHash(){
@@ -84,17 +114,60 @@
   out.hidden=true;searchResults.hidden=false;
   searchResults.innerHTML='<h1>Search: '+escape(q.value.trim())+'</h1><p class="search-state" role="status">Loading search index…</p>';
   let corpus;
-  try{corpus=await loadSearch()}catch(err){searchResults.innerHTML='<h1>Search unavailable</h1><p role="alert">The search index could not load. Use the article navigation or <a href="'+prefix+'all-articles.html">full article list</a>.</p>';return}
+  try{corpus=await loadSearch()}catch(err){
+   if(serial!==lastSearchSerial)return;
+   searchResults.innerHTML='<h1>Search unavailable</h1><p role="alert">The search index could not load. Use the article navigation or <a href="'+prefix+'all-articles.html">full article list</a>.</p>';
+   return;
+  }
   if(serial!==lastSearchSerial)return;
+  // AND across query words, but allow each word to occur in a different field.
+  // Keep punctuation in technical names (g_mass, Texture2DArray, R×A, FOG_FADE).
+  const terms=[...new Set(term.split(/\s+/u).filter(Boolean))];
+  // A single explicit game edition is a ranking intent, not a hard filter:
+  // cross-generation/conversion findings must still remain discoverable.
+  const editions=[...new Set([...term.matchAll(/\bedf\s*(4\.1|5|6)\b/gu)].map(match=>'EDF '+match[1]))];
+  const requestedEdition=editions.length===1?editions[0]:null;
+  const hasSubjectBeyondEdition=Boolean(term.replace(/\bedf\s*(?:4\.1|5|6)\b/gu,'').trim());
   const texts=new Map(corpus.map(x=>[x.id,x.text]));
   const hits=catalog.filter(matches).map(a=>{
    const body=texts.get(a.id)||'',name=a.title.toLowerCase(),keywords=(a.keywords||[]).join(' ').toLowerCase();
-   const index=body.indexOf(term),title=name.indexOf(term);
-   let score=title===0?30:title>=0?24:keywords.includes(term)?18:index>=0?4:0;
-   if(score>0&&a.kind==='Documentation')score+=10;
-   return {a,body,index,score};
+   if(!terms.every(word=>name.includes(word)||keywords.includes(word)||body.includes(word)))return {a,body,index:-1,score:0};
+   const phraseIndex=body.indexOf(term);
+   let score=name===term?80:name.startsWith(term)?50:name.includes(term)?35:keywords.includes(term)?25:phraseIndex>=0?12:0;
+   for(const word of terms){
+    if(name.startsWith(word))score+=22;
+    else if(name.includes(word))score+=16;
+    else if(keywords.includes(word))score+=10;
+    else score+=2;
+   }
+   // Prefer articles in an explicitly named subject over incidental mentions
+   // in unrelated research notes (e.g. "shaders" inside a map LOD note).
+   const topic=(a.topic||'').toLowerCase();
+   const topicWords=topic.split(/[^a-z0-9]+/u).filter(Boolean);
+   if(terms.some(word=>word.length>=4&&topicWords.some(t=>t.length>=4&&
+    (word===t||word.replace(/s$/u,'')===t.replace(/s$/u,'')))))score+=20;
+   if(a.kind==='Documentation')score+=8;
+   if(requestedEdition){
+    if(a.scope===requestedEdition)score+=32;
+    else if((a.versions||[]).includes(requestedEdition))score+=18;
+    else if(a.scope==='Conversion')score+=8;
+    else if(a.scope==='Universal')score+=4;
+    else score-=14;
+    // A broad landing page should not outrank an on-topic technical finding.
+    if(hasSubjectBeyondEdition&&a.kind==='Documentation'&&a.topic==='Start')score-=20;
+   }else if(editions.length>1){
+    // Queries comparing two EDF generations should surface conversion and
+    // multi-edition findings, without suppressing individual game evidence.
+    const recorded=(a.versions||[]).filter(v=>editions.includes(v)).length;
+    if(a.scope==='Conversion')score+=28;
+    else if(recorded===editions.length)score+=18;
+   }
+   // Prefer a meaningful technical token instead of a generic first-page excerpt.
+   const byLength=[...terms].sort((a,b)=>b.length-a.length);
+   const snippetIndex=phraseIndex>=0?phraseIndex:byLength.map(word=>body.indexOf(word)).find(i=>i>=0);
+   return {a,body,index:snippetIndex??-1,score};
   }).filter(x=>x.score>0).sort((x,y)=>y.score-x.score||x.a.title.localeCompare(y.a.title));
-  searchResults.innerHTML='<h1>Search: '+escape(q.value.trim())+'</h1><p class="searchnote" role="status">'+hits.length+' matching documentation pages and technical references. Exact topic pages appear first.</p>'+
+  searchResults.innerHTML='<h1>Search: '+escape(q.value.trim())+'</h1><p class="searchnote" role="status">'+hits.length+' matching documentation pages and technical references. '+(terms.length>1?'All search words must match. ':'')+'Exact topic pages appear first.</p>'+
    hits.map(({a,body,index})=>'<a class="hit" style="display:block;text-decoration:none;color:inherit" href="'+escape(href(a))+'"><div class="result-title">'+escape(a.title)+'</div><div class="kindlabel">'+escape(a.scope)+' · '+escape(a.topic)+' · '+escape(a.kind)+'</div><div class="snippet">'+escape(body.slice(Math.max(0,index-70),Math.max(0,index-70)+230))+'</div></a>').join('');
   searchResults.querySelectorAll('a.hit[href="#article-start"]').forEach(link=>link.addEventListener('click',()=>{q.value='';++lastSearchSerial;searchResults.hidden=true;out.hidden=false}));
  }
