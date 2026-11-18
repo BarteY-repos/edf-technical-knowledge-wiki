@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 world snapshots: serialized state versus online player identity The examined EDF6 executable contains an in-memory world snapshot facility via xgs::snapsho"><title>EDF6 world snapshots: serialized state versus online player identity | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 world snapshots: serialized state versus online player identity</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Networking</span></div><div class="referencebadge">Technical reference · Source-code/static interpretation with explicitly labelled contributor gameplay observations; no new game runtime</div><div id="articleBody"><p>The examined EDF6 executable contains an in-memory world snapshot facility via <strong><code>xgs::snapshot</code></strong>. Its presence does <strong>not</strong> mean that ordinary online gameplay has a complete, safe save-and-resume of its multiplayer session. State restoration, peer identity, player ownership and lobby membership are different responsibilities.</p>
+<h2 id="native-build-and-restore-wrappers">Native build and restore wrappers</h2>
+<p>The static source investigation identified a snapshot creation routine (RVA <code>0x6B4820</code> in the surveyed build) that checks state/context, creates a write recorder and invokes a shared world-serialization root. A corresponding restore routine (RVA <code>0x6B48A0</code>) checks for a retained snapshot, restores relevant renderer/world state and invokes a read recorder over the same root.</p>
+<p>The fact that a wrapper exists proves <strong>serialization code is present</strong>. It does not prove that an arbitrary multiplayer match can be rolled back or migrated live to a new host. The source's context guard was not identified as a blanket prohibition of online snapshots; its precise state eligibility requires separate proof.</p>
+<h2 id="known-serialization-boundaries">Known serialization boundaries</h2>
+<table>
+<thead>
+<tr>
+  <th>Component</th>
+  <th>Relevant finding</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>SoldierBase::OnSnapshot</code></td>
+  <td>Dispatches to the general <code>HumanBase::OnSnapshot</code> implementation in the examined build</td>
+</tr>
+<tr>
+  <td>Soldier local/remote role at <code>+0x128</code></td>
+  <td><strong>Not included</strong> in the inspected snapshot record</td>
+</tr>
+<tr>
+  <td>PlayerInfo</td>
+  <td>Holds actor references; no retained PUID/network-user identity in the observed record</td>
+</tr>
+<tr>
+  <td><code>MissionMgr::OnSnapshot</code></td>
+  <td>Includes a record named <code>script</code> rather than the complete active content package</td>
+</tr>
+<tr>
+  <td>Lobby/session / EOS users</td>
+  <td>Not demonstrated as reconstructible from world snapshot contents</td>
+</tr>
+</tbody>
+</table>
+<p>This explains the chief limitation: <strong>a restored actor is not automatically a correctly owned online player</strong>. The engine's normal joined-room handshake publishes the active pack and assigns player/member identities through other mechanisms. Those mechanisms are not replaced by merely restoring the snapshot bytes.</p>
+<h2 id="do-not-confuse-three-systems">Do not confuse three systems</h2>
+<ul>
+<li><strong>World snapshot</strong> — in-memory serialization of selected game/world state.</li>
+<li><strong>Mission sync</strong> — the roster/loadout/mission-start exchange among online peers.</li>
+<li><strong>Application-layer reliable packets (RUDP)</strong> — retention/retry/ACK of already serialized network records.</li>
+</ul>
+<p>A snapshot alone does not transfer the reliable-manager sequence state; reliable transport alone does not restore missing user ownership; a correct lobby package selection does not imply every scene object was recreated.</p>
+<p><strong>Evidence and credit:</strong> KH <code>net-world-snapshot</code>, <code>net-world-snapshot-limits</code> and <code>net-join-shell-path</code>; source analysis from EDF6 Network/Desync investigation and novae/ajane, 14 Nov 2026 Hub export. Static analysis only; <strong>no world restore was executed in the game</strong> for this guide.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 (novae/ajane), EDF 6 Netcode: KH fact ID and original investigator named below; code build steam-678ccb46</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-build-and-restore-wrappers">Native build and restore wrappers</a><a href="#known-serialization-boundaries">Known serialization boundaries</a><a href="#do-not-confuse-three-systems">Do not confuse three systems</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-xgs-world-snapshot-versus-online-session-reconstruction"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Networking Overview EDF6 multiplayer contains several distinct synchronization paths: actor state, damage, projectile/fire events, scene/object changes, mission"><title>Networking | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Networking</a></div><h1>Networking</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Networking</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>EDF6 multiplayer contains several distinct synchronization paths: <strong>actor state</strong>, <strong>damage</strong>, <strong>projectile/fire events</strong>, <strong>scene/object changes</strong>, <strong>mission events</strong> and <strong>transport lifecycle</strong>. A stable transform stream does not imply that HP, damage ownership or shot reconstruction is correct.</p>
+<h2 id="native-event-reference">Native event reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Area</th>
+  <th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Event registry (DamageObject, Generator, Mission, SceneObject, ItemDrop)</td>
+  <td><a href="engine-re-%26-networking-edf6-native-event-protocol-registry-and-damage-object-route.html">Native event IDs</a></td>
+</tr>
+<tr>
+  <td>Sandlot RUDP reconnect</td>
+  <td><a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">Transport and reconnect lifecycle</a></td>
+</tr>
+<tr>
+  <td>Fire/bullet reconstruction and RNG</td>
+  <td><a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG and remote reconstruction</a></td>
+</tr>
+<tr>
+  <td>Object authority, host/client ownership</td>
+  <td><a href="engine-re-%26-networking-edf6-per-object-online-authority-and-local-copies.html">Object identity and ownership</a></td>
+</tr>
+<tr>
+  <td>EDF5→EDF6 desync differences</td>
+  <td><a href="engine-re-%26-networking-edf5-edf6-desync-differential-evidence-vs-false-leads.html">Desync root causes</a></td>
+</tr>
+<tr>
+  <td>Custom per-object event overlay</td>
+  <td><a href="engine-re-%26-networking-edf41-per-object-event-wire-tag12-and-native-child-identities.html">Custom protocol (not native)</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="evidence-boundaries">Evidence boundaries</h2>
+<p>A mod-defined <code>tag 12</code> per-object channel is <strong>not</strong> a stock EDF6 wire protocol. Source research has documented several candidate fixes to desync, but an offline PASS, successful handshake or one-player mission load is not a full second-peer qualification.</p>
+<h2 id="community-research-14-november-2026">Community research (14 November 2026)</h2>
+<p>The <a href="docs-community-knowledge-hub.html">Community Research / Knowledge Hub</a> provides topic-oriented guidance and audited source facts about camera/input, rendering, gameplay, netcode, UI, physics and format differences. Source grades and exact game builds are preserved.</p>
+<h2 id="enemy-attacks-and-network-payloads">Enemy attacks and network payloads</h2>
+<p><a href="edf6-enemy-attacks-insects-ants-bees-spiders-tadpoles.html">Native enemy damage formulas</a> and <a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">the actual bullet collision stages</a> are distinct from whether a projectile's RNG history, contact record or damage event was transmitted to another peer. Source-level projectile counts and level curves are <strong>not</strong> proof of network synchronization.</p>
+<h2 id="related-native-edf6-networking-systems">Related native EDF6 networking systems</h2>
+<ul>
+<li><a href="edf6-online-room-four-slots-ready-handshake-and-member-indices.html">EDF6 lobby slots and READY handshake</a></li>
+<li><a href="edf6-mission-start-loadout-records-negative-weapon-ids-and-limits.html">Mission-start loadout records and weapon IDs</a></li>
+<li><a href="edf6-enemy-network-ai-ownership-pose-updates-and-insect-rng.html">Enemy AI / RNG / pose authority</a></li>
+<li><a href="edf6-air-raider-online-delivery-transporters-and-derived-network-identity.html">Air Raider vehicle deliveries online</a></li>
+<li><a href="edf6-xgs-world-snapshot-versus-online-session-reconstruction.html">World snapshots versus session restoration</a></li>
+</ul>
+<h2 id="native-game-reference-additions">Native game reference additions</h2>
+<ul>
+<li><a href="edf6-pickup-units-recovery-radius-and-online-claim-protocol.html">EDF6 host arbitration for item pickups</a></li>
+</ul>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf6-online-hit-authority-kill-events-and-hp-delta-epochs.html">Local hit ownership and HP epoch sync</a></li>
+</ul>
+<h2 id="native-game-system-research">Native game-system research</h2>
+<ul>
+<li><a href="edf6-main-script-coroutine-menu-flow-save-slot-and-input-mode.html">EDF6 menu-to-mission coroutine lifecycle</a></li>
+</ul>
+<h2 id="related-native-game-reference-pages">Related native-game reference pages</h2>
+<ul>
+<li><a href="edf5-online-crate-spawn-authority-seed-serial-local-physics.html">EDF5 local crate construction and shared serial</a></li>
+<li><a href="edf5-online-crate-pickup-types-host-dedup-remote-mark.html">EDF5 pickup requests and duplicate suppression</a></li>
+<li><a href="edf5-player-local-controller-pickup-gate-and-splitscreen.html">EDF5 local versus remote player pickup ownership</a></li>
+</ul>
+<h2 id="further-edf-game-documentation">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf5-vehicle-class-to-name-and-player-npc-identity.html">EDF5 vehicle class versus ownership</a></li>
+</ul>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="edf5-online-crate-pickup-types-host-dedup-remote-mark.html">EDF5 crate network state machine</a></li>
+<li><a href="edf5-online-pickup-counters-1024-cap-and-end-results.html">EDF5 online reward accounting and timing</a></li>
+</ul>
+
+<h2 id="direct-two-pc-eos-v-a-b-c-runtime-discrimination">Direct two-PC EOS V/A/B/C runtime discrimination</h2>
+<p>The <a href="edf6-eos-vabc-two-pc-transport-and-sceneobject-boundary.html">eight-log EOS V/A/B/C matrix</a> proves the audited ordinary <code>0x3300</code> physical send, enqueue and parse counts match on both peers in all four runs, with a roughly 10 Hz remote Soldier apply cadence. That <strong>narrows</strong> the transport-loss hypothesis; it does <strong>not</strong> prove remote positional values were correctly consumed. Later R7/R8 evidence records the remaining SceneObject staging/application boundary. The READY-reset branch was not exercised by a mid-session reconnect and projectile class <code>0x3500</code> was not tested in that matrix.</p>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="engine-re-networking-packets-ownership-and-reconnect-explained.html">EDF network behavior: shot state, packet ownership and reconnect</a><a href="engine-re-edf5-edf6-player-state-packet-lanes.html">Player-state networking: periodic transforms, jumps, EOS and RUDP</a><a href="engine-re-%26-networking-edf6-native-event-protocol-registry-and-damage-object-route.html">EDF6 network event registry: DamageObject, Mission, SceneObject and ItemDrop</a><a href="engine-re-%26-networking-edf41-per-object-event-wire-tag12-and-native-child-identities.html">EDF4.1 objects on EDF6 multiplayer: native identity and a custom per-object event channel</a><a href="engine-re-%26-networking-edf6-controlled-pvp-object-tree-restoration-and-spawn-ownership.html">Controlled EDF6 PvP actors — propagate teams through actual emitters and restore every native baseline</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li><li>/EDF5_EDF6_RESEARCH/research/audits/EDF6_NETWORK_EOS_RUNTIME_MATRIX_VABC_ANALYSIS_2026-09-07.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/EDF6_NETWORK_EOS_REPAIR_EVIDENCE_LEDGER_2026-08-30.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#native-event-reference">Native event reference</a><a href="#evidence-boundaries">Evidence boundaries</a><a href="#community-research-14-november-2026">Community research (14 November 2026)</a><a href="#enemy-attacks-and-network-payloads">Enemy attacks and network payloads</a><a href="#related-native-edf6-networking-systems">Related native EDF6 networking systems</a><a href="#native-game-reference-additions">Native game reference additions</a><a href="#further-native-game-references">Further native-game references</a><a href="#native-game-system-research">Native game-system research</a><a href="#related-native-game-reference-pages">Related native-game reference pages</a><a href="#further-edf-game-documentation">Further EDF game documentation</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#direct-two-pc-eos-v-a-b-c-runtime-discrimination">Direct two-PC EOS V/A/B/C runtime discrimination</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-networking"};</script><script src="../assets/site.js" defer></script></body></html>

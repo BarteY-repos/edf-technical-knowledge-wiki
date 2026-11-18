@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Crosswalk: armor gauge, aim line, FOV, mission clear marks (key: HUiHudPowerGuage) Armor gauge text cap (key: RTTI HUiHudPowerGuage) edf41: cap 999999 in the ga"><title>Crosswalk: armor gauge, aim line, FOV, mission clear marks (key: HUiHudPowerGuage) — community crosswalk | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-conversion.html">Conversion</a></div><h1>Crosswalk: armor gauge, aim line, FOV, mission clear marks (key: HUiHudPowerGuage) — community crosswalk</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Community Knowledge Hub</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Community crosswalk, source-reported classifications</div><div id="articleBody"><h2 id="armor-gauge-text-cap-key-rtti-huihudpowerguage">Armor gauge text cap  (key: RTTI <code>HUiHudPowerGuage</code>)</h2>
+<ul>
+<li>edf41: cap 999999 in the gauge update, one <code>mov eax,999999</code> for cur and max | ref: edf41/hud.md#armor-gauge-cap | evidence: static</li>
+<li>edf6: the same cap, one <code>mov eax</code> for cur, max and two stored copies | ref: edf6/hud.md#armor-gauge-cap | evidence: static</li>
+<li>edf5: the same cap and the same stored copies <code>[rbx+0xAE0]</code> / <code>[rbx+0xAE4]</code> as EDF6 | ref: edf5/hud.md#armor-gauge-cap | evidence: static</li>
+<li>Differences noticed: identical byte sequence <code>B8 3F 42 0F 00 3B D0</code> in every game (FevGrave), different addresses.</li>
+</ul>
+<h2 id="vehicle-weapon-aim-line-during-cooldown">Vehicle weapon aim line during cooldown</h2>
+<ul>
+<li>edf41: cooldown test <code>[rbx+0xAB0] &gt; 0</code>; color floats at <code>+0x104</code>.. | ref: edf41/hud.md#aim-line-cooldown | evidence: static</li>
+<li>edf6: cooldown test against <code>[rbx+0xE0C]</code>; color floats at <code>+0x114</code>.. | ref: edf6/hud.md#aim-line-cooldown | evidence: static</li>
+<li>Differences noticed: same idea (metoxys's WeaponAimLineContextual), different gate and field layout.</li>
+</ul>
+<h2 id="vertical-fov-constant">Vertical FOV constant</h2>
+<ul>
+<li>edf41: pi/4 constant divided by <code>[+0x310]</code>, stored to the camera's <code>+0x14</code> | ref: edf41/rendering.md#vertical-fov | evidence: static</li>
+<li>edf6: pi/4 constant divided by <code>[+0x410]</code>, stored to the camera's <code>+0x24</code> | ref: edf6/rendering.md#vertical-fov | evidence: static</li>
+<li>Differences noticed: EDF6's <code>+0x24</code> matches the projection fields recorded for <code>CharacterGhostCamera</code> (edf6/camera.md#ghost-camera-get-projection); EDF 4.1's camera object is not named.</li>
+</ul>
+<h2 id="mission-clear-marks-save-data">Mission clear marks (save data)</h2>
+<ul>
+<li>edf41: one bit per difficulty in <code>[save + 0xEE8 + class*0x200 + mission]</code>; only the cleared difficulty is marked | ref: edf41/missions.md#mission-clear-bits | evidence: static (FevGrave reports the patch tested)</li>
+<li>edf5: same bits in <code>[save + 0x566C + class*0x200 + mission]</code>; Normal and Hard also mark the lower ones | ref: edf5/mission-flow.md#mission-clear-bits | evidence: static (FevGrave reports the patch tested)</li>
+<li>edf6: same bits in <code>[save + 0x57AC + class*0x200 + mission]</code>; same rule as EDF5 | ref: edf6/missions.md#mission-clear-bits, #mission-clear-cascade-v2 | evidence: static</li>
+<li>Differences noticed: same bit values and 0x200 bytes per class; different base offset and cascade.</li>
+<li>Confidence in the mapping: high for the armor cap (identical code), medium for the rest.</li>
+<li>Added: 2026-10-16 src: FevGrave, metoxys, BlueAmulet (novae (ajane)'s outside sets)</li>
+</ul>
+<h2 id="source-and-confidence">Source and confidence</h2>
+<p>Compiled by novae (ajane), <em>EDF Knowledge Hub</em> revision <code>54f89cd</code> (2026-11-14). Each line retains its supplied evidence classification; this crosswalk does not by itself prove universal binary compatibility across game versions.</p>
+<h2 id="native-game-reference-guides">Native game reference guides</h2>
+<ul>
+<li><a href="edf6-damage-number-ui-native-sgo-styles-projection-and-digit-color.html">EDF6 damage-number overlay layouts</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip, crosswalk/hud-power-gauge.md</li><li>novae (ajane) and credited third-party sources</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#armor-gauge-text-cap-key-rtti-huihudpowerguage">Armor gauge text cap (key: RTTI HUiHudPowerGuage)</a><a href="#vehicle-weapon-aim-line-during-cooldown">Vehicle weapon aim line during cooldown</a><a href="#vertical-fov-constant">Vertical FOV constant</a><a href="#mission-clear-marks-save-data">Mission clear marks (save data)</a><a href="#source-and-confidence">Source and confidence</a><a href="#native-game-reference-guides">Native game reference guides</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"kh-crosswalk-hud-power-gauge"};</script><script src="../assets/site.js" defer></script></body></html>

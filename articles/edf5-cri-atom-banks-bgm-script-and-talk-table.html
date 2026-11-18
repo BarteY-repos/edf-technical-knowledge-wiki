@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 — native audio banks and line scheduling EDF5&#39;s surveyed Windows build uses CRI ADX2 / CRI Atom, with the playback implementation linked into EDF5.exe and "><title>EDF5 sound system: CRI Atom banks, mission BGM and unscripted NPC chatter | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Audio and dialogue</div><h1>EDF5 sound system: CRI Atom banks, mission BGM and unscripted NPC chatter</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Audio and dialogue</span></div><div class="referencebadge">Technical reference · Source-backed static analysis with explicitly scoped contributor tests; no new R125 runtime</div><div id="articleBody"><p>EDF5's surveyed Windows build uses <strong>CRI ADX2 / CRI Atom</strong>, with the playback implementation linked into <code>EDF5.exe</code> and a WASAPI output path. This is not evidence that EDF4.1 sound assets can be copied into EDF5 unchanged. Bank names, cue references, source voice variants and text/subtitles must be treated independently.</p>
+<h2 id="bank-and-cue-organization">Bank and cue organization</h2>
+<table>
+<thead>
+<tr>
+  <th>Resource</th>
+  <th>Original logical path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Music</td>
+  <td><code>APP:/SOUND/ADX/TIKYUUX_MUSIC.ACB</code></td>
+</tr>
+<tr>
+  <td>Effects</td>
+  <td><code>APP:/SOUND/ADX/TIKYUUX_SE.%LOCALE%.ACB</code></td>
+</tr>
+<tr>
+  <td>Atom settings</td>
+  <td><code>APP:/SOUND/ADX/TIKYUUX.ACF</code></td>
+</tr>
+<tr>
+  <td>Voices</td>
+  <td><code>app:/sound/adx/tikyuu5_voice.%LOCALE%.awb</code> and related banks</td>
+</tr>
+</tbody>
+</table>
+<p>A global SoundController owns the active music playback. Music from BVM and menu scripts eventually reaches a shared play function. A cross-fade stops or fades the prior handle, releases it, plays a new cue and sets the fade-in duration. The native BVM calls in the studied scripts are <strong>300 PlayBGM</strong>, <strong>301 FadeOutBGM</strong>, <strong>302 FadeInBGM</strong>, and <strong>303</strong> for a seek/start-offset variant. A survey of 141 scripts found 846 calls to 300, 747 to 301, 99 to 302 and six to 303. These are call-site counts, <strong>not</strong> the number of unique tracks.</p>
+<h2 id="the-npc-voice-tables-are-not-dialogue-text">The NPC voice tables are not dialogue text</h2>
+<p>The examined EDF5 dataset includes <strong>20 talk SGO files</strong>, 1464 talk tables (135 empty), 10,792 entries and 5402 distinct audio cues. A table entry carries the cue, animation, selection weight, bit-mask condition, conditional numeric window and possibly a reply table. The manager selects a weighted entry, applies a speaker variant and schedules it through one of its channels.</p>
+<p>Unlike EDF6, EDF5 has no general NPC chatter transcript or corresponding <code>edf6_voicetable</code> in the surveyed resources. A small set of quick-chat UI messages pairs display text with voice cues, but ordinary soldier remarks' spoken words are in audio. A cue appearing in the sound bank therefore cannot automatically be treated as a subtitle identifier.</p>
+<p>The TalkManager updates <strong>four channels</strong>. While a line is playing it reduces a music-volume factor toward <strong>0.3</strong>, restoring it toward <strong>1.0</strong> after speech stops. The precise interpretation of that controller float as the BGM multiplier is a static inference, not a separately captured audio measurement.</p>
+<p><strong>Evidence and credit:</strong> <code>kh-edf5-sound</code> facts <code>audio-cri-adx2</code>, <code>audio-banks-paths</code>, <code>bgm-play-choke-point</code>, <code>edf5-bgm-crossfade-stop</code>, <code>edf5-bvm-bgm-natives</code>, <code>edf5-talk-line-pick</code>, <code>edf5-talk-entry-fields</code>, <code>edf5-talk-no-captions</code>, <code>edf5-talk-update-duck</code>; source build <code>steam-5d11de53</code> / novae (ajane). No R125 runtime test.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf5-sound (original fact identifiers retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#bank-and-cue-organization">Bank and cue organization</a><a href="#the-npc-voice-tables-are-not-dialogue-text">The NPC voice tables are not dialogue text</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-cri-atom-banks-bgm-script-and-talk-table"};</script><script src="../assets/site.js" defer></script></body></html>

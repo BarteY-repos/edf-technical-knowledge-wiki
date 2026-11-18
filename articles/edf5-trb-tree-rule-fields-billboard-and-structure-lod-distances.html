@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 trees and buildings have different LOD systems A tree&#39;s TRB rule determines both its shape family and the values used when deciding when it becomes a billb"><title>EDF5 tree TRB rules: weighted models, billboard thresholds and building LOD | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Vegetation and LOD</div><h1>EDF5 tree TRB rules: weighted models, billboard thresholds and building LOD</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Vegetation and LOD</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R132 test</div><div id="articleBody"><p>A tree's <code>TRB</code> rule determines both its shape family and the values used when deciding when it becomes a billboard. Structure models use a different part/slot LOD table. Treating a single distance in a map resource as a universal EDF5 LOD radius obscures those distinctions.</p>
+<h2 id="trb-rule-anatomy">TRB rule anatomy</h2>
+<p>In the <code>ig_heigen507</code> corpus, <strong>19 <code>.trb</code> SGOs</strong> were observed. Their <code>rules</code> and <code>strings</code> contain weighted model alternatives, optional stumps, trunk/branch identifiers and several numeric families. Selected children of rule 0 are:</p>
+<table>
+<thead>
+<tr>
+  <th>Rule 0 child</th>
+  <th>Observed contents</th>
+  <th>Supported interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code></td>
+  <td>Weighted model-name choices</td>
+  <td>Chooses the tree model</td>
+</tr>
+<tr>
+  <td><code>1</code></td>
+  <td>Vec3, e.g. <code>(0.5,9.0,0.5)</code> or <code>(1.0,33.5,1.0)</code></td>
+  <td>Collision/trunk size <strong>inferred</strong></td>
+</tr>
+<tr>
+  <td><code>2</code></td>
+  <td>Category such as 2 (tree) or 0 (bush)</td>
+  <td>Collision role</td>
+</tr>
+<tr>
+  <td><code>3</code></td>
+  <td>Stump model or zero</td>
+  <td>Post-fall representation candidate</td>
+</tr>
+<tr>
+  <td><code>4</code></td>
+  <td><code>[1000]</code>, <code>[500]</code>, <code>[400]</code> or <code>[80]</code></td>
+  <td>Body property and display cutoff; <strong>not tree HP</strong></td>
+</tr>
+<tr>
+  <td><code>5</code></td>
+  <td>Two values, such as <code>[50,150]</code></td>
+  <td>Billboard near/far switching values</td>
+</tr>
+<tr>
+  <td><code>6</code></td>
+  <td><code>樹木</code> (tree)</td>
+  <td>Category/name marker</td>
+</tr>
+</tbody>
+</table>
+<p>Other rules describe the far billboard card, leaf appearance and sway by named bones (<code>miki</code> trunk / <code>eda</code> branch). Model names such as <code>sk_ptree013_40m_sugi</code> encode characteristic heights; the engine picks from a finite set of models rather than continuously scaling each tree.</p>
+<p>The <code>[1000]</code>-type number is copied into a Havok body property. Its exact gameplay reader was not identified; interpreting it as ordinary durability is contradicted by the grown-tree hit path, which has no damage threshold.</p>
+<h2 id="billboard-and-building-lod">Billboard and building LOD</h2>
+<p>The tree pipeline uses <strong>distance fields from TRB rules</strong> and a billboard transition; the original notes include a per-map tally of rule values. Building LOD instead follows <code>.mosb</code> part names and per-part distance thresholds. Material shaders include fade/dither behavior, so a visual disappearance can reflect <strong>LOD choice, culling, or shader fade</strong>, not necessarily the removal of the physical body.</p>
+<p><strong>Boundaries:</strong> the distance fields were measured for inspected game assets and native routines, but drawing pass names and some per-parameter visual semantics were not resolved in the same study.</p>
+<p><strong>Sources:</strong> EDF Knowledge Hub <code>edf5/map-placement.md</code> (<code>edf5-trb-rules</code>, <code>edf5-tree-build</code>), <code>edf5/map-lod.md</code> (<code>edf5-tree-classes</code>, <code>edf5-tree-blocks</code>, <code>edf5-trb-distance-fields</code>, <code>edf5-tree-billboard-switch</code>, <code>edf5-trb-distance-values</code>, <code>edf5-structure-lod-table</code>, <code>edf5-building-lod-values</code>, <code>edf5-lod-fade-shaders</code>).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/map-lod.md</li><li>EDF Knowledge Hub (2026-11-14): edf5/map-placement.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#trb-rule-anatomy">TRB rule anatomy</a><a href="#billboard-and-building-lod">Billboard and building LOD</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-trb-tree-rule-fields-billboard-and-structure-lod-distances"};</script><script src="../assets/site.js" defer></script></body></html>

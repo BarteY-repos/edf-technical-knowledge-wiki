@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 / EDF6 input: snapshots, hooks and acquisition boundaries Three distinct interfaces A game&#39;s message-pump snapshot, a Windows API&#39;s key state, and the game"><title>EDF5 / EDF6 Input Acquisition: Snapshot, Overlay and Raw Input Boundaries | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Native UI &amp; Input</div><h1>EDF5 / EDF6 Input Acquisition: Snapshot, Overlay and Raw Input Boundaries</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-source Reconciliation</span><span class="chip">Native UI &amp; Input</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Cross-source editorial reconciliation; no new runtime tests</div><div id="articleBody"><h2 id="three-distinct-interfaces">Three distinct interfaces</h2>
+<p>A game's <strong>message-pump snapshot</strong>, a Windows API's <strong>key state</strong>, and the game's <strong>downstream action/aim model</strong> are not interchangeable. Both games use their own input-side state, but the supplied snapshots belong to different exact binaries. A raw-mouse plugin changes a narrowly identified <em>relative-motion acquisition</em> point; it does not validate replacing the entire action system.</p>
+<h2 id="build-specific-landmarks">Build-specific landmarks</h2>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>EDF5 contributed static analysis</th>
+  <th>EDF6 contributed analysis / earlier native investigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Game-owned keyboard array</td>
+  <td><code>0x1253600</code>, 256-byte <code>GetKeyboardState</code> snapshot (<code>steam-5d11de53</code>)</td>
+  <td><code>0x21360E0</code> buffer (<code>steam-678ccb46</code>); <code>0x11847EA</code> anchor loads its address</td>
+</tr>
+<tr>
+  <td>Update/pump</td>
+  <td>Message loop <code>0x60BC90</code>; input reader near <code>0x60DF50</code>/<code>0x60E04E</code>; flag <code>0x12535DB</code></td>
+  <td>Separate keyboard polling/UI paths: see <a href="kh-edf6-ui.html">EDF6 UI controls</a> and <a href="kh-edf6-system.html">system</a></td>
+</tr>
+<tr>
+  <td>XInput</td>
+  <td><code>xinput9_1_0.dll</code> loaded dynamically; no static XInput import in source reading</td>
+  <td><code>xinput9_1_0.dll</code>; the contributed pad poll checks <code>XInputGetCapabilities</code> before <code>XInputGetState</code></td>
+</tr>
+<tr>
+  <td>Relative mouse acquisition</td>
+  <td>Stock cursor-based center/recenter path in prior analysis</td>
+  <td>Provider <code>EDF+0x11831F0</code>, direct consumer <code>EDF+0x1188479</code> in the <a href="performance-edf6-raw-input-acquisition-only-replacement-contract.html">Raw Input contract</a></td>
+</tr>
+</tbody>
+</table>
+<p>Do not copy EDF5 <code>0x1253600</code> into an EDF6 mod. The <code>0x1253600</code> address is reported as <strong>array storage</strong>, not a pointer to a heap buffer. The <code>0x21360E0</code> location is similarly build-specific; verify both anchors again for patched executables. See <a href="kh-edf5-input.html">EDF5 source notes</a>, <a href="kh-edf5-globals.html">EDF5 global</a>, <a href="kh-edf6-globals.html">EDF6 global</a>.</p>
+<h2 id="threading-what-is-known-and-what-is-not">Threading: what is known and what is not</h2>
+<p>The contributor reports that EDF5 fills its array from the message pump and copies it under a critical section before clearing the refresh flag. This establishes an <strong>internal producer/consumer synchronization path</strong>, not automatically a guarantee that <strong>arbitrary external readers</strong> can safely read all 256 bytes lock-free at any moment. The claim &quot;safe to read from any thread&quot; in the source appendix is preserved as contributor-reported, but has <strong>not been independently race-qualified</strong> by this wiki. A robust external hook should sample at a defined frame boundary or arrange appropriate synchronization if consistency matters.</p>
+<p>Windows <code>GetKeyState</code> semantics are thread/message-queue sensitive, and cannot simply be substituted for the game's frame snapshot. <code>GetAsyncKeyState</code> not appearing in an import table is only a statement about static imports, <strong>not</strong> proof that no dynamic call can occur. EDF5's IME association and candidate rendering are a separate <strong>UI text input</strong> pipeline; do not rewrite them as if they were gameplay key polling. See <a href="kh-guide-edf5-input.html">input and IME source</a>.</p>
+<h2 id="edf6-overlay-can-replace-import-hooks">EDF6 overlay can replace import hooks</h2>
+<p>The community source describes <code>EOSOVH-Win64-Shipping.dll</code> rewriting several EDF.dll import slots after launch and periodically afterward. If reproduced in the selected build, this explains why an import-address-table hook installed early can appear to work and later disappear. The source also describes a crash caused by overriding the entire USER32 <code>GetKeyState</code> export; <strong>do not interpret that as a blanket recommendation to patch USER32</strong>. Prefer minimally invasive, build-checked hook points, proper chaining and an explicit coexistence policy. <a href="kh-edf6-system.html">Contributor source</a>.</p>
+<h2 id="raw-input-does-not-mean-unbounded-aim-rewrites">Raw Input does not mean unbounded aim rewrites</h2>
+<p>The separate native Modernization <a href="performance-edf6-raw-input-acquisition-only-replacement-contract.html">Raw Input contract</a> replaces EDF6 relative delta acquisition (<code>WM_INPUT</code> counts), leaving menus and downstream Sandlot aim shaping intact: <code>/24</code> scaling, saturation/carry, class-specific response and turret inertia where applicable. Do not equate acquisition quantization with downstream intentional mechanics, nor turn an input hook into an implicit Safe120 simulation-rate patch.</p>
+<h2 id="suggested-tests">Suggested tests</h2>
+<ul>
+<li>Under the same build, compare foreground/focus state, keyboard snapshot and action event <em>in the same frame</em>; test UI typing/IME separately.</li>
+<li>For hooks, test cold launch and several seconds after EOS overlay initialization; trace who owns the import slot.</li>
+<li>For Raw Input, test absolute cursor UI and relative gameplay paths separately, and check menu-to-game transitions for stale deltas.</li>
+<li>Confirm two independent axes: <strong>key correctness</strong> and <strong>frame coherence</strong>. Correct individual bytes do not prove one coherent snapshot if observed asynchronously.</li>
+</ul>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>The source addresses above are contributed static analysis unless the original claim explicitly says otherwise; the earlier Modernization contract reflects native binary reconstruction, not an assertion of universal in-game mouse parity. No new executable tests, full race analysis or hooks were run here.</p>
+<h2 id="additional-native-game-system-references">Additional native game-system references</h2>
+<ul>
+<li><a href="edf5-native-input-pump-keyboard-snapshot-xinput-and-focus.html">EDF5 message pump and XInput</a></li>
+<li><a href="edf5-native-key-binding-pages-codes-and-conflict-rules.html">EDF5 binding code domains</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R85 Knowledge Hub contributor appendix and/or earlier R84 native research, exact links in article</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#three-distinct-interfaces">Three distinct interfaces</a><a href="#build-specific-landmarks">Build-specific landmarks</a><a href="#threading-what-is-known-and-what-is-not">Threading: what is known and what is not</a><a href="#edf6-overlay-can-replace-import-hooks">EDF6 overlay can replace import hooks</a><a href="#raw-input-does-not-mean-unbounded-aim-rewrites">Raw Input does not mean unbounded aim rewrites</a><a href="#suggested-tests">Suggested tests</a><a href="#evidence-boundary">Evidence boundary</a><a href="#additional-native-game-system-references">Additional native game-system references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"input-edf5-edf6-reconciliation"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 original map geometry: 16-family MAD survey and 3D surface connectivity What was measured: a bounded, read-only analysis of original EDF 4.1 map geometr"><title>EDF 4.1 original MAD geometry: 16-map surface survey | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF 4.1 original MAD geometry: 16-map surface survey</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Technical reference · Exact source geometry records; offline diagnostic graph only; no runtime NAV qualification</div><div id="articleBody"><p><strong>What was measured:</strong> a bounded, read-only analysis of original EDF 4.1 map geometry, using native source <code>MAC/MAD</code> data. <strong>Evidence:</strong> original game asset records inspected offline; not a recovered game pathfinding graph and not a runtime playtest. Results below are from the <code>R21</code> sample dated 15 November 2026 and apply to that specific corpus and selection method.</p>
+<h2 id="what-the-survey-actually-establishes">What the survey actually establishes</h2>
+<p><strong>All 16 inspected map families yielded parseable source geometry</strong> from a retained, root-preserving 18-family source archive; 31 static-body samples contain <strong>284,840 triangles</strong> in total. For an <code>hkpStorageExtendedMeshShape</code> with multiple <code>meshstorage</code> pools, vertices need independent pool-local index decoding and rebasing before a combined triangle list is meaningful. Each <code>trianglesSubparts</code> subpart has its own offsets, transform and index/count bounds; simply concatenating indices without the subpart mapping can corrupt the apparent geometry.</p>
+<p>The earlier two <code>SK_CRATER01</code> road bodies that had been rejected by a single-storage assumption were successfully decoded: <code>sk_craterroad01</code> <strong>2,430</strong> triangles and <code>sk_craterroad02</code> <strong>2,394</strong> triangles. This is a native <strong>source-mesh format observation</strong>, not evidence that a particular NPC can traverse the roads.</p>
+<h2 id="3d-adjacency-is-not-2d-footprint-overlap">3D adjacency is not 2D footprint overlap</h2>
+<p>For the sample, candidate surface triangles were filtered by an <strong>absolute normal-based 55° slope</strong> rule and joined only when their quantized <strong>three-dimensional edges</strong> matched (weld tolerance 0.001 source units). Triangles overlapping in the XZ plane but lying at different heights were <strong>not</strong> joined. This matters for multi-storey buildings, caves, roofs and bridges: a 2D top-down polygon graph cannot by itself tell whether two surfaces connect physically.</p>
+<p>An absolute-normal slope check is orientation-agnostic: <strong>ceiling triangles may qualify alongside floor triangles</strong>. Edge-connected components are therefore <strong>diagnostic geometry components</strong>, neither guaranteed walkable areas nor independently proven Havok navmesh islands. Winding, obstacles, agent width, step height, stairs/doors and links between different bodies remain separate problems.</p>
+<h2 id="per-map-bounded-source-sample">Per-map bounded source sample</h2>
+<p>The table reports <strong>only the sampled bodies</strong>, not the full static scene, and should not be used as a map-wide triangle budget. Component counts are the sum of qualifying edge-connected components within sampled bodies, not across the entire world.</p>
+<table>
+<thead>
+<tr>
+<th>Map family</th>
+<th style="text-align:right">Static mesh candidates</th>
+<th style="text-align:right">Bodies sampled</th>
+<th style="text-align:right">Triangles read</th>
+<th style="text-align:right">Slope candidates</th>
+<th style="text-align:right">3D-edge components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IG_CAVE01</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">35,616</td>
+<td style="text-align:right">20,390</td>
+<td style="text-align:right">30</td>
+</tr>
+<tr>
+<td><code>IG_HORNETCAVE01</code></td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">27,440</td>
+<td style="text-align:right">14,051</td>
+<td style="text-align:right">60</td>
+</tr>
+<tr>
+<td><code>NW_UNDERGROUND01</code></td>
+<td style="text-align:right">48</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">68</td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">7</td>
+</tr>
+<tr>
+<td><code>IG_WRECKTOWN01</code></td>
+<td style="text-align:right">194</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">59,582</td>
+<td style="text-align:right">56,230</td>
+<td style="text-align:right">16</td>
+</tr>
+<tr>
+<td><code>NW_HILLYCITY_LIGHT</code></td>
+<td style="text-align:right">266</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">53,866</td>
+<td style="text-align:right">45,569</td>
+<td style="text-align:right">60</td>
+</tr>
+<tr>
+<td><code>NW_KASENJIKI01</code></td>
+<td style="text-align:right">317</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">429</td>
+<td style="text-align:right">153</td>
+<td style="text-align:right">45</td>
+</tr>
+<tr>
+<td><code>NW_KOUSOUBLD01</code></td>
+<td style="text-align:right">261</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">43,993</td>
+<td style="text-align:right">41,579</td>
+<td style="text-align:right">28</td>
+</tr>
+<tr>
+<td><code>NW_SINSUIKOUEN</code></td>
+<td style="text-align:right">250</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">43,046</td>
+<td style="text-align:right">35,271</td>
+<td style="text-align:right">101</td>
+</tr>
+<tr>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">163</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">9,857</td>
+<td style="text-align:right">8,358</td>
+<td style="text-align:right">64</td>
+</tr>
+<tr>
+<td><code>SK_HEIGEN02</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">749</td>
+<td style="text-align:right">397</td>
+<td style="text-align:right">20</td>
+</tr>
+<tr>
+<td><code>SK_VALLEY01</code></td>
+<td style="text-align:right">17</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">873</td>
+<td style="text-align:right">440</td>
+<td style="text-align:right">41</td>
+</tr>
+<tr>
+<td><code>SK_KAIGAN01</code></td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">1,149</td>
+<td style="text-align:right">600</td>
+<td style="text-align:right">31</td>
+</tr>
+<tr>
+<td><code>SK_SANGAKU01</code></td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">1,149</td>
+<td style="text-align:right">600</td>
+<td style="text-align:right">31</td>
+</tr>
+<tr>
+<td><code>SK_SANGAKU02</code></td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">1,050</td>
+<td style="text-align:right">563</td>
+<td style="text-align:right">23</td>
+</tr>
+<tr>
+<td><code>SK_STEPMOUNTAIN01</code></td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">1,149</td>
+<td style="text-align:right">600</td>
+<td style="text-align:right">31</td>
+</tr>
+<tr>
+<td><code>SK_CRATER01</code></td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">4,824</td>
+<td style="text-align:right">2,531</td>
+<td style="text-align:right">263</td>
+</tr>
+</tbody>
+</table>
+<h2 id="notable-native-geometry-cases">Notable native geometry cases</h2>
+<ul>
+<li><strong><code>IG_CAVE01</code></strong>: the two examined collision bodies have <strong>13,452</strong> and <strong>22,164</strong> original triangles, respectively, and yield <strong>11</strong> and <strong>19</strong> independent edge-connected slope-candidate components. They are not 30 validated NPC regions.</li>
+<li><strong><code>IG_HORNETCAVE01</code></strong>: one sampled collision body has <strong>27,440</strong> triangles and <strong>60</strong> candidate components; its vertically separated and potentially ceiling-facing surfaces must not be conflated with paths.</li>
+<li><strong><code>NW_KOUSOUBLD01</code></strong>: a single named field body has <strong>43,751</strong> triangles and <strong>one</strong> diagnostic candidate component. A single component does not prove streets or buildings are navigable to NPCs.</li>
+<li><strong><code>SK_CRATER01</code></strong>: the two road meshes contain <strong>4,824</strong> source triangles combined; these meshes had been missed by the earlier single-<code>meshstorage</code> decoder.</li>
+<li><strong><code>NW_HILLYCITY_LIGHT</code></strong>: the separate previously retained strict original field extraction has <strong>45,505</strong> triangles; the R21 two-body sample is <strong>53,866</strong> triangles. They are <strong>different scopes</strong>. The historical R1D HKT and NVMD identity questions remain separate from this sample.</li>
+</ul>
+<h2 id="evidence-boundaries-and-missing-data">Evidence boundaries and missing data</h2>
+<p>The survey did <strong>not</strong> cover all 1,591 static mesh candidates, did <strong>not</strong> reconstruct the mountain terrain heightfield from SK <code>_fld2mgrid.shfb</code> / RAB source, and did <strong>not</strong> connect separate bodies through ramps, doors, bridges or placed obstacles. No agent-specific clearance, turn radius or locomotion profile was proved. This report produced <strong>no new HKT/NVMD navigation asset</strong> and includes <strong>no Windows/EDF6 runtime validation</strong>.</p>
+<p>The original unmodified map assets are not redistributed in this wiki. The summary and per-body derived measurements below are documentation only.</p>
+<h2 id="primary-source-and-provenance">Primary source and provenance</h2>
+<ul>
+<li><code>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R13_FUNCTIONALITY_WIP_R21_SOURCE_GEOMETRY/START_HERE_R13_FUNCTIONALITY_WIP_R21_SOURCE_GEOMETRY_2026-11-15.md</code></li>
+<li>Same directory: <code>R21_REAL_16_MAP_SURFACE_GRAPH_SUMMARY.json</code> and <code>R21_REAL_ALL_16_MAP_SURFACE_GRAPH.json</code>, sourced from <code>EDF41_MAP_RAW_MAC_MAD_18_FAMILIES_2026-11-15.zip</code> (SHA-256 <code>d91cba823e79af45d19bd359a1f14d58af5affb463347a38c3e1348f0ed92577</code>).</li>
+<li>Classification: <strong>exact original source geometry + offline interpreted graph, NOT game-runtime or a navigable HKT</strong>. Linked original source archives are not a license to infer automatic navigation restoration.</li>
+</ul>
+<p>Related: <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">EDF 4.1 original navigation and collision boundaries</a>, <a href="nav-edf41-r1d-source-authority.html">R1D identity and provenance</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Havok collision architecture</a>.</p>
+<h2 id="complete-r20-original-mad-body-census-different-scope-from-r21">Complete R20 original-MAD body census (different scope from R21)</h2>
+<p>The earlier original-asset <strong>R20</strong> pass covered <strong>all parsed MAD body records</strong> across the same 16 project map families. This is a source-record population census, <strong>not</strong> the 31-body R21 triangle/edge-connectivity sample. Its machine summary reports <strong>18,342 bodies</strong>, <strong>17,489 static bodies</strong> and <strong>1,591 candidate static mesh bodies</strong>. Counts do not include a reconstructed terrain-walkability graph or prove every body contributes to NPC navigation.</p>
+<p>An earlier <strong>R19 name-based hint</strong> would have selected just <strong>181/1,591</strong> static-mesh candidates. The source-data classification in R20 found <strong>1,410</strong> additional mesh candidates missed by that naming heuristic (<strong>88.6%</strong> of the candidate set). An asset's name is therefore not a safe universal classifier of static collision geometry.</p>
+<table>
+<thead>
+<tr>
+<th>Map</th>
+<th style="text-align:right">All MAD bodies</th>
+<th style="text-align:right">Static bodies</th>
+<th style="text-align:right">Static-mesh candidates</th>
+<th style="text-align:right">Matched by old name hint</th>
+<th style="text-align:right">Missed by name hint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IG_CAVE01</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td><code>IG_HORNETCAVE01</code></td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td><code>NW_UNDERGROUND01</code></td>
+<td style="text-align:right">386</td>
+<td style="text-align:right">364</td>
+<td style="text-align:right">48</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">41</td>
+</tr>
+<tr>
+<td><code>IG_WRECKTOWN01</code></td>
+<td style="text-align:right">2,545</td>
+<td style="text-align:right">2,443</td>
+<td style="text-align:right">194</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">190</td>
+</tr>
+<tr>
+<td><code>NW_HILLYCITY_LIGHT</code></td>
+<td style="text-align:right">3,204</td>
+<td style="text-align:right">3,063</td>
+<td style="text-align:right">266</td>
+<td style="text-align:right">34</td>
+<td style="text-align:right">232</td>
+</tr>
+<tr>
+<td><code>NW_KASENJIKI01</code></td>
+<td style="text-align:right">3,751</td>
+<td style="text-align:right">3,558</td>
+<td style="text-align:right">317</td>
+<td style="text-align:right">51</td>
+<td style="text-align:right">266</td>
+</tr>
+<tr>
+<td><code>NW_KOUSOUBLD01</code></td>
+<td style="text-align:right">3,379</td>
+<td style="text-align:right">3,253</td>
+<td style="text-align:right">261</td>
+<td style="text-align:right">32</td>
+<td style="text-align:right">229</td>
+</tr>
+<tr>
+<td><code>NW_SINSUIKOUEN</code></td>
+<td style="text-align:right">2,911</td>
+<td style="text-align:right">2,750</td>
+<td style="text-align:right">250</td>
+<td style="text-align:right">31</td>
+<td style="text-align:right">219</td>
+</tr>
+<tr>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">1,601</td>
+<td style="text-align:right">1,493</td>
+<td style="text-align:right">163</td>
+<td style="text-align:right">21</td>
+<td style="text-align:right">142</td>
+</tr>
+<tr>
+<td><code>SK_HEIGEN02</code></td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td><code>SK_VALLEY01</code></td>
+<td style="text-align:right">89</td>
+<td style="text-align:right">89</td>
+<td style="text-align:right">17</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">16</td>
+</tr>
+<tr>
+<td><code>SK_KAIGAN01</code></td>
+<td style="text-align:right">140</td>
+<td style="text-align:right">140</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">18</td>
+</tr>
+<tr>
+<td><code>SK_SANGAKU01</code></td>
+<td style="text-align:right">51</td>
+<td style="text-align:right">51</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">9</td>
+</tr>
+<tr>
+<td><code>SK_SANGAKU02</code></td>
+<td style="text-align:right">118</td>
+<td style="text-align:right">118</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">14</td>
+</tr>
+<tr>
+<td><code>SK_STEPMOUNTAIN01</code></td>
+<td style="text-align:right">117</td>
+<td style="text-align:right">117</td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">13</td>
+</tr>
+<tr>
+<td><code>SK_CRATER01</code></td>
+<td style="text-align:right">37</td>
+<td style="text-align:right">37</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>18,342</strong></td>
+<td style="text-align:right"><strong>17,489</strong></td>
+<td style="text-align:right"><strong>1,591</strong></td>
+<td style="text-align:right"><strong>181</strong></td>
+<td style="text-align:right"><strong>1,410</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source-family boundary:</strong> nine maps take the non-SK MAD2020 route; seven SK maps use a source route that also involves native FMB/Havok2020 data. This table counts <strong>MAD bodies</strong> only and does not supply a replacement for SK terrain-heightfield/FMB analysis. Both routes were source-parsed (16/16, zero source read/parse failures); neither produced a navigable HKT/NVMD asset or a runtime NAV PASS.</p>
+<p><strong>R20 versus R21:</strong> R20's bounded geometry probing successfully inspected 29 body samples. Its two <code>SK_CRATER01</code> road probes were <strong>unavailable under the then-current decoder</strong>, not absent from the original game. The subsequent <strong>R21 multi-<code>meshstorage</code> correction</strong> decoded both, raising the <em>separate</em> final sample to 31 bodies (284,840 triangles). The full population census remains 1,591 mesh candidates; <strong>29 or 31 are only sampled subsets</strong>.</p>
+<p>The machine-readable CSV shipped with this wiki as <code>data/EDF41_R20_FULL_16_MAP_MAD_STATIC_BODY_CENSUS_R145.csv</code> retains source routes, original-MAD SHA-256 hashes, R19 hint matches/misses and R20 probe statuses. No original game assets are redistributed.</p>
+<p><strong>Evidence:</strong> original <code>EDF41_R20_SOURCE_COLLISION_SUMMARY.json</code>, <code>/EDF41_EDF6_RESEARCH/EDF41_RAW_MAP_SOURCE_CORPUS_2026-11-15/</code>, reconciled with R21 <code>R21_REAL_16_MAP_SURFACE_GRAPH_SUMMARY.json</code>. All observations <strong>offline/static</strong>, game/runtime NAV <strong>not tested</strong>.</p>
+<h2 id="newer-seven-map-placed-body-contact-scope">Newer seven-map placed-body contact scope</h2>
+<p>The <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">R24–R28 seven-SK-map contact survey</a> is a <strong>different, later selection</strong>: 1,770 source <code>MAPB</code> placements of qualifying static meshes were analyzed against terrain, with 505,633 placed triangles and four unresolved terrain-domain cases. These values must not replace or be added to the 31-body / 284,840-triangle <strong>16-family sample</strong> in this article. Both remain source-only.</p>
+<h2 id="nine-non-sk-maps-original-mad-collision-geometry-is-layered-not-one-terrain-height">Nine non-SK maps: original MAD collision geometry is layered, not one terrain height</h2>
+<p>A later, <strong>separately scoped nine-map original-source survey</strong> examined non-SK cities, industrial zones and underground maps. It indexed <strong>1,504 original static collision-mesh bodies</strong>. These are not additional bodies to add to the older 16-family count in this article: the selection rules, geometry families and measured scopes differ.</p>
+<p>The survey completed the static-mesh body pass in three underground/cave families: <code>IG_CAVE01</code> (<strong>4/4</strong> bodies), <code>IG_HORNETCAVE01</code> (<strong>1/1</strong>) and <code>NW_UNDERGROUND01</code> (<strong>48/48</strong>). Its remaining six city families required bounded spatial sampling. For cave candidates, a single 4 m X/Z column can contain multiple distinct horizontal collision sheets at different Y heights, alongside side walls. <strong>Overlapping X/Z footprints do not prove that surfaces connect or that one is walkable.</strong> A ceiling cannot be promoted to an NPC floor merely because its triangle normal is roughly vertical.</p>
+<p>A separate original-MAD triangle census fully processed <strong>1,451 static-mesh bodies and 925,622 triangles across the six city families</strong>, while its detailed 4 m windows remained bounded. The source-tile follow-up covered <strong>768 of 8,402 planned 64 m windows</strong> (128 per city map), producing <strong>2,420,574 classified cell fragments</strong>; there were <strong>46,618</strong> columns with multiple candidate sheet strata and <strong>2,390</strong> columns showing opposed source winding at coincident surfaces. The unprocessed <strong>7,634</strong> windows must not be called complete NAV coverage.</p>
+<table>
+<thead>
+<tr>
+<th>City/industrial source map</th>
+<th style="text-align:right">64 m windows processed / planned</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IG_WRECKTOWN01</code></td>
+<td style="text-align:right">128 / 1,156</td>
+</tr>
+<tr>
+<td><code>NW_HILLYCITY_LIGHT</code></td>
+<td style="text-align:right">128 / 1,716</td>
+</tr>
+<tr>
+<td><code>NW_KASENJIKI01</code></td>
+<td style="text-align:right">128 / 1,554</td>
+</tr>
+<tr>
+<td><code>NW_KOUSOUBLD01</code></td>
+<td style="text-align:right">128 / 1,444</td>
+</tr>
+<tr>
+<td><code>NW_SINSUIKOUEN</code></td>
+<td style="text-align:right">128 / 1,088</td>
+</tr>
+<tr>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">128 / 1,444</td>
+</tr>
+</tbody>
+</table>
+<p>These counters describe <strong>source collision-mesh candidates and source clipping</strong>, not pathfinding completion, running NPC movement, confirmed body activation or generated game-ready HKT/NVMD. See the <a href="maps-%26-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure.html">MAPB/MAPO collision ownership and named resources</a> and the <a href="maps-%26-navigation-edf-4-1-donor-nav-and-sk-collision-boundary.html">navigation versus collision boundary</a>.</p>
+<p><strong>Original evidence:</strong> <code>R37_NAV_INTEGRATION_DECISIONS.md</code>, <code>R38_OFFLINE_QUALIFICATION.json</code>, <code>R40_REAL_6_CITY_ACCELERATED_4M_COVERAGE.json</code>, <code>R40_NAV_INTEGRATION_DECISIONS.md</code> from the source-only R37–R40 EDF4.1 research lineage. Machine-readable coverage: <code>data/R168_NONSK_SIX_CITY_SOURCE_TILE_COVERAGE.csv</code>.</p>
+
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R13_FUNCTIONALITY_WIP_R21_SOURCE_GEOMETRY/START_HERE_R13_FUNCTIONALITY_WIP_R21_SOURCE_GEOMETRY_2026-11-15.md</li><li>R21_REAL_16_MAP_SURFACE_GRAPH_SUMMARY.json</li><li>R21_REAL_ALL_16_MAP_SURFACE_GRAPH.json</li><li>EDF41_R20_SOURCE_COLLISION_SUMMARY.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R37_NONSK_MULTILAYER/EDF41_R37_DELTA_ON_R36_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R38_NONSK_EXACT_TRIANGLES_ROI/EDF41_R38_DELTA_ON_R37_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R40_NONSK_ACCELERATED_4M_TILES/EDF41_R40_DELTA_ON_R39_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R42_MAPO_HKT_COLLISION_ROUTING/EDF41_R42_DELTA_ON_R41_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R45_GROUP_COMPACT_HKT_RESOLUTION/EDF41_R45_DELTA_ON_R44_2026-11-16.zip</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-survey-actually-establishes">What the survey actually establishes</a><a href="#3d-adjacency-is-not-2d-footprint-overlap">3D adjacency is not 2D footprint overlap</a><a href="#per-map-bounded-source-sample">Per-map bounded source sample</a><a href="#notable-native-geometry-cases">Notable native geometry cases</a><a href="#evidence-boundaries-and-missing-data">Evidence boundaries and missing data</a><a href="#primary-source-and-provenance">Primary source and provenance</a><a href="#complete-r20-original-mad-body-census-different-scope-from-r21">Complete R20 original-MAD body census (different scope from R21)</a><a href="#newer-seven-map-placed-body-contact-scope">Newer seven-map placed-body contact scope</a><a href="#nine-non-sk-maps-original-mad-collision-geometry-is-layered-not-one-terrain-height">Nine non-SK maps: original MAD collision geometry is layered, not one terrain height</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-original-mad-static-geometry-16-map-3d-surface-survey"};</script><script src="../assets/site.js" defer></script></body></html>

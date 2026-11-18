@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 mission selection and weapon ownership: row-state and save-record boundaries Mission-select rows and one exact-build UI behaviour The retained ported-conte"><title>EDF6 mission selection and weapon ownership: row-state and save-record boundaries | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 mission selection and weapon ownership: row-state and save-record boundaries</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span></div><div class="referencebadge">Technical reference · Exact-build source RE notes and offline-checked helper; not fresh native runtime</div><div id="articleBody"><h2 id="mission-select-rows-and-one-exact-build-ui-behaviour">Mission-select rows and one exact-build UI behaviour</h2>
+<p>The retained ported-content code documents the mission-selection list as an array of <strong>0x14-byte rows</strong> in one target EDF6 binary. Its source model (<code>ListRow</code>) is:</p>
+<table>
+<thead>
+<tr>
+  <th>Offset</th>
+  <th style="text-align:right">Size</th>
+  <th>Meaning in retained source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td style="text-align:right">4</td>
+  <td>List-row index</td>
+</tr>
+<tr>
+  <td><code>+0x04</code></td>
+  <td style="text-align:right">4</td>
+  <td>Displayed mission number (field 4)</td>
+</tr>
+<tr>
+  <td><code>+0x08</code></td>
+  <td style="text-align:right">4</td>
+  <td>Row state</td>
+</tr>
+<tr>
+  <td><code>+0x0C</code></td>
+  <td style="text-align:right">4</td>
+  <td>Branch value (field 5)</td>
+</tr>
+<tr>
+  <td><code>+0x10</code></td>
+  <td style="text-align:right">1 + 3 padding</td>
+  <td>Flag byte</td>
+</tr>
+</tbody>
+</table>
+<p>The documented states are <strong>0 = cleared; 1 = open; 2 = open branch (<code>field5 == 1</code>); 3 = locked but visible; 4 = locked and hidden</strong>. This distinction matters: hidden is not equivalent to completed or merely locked.</p>
+<p>The source's narrow <code>OpenAll</code> path recognizes a <strong>freshly constructed list</strong> only when row zero has index 0/state 1 and every subsequent row has the corresponding index/state 4. It then changes those hidden rows to state 1 or 2 according to the branch field, <em>before</em> the engine's normal scan. The documented native scan opens the successor of a completed row. <strong>No save data is written</strong> in this UI-only operation, and already-cleared progress is not altered. If the initial list does not match the expected shape, the helper fails closed rather than blindly patching memory.</p>
+<p>The source points to list construction around <code>EDF.dll+0x8A2160..0x8A241A</code>, with its stored row list at <code>+0x8A1530</code>; these addresses are <strong>build-specific</strong>.</p>
+<h2 id="weapon-possession-records-are-not-mission-row-states">Weapon possession records are not mission-row states</h2>
+<p>The retained game-status weapon row is <strong>12 bytes</strong>: a little-endian <code>uint32</code> flags word followed by <strong>eight star bytes</strong>. Within that flags word, <strong>bit 0 = owned</strong> and <strong>bit 2 = newly obtained</strong>. The source's ownership helper preserves all other bits. On first acquisition it sets owned/new and zeros the eight star bytes; on subsequent acquisition it leaves existing stars intact. A separate max-star path sets each to ten (after which the stock game applies actual weapon-specific caps).</p>
+<p>A <code>Disown</code> operation clears owned and new flags while <strong>preserving stars</strong>. This distinction matters when a weapon or support action moves from the ordinary loadout to another interface or becomes ineligible: erasing star bytes would mutate progress rather than only availability.</p>
+<p>The mod's content-name gate recognizes <code>EDF6VC_E5_</code> and <code>EDF6VC_E41_</code>; it excludes <code>EDF6VC_RETIRED_</code> and call-weapon names. These prefix rules are <strong>mod-defined</strong>, not universal properties of EDF6's inventory format.</p>
+<h2 id="limits-and-implementation-hygiene">Limits and implementation hygiene</h2>
+<p>This is a source-reviewed exact-build contract from <code>components/compatibility/src/unlock_ported.h</code>. It explains what was patched and why, not a blanket recommendation to unlock all stock missions. Verify the native addresses and row semantics for the target build. Separate mission-list visibility from saved progression, and inventory possession from star upgrades; the same memory operation should not silently implement both.</p>
+<p>Related: <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">Mission identity, LIST and thumbnails</a> and <a href="engine-re-fencer-armor-limits-gameplay-and-progression.html">Weapon progression/armor limits</a>.</p>
+<p>For a different persistent-progress hazard, see <a href="formats-%26-containers-edf6-achievement-sgo-trophy-dat-kill-counter-ordering.html">Achievement.sgo / TROPHY.DAT counter ordering</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/compatibility/src/unlock_ported.h</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#mission-select-rows-and-one-exact-build-ui-behaviour">Mission-select rows and one exact-build UI behaviour</a><a href="#weapon-possession-records-are-not-mission-row-states">Weapon possession records are not mission-row states</a><a href="#limits-and-implementation-hygiene">Limits and implementation hygiene</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-edf6-mission-selection-row-state-and-weapon-ownership-records"};</script><script src="../assets/site.js" defer></script></body></html>

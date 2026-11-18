@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 projectile RNG consumers: AmmoClass and NetworkBullet reference Scope: static analysis of one EDF6 EDF.dll build, SHA-256 0d5092393a1b9d8f1b75b0c93d8a8f656"><title>EDF6 projectile RNG: AmmoClass consumers and NetworkBullet selector reference | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 projectile RNG: AmmoClass consumers and NetworkBullet selector reference</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span></div><div class="referencebadge">Technical reference · Static canonical EDF6.dll and qualified 1,315 active weapon configurations; no paired runtime test</div><div id="articleBody"><p><strong>Scope:</strong> static analysis of one EDF6 <code>EDF.dll</code> build, SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>, joined to an audited <strong>1,315 active-configuration</strong> WEAPONTABLE/star-state corpus. This is a <strong>reader reference for the game binary</strong>, not an SDK promise or an in-game synchronization test.</p>
+<h2 id="how-a-random-state-reaches-a-projectile">How a random state reaches a projectile</h2>
+<p>Common Weapon projectile creation at <code>EDF+0x696FD0</code> derives a value from the 64-bit Weapon LCG. The engine writes the upper-derived projectile value to the class-specific <strong>Bullet InitParam <code>+0x1A0</code></strong> at <code>EDF+0x69776D</code>. <code>BulletBase</code> construction at <code>EDF+0x22E9C0</code> loads the InitParam field and stores the zero-extended value in the finished <strong>BulletBase <code>+0x130</code></strong>. They are <strong>different object layouts</strong>. Common BulletBase does not itself continuously consume <code>+0x130</code>; derived classes may do so.</p>
+<p><code>state_next = (state * 0x5D588B656C078965 + 0x269EC3) mod 2^64</code></p>
+<h2 id="all-seven-subtype1-capable-projectile-families-in-this-shipped-corpus">All seven subtype1-capable projectile families in this shipped corpus</h2>
+<p>The star-envelope join produces these <strong>capable-weapon</strong> counts by <code>AmmoClass</code> (a configuration is counted as capable even if some of its star states choose direct fire):</p>
+<table>
+<thead>
+<tr>
+  <th>AmmoClass</th>
+  <th style="text-align:right">Weapons capable of subtype1</th>
+  <th>Proven class-owned consumer of Bullet <code>+0x130</code>?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>LaserBullet01</code></td>
+  <td style="text-align:right">72</td>
+  <td>No in the audited constructor/vtable region</td>
+</tr>
+<tr>
+  <td><code>SolidBullet01</code></td>
+  <td style="text-align:right">46</td>
+  <td>No in the audited constructor/vtable region</td>
+</tr>
+<tr>
+  <td><code>FlameBullet02</code></td>
+  <td style="text-align:right">18</td>
+  <td><strong>Yes</strong>, constructor-dependent motion</td>
+</tr>
+<tr>
+  <td><code>LightningBullet01</code></td>
+  <td style="text-align:right">16</td>
+  <td><strong>Yes</strong>, constructor + OnUpdate path</td>
+</tr>
+<tr>
+  <td><code>AcidBullet01</code></td>
+  <td style="text-align:right">8</td>
+  <td>No; an apparent <code>+0x130</code> reference was stack-local</td>
+</tr>
+<tr>
+  <td><code>SolidExpBullet01</code></td>
+  <td style="text-align:right">6</td>
+  <td><strong>Yes</strong>, detonation countdown</td>
+</tr>
+<tr>
+  <td><code>LaserBullet03</code></td>
+  <td style="text-align:right">6</td>
+  <td>No in the audited constructor/vtable region</td>
+</tr>
+</tbody>
+</table>
+<p>This table must not be read as an assertion that other projectile types never use RNG. Several such as <code>SpiderStringBullet03</code>, <code>PlasmaBullet01</code>, <code>NapalmBullet01</code> and <code>MissileBullet02</code> do consume projectile RNG, but <strong>are not subtype1-reachable</strong> within this particular audited shipped-weapon star envelope.</p>
+<h2 id="three-important-class-consumers">Three important class consumers</h2>
+<table>
+<thead>
+<tr>
+  <th>Class</th>
+  <th>Native observation</th>
+  <th>Gameplay effect</th>
+  <th>What NetworkBullet does <strong>not</strong> transmit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>FlameBullet02</code></td>
+  <td>Constructor <code>EDF+0x260AA0</code> advances <code>+0x130</code>; writes <code>+0x11D0/+0x11D8</code>; OnUpdate <code>EDF+0x2622A0</code> uses them</td>
+  <td>Motion/direction of flame evolves from locally constructed random scalars</td>
+  <td>Scalars <code>+0x11D0/+0x11D8</code>; selector1 only, selector0 disabled</td>
+</tr>
+<tr>
+  <td><code>LightningBullet01</code></td>
+  <td>Constructor <code>EDF+0x259E40</code>; OnUpdate <code>EDF+0x25AD10</code>; RNG helper <code>EDF+0x04EB60</code> and direct LCG</td>
+  <td>Randomized path and replicated movement direction</td>
+  <td>RNG <code>+0x130</code> and internal path <code>+0x1160</code>; selector1 only, selector0 disabled</td>
+</tr>
+<tr>
+  <td><code>SolidExpBullet01</code></td>
+  <td>Constructor <code>EDF+0x28DB80</code> sets countdown at <code>+0xF00</code>; OnUpdate <code>EDF+0x28F340</code> decrements and later spawns <code>BlowHit01</code></td>
+  <td>Randomized detonation/hit-spawn time</td>
+  <td>Countdown <code>+0xF00</code>; constructor clears inherited selector1 to <code>0</code>, no common selector enabled in checked path</td>
+</tr>
+</tbody>
+</table>
+<p>A subtle but important distinction: the class state can diverge after remote subtype1 reconstruction <strong>even when initial spread is deterministic</strong>. Of the <strong>40</strong> subtype1-capable weapons using these three families, <strong>38</strong> have <code>FireSpreadType 0</code>, one spread1 and one spread2. Their distribution is:</p>
+<table>
+<thead>
+<tr>
+  <th>Class</th>
+  <th style="text-align:right">Capable</th>
+  <th style="text-align:right">Always subtype1</th>
+  <th style="text-align:right">Switchable via stars</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>FlameBullet02</code></td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>LightningBullet01</code></td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>SolidExpBullet01</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>40</strong></td>
+  <td style="text-align:right"><strong>30</strong></td>
+  <td style="text-align:right"><strong>10</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Separately, <strong>six</strong> always-subtype1 weapons have RNG-sensitive initial spread types 1/3; <strong>Lightning Rapid Bow T2</strong> belongs to both groups. Thus the <strong>union is 45 subtype1-capable configurations</strong>, of which <strong>35 are always subtype1</strong>. These are two related but distinct scopes, not conflicting counts.</p>
+<h2 id="receiver-catch-up-and-why-eventual-seed-equality-is-not-enough">Receiver catch-up and why eventual seed equality is not enough</h2>
+<p>Subtype1 publishes a cumulative shot target after the normal six-Weapon-update delay. A later receiver can catch up on shot <strong>count</strong> by creating missed projectiles locally. Under strict equal-seed and equal-total-update/projectile-step conditions, the current Weapon LCG can reconverge after that catch-up. Nevertheless the newly created projectile gets the receiver's <strong>later historical sample</strong>, not the sender's original sample. A later common NetworkBullet selector does not serialize the class-specific random fields in the table above. No automatic recovery of those historical values is established by the inspected recurring protocol.</p>
+<p>This explains a <strong>possible static synchronization gap</strong>, not a guarantee that every visible multiplayer shot desynchronizes. The size and frequency of actual divergence require paired runtime traces.</p>
+<h2 id="other-true-rng-consumers-excluded-from-the-subtype1-set">Other true RNG consumers excluded from the subtype1 set</h2>
+<ul>
+<li><code>SpiderStringBullet03::OnUpdate</code> (<code>EDF+0x285700</code>) advances <code>+0x130</code> and derives a class scalar at <code>+0x108C</code>.</li>
+<li><code>NapalmBullet01::OnUpdate</code> (<code>EDF+0x2641F0</code>) derives a randomized spatial vector.</li>
+<li><code>MissileBullet02::OnUpdate</code> (<code>EDF+0x26E4C0</code>) derives and stores a randomized spatial vector around <code>+0x15D0</code>.</li>
+<li><code>PlasmaBullet01</code> constructor (<code>EDF+0x25B650</code>) consumes Bullet-local RNG; another later code path uses <strong>process-global RNG</strong> and must not be conflated with the projectile state.</li>
+</ul>
+<p>Simply matching a memory displacement like <code>+0x130</code> is insufficient: for example <code>LaserBullet02</code> and <code>BarugaCannonBullet</code> contain similarly named/positioned accesses that were <strong>not</strong> qualified as consumers of this Bullet-local LCG state.</p>
+<h2 id="evidence-boundary-and-related-reading">Evidence boundary and related reading</h2>
+<p>The quoted offsets, class inventory and star-envelope counts are from <strong>static native binary and source data analysis</strong>. No new EDF6 multiplayer runtime test is claimed. Read <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG and batching</a>, <a href="engine-re-%26-networking-networkbullet-selector-contact-and-state-boundaries.html">NetworkBullet selectors</a> and <a href="edf6-weapon-star-dependent-fire-synchronization-complete-switcher-list.html">star-dependent fire policies</a>.</p>
+<p><strong>Sources:</strong> <code>EDF6_ENGINE_RE_POST_R12_RNG_LIFECYCLE_WIP_2026-09-29.md</code>, <code>EDF6_ENGINE_RE_POST_R13_PROJECTILE_RNG_CONSUMERS_WIP_2026-09-29.md</code>, <code>EDF6_ENGINE_RE_POST_R14_NETWORKBULLET_RECONCILIATION_WIP_2026-09-29.md</code>, and the respective qualified R13–R15 checkpoints.</p>
+<h2 id="exact-native-reference-tables">Exact native reference tables</h2>
+<p><a href="edf6-engine-r17-native-struct-field-offset-reference.html">Projectile and Weapon layout fields</a> — static R17 per-build catalog; not portable APIs</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_ENGINE_RE_POST_R12_RNG_LIFECYCLE_WIP_2026-09-29.md</li><li>EDF6_ENGINE_RE_POST_R13_PROJECTILE_RNG_CONSUMERS_WIP_2026-09-29.md</li><li>EDF6_ENGINE_RE_POST_R14_NETWORKBULLET_RECONCILIATION_WIP_2026-09-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#how-a-random-state-reaches-a-projectile">How a random state reaches a projectile</a><a href="#all-seven-subtype1-capable-projectile-families-in-this-shipped-corpus">All seven subtype1-capable projectile families in this shipped corpus</a><a href="#three-important-class-consumers">Three important class consumers</a><a href="#receiver-catch-up-and-why-eventual-seed-equality-is-not-enough">Receiver catch-up and why eventual seed equality is not enough</a><a href="#other-true-rng-consumers-excluded-from-the-subtype1-set">Other true RNG consumers excluded from the subtype1 set</a><a href="#evidence-boundary-and-related-reading">Evidence boundary and related reading</a><a href="#exact-native-reference-tables">Exact native reference tables</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-edf6-projectile-ammo-class-rng-and-network-selector-reference"};</script><script src="../assets/site.js" defer></script></body></html>

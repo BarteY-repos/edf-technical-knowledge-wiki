@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDFROOM MAD: triangle conservation and physical wall integrity A Havok compressed-mesh conversion may perturb the decoded coordinates of individual vertices whi"><title>EDFROOM MAD: native-compatible wall collision, quantization and triangle conservation | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Havok collision geometry and compressed mesh</div><h1>EDFROOM MAD: native-compatible wall collision, quantization and triangle conservation</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Havok collision geometry and compressed mesh</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived and exact bounded runtime evidence separated</div><div id="articleBody"><p>A Havok compressed-mesh conversion may perturb the decoded coordinates of individual vertices while preserving <strong>shared seam continuity and physical blocking</strong>. The <code>NG_DLC_EDFROOM03</code> research provides measured source-versus-target collision geometry and a later gameplay observation that distinguish those properties from AI decisions.</p>
+<h2 id="full-controlled-collision-inventory">Full controlled collision inventory</h2>
+<p>The retained candidate MAD represented <strong>101 direct compressed meshes</strong>. The source triangle census and the deterministic degenerate-triangle filtering result were:</p>
+<table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th style="text-align:right">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Source logical triangles before filtering</td>
+  <td style="text-align:right">315,460</td>
+</tr>
+<tr>
+  <td>Removed by the bounded degeneracy predicate</td>
+  <td style="text-align:right">17,509</td>
+</tr>
+<tr>
+  <td>Expected kept triangles</td>
+  <td style="text-align:right"><strong>297,951</strong></td>
+</tr>
+<tr>
+  <td>Target metadata triangle count</td>
+  <td style="text-align:right"><strong>297,951</strong></td>
+</tr>
+<tr>
+  <td>Independently decoded target logical triangles</td>
+  <td style="text-align:right"><strong>297,951</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The degenerate-filter study used a <code>1e-7</code> source-area tolerance. This is the <strong>converter's audited filtering rule</strong>, not proof that every native EDF6 map filters its geometry with this exact tolerance.</p>
+<p>The candidate's compressed-mesh broadphase audit reported <strong>166,084 expected shape keys</strong>, exactly 166,084 reachable unique keys, and zero missing keys, extra keys, duplicate leaf keys or &gt;<code>1e-4</code> bound violations in that examined run. The audited MAD also contained <strong>289 physics bodies</strong> (287 static and 2 dynamic). Passing these checks establishes physical wire/graph consistency for this candidate; it is not equivalent to a full native Havok gameplay qualification.</p>
+<h2 id="shared-section-seams-were-preserved-despite-coordinate-rounding">Shared-section seams were preserved despite coordinate rounding</h2>
+<p>An independent <em>exact identity</em> audit examined <strong>20 named wall/corridor/collider records</strong>, including multi-section wall geometry. Every audited record reported <strong>zero seams exceeding 1 mm, 5 mm or 10 mm</strong>, with maximum measured shared-boundary discontinuity <strong>0</strong> under the audit's source-key comparison.</p>
+<p>This does not mean the target compressed positions equal source floating-point vertices exactly. The largest measured individual quantization errors included:</p>
+<table>
+<thead>
+<tr>
+  <th>Collision record</th>
+  <th style="text-align:right">Triangles</th>
+  <th style="text-align:right">Maximum decoded coordinate error (source units)</th>
+  <th style="text-align:right">Shared seam maximum</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>ya_edfroom_roomb.roomb_collider</code></td>
+  <td style="text-align:right">1,701</td>
+  <td style="text-align:right">0.0458995</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td><code>ya_edfroom_rooma.rooma_collider</code></td>
+  <td style="text-align:right">966</td>
+  <td style="text-align:right">0.0276907</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td><code>ya_edfroom_corridor_slope.side_wall</code></td>
+  <td style="text-align:right">144</td>
+  <td style="text-align:right">0.0225413</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td><code>ya_edfroom_corridor.side_wall</code></td>
+  <td style="text-align:right">144</td>
+  <td style="text-align:right">0.0217197</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td><code>ya_edfroom_corridor_r.side_wall</code></td>
+  <td style="text-align:right">164</td>
+  <td style="text-align:right">0.0210661</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong> the compressed coordinates are quantized; however, vertices that are supposed to represent the same seam remained co-located under the measured source-key identity relation. A nonzero source-to-target error is not by itself an opening in the wall. Conversely, this localized metric does not guarantee every triangle in every map is topologically or physically correct.</p>
+<h2 id="independent-in-game-observation">Independent in-game observation</h2>
+<p>In the affected EDFROOM/DM019 scene, characters <strong>could not walk through the tested wall</strong> and spider web projectiles <strong>hit the wall rather than penetrating it</strong>. Some spiders still aimed/fired <em>toward</em> allied NPCs on the far side. A later controlled high-only streaming-link change did <strong>not</strong> remove that AI behavior.</p>
+<p>This makes the following explanation unsupported: <em>“Spiders attack NPCs through the wall because the collision exporter created a gap.”</em> The surviving candidate explanations belong to AI-vs-AI target selection, perception/LOS queries, agent-specific navigation and target routing; none was conclusively identified in the retained runtime experiment.</p>
+<p>See <a href="maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">physical wall versus AI targeting</a> and <a href="edf5-edf6-hkt-coarse-graph-clearance-and-half16-encoding.html">navigation graph and clearance data</a>.</p>
+<p><strong>Source evidence:</strong> <code>EDFROOM_MAD_FILTERED_CONSERVATION_2026-08-25.json</code>, <code>EDFROOM_MAD_WALL_SEAM_EXACT_AUDIT_2026-08-25.json</code>, <code>EDFROOM_MAD_BROADPHASE_2026-08-25.json</code>, <code>EDFROOM_MAD_WIRE_2026-08-25.json</code>, and <code>EDFROOM_AI_WALL_RUNTIME_OBSERVATION_2026-08-25.json</code> under <code>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/</code>. All metrics are bound to the specific source/converted collision corpus.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/EDFROOM_MAD_FILTERED_CONSERVATION_2026-08-25.json</li><li>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/runtime/EDFROOM_AI_WALL_RUNTIME_OBSERVATION_2026-08-25.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#full-controlled-collision-inventory">Full controlled collision inventory</a><a href="#shared-section-seams-were-preserved-despite-coordinate-rounding">Shared-section seams were preserved despite coordinate rounding</a><a href="#independent-in-game-observation">Independent in-game observation</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-edfroom-mad-wall-quantization-and-triangle-conservation"};</script><script src="../assets/site.js" defer></script></body></html>

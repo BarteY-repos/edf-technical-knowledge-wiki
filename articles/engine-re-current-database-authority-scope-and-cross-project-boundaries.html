@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Engine binary research: observed functions and limits The retained EDF6 engine-binary analysis has its strongest source-backed coverage in weapon fire, projecti"><title>EDF6 binary semantics: weapon fire, network reliability and exact scope | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 binary semantics: weapon fire, network reliability and exact scope</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled + Exact native</div><div id="articleBody"><p>The retained EDF6 engine-binary analysis has its strongest source-backed coverage in weapon fire, projectile replication, network transport and Sandlot reliability. These are bounded observations, not a complete model of every renderer, resource loader, navigation system or AI class.</p>
+<h2 id="studied-binary-identity-and-research-coverage">Studied binary identity and research coverage</h2>
+<p>Current retained package:</p>
+<pre><code class="language-text">EDF6_ENGINE_RE_R17_2026-09-29.zip
+SHA-256: 93419d55b395c9452e1b23fbccdb37baba3cdb9c4c63f71bac5e31e809e86784
+</code></pre>
+<p>Canonical EDF6 runtime binary used by this database:</p>
+<pre><code class="language-text">EDF.dll
+SHA-256: 0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916
+</code></pre>
+<p>R17 retained:</p>
+<table>
+<thead>
+<tr>
+  <th>Database class</th>
+  <th style="text-align:right">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Semantic symbols</td>
+  <td style="text-align:right">336</td>
+</tr>
+<tr>
+  <td>Structure fields</td>
+  <td style="text-align:right">145</td>
+</tr>
+<tr>
+  <td>Exact-address claims</td>
+  <td style="text-align:right">330</td>
+</tr>
+<tr>
+  <td>Semantic corrections</td>
+  <td style="text-align:right">40</td>
+</tr>
+<tr>
+  <td>Exact-site signatures</td>
+  <td style="text-align:right">2,097</td>
+</tr>
+<tr>
+  <td>Function fingerprints</td>
+  <td style="text-align:right">1,361</td>
+</tr>
+</tbody>
+</table>
+<p>Exact RVAs are therefore <strong>build-specific evidence</strong>. Reuse a semantic function only after confirming the target binary identity or independently relocating it by signature/RTTI/xrefs.</p>
+<h2 id="what-engine-re-directly-establishes">What Engine RE directly establishes</h2>
+<h3 id="weapon-fire-direction-is-not-ordinary-actor-orientation">Weapon-fire direction is not ordinary actor orientation</h3>
+<p>The recovered fire chain shows a dedicated per-shot transform path sourced from the weapon muzzle.</p>
+<p>Key retained sites include:</p>
+<pre><code class="language-text">sender 0x694910 -&gt; per-shot entry+0x50 transform
+receiver 0x692540 -&gt; restores that transform before projectile creation
+common spread builder 0x691560
+</code></pre>
+<p><code>Weapon+0xBC8</code> RNG state can also be transmitted/restored before spread on the relevant paths. The resulting projectile transform seeds the replicated Bullet state rather than merely inheriting Soldier world orientation.</p>
+<p>Implementation consequence: fixing shot direction by repeatedly forcing actor orientation is the wrong abstraction when the divergence is in weapon/projectile creation state.</p>
+<p>See <a href="engine-re-%26-networking-weapon-fire-projectile-direction-authority.html">Weapon fire and projectile direction authority</a>.</p>
+<h3 id="networkbullet-selector-state-has-bounded-semantics">NetworkBullet selector state has bounded semantics</h3>
+<p>The selector work distinguishes current spatial publication, contact-frame state and missile collision/contact records instead of treating the entire projectile as one opaque synchronized blob.</p>
+<p>This is important because later class-internal behavior may depend on state that is <strong>not present in any selector payload</strong>. A correctly delivered selector cannot reconstruct a field that was never serialized.</p>
+<p>See <a href="engine-re-%26-networking-networkbullet-selector-contact-and-state-boundaries.html">NetworkBullet selector contact and state boundaries</a>.</p>
+<h3 id="shipping-reliability-is-above-eos">Shipping reliability is above EOS</h3>
+<p>Normal NetworkBullet selector0/1/2 traffic uses Sandlot's retained reliability path even though physical delivery ultimately uses an EOS P2P <code>UnreliableUnordered</code> wrapper.</p>
+<p>Recovered retained path:</p>
+<pre><code class="language-text">mode0 -&gt; 0x12C2DE0 -&gt; retained-record builder 0x12D0AC0
+DATA 0x1200
+ACK  0x1300
+</code></pre>
+<p>RTTI identifies the retained machinery as <code>eos::packet::Controller::ReliableBuffer</code>, <code>ReliableInfo</code> and <code>ReliableMgr</code>.</p>
+<p>Observed semantics include:</p>
+<ul>
+<li>per-record sequence identity;</li>
+<li>retained payload bytes;</li>
+<li>sent-once state;</li>
+<li>retry threshold and last-send QPC time;</li>
+<li>initial retry threshold of 700 ms;</li>
+<li>+1000 ms threshold growth after resend;</li>
+<li><code>ReliableMgr+0x98</code> fault/retry condition once the threshold grows beyond 7000 ms;</li>
+<li>receiver sequence deduplication;</li>
+<li>ACK emission even for a duplicate DATA packet;</li>
+<li>ACK retirement of the sender's matching pending record;</li>
+<li>receiver dedupe aging on roughly a 40-second scale.</li>
+</ul>
+<p>Therefore one transient physical EOS packet loss is not, by itself, sufficient to explain a permanently missing normal selector update while the Sandlot reliable session remains healthy.</p>
+<p>See <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">Sandlot RUDP and reconnect lifecycle</a>.</p>
+<h3 id="reliability-cannot-repair-omitted-projectile-internal-state">Reliability cannot repair omitted projectile-internal state</h3>
+<p>R14-R17 leave concrete unsynchronized/internal-state candidates for classes such as:</p>
+<ul>
+<li><code>FlameBullet02</code> motion scalars;</li>
+<li><code>LightningBullet01</code> per-projectile RNG/path state;</li>
+<li><code>SolidExpBullet01</code> detonation countdown.</li>
+</ul>
+<p>The next binary frontier is therefore a <strong>minimal initial seed/state parity surface</strong>, not generic per-frame replication of every projectile field.</p>
+<h2 id="runtime-module-boundary-across-edf5-and-edf6">Runtime module boundary across EDF5 and EDF6</h2>
+<p>For cross-generation binary comparison, the useful main-runtime pair is:</p>
+<pre><code class="language-text">EDF5.exe &lt;-&gt; EDF6/EDF.dll
+</code></pre>
+<p>EDF6's small <code>EDF6.exe</code> is not the equivalent home for most gameplay logic that lived in the EDF5 executable. This matters whenever a cross-version search appears to show that a function vanished.</p>
+<p>See <a href="engine-re-edf5-edf6-runtime-binary-architecture.html">EDF5 vs EDF6 runtime binary architecture</a>.</p>
+<h2 id="navigation-and-ai-current-documentation-boundary">Navigation and AI: current documentation boundary</h2>
+<p>This bounded binary sample does <strong>not</strong> justify a broad statement such as &quot;EDF6 navigation or AI is fully reverse-engineered.&quot; Evidence about those areas comes from:</p>
+<ul>
+<li>exact native and reconstructed HKT/NVMD evidence;</li>
+<li>mission API and route semantics;</li>
+<li>source-format observations of map and mission resources;</li>
+<li>EDF4.1→EDF6 gameplay-fidelity comparisons;</li>
+<li>targeted binary/runtime observations where they exist.</li>
+</ul>
+<p>No complete <code>NavManager</code>/<code>AIManager</code> type contract follows merely from an incomplete binary survey.</p>
+<p>Useful entries:</p>
+<ul>
+<li><a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">NAV HKT/NVMD compatibility versus native rebake</a></li>
+<li><a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">EDF4.1 native geometry, MAPO binding and R1D NAV</a></li>
+<li><a href="missions-%26-scripting-r37-control-flow-dataflow-api-parity.html">Mission R37 control-flow/dataflow/API parity</a></li>
+</ul>
+<h2 id="resource-loading-and-renderer-current-documentation-boundary">Resource loading and renderer: current documentation boundary</h2>
+<p>Likewise, do not fabricate a single universal resource-loader or renderer object model from current Engine RE coverage.</p>
+<p>The useful recovered contracts are distributed by format/path:</p>
+<ul>
+<li>CPK/TOC/CRILAYLA/VFS resource lookup in the container documentation;</li>
+<li>RAB/CMPL/MARC resource packaging in the archive documentation;</li>
+<li>MDB material and vertex ABI in model/material articles;</li>
+<li>FieldRender local-slot and projected-texture transport in the map articles;</li>
+<li>build-specific native WinMM import and MissionMgr resource-load observations.</li>
+</ul>
+<p>That is currently more actionable and better evidenced than an invented top-down class diagram.</p>
+<h2 id="interpretation-rules">Interpretation rules</h2>
+<ol>
+<li>Verify canonical binary identity before applying exact Engine RE RVAs.</li>
+<li>Prefer semantic fingerprints/RTTI/xrefs when moving a finding to a different build.</li>
+<li>Keep projectile creation state separate from ordinary actor orientation.</li>
+<li>Keep physical EOS delivery separate from Sandlot's retained reliability semantics.</li>
+<li>Do not claim reliability repairs state absent from serialized payloads.</li>
+<li>Do not attribute map/NAV/Havok behaviour to this binary survey unless an exact native site in the surveyed build supports the claim.</li>
+<li>When a subsystem lacks a recovered runtime class model, document the exact format/API/runtime contract that <strong>is</strong> known instead of inventing class names or layouts.</li>
+</ol>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p><strong>Exact native/binary:</strong> current R17 database identities, RVAs/signatures for the canonical EDF6 <code>EDF.dll</code>, RTTI-backed reliable transport types and reconstructed fire/projectile paths.</p>
+<p><strong>Reconciled:</strong> format- and subsystem-specific evidence must retain its original origin, build and test scope.</p>
+<p><strong>Unresolved:</strong> a complete renderer/resource-loader/navigation/AI class map is not established by R17; the minimal seed/state parity repair for the remaining projectile classes is also still open.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6 Engine RE R17 current authority and delivery/loss-recovery checkpoint</li><li>EDF6 Engine RE R8 fire-direction checkpoint</li><li>Current cross-project reconciled wiki authority</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#studied-binary-identity-and-research-coverage">Studied binary identity and research coverage</a><a href="#what-engine-re-directly-establishes">What Engine RE directly establishes</a><a href="#weapon-fire-direction-is-not-ordinary-actor-orientation">　Weapon-fire direction is not ordinary actor orientation</a><a href="#networkbullet-selector-state-has-bounded-semantics">　NetworkBullet selector state has bounded semantics</a><a href="#shipping-reliability-is-above-eos">　Shipping reliability is above EOS</a><a href="#reliability-cannot-repair-omitted-projectile-internal-state">　Reliability cannot repair omitted projectile-internal state</a><a href="#runtime-module-boundary-across-edf5-and-edf6">Runtime module boundary across EDF5 and EDF6</a><a href="#navigation-and-ai-current-documentation-boundary">Navigation and AI: current documentation boundary</a><a href="#resource-loading-and-renderer-current-documentation-boundary">Resource loading and renderer: current documentation boundary</a><a href="#interpretation-rules">Interpretation rules</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-current-database-authority-scope-and-cross-project-boundaries"};</script><script src="../assets/site.js" defer></script></body></html>

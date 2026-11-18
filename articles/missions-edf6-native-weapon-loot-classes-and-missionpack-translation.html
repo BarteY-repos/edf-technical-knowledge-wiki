@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 WEAPONTABLE.P8: loot classes versus MissionPack identifiers EDF6 weapon drop classification does not use custom mission-pack numbers as the loot-class valu"><title>EDF6 weapon loot classes: `WEAPONTABLE.P8` and MissionPack identity | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Loot and mission identity</div><h1>EDF6 weapon loot classes: `WEAPONTABLE.P8` and MissionPack identity</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Loot and mission identity</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived static analysis and bounded modded-game runtime evidence, scoped per case</div><div id="articleBody"><p>EDF6 weapon drop classification does <strong>not</strong> use custom mission-pack numbers as the loot-class values. In the retained binary/mission compatibility research, <code>WEAPONTABLE.P8</code> used three native loot classes:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">P8 loot class</th>
+  <th>Observed native role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>Base-game weapon drop class</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>DLC1 weapon drop class</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>DLC2 weapon drop class</td>
+</tr>
+</tbody>
+</table>
+<p>For the tested <strong>EDF5 content hosted in custom EDF6 mission packs</strong>, the required correspondence was:</p>
+<table>
+<thead>
+<tr>
+  <th>Custom content pack</th>
+  <th style="text-align:right">Loot class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MissionPack03</code> (base EDF5 content)</td>
+  <td style="text-align:right"><code>0</code></td>
+</tr>
+<tr>
+  <td><code>MissionPack04</code> (EDF5 DLC1 content)</td>
+  <td style="text-align:right"><code>1</code></td>
+</tr>
+<tr>
+  <td><code>MissionPack05</code> (EDF5 DLC2 content)</td>
+  <td style="text-align:right"><code>2</code></td>
+</tr>
+</tbody>
+</table>
+<p>The pack identifier (<code>03</code>/<code>04</code>/<code>05</code>) and native class (<code>0</code>/<code>1</code>/<code>2</code>) serve <strong>different roles</strong>. The native loot class is not necessarily inferable by truncating the pack number, and this translation is not a general rule for arbitrary MissionPacks.</p>
+<h2 id="observed-in-game-discriminator">Observed in-game discriminator</h2>
+<p>The retained modded-game MP05/DLC2 test admitted P8=2 weapon rows at the expected late-game progression levels. That test supported the class translation for the <strong>tested installation</strong>, not the behavior of every stock/modified EDF6 build or a global mission-pack namespace policy.</p>
+<h2 id="when-this-distinction-matters">When this distinction matters</h2>
+<p>A mission can compile, reach the first frame, spawn enemies and award boxes while producing the wrong weapon family. Diagnosing that case requires separating:</p>
+<ol>
+<li>the active game's logical mission/content pack;</li>
+<li>its associated native <code>WEAPONTABLE.P8</code> loot class;</li>
+<li>the weapon level/progression conditions of the mission;</li>
+<li>any modded loader's custom mapping, which is <strong>not</strong> equivalent to stock behavior.</li>
+</ol>
+<p>For MissionPack LIST/config lookup and save identity, see <a href="edf6-native-missionpack-mode-and-lobby-identity.html">native MissionPack ID semantics</a>. For resource table parity, see <a href="missions-edf5-indexed-resource-parity-evidence.html">MissionPack LIST/TXT/image evidence</a>.</p>
+<h2 id="native-candidate-filter-and-observed-dlc2-rewards">Native candidate filter and observed DLC2 rewards</h2>
+<p>In the examined EDF6 binary, <code>WEAPONTABLE.P8=0</code> passes the class check for any evaluated pack. Nonzero values must match the active <em>logical</em> pack ID in the original candidate path; <strong>the class gate precedes the level-range gate</strong>. As a result, a DLC1-class pool can include <code>P8=0</code> and <code>P8=1</code>, while DLC2-class pools can include <code>P8=0</code> and <code>P8=2</code>. The additional DLC rows are not automatically available merely because a mission's reward level overlaps their levels.</p>
+<p>An <strong>instrumented modified EDF6 runtime</strong> running a custom MP09 test explicitly mapped to DLC2 class 2 recorded <strong>110 <code>P8=2</code> candidates</strong>, <strong>34 newly admitted rows</strong> and two actual Lv 107 Air Raider rewards: <strong>N9 Eros Vulture ZAM</strong> and <strong>Gigantocopter 3 Delta</strong>. The source acceptance report does not demonstrate a Lv 110+ drop or native unmodified MP09 DLC2 behavior. For the exact binary path, <code>P5/P8</code> decoded offsets and evidence distinctions see <a href="edf6-weapon-drop-filtering-p8-level-window-and-dlc2-runtime.html">P8 candidate filtering and runtime test</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_LOOT/EDF5_EDF6_DLC_LOOT_R3C_RUNTIME_ACCEPTANCE_2026-10-05.md</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#observed-in-game-discriminator">Observed in-game discriminator</a><a href="#when-this-distinction-matters">When this distinction matters</a><a href="#native-candidate-filter-and-observed-dlc2-rewards">Native candidate filter and observed DLC2 rewards</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf6-native-weapon-loot-classes-and-missionpack-translation"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 map collision: how a placed prop becomes solid EDF5 looks up many placed prop collision resources using the model or structure name, with a .hkt suffix. A "><title>EDF5 map HKT: model-name collision lookup, rigid-body pose and layer categories | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Maps / collision</div><h1>EDF5 map HKT: model-name collision lookup, rigid-body pose and layer categories</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Maps / collision</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R132 test</div><div id="articleBody"><p>EDF5 looks up many placed prop collision resources using the <strong>model or structure name</strong>, with a <code>.hkt</code> suffix. A map also has its own <code>collision.hkt</code>, but a placed model's resource path and its world transform have to be handled separately.</p>
+<h2 id="two-independent-conditions-source-resource-and-a-collision-role">Two independent conditions: source resource and a collision role</h2>
+<p><code>Preload_Model</code> reads the object-definition name, derives its stem, and conditionally requests <code>&lt;stem&gt;.hkt</code> when a definition field at <code>+0x10</code> indicates a collision asset. The same suffix is used by the FMEX, animated-model and structure preload paths. The source counted 1,309/1,317 inspected definition rows with value <code>-1</code> and eight with <code>0</code>; <strong>interpreting this as a collision-presence switch is an inference</strong>, not an officially named file field.</p>
+<p>For a qualifying HKT, the engine builds Havok rigid-body information, assigns a collision filter, poses the body from the MAPB world matrix, and associates it with the object's placement index. Recorded default physics data include friction-like values <strong>0.8</strong> and <strong>0.5</strong>; the researcher inferred the fixed-body motion type from the stored enum. No universal collision-shape identity can be inferred from a matching MDB file name alone.</p>
+<h2 id="observed-layer-selection-by-definition-category">Observed layer selection by definition category</h2>
+<table>
+<thead>
+<tr>
+  <th>Object definition category</th>
+  <th style="text-align:right">Observed collision layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>3</code></td>
+  <td style="text-align:right"><code>17</code> (<code>0x11</code>)</td>
+</tr>
+<tr>
+  <td><code>2</code>, <code>4</code>, <code>5</code>, <code>6</code></td>
+  <td style="text-align:right"><code>20</code> (<code>0x14</code>)</td>
+</tr>
+<tr>
+  <td><code>10</code></td>
+  <td style="text-align:right">Water path, <strong>no ordinary body</strong> built here</td>
+</tr>
+<tr>
+  <td>Other categories</td>
+  <td style="text-align:right"><code>15</code> (<code>0x0F</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>For composite <code>.mosb</code> structures, the native code merges multiple <code>.hkt</code> parts into a fixed body with local part transforms. Generated trees use their own capsule collision, often on layer 20. The numeric layer does not alone establish every permitted pairwise collision: the <strong>filter matrix</strong> is a separate piece of Havok state.</p>
+<h2 id="limits-of-the-evidence">Limits of the evidence</h2>
+<p>These findings come from EDF5's object-preload functions and a 24-map tally. The source did not read all layer-to-layer pair rules in the same pass. Do not substitute EDF6's <code>hknp</code> material/layer semantics into EDF5's <code>hkp</code> bodies simply because the class or object name is familiar.</p>
+<p><strong>Attribution:</strong> EDF Knowledge Hub, <code>edf5/map-placement.md</code>, <code>edf5-map-collision-by-name</code>, <code>edf5-map-collision-pose</code>, <code>edf5-map-collision-layers</code>; build <code>steam-5d11de53</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/map-placement.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-independent-conditions-source-resource-and-a-collision-role">Two independent conditions: source resource and a collision role</a><a href="#observed-layer-selection-by-definition-category">Observed layer selection by definition category</a><a href="#limits-of-the-evidence">Limits of the evidence</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-map-hkt-body-construction-collision-layer-map"};</script><script src="../assets/site.js" defer></script></body></html>

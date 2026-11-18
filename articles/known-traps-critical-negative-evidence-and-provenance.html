@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Distinct EDF data families: common false equivalences EDF data boundary Observed limitation Ordinary MDB versus FieldRender Do not apply FMEP terrain requiremen"><title>EDF format differences that should not be generalized | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-conversion.html">Conversion</a></div><h1>EDF format differences that should not be generalized</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Cross-game Conversion</span><span class="chip">Conversion</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><table>
+<thead>
+<tr>
+  <th>EDF data boundary</th>
+  <th>Observed limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ordinary MDB versus FieldRender</td>
+  <td>Do not apply FMEP terrain requirements to ordinary static/skinned MDB renderers.</td>
+</tr>
+<tr>
+  <td>Map RMPA versus mission RMPA</td>
+  <td>Treat as independent subsystems with separate version/semantic rules.</td>
+</tr>
+<tr>
+  <td>Static source interpretation versus in-game behaviour</td>
+  <td>Parsing or recompiling a file does not prove that the target game consumed it correctly.</td>
+</tr>
+<tr>
+  <td>Shader migration</td>
+  <td>Shader-name-only migration is not sufficient; material ABI, vertex declarations, parameters, samplers and textures matter.</td>
+</tr>
+<tr>
+  <td>Model/animation versions</td>
+  <td>Header/version bump is not structural conversion.</td>
+</tr>
+<tr>
+  <td><code>.trb</code> and <code>.mdx</code></td>
+  <td>Do not globally rename extension identities.</td>
+</tr>
+<tr>
+  <td>FPR masks</td>
+  <td>No universal channel shuffle is established.</td>
+</tr>
+<tr>
+  <td>Legacy compositor</td>
+  <td><code>SND_CHARA_BASIC</code> and related semantics remain unresolved.</td>
+</tr>
+<tr>
+  <td>Modded game versus original EDF</td>
+  <td>A community plugin or loader can establish an extension behavior, not an unmodified Sandlot engine feature.</td>
+</tr>
+<tr>
+  <td>EDF5_NEW_SCRIPT identification</td>
+  <td>Distinguish source script generation and original mission assembly provenance before attributing a behaviour to the native title.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidence level:</strong> Reconciled domain boundaries. Exact per-format details live in the linked domain articles.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF_FULL_KNOWLEDGE_WIKI/EDF_4_1_TO_6_COMPLETE_KNOWLEDGE_WIKI_MASTER_SPEC_2026-11-13.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"known-traps-critical-negative-evidence-and-provenance"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 → EDF6 mission numeric globals: ten identified scalar type mismatches What fails: EDF5 source MISSION.BVM distinguishes floating-point scalars from integer"><title>EDF5→EDF6 mission scalars: ten float/global cases and NPC health | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / BVM and AngelScript numeric type semantics</div><h1>EDF5→EDF6 mission scalars: ten float/global cases and NPC health</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">BVM and AngelScript numeric type semantics</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived; separates static evidence and the limited modded-runtime results</div><div id="articleBody"><p><strong>What fails:</strong> EDF5 source <code>MISSION.BVM</code> distinguishes floating-point scalars from integer counters. In an earlier EDF5→EDF6 <code>MISSION.AC</code> reconstruction, some global variables holding fractional values were declared <code>int</code> (or remained ambiguous <code>Object</code> during inference). A fractional <code>0.8</code> or <code>0.9</code> then became integer <code>0</code> <em>before</em> being passed to allied-unit, enemy or generator scale parameters. This is a gameplay-visible type error, not a mere formatting difference.</p>
+<h2 id="source-and-evidence-boundary">Source and evidence boundary</h2>
+<p>An independently regenerated <strong>141/141-source-mission</strong> census compared the reconstructed EDF5 <code>BVM</code> semantics against the effective early compatibility corpus. Exactly <strong>10</strong> missions had global scalar declarations that needed <code>float</code> rather than <code>int</code>. The source reconstruction and static syntax checks passed; <strong>this was not a ten-mission in-game acceptance sweep</strong>. Later conversion builds may differ from this particular early baseline.</p>
+<p>The inferred target types were:</p>
+<ul>
+<li>Assignments containing <em>only integer-valued numeric literals</em>: <code>int</code>.</li>
+<li>Numeric-only assignment sets containing at least one fractional (<code>.</code>, <code>f</code>, exponent) literal: <code>float</code>.</li>
+<li>Assignments with nonnumeric/object-like values: remain <code>Object</code> until a better semantic type is proven.</li>
+</ul>
+<p>The prior heuristic incorrectly handled mixed branches such as <code>1</code> and <code>0.8f</code>. A variable can be declared incorrectly even when its current path happens to use <code>1.0f</code>; distinguish <strong>type drift</strong> from a <strong>proven visible symptom</strong>.</p>
+<h2 id="complete-ten-mission-global-census">Complete ten-mission global census</h2>
+<table>
+<thead>
+<tr>
+  <th>Original mission (port pack)</th>
+  <th style="text-align:right">Display number</th>
+  <th>Incorrect global declaration</th>
+  <th>Source-meaningful effect and limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>M026</code> (MP03)</td>
+  <td style="text-align:right">29</td>
+  <td><code>friend_level</code></td>
+  <td><code>1.0</code> on lower difficulties; <code>0.8</code> on Hardest/Inferno. A wrong <code>int</code> yields <code>0</code> before <code>CreateFriend</code>/<code>CreateFriendSquad</code> on the latter difficulties</td>
+</tr>
+<tr>
+  <td><code>M042_5</code> (MP03)</td>
+  <td style="text-align:right">57</td>
+  <td><code>friend_level</code></td>
+  <td><code>0.9</code> below Hardest and <code>0.8</code> above; wrong <code>int</code> yields <code>0</code> on every difficulty</td>
+</tr>
+<tr>
+  <td><code>DM003_3</code> (MP04 / DLC1)</td>
+  <td style="text-align:right">DLC1 #13</td>
+  <td><code>friend_level</code></td>
+  <td><code>0.8</code> fed to multiple <code>CreateFriendSquad</code> calls; wrong <code>int</code> yields <code>0</code></td>
+</tr>
+<tr>
+  <td><code>DM023</code> (MP05 / DLC2)</td>
+  <td style="text-align:right">DLC2 #11</td>
+  <td><code>friend_level</code>, <code>enemy_level</code>, <code>enemy_dur</code></td>
+  <td>Allied level falls from <code>1.0</code> to <code>0.9</code>/<code>0.8</code> on higher difficulties; integer truncation can explain empty HP bars, ineffective healing and near-immediate allied deaths. Enemy level/durability typing also differs</td>
+</tr>
+<tr>
+  <td><code>M017</code> (MP03)</td>
+  <td style="text-align:right">—</td>
+  <td><code>friend_base_level</code></td>
+  <td>Source type is <code>float</code>, but the observed path uses <code>1.0</code>; <strong>no fractional truncation symptom inferred</strong></td>
+</tr>
+<tr>
+  <td><code>M039</code> (MP03)</td>
+  <td style="text-align:right">89</td>
+  <td><code>begaruta_level</code>, <code>tank_level</code>, <code>soldier_level</code></td>
+  <td>Source has fractional allied levels, but the earlier R7 global audit saw values overwritten by <code>1.0</code> before use; <strong>do not attribute a specific HP failure to these globals on R7 evidence alone</strong></td>
+</tr>
+<tr>
+  <td><code>M065</code> (MP03)</td>
+  <td style="text-align:right">68</td>
+  <td><code>generator_level</code></td>
+  <td>Fractional generator scale may truncate; this is an enemy/generator configuration case, not directly an allied HP bar issue</td>
+</tr>
+<tr>
+  <td><code>M069</code> (MP03)</td>
+  <td style="text-align:right">92</td>
+  <td><code>ufo_level</code></td>
+  <td>Fractional UFO scale may truncate; enemy scaling case</td>
+</tr>
+<tr>
+  <td><code>DM009</code> (MP05 / DLC2)</td>
+  <td style="text-align:right">—</td>
+  <td><code>g_generator_level</code></td>
+  <td>Observed source literal about <code>0.6</code> truncated to <code>0</code> in the affected AC</td>
+</tr>
+<tr>
+  <td><code>DM012</code> (MP05 / DLC2)</td>
+  <td style="text-align:right">—</td>
+  <td><code>g_level</code></td>
+  <td>Observed source literal about <code>0.4</code> truncated to <code>0</code> in the affected AC</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important separate M039 finding:</strong> A <em>later</em>, broader direct BVM→AC review found <strong>two <code>int</code> local variables</strong> forwarding fractional allied scales to nine NPC construction calls in the then-current <code>1.0.6</code> corpus. That is a <strong>different, later and stronger value-flow finding</strong> from the earlier global-variable audit. The R7 statement about globally declared <code>M039</code> variables must not negate the later local-variable finding. See <a href="missions-%26-scripting-direct-bvm-to-ac-141-mission-audit-and-value-flow-boundaries.html">the 141-mission direct value-flow review</a>.</p>
+<h2 id="why-dm023-matters">Why DM023 matters</h2>
+<p>In the source-derived <code>DM023</code> branches, the level multiplier is a real value: about <code>1.0</code> at lower levels of difficulty, <code>0.9</code> on Hardest and <code>0.8</code> on Inferno. When a variable carrying that multiplier is forced into an <code>int</code>, the caller may receive <code>0</code> instead of a fractional scale. A character may then appear to have no normal health budget even though the spawn succeeds. The enemy-level <code>1.2</code> on Inferno was also mistyped in an earlier branch. A mission reaching gameplay is not proof of correct difficulty scaling.</p>
+<h2 id="scripting-implications">Scripting implications</h2>
+<p>Treat float/int parity as <strong>end-to-end value flow</strong>: declaration → assignment under each difficulty → temporary locals → argument type at <code>CreateFriend</code>/<code>CreateFriendSquad</code> or generator construction. Count-based script audits will miss a numeric-value error when the same API calls are present on both sides. The later backward-layout switch audit is complementary: even correct floats cannot rescue a difficulty switch reconstructed into <code>if(0 == 3)</code> constant comparisons.</p>
+<p>The ten-name declaration-only repair was validated as a minimal syntactic change in the historical compatibility corpus (10/10), but does <strong>not</strong> establish current retail EDF6 behavior or end-to-end mission parity. For the distinct switch/branch issue see <a href="missions-edf5-bvm-backward-switch-parity.html">difficulty-switch reconstruction</a>.</p>
+<h2 id="source-provenance">Source provenance</h2>
+<p>Primary record: <code>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_GLOBAL_SCALAR_TYPING_CENSUS_R7_2026-09-27.md</code> (source <code>BVM</code>, 141 missions, exact ten-case ledger). The later <code>1.0.6</code> direct BVM-to-AC audit is higher authority for the subsequently identified <code>M039</code> <strong>local</strong> variable defect. This page records source-derived port semantics, not a claim that unmodified EDF6 has these bugs.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_GLOBAL_SCALAR_TYPING_CENSUS_R7_2026-09-27.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#source-and-evidence-boundary">Source and evidence boundary</a><a href="#complete-ten-mission-global-census">Complete ten-mission global census</a><a href="#why-dm023-matters">Why DM023 matters</a><a href="#scripting-implications">Scripting implications</a><a href="#source-provenance">Source provenance</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-to-edf6-float-global-typing-ten-mission-census"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="An ally&#39;s uniform is less precise than its configured weapon SGO EDF5&#39;s NPC soldier SGOs describe weapons in soldier_load_weapon, pointing to weapon/ and an Ai*"><title>EDF5 allied NPC soldiers: SGO weapon loadouts and role names | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Allied NPCs / weapons</div><h1>EDF5 allied NPC soldiers: SGO weapon loadouts and role names</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Allied NPCs / weapons</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5's NPC soldier SGOs describe weapons in <code>soldier_load_weapon</code>, pointing to <code>weapon/</code> and an <code>Ai*</code> weapon SGO. The source census lists <strong>22 carried NPC weapon definitions</strong>. Broad runtime classes are shared with player soldiers: <strong>AssultSoldier</strong> for Ranger-style AI, <strong>PaleWing</strong> for Wing Diver-style AI, and <strong>HeavyArmor</strong> for Fencers.</p>
+<table>
+<thead>
+<tr>
+  <th>SGO suffix/prefix</th>
+  <th>Interpreted NPC loadout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>_af</code></td>
+  <td>Assault rifle</td>
+</tr>
+<tr>
+  <td><code>_fl</code></td>
+  <td>Flamethrower</td>
+</tr>
+<tr>
+  <td><code>_rl</code></td>
+  <td>Rocket launcher</td>
+</tr>
+<tr>
+  <td><code>_sg</code></td>
+  <td>Shotgun</td>
+</tr>
+<tr>
+  <td><code>_sn</code></td>
+  <td>Sniper rifle</td>
+</tr>
+<tr>
+  <td>Fencer <code>_sc</code></td>
+  <td>Hand cannon</td>
+</tr>
+<tr>
+  <td>Fencer <code>_smc</code></td>
+  <td>Galion autocannon</td>
+</tr>
+<tr>
+  <td>Fencer <code>_ssg</code></td>
+  <td>Dexter shotgun</td>
+</tr>
+<tr>
+  <td>Fencer <code>_sp</code></td>
+  <td>Pile bunker / Spine Driver family</td>
+</tr>
+<tr>
+  <td>Wing Diver <code>_lance</code></td>
+  <td>Power Lance</td>
+</tr>
+<tr>
+  <td>Wing Diver <code>_lr</code></td>
+  <td>Mag Blaster family</td>
+</tr>
+<tr>
+  <td>Wing Diver <code>_izn</code></td>
+  <td>Lightning Bow</td>
+</tr>
+<tr>
+  <td>Wing Diver <code>_tb</code></td>
+  <td>Thunder Bowgun</td>
+</tr>
+<tr>
+  <td>Wing Diver <code>_ms</code></td>
+  <td>MONSTER</td>
+</tr>
+</tbody>
+</table>
+<p>Fencer definitions can carry <strong>two weapon definitions</strong>, including <code>AiHeavyShield01</code>; Grim Reaper variants additionally name <code>AiHeavyDash01</code>. <code>elite</code> corresponds to the Spriggan group, <code>_s_</code> to Sarge's squad, whose leader carries <code>AiSoldierLaserRifle02</code> (Blazer) from offline mission 78 onward in the studied script data.</p>
+<p>NPC weapon SGOs contain <strong>plain ammunition, damage and reload numbers rather than player weapon star arrays</strong>. The original source comparison with the Japanese NPC weapon table found matching values where provided, but also found erroneous English first-pass catalogue labels (e.g. shotgun Rangers called Fencers).</p>
+<p><strong>Sources:</strong> EDF Knowledge Hub <code>edf5/object-classes.md</code>, <code>edf5-npc-load-weapon</code>, <code>classes-player-vs-npc</code>, Japanese EDF5 NPC weapon table. Static source and community table corroboration; no new live NPC damage experiments.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-npc-soldier-loadouts-sgo-weapon-family-mapping"};</script><script src="../assets/site.js" defer></script></body></html>

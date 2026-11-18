@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 5 — Dead Ends (community source notes) This is a source-attributed research appendix, not a chronology or a replacement for topic reference pages. The obser"><title>EDF 5 — Dead Ends (community source notes) | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / <a href="docs-troubleshooting.html">Troubleshooting</a></div><h1>EDF 5 — Dead Ends (community source notes)</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Community Knowledge Hub</span><span class="chip">Troubleshooting</span></div><div class="referencebadge">Source-backed research / case study · Contributed research; per-claim static, verified, unverified; not independently re-tested</div><div id="articleBody"><p>This is a <strong>source-attributed research appendix</strong>, not a chronology or a replacement for topic reference pages. The observations were contributed in the <em>EDF Knowledge Hub</em> export, snapshot <strong>2026-11-14</strong>, revision <code>54f89cd</code>, compiled by <strong>novae (ajane)</strong>.</p>
+<p>Read each statement with its evidence grade and exact build. <strong>Verified</strong> means a reported game test, <strong>static</strong> means reverse engineering or source inspection without a reported game test, and <strong>unverified</strong> is a hypothesis. None of these observations was newly tested for this wiki release.</p>
+<h2 id="more-facts">More facts</h2>
+<h3 id="attempt-that-did-not-work-1">Attempt that did not work — 1</h3>
+<p><strong>Attempt:</strong> shrinking particle .dds sprite images</p>
+<p><strong>Why it failed / limitation:</strong> crude: the game draws the same sprite at very different sizes (a beehive vs. a giant walker's dirt clouds)</p>
+<p><strong>Suggested direction:</strong> a screen-space size cap per particle in ParticleRender (idea only, not built)</p>
+<p><strong>Source:</strong> user, novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-2">Attempt that did not work — 2</h3>
+<p><strong>Attempt:</strong> player+0x280 bit 0x10 as an invulnerability bit</p>
+<p><strong>Why it failed / limitation:</strong> it is the DEAD flag (set at 2DB7F0 when HP &lt;= 0)</p>
+<p><strong>Suggested direction:</strong> bit 1 (set_invincible)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-3">Attempt that did not work — 3</h3>
+<p><strong>Attempt:</strong> enlarging xgl_user_param only in the pixel shaders (shader packs v01-v03)</p>
+<p><strong>Why it failed / limitation:</strong> in game: heap corruption, crashes at start of missions with NPC tanks, on Retreat, at the drone mission-end fade (ntdll C0000374); static cause: 11 files also have vertex shaders binding xgl_user_param, so one effect reported two sizes for the same material cbuffer</p>
+<p><strong>Suggested direction:</strong> append the same parameters to every vertex shader that binds it (pack v04 / v05). The source records later in-game tests with pack v05 and no further crash, but never states the crash fixed</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-4">Attempt that did not work — 4</h3>
+<p><strong>Attempt:</strong> letting the camera pass MapObject_Fmex (PROP PASS bit 512, v19), then only steep Fmex contacts with |normal.y| &lt; 0.5 (v20)</p>
+<p><strong>Why it failed / limitation:</strong> verified in game: Fmex is the ground mesh (plus some baked-in props), so the camera sank under the ground; with the slope rule it flipped outside the level in caves and on steep slopes</p>
+<p><strong>Suggested direction:</strong> PROP MAX SIZE, pass only objects whose AABB width &lt;= 10 m (v21, not tested in game)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-5">Attempt that did not work — 5</h3>
+<p><strong>Attempt:</strong> letting the camera pass every MapObject_Model (v19/v20)</p>
+<p><strong>Why it failed / limitation:</strong> in game: MapObject_Model also builds big level pieces (underground base rooms, halls, exit ramp); passing them puts the camera outside the level or under the ground</p>
+<p><strong>Suggested direction:</strong> PROP MAX SIZE (v21, not tested in game)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-6">Attempt that did not work — 6</h3>
+<p><strong>Attempt:</strong> <code>ModelDebris</code> / <code>ModelDebrisManager</code> as the scenery-sink mechanism (session 1)</p>
+<p><strong>Why it failed / limitation:</strong> its tick is only an elapsed timer that jumps to cleanup; it is the debris-chunk system</p>
+<p><strong>Suggested direction:</strong> the CrashModel tick D7830 (layer 30 and impulses, physics-havok.md)</p>
+<p><strong>Source:</strong> novae (ajane), session 1 · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-7">Attempt that did not work — 7</h3>
+<p><strong>Attempt:</strong> searching for code references to Havok's <code>hkpDisableEntityCollisionFilter</code> to explain the sink (session 1)</p>
+<p><strong>Why it failed / limitation:</strong> zero direct references; inconclusive</p>
+<p><strong>Suggested direction:</strong> the collision-layer change in D7830 (layer 30 collides only with layer 0), user-confirmed with crates</p>
+<p><strong>Source:</strong> novae (ajane), session 1 · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-8">Attempt that did not work — 8</h3>
+<p><strong>Attempt:</strong> the <code>MapObjectDestroy</code>/<code>2</code>/<code>3</code>/<code>4</code> strings as destruction-effect code (session 1)</p>
+<p><strong>Why it failed / limitation:</strong> they are level-authoring instance names</p>
+<p><strong>Suggested direction:</strong> the MapObject class tick and vtable (map-objects.md)</p>
+<p><strong>Source:</strong> novae (ajane), session 1 · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-9">Attempt that did not work — 9</h3>
+<p><strong>Attempt:</strong> collecting crates after the fail screen appears (v08 sweep mode 2)</p>
+<p><strong>Why it failed / limitation:</strong> in game: crates collected while the result screen is up are neither shown nor kept</p>
+<p><strong>Suggested direction:</strong> sweep before the failed-result layout (MISSION FAILED banner, v23)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-10">Attempt that did not work — 10</h3>
+<p><strong>Attempt:</strong> mission-clear work in the <code>ApplyResult</code> script native (ClearHook 3E3168, v18-v20)</p>
+<p><strong>Why it failed / limitation:</strong> in game: crash after the fade; it runs after the mission is torn down, so the player pointer is stale</p>
+<p><strong>Suggested direction:</strong> <code>EndMission</code> 114BB0 (v21) or the MISSION CLEAR banner via <code>ShowLayout</code> 126EE0 (v22), both verified</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-11">Attempt that did not work — 11</h3>
+<p><strong>Attempt:</strong> vacuum flights timed to a fixed duration (SINK) (v10)</p>
+<p><strong>Why it failed / limitation:</strong> long durations need enormous launch speeds (60 s needs about 290 m/s up)</p>
+<p><strong>Suggested direction:</strong> arrival-based collection (v11)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-12">Attempt that did not work — 12</h3>
+<p><strong>Attempt:</strong> tuning vacuum speed against an idealized physics model (sessions 2-3)</p>
+<p><strong>Why it failed / limitation:</strong> in game: flights took 6-10 s; the engine clips crates to about 57 m/s and gravity is 14.7, not 9.8</p>
+<p><strong>Suggested direction:</strong> read the engine's own limits first, raise the per-body limit (v13, verified)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-13">Attempt that did not work — 13</h3>
+<p><strong>Attempt:</strong> re-solving the vacuum aim with a floored flight time each re-aim (v11 draft, v12 &quot;lagging&quot; rule)</p>
+<p><strong>Why it failed / limitation:</strong> the crate hovers g·T²/2 below the target (21 m at a 1.5 s floor, 176 m at T = 6 s), caught in simulation</p>
+<p><strong>Suggested direction:</strong> let the planned time count down</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-14">Attempt that did not work — 14</h3>
+<p><strong>Attempt:</strong> a shrink tied to the planned flight time or a distance window (v13-v16)</p>
+<p><strong>Why it failed / limitation:</strong> in game: crates shrank away 6-20 m before reaching the player at 50-100+ m/s</p>
+<p><strong>Suggested direction:</strong> shrink after the catch (absorb, v17, &quot;much closer to pleasing&quot;)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-15">Attempt that did not work — 15</h3>
+<p><strong>Attempt:</strong> switching to every-frame control in the last frames of a flight (v15 terminal guidance)</p>
+<p><strong>Why it failed / limitation:</strong> in game: close-range wobble; a change of cadence reads as a kink</p>
+<p><strong>Suggested direction:</strong> one steady re-aim cadence for the whole flight (v16)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-16">Attempt that did not work — 16</h3>
+<p><strong>Attempt:</strong> the per-difficulty byte table at E92AA4 as the loot-retention rule</p>
+<p><strong>Why it failed / limitation:</strong> it is not the retention rule</p>
+<p><strong>Suggested direction:</strong> the result tally 199120 and [0x125AB30]+0x4C (mission-flow.md)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-17">Attempt that did not work — 17</h3>
+<p><strong>Attempt:</strong> taking the global [0x125AB68] for the decal manager because creation wrappers pass it</p>
+<p><strong>Why it failed / limitation:</strong> it is a world/scene object with about 530 users</p>
+<p><strong>Suggested direction:</strong> confirm a singleton by its vtable/RTTI (<code>DecalManager</code>)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-18">Attempt that did not work — 18</h3>
+<p><strong>Attempt:</strong> finding an acid-splat count limit in the spawner 1B5850, <code>AcidBullet01</code>, <code>ClaySplashEffect</code> and <code>EffectLimitter</code></p>
+<p><strong>Why it failed / limitation:</strong> none found; the instant loss of old acid splats is still unexplained</p>
+<p><strong>Suggested direction:</strong> novae (ajane) test in lessons-blood-decals.md section 5 (huge OVERLAP_LIMIT and MAX_DECALS: if splats still vanish, the limit is outside the decal system)</p>
+<p><strong>Source:</strong> novae (ajane) · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-19">Attempt that did not work — 19</h3>
+<p><strong>Attempt:</strong> scaling the blood spray's <code>far</code> where it is loaded (<code>1AFB46</code>, BLOOD_REACH v03-v06)</p>
+<p><strong>Why it failed / limitation:</strong> it also pulls the projector back and feeds the rank, so splats grew wider; novae (ajane) noticed</p>
+<p><strong>Suggested direction:</strong> hook only the uses you mean, here the ray (<code>1AFB4F</code>..) and the far plane (<code>1AFD57</code>) separately (v07); list every use of a value before scaling it (decals.md#blood-spray-far)</p>
+<p><strong>Source:</strong> novae (ajane), lessons section 4 · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-20">Attempt that did not work — 20</h3>
+<p><strong>Attempt:</strong> editing the generator by string replacement</p>
+<p><strong>Why it failed / limitation:</strong> one replacement silently deleted four settings, another failed to match and dropped an anchor</p>
+<p><strong>Suggested direction:</strong> keep tests that check every setting loads and every anchor resolves, and rerun the whole suite after every edit</p>
+<p><strong>Source:</strong> novae (ajane), lessons section 4 · <strong>Build:</strong> steam-5d11de53</p>
+<h3 id="attempt-that-did-not-work-21">Attempt that did not work — 21</h3>
+<p><strong>Attempt:</strong> an Alt+Shift hotkey chord</p>
+<p><strong>Why it failed / limitation:</strong> Alt+Shift is Windows' keyboard-language switch</p>
+<p><strong>Suggested direction:</strong> Alt plus a letter key (v08/v09 use Alt+N/J/M/K)</p>
+<p><strong>Source:</strong> novae (ajane), HANDOFF lesson 6 · <strong>Build:</strong> steam-5d11de53</p>
+<h2 id="interpretation-boundary">Interpretation boundary</h2>
+<p>These are contributor findings for named builds and systems. Refer to the main documentation for version differences and for later corrections. Relative RVAs are not automatically valid on another patch or store version.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip, revision 54f89cd</li><li>novae (ajane), original cited third-party authors shown per claim</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#more-facts">More facts</a><a href="#attempt-that-did-not-work-1">　Attempt that did not work — 1</a><a href="#attempt-that-did-not-work-2">　Attempt that did not work — 2</a><a href="#attempt-that-did-not-work-3">　Attempt that did not work — 3</a><a href="#attempt-that-did-not-work-4">　Attempt that did not work — 4</a><a href="#attempt-that-did-not-work-5">　Attempt that did not work — 5</a><a href="#attempt-that-did-not-work-6">　Attempt that did not work — 6</a><a href="#attempt-that-did-not-work-7">　Attempt that did not work — 7</a><a href="#attempt-that-did-not-work-8">　Attempt that did not work — 8</a><a href="#attempt-that-did-not-work-9">　Attempt that did not work — 9</a><a href="#attempt-that-did-not-work-10">　Attempt that did not work — 10</a><a href="#attempt-that-did-not-work-11">　Attempt that did not work — 11</a><a href="#attempt-that-did-not-work-12">　Attempt that did not work — 12</a><a href="#attempt-that-did-not-work-13">　Attempt that did not work — 13</a><a href="#attempt-that-did-not-work-14">　Attempt that did not work — 14</a><a href="#attempt-that-did-not-work-15">　Attempt that did not work — 15</a><a href="#attempt-that-did-not-work-16">　Attempt that did not work — 16</a><a href="#attempt-that-did-not-work-17">　Attempt that did not work — 17</a><a href="#attempt-that-did-not-work-18">　Attempt that did not work — 18</a><a href="#attempt-that-did-not-work-19">　Attempt that did not work — 19</a><a href="#attempt-that-did-not-work-20">　Attempt that did not work — 20</a><a href="#attempt-that-did-not-work-21">　Attempt that did not work — 21</a><a href="#interpretation-boundary">Interpretation boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"kh-edf5-dead-ends"};</script><script src="../assets/site.js" defer></script></body></html>

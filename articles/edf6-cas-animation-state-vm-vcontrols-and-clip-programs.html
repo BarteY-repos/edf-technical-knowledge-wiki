@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 animation state machines: how CAS controls poses and movement The EDF6 animation system is more than a list of named clips. A .CAS file combines an embedde"><title>EDF6 CAS animation controller: VControls, states, transition programs and IK | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Animation and state machines</div><h1>EDF6 CAS animation controller: VControls, states, transition programs and IK</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Animation and state machines</span></div><div class="referencebadge">Technical reference · Source-derived; evidence grades and build restrictions described in article; no new EDF runtime</div><div id="articleBody"><p>The EDF6 animation system is more than a list of named clips. A <code>.CAS</code> file combines an <strong>embedded CANM6 clip container</strong>, independent animation groups, named controller variables and compact programs that assemble the pose each update. This account is based on exact-build code analysis and a multi-file parse census, not on new in-game animation testing.</p>
+<h2 id="container-and-named-state-identity">Container and named state identity</h2>
+<p>In the studied Steam build (<code>steam-678ccb46</code>) a CAS header is 0x30 bytes. All 323 CAS files in the original sampling subset used version <strong>516 (<code>0x204</code>)</strong>, with an embedded CANM, TControls, VControls, animation groups and bone-name references. The EDF6 instruction format is <strong>13 32-bit words (52 bytes)</strong>, unlike the earlier 9-word form in CAS 512. Strings are terminated UTF-16LE; most record-local offsets are relative to the referring record.</p>
+<p>A <strong>TControl</strong> is a 12-byte, named ordered sequence of CANM clips, not a bone channel. Its length is the sum of clip durations; sampled files included valid empty TControls. The <strong>VControl</strong> records (20 bytes) supply float, int or matrix variables; the game finds inputs by name, including <code>v_move_x</code>, <code>v_aim_target</code> and weapon- or vehicle-grip IK targets. Changing a variable name can sever the engine's intended input connection. A separate CAS BoneList resolves node names against the model; a missing node can produce an initialization message.</p>
+<p>Each <strong>AnmGroup</strong> owns its own node/state list. Code selects groups and nodes by name and changes them using <code>SetPlayedAnimationID(group,node,flags)</code>. <code>main</code> and <code>weapon</code> are examples; their names are not arbitrary metadata.</p>
+<h2 id="node-timing-and-cross-fades">Node timing and cross-fades</h2>
+<table>
+<thead>
+<tr>
+  <th>Record</th>
+  <th>Observed native behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Animation node (<code>0x24</code> bytes)</td>
+  <td>Holds state name, default and source-state transition records, and three programs: entry, pose and post-skeleton IK</td>
+</tr>
+<tr>
+  <td>End kind <code>0</code></td>
+  <td>Never expires; loops</td>
+</tr>
+<tr>
+  <td>End kind <code>1</code></td>
+  <td>Uses explicit float end time</td>
+</tr>
+<tr>
+  <td>End kind <code>2</code></td>
+  <td>Uses the combined duration of a TControl selected <strong>by TControl index</strong>, not by CANM clip-name order</td>
+</tr>
+<tr>
+  <td>Transition (<code>0x20</code> bytes)</td>
+  <td>Includes source-state match, fade time in frames, optional program and a start-time mode</td>
+</tr>
+<tr>
+  <td>Crossfade start mode <code>2</code></td>
+  <td>Preserves current playback phase rather than unconditionally resetting it</td>
+</tr>
+</tbody>
+</table>
+<p>The source's 375-file census counted 6,037 kind-2 nodes, 577 kind-0 nodes and ten kind-1 nodes. A separate 323-file verification found <strong>346 false out-of-range references</strong> if kind-2 end times were misread as CANM clip-name indices. This is a concrete example of two valid index spaces inside the same asset.</p>
+<h2 id="what-the-tiny-vm-actually-does">What the tiny VM actually does</h2>
+<p>A program is a count plus an instruction-array offset. Its native opcodes do not provide a normal branch/loop language: instructions execute sequentially, while node transitions provide state control. Programs run at different phases:</p>
+<ol>
+<li>The global controller program runs after group times advance.</li>
+<li>Entry <code>parametric1</code> and transition programs run when a node is selected.</li>
+<li><code>parametric2</code> samples/blends the pose; group references can contribute more poses.</li>
+<li>The game updates bone/world matrices, then <code>parametric3</code> supplies IK corrections.</li>
+</ol>
+<table>
+<thead>
+<tr>
+  <th>Opcode family</th>
+  <th>Operations found in the source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code>–<code>5</code></td>
+  <td>Sample a TControl, normalized samples, two/three-way blends, additive sampling</td>
+</tr>
+<tr>
+  <td><code>6</code>–<code>11</code></td>
+  <td>Rotation compose/difference and weighted blends (some defined but not seen in sampled files)</td>
+</tr>
+<tr>
+  <td><code>12</code>–<code>22</code></td>
+  <td>Float assignment, arithmetic, interpolation, clamping, magnitudes</td>
+</tr>
+<tr>
+  <td><code>24</code>–<code>28</code></td>
+  <td>Integer assignment and arithmetic</td>
+</tr>
+<tr>
+  <td><code>30</code>, <code>31</code></td>
+  <td>Aim constraint and two-bone inverse kinematics</td>
+</tr>
+<tr>
+  <td><code>32</code></td>
+  <td>Run the active node's post-update IK program</td>
+</tr>
+<tr>
+  <td><code>33</code></td>
+  <td>Send a user callback to game code, e.g. weapon hand reattachment</td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>VM opcode numbers</strong>, not portable commands for arbitrary CAS versions. The source documents a real ignored opcode 35 and invalid operand combinations that can crash the game. The embedded CANM's own BoneList is not proven interchangeable with the CAS BoneList.</p>
+<h2 id="evidence-and-useful-companion-pages">Evidence and useful companion pages</h2>
+<p>The source reports a <strong>323-file parse</strong> and a separate <strong>375-file state-machine census</strong>; these are not necessarily identical populations and must not be merged into one denominator. This is <strong>static / binary-researched knowledge</strong> for <code>steam-678ccb46</code>.</p>
+<p><strong>Attribution:</strong> EDF Knowledge Hub, <code>edf6/animation-cas.md</code>; CAS/CANM specification (unnamed author), EDF_Tools (AUK233), and novae (ajane). Fact IDs <code>cas-header</code>, <code>cas-vcontrol</code>, <code>cas-node</code>, <code>cas-transition</code>, <code>cas-program-vm</code>, <code>cas-opcodes</code>.</p>
+<p>See the <a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">cross-game CAS/CANM record comparison</a>, <a href="animation-canm-cas-and-mab-formats-explained.html">game animation overview</a> and <a href="kh-edf6-animation-cas.html">original detailed source notes</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026: edf6/animation-cas.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#container-and-named-state-identity">Container and named state identity</a><a href="#node-timing-and-cross-fades">Node timing and cross-fades</a><a href="#what-the-tiny-vm-actually-does">What the tiny VM actually does</a><a href="#evidence-and-useful-companion-pages">Evidence and useful companion pages</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-cas-animation-state-vm-vcontrols-and-clip-programs"};</script><script src="../assets/site.js" defer></script></body></html>

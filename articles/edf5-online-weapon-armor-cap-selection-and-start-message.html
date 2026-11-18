@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 — equipment marking and mission-start restrictions EDF5 retains two independent kinds of online limits. Weapon levels are compared to a calculated ceiling "><title>EDF5 online restrictions: red over-cap equipment and authoritative armor boxes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Online caps</div><h1>EDF5 online restrictions: red over-cap equipment and authoritative armor boxes</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Online caps</span></div><div class="referencebadge">Technical reference · Build-scoped static analysis; original contributor evidence grades cited; no new R126 gameplay runtime</div><div id="articleBody"><p>EDF5 retains two independent kinds of online limits. Weapon <strong>levels</strong> are compared to a calculated ceiling for the selected mission/difficulty; <strong>armor boxes</strong> are limited when the host prepares each player's launch record. A red weapon cell is not a complete statement about whether a weapon can be selected in the menu.</p>
+<h2 id="offline-versus-online-metadata">Offline versus online metadata</h2>
+<p>In the original <code>config.sgo</code>, the three offline modes (campaign, DLC1, DLC2) have zero in ModeList's cap-list fields. The three online counterparts carry the indexed cap data. The byte <code>save+0x24571</code> is set by the online session update when the room's weapon switch is active and the getter provides a positive cap. The armor switch is stored separately. The mode flag at node <code>+0x5C</code> is used to distinguish online from offline creation.</p>
+<h2 id="red-does-not-mean-unselectable">Red does not mean unselectable</h2>
+<p>EDF5's <code>HUiHQWeaponSelect</code> sets an above-cap bit on the relevant weapon cell; its level text is <strong>red</strong>. But the studied <code>PressButton</code> handler rejects only cell bits <strong>1 and 2</strong> (<code>cell+0x4C &amp; 6</code>). It does <strong>not</strong> reject bit <strong>0</strong>, which represents being above the online limit. Therefore the equipment menu permits that selection even though the online limit is visibly exceeded. It is incorrect to transfer EDF4.1's stricter confirm-handler behavior to EDF5.</p>
+<h2 id="armor-is-bounded-at-online-departure">Armor is bounded at online departure</h2>
+<p>The host's mission-start record writer takes a limit in armor boxes and clamps each participant's count if a nonnegative cap is smaller. The receiver stores the transmitted count in the player-record area. The online spawn route then computes the character's HP using the received bounded count; the offline route reads the locally saved count. Current and maximum HP are stored separately on the soldier.</p>
+<p>A useful semantic distinction: <strong>boxes are not HP</strong>. They become HP only after applying the class-specific coefficient and base. A data comparison of an armor-box count and displayed HP would mix different units.</p>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>Observed EDF5 answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Does the offline campaign use online cap lists?</td>
+  <td>No; its ModeList cap entries are zero</td>
+</tr>
+<tr>
+  <td>Is an over-cap weapon marked?</td>
+  <td>Yes; its cell becomes red</td>
+</tr>
+<tr>
+  <td>Does the menu block confirmation solely for over-cap bit 0?</td>
+  <td>No</td>
+</tr>
+<tr>
+  <td>Is armor merely a UI restriction?</td>
+  <td>No; the online launch record clamps the count</td>
+</tr>
+<tr>
+  <td>Do the offline and online spawn paths read identical armor ownership?</td>
+  <td>No; local save versus received online record</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidence and credit:</strong> <code>kh-edf5-online-caps</code>: <code>edf5-offline-modes-no-caps</code>, <code>edf5-cap-flag</code>, <code>edf5-weaponselect-cap-colors</code>, <code>edf5-online-armor-cut</code>, <code>edf5-spawn-hp-store</code>, build <code>steam-5d11de53</code>; original KH curators / novae (ajane). These are static reverse-engineering observations.</p>
+<h2 id="additional-native-game-references">Additional native-game references</h2>
+<ul>
+<li><a href="edf5-menu-settings-layout-rows-cursor-scroll-and-class.html">EDF5 equipment and settings screen layout</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 — kh-edf5-online-caps (fact IDs retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#offline-versus-online-metadata">Offline versus online metadata</a><a href="#red-does-not-mean-unselectable">Red does not mean unselectable</a><a href="#armor-is-bounded-at-online-departure">Armor is bounded at online departure</a><a href="#additional-native-game-references">Additional native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-online-weapon-armor-cap-selection-and-start-message"};</script><script src="../assets/site.js" defer></script></body></html>

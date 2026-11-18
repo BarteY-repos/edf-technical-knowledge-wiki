@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 maps contain two distinct floor-navigation worlds On the studied EDF6 executable and map corpus, each map has two Havok navigation resources, with matching"><title>EDF6 navigation: two Havok worlds, HUMAN and BIG, and their source mesh differences | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Native navigation</div><h1>EDF6 navigation: two Havok worlds, HUMAN and BIG, and their source mesh differences</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Native navigation</span></div><div class="referencebadge">Technical reference · Static source and contributor checks, with build and open questions noted; no new R131 EDF runtime</div><div id="articleBody"><p>On the studied EDF6 executable and map corpus, each map has two Havok navigation resources, with matching <code>.NVMD</code> metadata:</p>
+<table>
+<thead>
+<tr>
+  <th>Resource suffix</th>
+  <th>AI world</th>
+  <th>Native actor examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>.NAVMESH_H.HKT</code></td>
+  <td><strong>0 — HUMAN</strong></td>
+  <td>HumanBase allied soldiers, vehicles, RouteGuide and <code>BombBullet01</code></td>
+</tr>
+<tr>
+  <td><code>.NAVMESH.HKT</code></td>
+  <td><strong>1 — BIG</strong></td>
+  <td>HumanoidBase, large Berserker/Hector actors, Merman, ShellFish and GiantDango</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The suffix <code>_H</code> maps to the HUMAN world, not the BIG world</strong>. The original route-building function chooses the names according to the inverse-looking selector in its caller; relying on alphabetical order or filename length would invert the maps.</p>
+<h2 id="what-these-files-really-store">What these files really store</h2>
+<p>Each navigation HKT contains section-indexed triplets: <code>NavMesh&lt;n&gt;</code> (<code>hkaiNavMesh</code>), <code>Graph&lt;n&gt;</code> (<code>hkaiDirectedGraphExplicitCost</code>) and <code>Mediator&lt;n&gt;</code> (<code>hkaiQueryMediator</code>). One studied EDFROOM file had <strong>15 sections</strong>. Both classes of navmesh were almost entirely <strong>upward-facing floor geometry</strong> (99.6–100% of measured face area). The <code>_H</code> mesh typically had <strong>5–6× more faces</strong> than the BIG version in the reported corpus.</p>
+<p>These are <strong>not wall-climbing navigation meshes</strong>. Enemy wall-climbing and attachment can be handled by a different controller, and the existence of a detailed collision body is not proof it has a traversable navmesh connection. A valid <code>NAVMESH_H.HKT</code> is also not enough to establish that an EDF4.1 port has the correct paths on a different map geometry.</p>
+<h2 id="runtime-ownership-and-open-limits">Runtime ownership and open limits</h2>
+<p><code>MapRABInit</code> requests both variants, and the map manager creates separate AI worlds. <code>CreateAiCharacter</code> takes a <strong>world ID</strong>, so actors can end up using different route graphs within the same scene. A contributor tried replacing the HUMAN source mesh with the BIG one and did <strong>not</strong> observe a clear behavioral difference in that specific test. That was inconclusive: it neither disproves the world separation nor establishes that swapping the files is safe.</p>
+<p><strong>Evidence:</strong> source-level Havok file inspection, static <code>EDF.dll</code> analysis (<code>+0x18F9A0</code>, <code>+0x121470</code>) and the one inconclusive contributor experiment. Build <code>steam-678ccb46</code>; no new R131 in-game validation.</p>
+<p><strong>Attribution:</strong> ktaro / EDF Knowledge Hub <code>edf6/map-collision.md</code>, facts <code>navmesh-worlds</code>, <code>navmesh-contents</code>. See <a href="kh-edf6-map-collision.html">original evidence</a>, <a href="docs-navigation.html">navigation guide</a>, and <a href="docs-edf41-nav-current.html">EDF4.1 route-graph limitations</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 / edf6/map-collision.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-these-files-really-store">What these files really store</a><a href="#runtime-ownership-and-open-limits">Runtime ownership and open limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-dual-havok-navmesh-big-human-world-selection"};</script><script src="../assets/site.js" defer></script></body></html>

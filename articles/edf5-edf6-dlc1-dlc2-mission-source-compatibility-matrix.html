@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 DLC1/DLC2 port: 29 missions and known source/reference differences The retained source-corpus audit covers all 29 EDF5 DLC missions hosted in EDF6: 15 DLC1"><title>EDF5→EDF6 DLC1/DLC2: 29-mission source and RMPA evidence matrix | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / DLC encounter and mission resources</div><h1>EDF5→EDF6 DLC1/DLC2: 29-mission source and RMPA evidence matrix</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">DLC encounter and mission resources</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived; separates static evidence and the limited modded-runtime results</div><div id="articleBody"><p>The retained source-corpus audit covers <strong>all 29 EDF5 DLC missions</strong> hosted in EDF6: <strong>15 DLC1</strong> entries and <strong>14 DLC2</strong> entries. It compares native EDF5 <code>MISSION.BVM</code>-derived script behavior, ported <code>MISSION.AC</code>, and mission <code>MISSION.RMPA</code> target/reference profiles. This is a <strong>specific versioned port audit</strong>, not a demonstration that stock EDF5 and stock EDF6 missions share an identical format or gameplay.</p>
+<h2 id="what-the-29-entry-audit-established">What the 29-entry audit established</h2>
+<table>
+<thead>
+<tr>
+  <th>Check</th>
+  <th>Result</th>
+  <th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ported AC byte-exact to the examined clean source-derived lineage</td>
+  <td><strong>25/29</strong></td>
+  <td>Four remaining AC deltas were known compatibility changes</td>
+</tr>
+<tr>
+  <td>Mission RMPA exact against retained target/reference profile</td>
+  <td><strong>27/29</strong></td>
+  <td>Two RMPAs had deliberate compatibility deviations</td>
+</tr>
+<tr>
+  <td>False terminal guard <code>if ((0 == 0)) return;</code></td>
+  <td><strong>0/29</strong></td>
+  <td>No such known converter scaffold remained in this DLC subset</td>
+</tr>
+<tr>
+  <td>Unhandled or unresolved conversion markers</td>
+  <td><strong>0/29</strong></td>
+  <td>Absence of markers does not imply gameplay parity</td>
+</tr>
+</tbody>
+</table>
+<p>The four non-exact AC missions were <code>DM001</code>, <code>DM015</code>, <code>DM006_2</code>, <code>DM024</code>; the two non-exact mission RMPAs were <code>DM001</code> and <code>DM021</code>. These are not automatically defects: each corresponds to a previously documented gameplay/ABI/resource compatibility exception.</p>
+<h2 id="complete-dlc-mission-disposition">Complete DLC mission disposition</h2>
+<p>The sequence shown here is <strong>mission-list display order</strong>; the filenames themselves are not sequential display numbers.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">DLC1 display #</th>
+  <th>Mission resource</th>
+  <th>AC evidence</th>
+  <th>RMPA evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>DM011</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>DM013</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>DM005</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn/route tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>DM018</code></td>
+  <td>Source-exact after weather/script branch correction</td>
+  <td>Reference-exact, spawn/route tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>DM019</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>DM020</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>DM008</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>DM003</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, target-only empty spawn</td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>DM014</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>DM003_2</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>DM001</code></td>
+  <td><strong>Compatibility delta</strong></td>
+  <td><strong>Compatibility delta</strong> (E506 spawn/route handling)</td>
+</tr>
+<tr>
+  <td style="text-align:right">12</td>
+  <td><code>DM007</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">13</td>
+  <td><code>DM003_3</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn/route/shape tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">14</td>
+  <td><code>DM013_2</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">15</td>
+  <td><code>DM015</code></td>
+  <td><strong>Compatibility delta</strong> (fortress/resource behavior)</td>
+  <td>Reference-exact</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">DLC2 display #</th>
+  <th>Mission resource</th>
+  <th>AC evidence</th>
+  <th>RMPA evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>DM005_2</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>DM002</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, target-only empty spawn</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>DM021</code></td>
+  <td>Source-exact</td>
+  <td><strong>Compatibility delta</strong> (player-start location)</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>DM006_2</code></td>
+  <td><strong>Compatibility delta</strong> (<code>cuscall0 3450</code> / radius semantics)</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>DM009</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>DM007_2</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>DM010</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, route tuning and empty spawn</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>DM014_2</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>DM012</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>DM022</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>DM023</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, spawn tuning</td>
+</tr>
+<tr>
+  <td style="text-align:right">12</td>
+  <td><code>DM024</code></td>
+  <td><strong>Compatibility delta</strong> (DropBoat receiver/return types)</td>
+  <td>Reference-exact</td>
+</tr>
+<tr>
+  <td style="text-align:right">13</td>
+  <td><code>DM017</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, <strong>one source/reference route identity watch case</strong></td>
+</tr>
+<tr>
+  <td style="text-align:right">14</td>
+  <td><code>DM016</code></td>
+  <td>Source-exact</td>
+  <td>Reference-exact, target-only empty spawn</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Source-exact</strong> and <strong>reference-exact</strong> refer to the retained comparison baselines and are not equivalent to in-game completeness. Many reference-exact files intentionally incorporate mission-specific spawn/route tuning.</p>
+<h2 id="three-counterintuitive-game-behavior-cases">Three counterintuitive game-behavior cases</h2>
+<ul>
+<li><strong><code>DM002</code> (DLC2 #2, <em>Engage Aliens 4</em>):</strong> the sparse enemy groups and unusually wide spawn layout are present in the <em>clean EDF5 source</em>. They are not proof that the port dropped waves.</li>
+<li><strong><code>DM010</code> (DLC2 #7):</strong> repeated or overlapping waves arise from source time-or-clear rearming. The source chain is finite and reaches <code>MissionClear</code>; duration alone does not prove an infinite spawn loop.</li>
+<li><strong><code>DM020</code> (DLC1 #6):</strong> absent <code>tank01_5</code> / <code>tank01_6</code> constructors reflect the source behavior. Adding them would be an ungrounded content change.</li>
+</ul>
+<h3 id="dm017-route-discrepancy-is-a-watch-item-not-a-proven-bug"><code>DM017</code>: route discrepancy is a watch item, not a proven bug</h3>
+<p>In the examined source RMPA, the inner route named <code>飛行カエル03_2</code> refers to points/names corresponding to <code>飛行カエル03_1</code>. The tested reference profile zeros that inner route. Similar sparse zeroing occurs deliberately in other target profiles. With no runtime symptom attributed to this exact discrepancy, it was retained unchanged. A controlled RMPA-only comparison would be needed before presenting it as a fix.</p>
+<h2 id="limits">Limits</h2>
+<p>The 2026-09-21 audit determined that no additional production mission regeneration was justified by its evidence. Later source and runtime work may supersede particular missions; these 29 entries document the <strong>state and reasons of this bounded comparison</strong>, not immutable truths about every subsequent patch. For separately detected <code>int</code>/<code>float</code> scalar problems see <a href="edf5-to-edf6-float-global-typing-ten-mission-census.html">ten-mission numeric census</a>. For mission routing/storage semantics see <a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">MISSION.RMPA structure</a>.</p>
+<p><strong>Source provenance:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/DLC1_DLC2_CURRENT_KNOWLEDGE_AUDIT_2026-09-21.md</code> and matching <code>.json</code>; mission-specific compatibility research is independent of the total-count census.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/DLC1_DLC2_CURRENT_KNOWLEDGE_AUDIT_2026-09-21.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-29-entry-audit-established">What the 29-entry audit established</a><a href="#complete-dlc-mission-disposition">Complete DLC mission disposition</a><a href="#three-counterintuitive-game-behavior-cases">Three counterintuitive game-behavior cases</a><a href="#dm017-route-discrepancy-is-a-watch-item-not-a-proven-bug">　DM017: route discrepancy is a watch item, not a proven bug</a><a href="#limits">Limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-dlc1-dlc2-mission-source-compatibility-matrix"};</script><script src="../assets/site.js" defer></script></body></html>

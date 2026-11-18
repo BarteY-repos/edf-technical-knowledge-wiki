@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="_mission does not mean “this vehicle drives under AI” EDF5 scripts can spawn empty, boardable vehicles with special *_mission or *_fw SGOs. These are distinct f"><title>EDF5 mission vehicles: parked boardable objects versus AI-controlled variants | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Vehicles / missions</div><h1>EDF5 mission vehicles: parked boardable objects versus AI-controlled variants</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Vehicles / missions</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 scripts can spawn <strong>empty, boardable vehicles</strong> with special <code>*_mission</code> or <code>*_fw</code> SGOs. These are distinct from a separately configured <code>*_ai</code> vehicle driven by an NPC. The static inventory was cross-checked against Japanese mission tables marking vehicles <strong>搭乗可能</strong> (“boardable”).</p>
+<table>
+<thead>
+<tr>
+  <th>Mission SGO</th>
+  <th>Model or role</th>
+  <th>Mission placement from source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v505_tank_mission</code></td>
+  <td>Blacker tank</td>
+  <td>Offline 80 (three), 81 (one)</td>
+</tr>
+<tr>
+  <td><code>v504_begaruta_mission</code></td>
+  <td>Gray Nix (“blue” in community table)</td>
+  <td>Offline 80 (two), 92</td>
+</tr>
+<tr>
+  <td><code>v504_begaruta_g_mission</code></td>
+  <td>Standard/green Nix</td>
+  <td>Offline 81</td>
+</tr>
+<tr>
+  <td><code>v504_begaruta_fw</code></td>
+  <td>Yellow Nix with Combat Burners</td>
+  <td>Offline 96, 105</td>
+</tr>
+<tr>
+  <td><code>v513_trailertruck01cab</code></td>
+  <td>Tractor head</td>
+  <td>Offline 92, 96</td>
+</tr>
+<tr>
+  <td><code>v512_keitruck</code></td>
+  <td>Small/light truck</td>
+  <td>Present in source mission catalogue</td>
+</tr>
+<tr>
+  <td><code>v515_retrobalam_mission</code></td>
+  <td>Barga</td>
+  <td>Mission-prop-like in offline 81; boardable later in 82</td>
+</tr>
+</tbody>
+</table>
+<p>A coarse catalogue called <code>v505_tank_mission</code> a “Scripted Maser Tank”; its model and mounted weapon identity show <strong>Blacker</strong>. Some raw rows marked <code>_mission</code> vehicles “AI Controlled” simply because their class is shared with AI forms. The <strong>SGO setup and placement</strong> determine the role, not the class name.</p>
+<p>The original contributor separately reported a <strong>verified gameplay constraint</strong>: NPCs do not share a vehicle with a player as driver or passenger. This is an observation for ordinary game play, not a claim that modified code could never implement it.</p>
+<p><strong>Sources:</strong> <code>edf5/object-classes.md</code>, facts <code>edf5-mission-vehicles-boardable</code> (static mission/wiki pairing), <code>edf5-npc-vehicle-variants</code> (static) and <code>edf5-npc-vehicles-not-shared</code> (contributor-verified).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-mission-placed-boardable-versus-npc-driven-vehicles"};</script><script src="../assets/site.js" defer></script></body></html>

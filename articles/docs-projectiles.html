@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Projectiles &amp; Ammunition EDF6 weapons can emit nested projectile types. The outer weapon SGO and the inner Ammo_CustomParameter structures jointly determine beh"><title>Projectiles &amp; Ammunition | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Projectiles &amp; Ammunition</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Documentation</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Community-provided Japanese memo; source-specific and not independently rerun</div><div id="articleBody"><p>EDF6 weapons can emit nested projectile types. The outer weapon SGO and the inner <code>Ammo_CustomParameter</code> structures jointly determine behavior; <strong>changing only the child bullet class may lose guidance, damage flags or rendering</strong>.</p>
+<h2 id="useful-experiment-derived-class-differences">Useful experiment-derived class differences</h2>
+<table>
+<thead>
+<tr>
+  <th>Class / pattern</th>
+  <th>Observed behavior</th>
+  <th>Boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>NapalmBullet01</code> with a <code>MissileBullet01</code> child</td>
+  <td>Child guidance was disabled in the tested sticky-napalm arrangement</td>
+  <td>One arrangement; not a general <code>MissileBullet01</code> limitation</td>
+</tr>
+<tr>
+  <td><code>NapalmBullet01</code> with <code>GrenadeBullet01</code> child</td>
+  <td>Direct contact with the same attachment target sometimes failed to apply explosion attributes; splash via a different target behaved differently</td>
+  <td>Object- and contact-dependent</td>
+</tr>
+<tr>
+  <td><code>NapalmBullet01</code> with <code>SpiderStringBullet02</code> child</td>
+  <td>Some attachment angles produced a severe rendering disappearance bug</td>
+  <td>Negative experiment; precise cause unknown</td>
+</tr>
+<tr>
+  <td><code>ClusterBullet01</code></td>
+  <td>First custom field in the sample was a per-frame speed multiplier: below 1 decelerates, above 1 accelerates</td>
+  <td>Very high acceleration caused crashes in the author's tests</td>
+</tr>
+<tr>
+  <td><code>BombBullet02</code> detector variant</td>
+  <td><code>AmmoExplosion</code> was used as the detection range, not only a visual blast setting</td>
+  <td>Type dependent; class variant must match</td>
+</tr>
+<tr>
+  <td><code>SentryGunBullet01</code></td>
+  <td>Can emit ordinary bullets and several special classes; nested sentry-to-sentry was not demonstrated</td>
+  <td>Some children need other ammo-model paths</td>
+</tr>
+</tbody>
+</table>
+<h2 id="clusterbullet01-sample-field-positions"><code>ClusterBullet01</code> sample field positions</h2>
+<p>Source <code>解析!B1467:J1474</code> describes the following, <strong>within that exact field profile</strong>:</p>
+<ol>
+<li>per-frame speed multiplier (sample <code>0.99</code>);</li>
+<li>baseline emission angle (sample <code>1.57</code> radians);</li>
+<li>angle variance (<code>3.14</code> spans a full turn in the author's notes);</li>
+<li>discrete direction mode: <code>0</code> downward, <code>1</code> upward, <code>2</code> forward, <code>3</code> forward/upward; values ≥4 appeared rightward;</li>
+<li>guidance flag.</li>
+</ol>
+<p>Parent <code>AmmoAlive</code> influences start of child emission. A low particle speed cannot substitute for a timing field. The note warns that extreme travel distance caused crashes.</p>
+<h2 id="detection-and-damage-are-separate">Detection and damage are separate</h2>
+<p><code>BombBullet02</code> detector type uses a configurable delay before arming. The contributor distinguished a trigger responding when <strong>any part of the enemy enters the volume</strong> from one requiring the <strong>enemy center</strong> to enter it. The stored numeric mode-to-behavior mapping is incomplete; do not assert all enum values.</p>
+<p><code>AmmoExplosion</code> in that detector example is thus a <strong>detection radius</strong>, distinct from a separate AI search radius such as the accepted-omission <code>SetAiSearchRadius(3450)</code> <a href="missions-%26-scripting-canonical-blocker-cuscall0-3450.html">see compatibility note</a>.</p>
+<h2 id="sentry-projectile-chaining">Sentry/projectile chaining</h2>
+<p>The source reports that using an intermediate <code>ClusterBullet01</code> can allow classes requiring extra ammo-model handling to be spawned downstream; one grenade variant was tested. It <strong>does not demonstrate a working sentry that deploys another sentry</strong>. See also <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG and projectile reconstruction</a> for multiplayer concerns.</p>
+<p><strong>Source:</strong> <code>解析!B65:O236</code>, <code>解析!B1060:K1090</code>, <code>解析!B1467:J1486</code>, <code>解析!B2013:K2031</code> in the community workbook. Values should be treated as <em>class/profile-specific experiments</em>.</p>
+<h2 id="damage-before-and-after-projectile-contact">Damage before and after projectile contact</h2>
+<p><a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">Native bullet Flag 1 / Flag 2 and layer filtering</a> distinguishes a blocking ray from the shape-cast used to hit a target. Source-level attack curves are available for <a href="edf6-enemy-attacks-insects-ants-bees-spiders-tadpoles.html">insects and tadpoles</a>, <a href="edf6-enemy-attacks-drones-and-deroys.html">drones and Deroys</a>, <a href="edf6-enemy-attacks-erginus-archelus-monsterbase-scaling.html">Erginus/Archelus</a> and <a href="edf6-enemy-attacks-android-scylla-siren-haze-sgo-curves.html">Android/Scylla/Siren/Haze</a>. Projectile damage must not be equated with final HP loss before count, collision and ModeList are known.</p>
+<h2 id="additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</h2>
+<ul>
+<li><a href="edf6-missile-homing-guidance-delays-types-and-local-update.html">Missile guidance and steering gates</a></li>
+<li><a href="edf6-weapon-native-lockon-search-distribution-and-cancel.html">Target lock and firing distribution</a></li>
+</ul>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf6-air-raider-energy-wall-barrierbullet-team-hp-collision.html">EDF6 BarrierBullet01 energy wall</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Community Japanese workbook: `mod製作メモ.xlsx` (supplied 2026-11-15; publication rights to be confirmed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#useful-experiment-derived-class-differences">Useful experiment-derived class differences</a><a href="#clusterbullet01-sample-field-positions">ClusterBullet01 sample field positions</a><a href="#detection-and-damage-are-separate">Detection and damage are separate</a><a href="#sentry-projectile-chaining">Sentry/projectile chaining</a><a href="#damage-before-and-after-projectile-contact">Damage before and after projectile contact</a><a href="#additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</a><a href="#further-native-game-references">Further native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-projectiles"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 vs EDF6 runtime binary architecture The useful cross-generation binary comparison is not EDF5.exe ↔ EDF6.exe. The two releases package the main game runtim"><title>EDF5 vs EDF6 runtime binary architecture | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF5 vs EDF6 runtime binary architecture</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Exact binary inventory and canonical-hash RE boundary</div><div id="articleBody"><p>The useful cross-generation binary comparison is <strong>not <code>EDF5.exe</code> ↔ <code>EDF6.exe</code></strong>. The two releases package the main game runtime differently.</p>
+<h2 id="observed-shipping-layout">Observed shipping layout</h2>
+<p>For the retained canonical builds:</p>
+<table>
+<thead>
+<tr>
+  <th>File</th>
+  <th style="text-align:right">Size</th>
+  <th>SHA-256 / role in RE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF5 <code>EDF5.exe</code></td>
+  <td style="text-align:right">19,896,320 B</td>
+  <td><code>3512d2a2e61d532c5d12dc0c5fd1ac61f6743e13349ae21301bb8449dd4bae5f</code> — primary monolithic mission/runtime comparison target</td>
+</tr>
+<tr>
+  <td>EDF5 <code>umbra_sandlot.dll</code></td>
+  <td style="text-align:right">323,584 B</td>
+  <td>supporting module; do not treat as the EDF5 equivalent of EDF6 <code>EDF.dll</code></td>
+</tr>
+<tr>
+  <td>EDF6 <code>EDF.dll</code></td>
+  <td style="text-align:right">35,869,184 B</td>
+  <td><code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code> — canonical main runtime RE target</td>
+</tr>
+<tr>
+  <td>EDF6 <code>EDF6.exe</code></td>
+  <td style="text-align:right">383,488 B</td>
+  <td><code>87fadc7dbfb6f50d0f1bfea5b3f51af779aeaa9fa03a90c62a695eb39f1e0989</code> — small executable, not the primary code-equivalence target</td>
+</tr>
+<tr>
+  <td>EDF6 <code>LaunchGame.exe</code></td>
+  <td style="text-align:right">1,100,288 B</td>
+  <td>launcher-side binary; separate from the main runtime module</td>
+</tr>
+<tr>
+  <td>EDF6 <code>umbra_sandlot.dll</code></td>
+  <td style="text-align:right">754,688 B</td>
+  <td>supporting module</td>
+</tr>
+</tbody>
+</table>
+<p>The retained EDF5 build has no separate main <code>EDF.dll</code>; mission/runtime code is concentrated in <code>EDF5.exe</code>. EDF6 moves the large runtime body into <code>EDF.dll</code> while leaving a much smaller <code>EDF6.exe</code>.</p>
+<h2 id="practical-re-rule">Practical RE rule</h2>
+<p>When comparing game logic across EDF5 and EDF6, start from:</p>
+<pre><code class="language-text">EDF5.exe  &lt;-&gt;  EDF6/EDF.dll
+</code></pre>
+<p>This is especially important for mission/event dispatch, gameplay classes, networking, projectile logic and other systems whose EDF6 implementation lives in the large DLL.</p>
+<p>Do <strong>not</strong> conclude that an EDF5 function “disappeared” merely because it has no useful analogue in the small EDF6 executable. Search the canonical EDF6 <code>EDF.dll</code> first.</p>
+<h2 id="address-and-hook-boundary">Address and hook boundary</h2>
+<p>Exact EDF6 RVAs, signatures and structure fields in the Engine RE database are tied to the canonical <code>EDF.dll</code> identity above. A semantic function may survive across builds while its address changes.</p>
+<p>Implementation rules:</p>
+<ul>
+<li>verify the target module hash/build before applying an exact RVA claim;</li>
+<li>prefer semantic signatures/RTTI/xrefs when migrating an RE finding to another build;</li>
+<li>do not port EDF5 executable RVAs numerically into EDF6;</li>
+<li>do not assume <code>EDF6.exe</code> owns a gameplay path just because EDF5 kept that path in its executable;</li>
+<li>plugin/hook work that targets recovered EDF6 gameplay functions must treat <code>EDF.dll</code> as the relevant module unless the specific function is proven elsewhere.</li>
+</ul>
+<h2 id="what-this-does-not-prove">What this does not prove</h2>
+<p>The packaging split does not by itself identify every responsibility of <code>EDF6.exe</code>, <code>LaunchGame.exe</code> or <code>umbra_sandlot.dll</code>. It is an architecture/comparison rule: <strong>where the main runtime moved</strong>, not a complete module-ownership map.</p>
+<h2 id="exact-native-reference-tables">Exact native reference tables</h2>
+<p><a href="edf6-engine-r17-native-symbol-and-rva-reference.html">EDF6 R17 full symbol and RVA reference</a> — static R17 per-build catalog; not portable APIs</p>
+<h2 id="exact-native-reference-tables-2">Exact native reference tables</h2>
+<p><a href="edf6-engine-r17-native-struct-field-offset-reference.html">EDF6 R17 memory structure field atlas</a> — static R17 per-build catalog; not portable APIs</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li><li>Library: ENGINE_RE/CURRENT_AUTHORITY.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#observed-shipping-layout">Observed shipping layout</a><a href="#practical-re-rule">Practical RE rule</a><a href="#address-and-hook-boundary">Address and hook boundary</a><a href="#what-this-does-not-prove">What this does not prove</a><a href="#exact-native-reference-tables">Exact native reference tables</a><a href="#exact-native-reference-tables-2">Exact native reference tables</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-edf5-edf6-runtime-binary-architecture"};</script><script src="../assets/site.js" defer></script></body></html>

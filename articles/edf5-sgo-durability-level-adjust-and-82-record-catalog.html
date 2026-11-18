@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="An SGO number is a configuration input, not final observed health EDF5 object SGOs declare xgs_scene_object_class and, for relevant objects, game_object_durabil"><title>EDF5 object SGO durability: 82 grouped records, level adjustments and limits | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Enemy health / reference data</div><h1>EDF5 object SGO durability: 82 grouped records, level adjustments and limits</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Enemy health / reference data</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 object SGOs declare <code>xgs_scene_object_class</code> and, for relevant objects, <code>game_object_durability</code>. Some enemies also contain <code>game_object_level_adjust</code>. The Japanese bestiary's baseline tables agree with the <strong>product</strong> in the 45-value comparison described in the source analysis.</p>
+<table>
+<thead>
+<tr>
+  <th>Variant</th>
+  <th style="text-align:right">Raw durability</th>
+  <th style="text-align:right">Level adjustment</th>
+  <th style="text-align:right">Adjusted baseline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Red Hornet</td>
+  <td style="text-align:right">90</td>
+  <td style="text-align:right">1.5</td>
+  <td style="text-align:right">135</td>
+</tr>
+<tr>
+  <td>Blue Drone</td>
+  <td style="text-align:right">75</td>
+  <td style="text-align:right">1.5</td>
+  <td style="text-align:right">112.5</td>
+</tr>
+<tr>
+  <td>Short Deroy</td>
+  <td style="text-align:right">825</td>
+  <td style="text-align:right">0.7</td>
+  <td style="text-align:right">577.5</td>
+</tr>
+<tr>
+  <td>Red/Demon Hornet Queen</td>
+  <td style="text-align:right">3000</td>
+  <td style="text-align:right">1.5</td>
+  <td style="text-align:right">4500</td>
+</tr>
+<tr>
+  <td>Gold Ant Queen</td>
+  <td style="text-align:right">2800</td>
+  <td style="text-align:right">3.5</td>
+  <td style="text-align:right">9800</td>
+</tr>
+</tbody>
+</table>
+<p>These <strong>source-level baselines are not a complete runtime HP calculator</strong>. Difficulty, online scaling, mission setup, independent destructible subparts and script changes can alter active enemy endurance.</p>
+<h2 id="downloadable-full-grouped-source-inventory">Downloadable full grouped source inventory</h2>
+<p><code>data/EDF5_NATIVE_SGO_DURABILITY_82_GROUPS_R134.csv</code> retains <strong>82</strong> grouped source facts across enemy objects, NPCs, vehicles and mission objects. Each row records the native C++ class, raw durability (or its absence), variant labels, source grade, exact fact ID and build. Totals: <strong>37 enemy groups, 24 vehicle groups, 4 NPC/civilian groups and 17 object/spawner groups</strong>. Multiple SGOs with the same class/base durability are grouped to match the source census rather than inventing unique classes.</p>
+<p>The original inventory labels are retained for provenance. They are <strong>not authoritative official English names</strong>: the detailed subtype articles correct examples such as the Deroy <code>_m</code> suffix and “AI-controlled” parked vehicles. A generic inventory “used in official missions” can include EDF4.1-source missions retained in EDF5's archive, so it does not prove the enemy spawns in the EDF5 campaign; Erginus King is a counterexample.</p>
+<p><strong>Source:</strong> EDF Knowledge Hub <code>edf5/object-classes.md</code>, facts <code>atwiki-enemy-durability-level-adjust</code>, <code>sgo-giantant-15</code>, <code>sgo-vehicle505-tank-700</code>, <code>sgo-generatorpoll-14000</code> and the cited 82 <code>sgo-*</code> records; native build <code>steam-5d11de53</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#downloadable-full-grouped-source-inventory">Downloadable full grouped source inventory</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-sgo-durability-level-adjust-and-82-record-catalog"};</script><script src="../assets/site.js" defer></script></body></html>

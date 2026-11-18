@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SetGenerator configures a persistent spawner, not one immediate batch The observed EDF5 BVM uses 2100 SetGenerator to configure repeating generation, and 2101 t"><title>EDF5 native generator: BVM calls 2100/2101, message 0x20100, wave pools and eight owners | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Missions / spawning and engine</div><h1>EDF5 native generator: BVM calls 2100/2101, message 0x20100, wave pools and eight owners</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Missions / spawning and engine</span></div><div class="referencebadge">Technical reference · EDF5 source static analysis; no new runtime qualification</div><div id="articleBody"><p>The observed EDF5 BVM uses <code>2100 SetGenerator</code> to configure repeating generation, and <code>2101</code> to release a <strong>one-time batch</strong>. In the 141 shipping source BVMs, <code>2100</code> occurs <strong>609 times across 49 scripts</strong>; <code>2101</code> occurs <strong>270 times across 28 scripts</strong>. In the game binary their call handlers prepare a native object message <strong><code>0x20100</code></strong>; the receiver is a generator component of a ship, hive, nest, anchor, fortress or boss.</p>
+<table>
+<thead>
+<tr>
+  <th><code>0x20100</code> payload offset</th>
+  <th>Meaning in the examined EDF5.exe build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td>Mode: <code>0</code> repeating (<code>2100</code>), <code>1</code> one-shot (<code>2101</code>)</td>
+</tr>
+<tr>
+  <td><code>+0x04</code></td>
+  <td>Wave interval <strong>in frames</strong>; repeating script interval multiplied by 60</td>
+</tr>
+<tr>
+  <td><code>+0x08</code></td>
+  <td>Amount: wave size / live cap for repeating mode</td>
+</tr>
+<tr>
+  <td><code>+0x0C</code></td>
+  <td>Gap between individual spawns <strong>in frames</strong>; script parameter ×60</td>
+</tr>
+<tr>
+  <td><code>+0x10</code></td>
+  <td>Enemy HP multiplier, already multiplied by mission script global factor</td>
+</tr>
+<tr>
+  <td><code>+0x14</code></td>
+  <td>Boolean flag</td>
+</tr>
+<tr>
+  <td><code>+0x18</code></td>
+  <td>Spawned SGO path</td>
+</tr>
+<tr>
+  <td><code>+0x38</code></td>
+  <td>Observed constant <code>1</code></td>
+</tr>
+<tr>
+  <td><code>+0x40</code></td>
+  <td>Hatch/generator index</td>
+</tr>
+</tbody>
+</table>
+<p>For the repeating mode, the game keeps a <strong>standing setup</strong> and an <strong>active setup</strong>. Each update decreases wave and per-spawn delays, checks the pool slot, spawns one unit when eligible, and reduces the remaining count. After the last position in the wave, it reuses the standing setup. A pool slot still occupied by a living enemy is skipped; the <code>amount</code> is not the total number created in the whole encounter. A one-shot <code>2101</code> has no such persistent pool slot reservation; when it ends, it returns control to the standing setup.</p>
+<p>Eight observed component owners are <code>GeneratorPoll</code> (Teleport Anchors), <code>AntHill</code>, <code>BigNest</code>, <code>MovingFortress</code>, <code>Humanoid_BigGreyBoss</code>, <code>UfoCarrier</code>, <code>UfoMother511</code>, and <code>UfoMother511RingUnitParts</code>. Some have generator arrays and select an element by hatch index. The source identifies additional <code>0x20101</code> signaling used as a <strong>wave gate</strong> by certain ship/ring components; it is not demonstrated to apply to all eight owner types.</p>
+<p>A frequent cataloging error is to read the <code>2100</code> wave cap as a fixed enemy count. This miscounts missions with infinite/repeated spawning. The message fields above are <strong>native EDF5 executable reconstruction</strong>, not a universal offset map for EDF6.</p>
+<p><strong>Evidence:</strong> static <code>steam-5d11de53</code> reverse engineering <code>bvm-generator-calls-2100-2101</code>, <code>bvm-setgenerator-native</code>, <code>generator-message-0x20100</code>, <code>generator-waves-repeat</code>, <code>generator-owner-classes</code>; includes game RVAs in the underlying research, but no new game session test.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14, edf5/mission-vm.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-bvm-setgenerator-20100-message-owners-waves"};</script><script src="../assets/site.js" defer></script></body></html>

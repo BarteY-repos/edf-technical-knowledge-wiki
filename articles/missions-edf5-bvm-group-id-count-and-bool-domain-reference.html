@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 BVM: group IDs, group counts and boolean query domains Scope: decompiled EDF5 mission bytecode mapped to EDF6 AngelScript in a retained 141-mission shippin"><title>EDF5 BVM group IDs, object counts and bool query domains | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / VM &amp; API</div><h1>EDF5 BVM group IDs, object counts and bool query domains</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">VM &amp; API</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact 141-mission source/target static typing comparison, not new game runtime</div><div id="articleBody"><p><strong>Scope:</strong> decompiled EDF5 mission bytecode mapped to EDF6 AngelScript in a retained <strong>141-mission shipping corpus</strong>. The observed source stack and target call signatures establish separate scalar domains for <strong>group identifiers</strong>, <strong>group-object counts</strong> and <strong>boolean queries</strong>. These are typed game-script semantics, not directions for a particular editor.</p>
+<h2 id="a-group-token-is-not-an-object-handle">A group token is not an <code>Object</code> handle</h2>
+<p>The audited source group system uses calls such as:</p>
+<table>
+<thead>
+<tr>
+  <th>Source custom call</th>
+  <th>Semantic role</th>
+  <th>Inferred source/target value domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>3500 AddGroupObjectBegin</code></td>
+  <td>Starts a group transaction</td>
+  <td>Group key is a scalar <strong>integer</strong></td>
+</tr>
+<tr>
+  <td><code>3502 GetGroupObjectCount</code></td>
+  <td>Queries number of group members</td>
+  <td>Return is scalar <strong>integer</strong>, not an <code>Object</code></td>
+</tr>
+<tr>
+  <td><code>9116 Factor_GroupObjectCount</code></td>
+  <td>Factor examines group count</td>
+  <td>Consumes integer group identity / count domain</td>
+</tr>
+<tr>
+  <td><code>9117 Factor_GroupObjectEncount</code></td>
+  <td>Factor examines group encounter</td>
+  <td>Consumes integer group identity</td>
+</tr>
+</tbody>
+</table>
+<p>A decompiler that types every <code>Object</code>-looking BVM global as an AngelScript <code>Object</code> reference can therefore generate the wrong API call or even a compile-time <code>Object&amp;</code>/integer error. The source context of a variable's consumers is stronger evidence of its domain than a generic placeholder type.</p>
+<h2 id="measured-source-conversion-examples">Measured source-conversion examples</h2>
+<p>A bounded source audit found <strong>22 declaration type corrections</strong> distributed across <strong>12 mission scripts</strong>, plus <strong>one boolean-domain comparison</strong> in <code>M004</code> — <strong>13 affected <code>MISSION.AC</code> files</strong> total:</p>
+<table>
+<thead>
+<tr>
+  <th>Mission</th>
+  <th>Examples of recovered domain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>M007_5</code></td>
+  <td><code>Spider02Group_count</code> is an integer</td>
+</tr>
+<tr>
+  <td><code>M028</code></td>
+  <td><code>LastSpider_group_count</code>, <code>ant01a_group_count</code>, <code>ant02a_group_count</code>, <code>ant_group_count</code>, <code>group_count</code> are integers</td>
+</tr>
+<tr>
+  <td><code>M043</code></td>
+  <td><code>total_enemy</code> is an integer count</td>
+</tr>
+<tr>
+  <td><code>M048</code></td>
+  <td><code>GROUP_DEIROI</code> and <code>group_count</code> are integers</td>
+</tr>
+<tr>
+  <td><code>M054</code></td>
+  <td><code>group_count</code> and <code>group_count_ara</code> are integers</td>
+</tr>
+<tr>
+  <td><code>M204</code></td>
+  <td><code>group_Ant02Count</code> is an integer</td>
+</tr>
+<tr>
+  <td>DLC1 <code>DM003_3</code></td>
+  <td><code>GROUP_DEIROI01</code>, <code>GROUP_FROG01</code>, <code>GROUP_FROG03</code>, <code>frog_count01</code>, <code>frog_count03</code> use scalar integer domains</td>
+</tr>
+<tr>
+  <td>DLC2 <code>DM005_2</code></td>
+  <td><code>GROUP_CARRIER</code> is a group ID (integer), not an object handle</td>
+</tr>
+</tbody>
+</table>
+<p>Other affected missions: <code>M029</code>, <code>M030</code>, <code>M042</code>, <code>M076</code>; the corrected field's exact consumer must still be examined rather than globally treating all symbolic names as integer.</p>
+<h2 id="isaimoveend-source-integer-truth-versus-target-boolean-result"><code>IsAiMoveEnd</code>: source integer truth versus target boolean result</h2>
+<p>A separate discrepancy in <code>M004</code> shows how two script generations can express the same condition using different value domains. A source-derived expression in the target script had the shape:</p>
+<pre><code class="language-angelscript">IsAiMoveEnd(loc_0x01) == 1
+</code></pre>
+<p>The inspected EDF6 callable returns <code>bool</code>, so the translated comparison must be:</p>
+<pre><code class="language-angelscript">IsAiMoveEnd(loc_0x01) == true
+</code></pre>
+<p>This is <strong>not</strong> license to rewrite all integer comparisons as booleans. It is specifically grounded in the target function's signature and the source numeric truth-domain comparison.</p>
+<h2 id="what-the-evidence-proves">What the evidence proves</h2>
+<p>The R42 source-only audit changed <strong>13 of 141</strong> generated mission scripts, retaining the remaining <strong>267 nonlisted runtime payload files byte-identically</strong> in that historical package. The focused mission engine regression suite passed <strong>23/23</strong>, structural validation reported zero errors/warnings, and no remaining non-integer declarations were found for the audited group-consumer set.</p>
+<p>These are <strong>static conversion and compilation qualifications</strong>. They do not independently establish that all 141 missions reproduced every source behavior at runtime. Later compatibility decisions (including deliberate mission-local omissions of unresolved custom call <code>3450</code>) are separate. A source group identifier should never be silently promoted to an object reference to make a specific target expression compile.</p>
+<p><strong>Sources:</strong> <code>MISSION/R42/R42_PATCH_AUDIT.json</code>, <code>MISSION/R42/R42_CURRENT_RESEARCH_STATE_2026-08-27.json</code>, the exact EDF5 BVM/EDF6 API corpus. See <a href="missions-%26-scripting-bvm-engine-call-and-factor-reference-table.html">custom-call and factor IDs</a> and <a href="missions-%26-scripting-source-void-and-ordering-rules-do-not-regress.html">source stack/order semantics</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MISSION/R42/R42_PATCH_AUDIT.json</li><li>MISSION/R42/R42_CURRENT_RESEARCH_STATE_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#a-group-token-is-not-an-object-handle">A group token is not an Object handle</a><a href="#measured-source-conversion-examples">Measured source-conversion examples</a><a href="#isaimoveend-source-integer-truth-versus-target-boolean-result">IsAiMoveEnd: source integer truth versus target boolean result</a><a href="#what-the-evidence-proves">What the evidence proves</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-bvm-group-id-count-and-bool-domain-reference"};</script><script src="../assets/site.js" defer></script></body></html>

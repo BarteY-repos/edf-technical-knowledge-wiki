@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Squad radio chatter is driven by AI conditions and cooldowns EDF5 uses named TalkManager tables. The game object and the current AI state determine whether a li"><title>EDF5 NPC dialogue triggers: joining, wounds, reloading, reinforcements and victory | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / NPC audio / AI</div><h1>EDF5 NPC dialogue triggers: joining, wounds, reloading, reinforcements and victory</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">NPC audio / AI</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 uses named <code>TalkManager</code> tables. The game object and the current AI state determine whether a line is eligible; it is not simply a fixed sound assigned to an animation. The source identifies the following native talk events:</p>
+<table>
+<thead>
+<tr>
+  <th>Trigger</th>
+  <th>Source condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>合流</code> (joining)</td>
+  <td>A recruit joins a player-led squad</td>
+</tr>
+<tr>
+  <td><code>体力低下</code> (low HP)</td>
+  <td>First crossing below half HP</td>
+</tr>
+<tr>
+  <td><code>ダメージ</code> (damage)</td>
+  <td>HP decreased; then approximately 300–599 frames cooldown, excluding certain state values</td>
+</tr>
+<tr>
+  <td><code>リロード</code> (reload)</td>
+  <td>A weapon becomes empty and is reloading</td>
+</tr>
+<tr>
+  <td><code>増援出現</code> (reinforcements)</td>
+  <td>Hostile count increased by more than ten, or increased from zero; after at least 900 life frames</td>
+</tr>
+<tr>
+  <td><code>気付かれた</code> (spotted)</td>
+  <td>First target after at least 60 frames</td>
+</tr>
+<tr>
+  <td><code>勝利</code> (victory)</td>
+  <td>At least 120 frames without a target</td>
+</tr>
+<tr>
+  <td><code>走り出す</code> (start running)</td>
+  <td>A following soldier has moved for around 90 frames under a local-player squad root; 300–899-frame cooldown</td>
+</tr>
+</tbody>
+</table>
+<p>The table names are <strong>native Japanese strings</strong> present in the source. Their English rendering here is an explanation rather than a claim about localized subtitle text. Cooldowns describe the examined AI conditions; actual spoken lines can also depend on table selection and game circumstances.</p>
+<p>The native source identifies distinct sound talk tables for Rangers, squad leaders, Fencers, Spriggans, Grim Reapers, civilians and alien types, so a per-actor fixed sound cannot capture the full event machinery.</p>
+<p><strong>Source:</strong> <code>edf5/soldier-ai.md</code>, <code>edf5-npc-talk-lines</code>, <code>edf5-npc-talk-triggers</code>, <code>edf5-talk-sgo-tables</code>. Native code and Root.cpk table census; no newly recorded dialogue session.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/soldier-ai.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-npc-radio-voice-table-trigger-conditions-cooldowns"};</script><script src="../assets/site.js" defer></script></body></html>

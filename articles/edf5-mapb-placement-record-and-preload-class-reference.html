@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 map.mapb: where map objects are placed A map&#39;s visible objects are not simply stored as complete models at their world positions. EDF5&#39;s map.mapb associate"><title>EDF5 MAPB: 0x44-byte placements, transform construction and preload classes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Maps / formats</div><h1>EDF5 MAPB: 0x44-byte placements, transform construction and preload classes</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Maps / formats</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R132 test</div><div id="articleBody"><p>A map's visible objects are not simply stored as complete models at their world positions. EDF5's <code>map.mapb</code> associates <strong>placement records</strong> with object definitions; the loader constructs a world matrix, chooses an object class by the definition's resource extension, and hands the resulting parameters to that class. EDF6 uses a closely related format, but not the same placement record size.</p>
+<h2 id="the-placement-record">The placement record</h2>
+<p>The studied EDF5 loader walks the entries with <strong>0x44 bytes per record</strong>. The corresponding EDF6 record is <strong>0x48 bytes</strong>. For a record at address <code>r</code> the source identified:</p>
+<table>
+<thead>
+<tr>
+  <th>Offset from <code>r</code></th>
+  <th>EDF5 meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td>Relative offset to the object definition</td>
+</tr>
+<tr>
+  <td><code>+0x04</code>, <code>+0x08</code>, <code>+0x0C</code></td>
+  <td>Translation X, Y, Z as 32-bit floats</td>
+</tr>
+<tr>
+  <td><code>+0x10</code>, <code>+0x14</code>, <code>+0x18</code></td>
+  <td>Euler rotation X, Y, Z <strong>in degrees</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The native function converts degrees to radians, applies the X, then Y, then Z rotations, and builds a matrix with the translation and homogeneous W=1. <strong>It does not read a per-record scale in this path.</strong> That does not mean no object in EDF5 can have scale: generated foliage and MDB model internals use other sources of scale and pose data.</p>
+<p>An object definition includes a type (<code>+0x00</code>), a self-relative parameter SGO pointer (<code>+0x04</code>), a name (<code>+0x0C</code>) and other display/damage fields. The parameter SGO is checked against <code>SGO</code> and version <code>0x102</code>. The corresponding <code>MAPO</code> record, when present, is at base <code>mapo+0x08 + placement_index*0x1C</code>.</p>
+<h2 id="which-native-class-loads-which-resource">Which native class loads which resource?</h2>
+<table>
+<thead>
+<tr>
+  <th>File-name ending</th>
+  <th>EDF5 preload owner</th>
+  <th>What makes it special</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>.mosb</code></td>
+  <td><code>Preload_Structure</code></td>
+  <td>Composite building or structure, often with individual parts</td>
+</tr>
+<tr>
+  <td><code>.fmep</code></td>
+  <td><code>Preload_Fmex</code></td>
+  <td>Ground/field scene and its associated FMB and grass resources</td>
+</tr>
+<tr>
+  <td><code>.mdx</code></td>
+  <td><code>Preload_AnimationModel</code> or <code>Preload_Model</code></td>
+  <td><code>HAS_ANIMATION</code> in parameter SGO selects the animated branch</td>
+</tr>
+<tr>
+  <td><code>.shfb</code></td>
+  <td><code>Preload_Shf</code></td>
+  <td>Heightfield terrain, with <code>.cols.sgo</code> and <code>.norm.sgo</code></td>
+</tr>
+<tr>
+  <td><code>.trb</code>, <code>.mlb</code></td>
+  <td><strong>Not spawned by this ordinary dispatcher</strong></td>
+  <td>Generated through the grow-object visitors of the ground/heightfield</td>
+</tr>
+</tbody>
+</table>
+<p>The original notes also identify a build-specific global that can skip certain definition categories; the exact conditions were recovered statically. They should not be interpreted as universal EDF5 authoring rules without the same executable.</p>
+<h2 id="how-the-constructed-matrix-travels">How the constructed matrix travels</h2>
+<p><code>Preload_Base::InitParam</code> receives the object's world matrix alongside the parent loader, embedded parameter SGO, record, definition, <code>MAPO</code> entry and original placement index. This establishes why <strong>resource-name identity, placement index, world transform and model part data are different pieces of the map format</strong>.</p>
+<p><strong>Evidence:</strong> static reading of EDF5 Steam build <code>steam-5d11de53</code> (<code>C3650</code> and its preload dispatch). The researcher explicitly did <strong>not</strong> independently compare every decoded byte to an untouched raw <code>map.mapb</code>; these offsets are engine-read semantics rather than a complete published binary grammar.</p>
+<p><strong>Sources:</strong> EDF Knowledge Hub, <code>edf5/map-placement.md</code>, facts <code>edf5-mapb-record</code>, <code>edf5-mapb-matrix</code>, <code>edf5-mapb-classes</code>, <code>edf5-preload-base</code>. Compare <a href="kh-edf6-file-formats.html">EDF6 map resource layout</a> and <a href="edf5-mapo-part-tables-structure-lod-and-rubble-pairs.html">EDF5 structure parts</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/map-placement.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-placement-record">The placement record</a><a href="#which-native-class-loads-which-resource">Which native class loads which resource?</a><a href="#how-the-constructed-matrix-travels">How the constructed matrix travels</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-mapb-placement-record-and-preload-class-reference"};</script><script src="../assets/site.js" defer></script></body></html>

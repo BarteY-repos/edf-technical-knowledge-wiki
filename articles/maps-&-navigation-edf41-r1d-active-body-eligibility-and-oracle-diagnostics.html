@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 navigation reconstruction: collision-body eligibility versus group ranking A source map may expose the correct set of geometry groups without exposing t"><title>EDF 4.1 navigation reconstruction: collision-body eligibility versus group ranking | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-navigation.html">Navigation</a></div><h1>EDF 4.1 navigation reconstruction: collision-body eligibility versus group ranking</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source geometry and historical oracle; active-body filter unresolved</div><div id="articleBody"><p>A source map may expose the correct <strong>set of geometry groups</strong> without exposing the correct <strong>active collision bodies</strong> within those groups. This distinction is central to the studied EDF4.1→EDF6 <code>NW_HILLYCITY_LIGHT</code> navigation reconstruction.</p>
+<h2 id="current-technical-correction">Current technical correction</h2>
+<p>A later source-semantic reconstruction <strong>does</strong> reproduce the exact historical 4,971 body-level footprint census from 4,994 pre-dedupe instances and 23 FixB semantic removals, while retaining the exact 65/1,405/251/1,153/1 group/placement/rotation census. It is an offline candidate, <strong>not</strong> recovered historical source or byte-exact final R1D HKT. The R75 best natural candidate is 381,544 bytes (+32 from the historical target); the 381,528-byte (+16) path uses a non-natural group swap. Selected-source audits through R100 close simple body-role, source-base, MAPB placement identity and shared Havok-object alias hypotheses in this corpus. See <a href="nav-edf41-r1d-source-authority.html">current R1D authority rules</a>, <a href="nav-edf41-mapo-component-transform-evidence.html">MAPO transform evidence</a>, and <a href="nav-edf41-selected-body-identity-audits.html">source identity/audit details</a>.</p>
+<p>The older sections below are retained <em>as historical diagnostics from before the R32/R75 source recovery</em>. They describe then-open hypotheses, not the latest pending tests.</p>
+<h2 id="what-is-actually-reproduced">What is actually reproduced</h2>
+<p>A source-static group rank based on geometry transformed by each body's <code>motionState</code> reproduces the retained historical selection census:</p>
+<table>
+<thead>
+<tr>
+  <th>Measured quantity</th>
+  <th style="text-align:right">Reconstructed / historical</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Source-static selected groups</td>
+  <td style="text-align:right">65</td>
+</tr>
+<tr>
+  <td>Selected placements</td>
+  <td style="text-align:right">1,405</td>
+</tr>
+<tr>
+  <td>Exact-zero rotations</td>
+  <td style="text-align:right">251</td>
+</tr>
+<tr>
+  <td>Yaw-only rotations</td>
+  <td style="text-align:right">1,153</td>
+</tr>
+<tr>
+  <td>Mixed X/Z rotations</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>Historical active body footprints</td>
+  <td style="text-align:right"><strong>4,971</strong>, still unresolved</td>
+</tr>
+</tbody>
+</table>
+<p>These equalities do <strong>not</strong> prove the historical algorithm has been recovered. Multiple group selections can yield the same aggregated placement census, and group membership alone does not determine the eligible <code>GroupGeometry.pieces</code> set.</p>
+<h2 id="the-hard-distinction-between-the-historical-note-and-retained-code">The hard distinction between the historical note and retained code</h2>
+<p>The historical classifier was described as testing a body-level condition <strong><code>max_xz &gt;= 5.75</code></strong>. The retained R1/R1B harness, however, ranks <strong>full source-static <code>GroupGeometry</code></strong>, counts primitive pieces and contains <strong>no persisted body-filter implementation</strong>. A later reconstructed filter is therefore a hypothesis about missing logic, not proven source code.</p>
+<p>The latest recovered natural experiment ranks the full geometry by XZ area, requires at least one active raw body and then applies the raw <code>max_xz</code> body filter. It reproduces the historical placement/rotation census but produces <strong>5,026 footprints: 55 too many</strong>. A prior R18 baseline produced <strong>4,948: 23 too few</strong> under a different candidate. The figures are results of <strong>different semantics</strong>, not a monotonically converging universal threshold.</p>
+<p>Further structural searches did not find a natural category of the 13–14 problematic body cases whose contributions simply account for the missing 55. One remaining known parser/body failure (<code>sk_car_bus01_hk.polymsh3</code>) must stay fail-closed; adding arbitrary bodies to hit the count is not evidence.</p>
+<h2 id="why-the-exact-4-971-matters">Why the exact 4,971 matters</h2>
+<p>The historical R1D target removes <strong>277</strong> triangles from the prior exact R1C navigation output, with 1,562 vertices and 2,651 triangles. A candidate already matched the tile counts and exact NVMD, yet the LOW HKT remained <strong>16 bytes larger</strong> and differed in SHA-256. Matching geometry statistics, target byte length and runtime traversal are <strong>three separate tests</strong>.</p>
+<p>For this reason a correct reproduction requires <em>natural eligibility</em> and exact source-backed ordering rather than numerical fitting. Do not change the <code>5.75</code> threshold, inject bodies manually, swap arbitrary groups or delete a seam record to make a length or SHA match.</p>
+<h2 id="earlier-proposed-discriminator-subsequently-audited">Earlier proposed discriminator (subsequently audited)</h2>
+<p>Compare source <code>hkpListShape</code> <strong>cached AABB</strong> semantics against bounds recomputed from its children with real convex-radius and motion-state behavior; preserve the same population and group ranking rules. If that produces a natural 4,971, record the <strong>named group set, per-group body membership, geometry method and deterministic reproduction</strong>, not only a count.</p>
+<p><strong>Evidence:</strong> exact historical R1D oracle; <code>EDF41_R1D_ACTIVE_BUILDER_FRONTIER_2026-11-14_R18.json</code> and superseding <strong>R19</strong>; associated ListShape-family and linked-primitive censuses. <strong>Status: unresolved offline reverse engineering; not an exact nav or runtime PASS.</strong></p>
+<p>Related: <a href="maps-%26-navigation-edf41-mapo-core-relayout-vs-whole-mac-size.html">MAPO object-row relayout</a>, <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">source binding and exact R1C/R1D controls</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Havok collision and navigation architecture</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_ACTIVE_BUILDER_FRONTIER_2026-11-14_R19.json</li><li>EDF41_R1D_ACTIVE_BUILDER_FRONTIER_2026-11-14_R18.json</li><li>EDF41_R1D_ASSOCIATED_LISTSHAPE_FAMILIES_2026-11-14_R1.json</li><li>EDF41_R1D_LINKED_TOP_LEVEL_PRIMITIVE_CENSUS_2026-11-14_R1.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#current-technical-correction">Current technical correction</a><a href="#what-is-actually-reproduced">What is actually reproduced</a><a href="#the-hard-distinction-between-the-historical-note-and-retained-code">The hard distinction between the historical note and retained code</a><a href="#why-the-exact-4-971-matters">Why the exact 4,971 matters</a><a href="#earlier-proposed-discriminator-subsequently-audited">Earlier proposed discriminator (subsequently audited)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-edf41-r1d-active-body-eligibility-and-oracle-diagnostics"};</script><script src="../assets/site.js" defer></script></body></html>

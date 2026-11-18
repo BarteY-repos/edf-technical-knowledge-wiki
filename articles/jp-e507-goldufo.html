@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="E507 Gold UFO ammunition records: observed fields and crash-sensitive unknowns Two separately recorded profiles The Japanese source contains a bullet_big_bomber"><title>E507 Gold UFO ammunition records and unknown fields | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>E507 Gold UFO ammunition records and unknown fields</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Community Japanese Workbook</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Translated contributed workbook notes; sample data, negative experiments and explicitly labeled inferences</div><div id="articleBody"><h2 id="two-separately-recorded-profiles">Two separately recorded profiles</h2>
+<p>The Japanese source contains a <code>bullet_big_bomber_info</code> pointer example for <code>E507_GOLDUFO_BIG.SGO</code> (<code>解析!A1665:A1690</code>) and a longer <code>bullet_info</code> XML-like record for <code>E507_GOLDUFO_ACE</code> (<code>解析!A2037:J2086</code>). They must not be assumed to share a single identical parser or flat ABI merely because their asset identifiers begin with <code>E507</code>.</p>
+<h2 id="ace-bullet-info-record-excerpt">ACE <code>bullet_info</code> record excerpt</h2>
+<p>The source's comments identify only a subset of its positions:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Record index</th>
+  <th>Sample value</th>
+  <th>Source label / interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>integer <code>30</code></td>
+  <td>Burst projectiles per attack, according to note</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>integer <code>1</code></td>
+  <td><code>fireinterval</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>integer <code>1</code></td>
+  <td><code>firecount</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td>float <code>0.40000001</code></td>
+  <td><code>ammosize</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5</code></td>
+  <td>float <code>30</code></td>
+  <td>Bullet speed (<code>弾速</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>7</code></td>
+  <td>integer <code>15</code></td>
+  <td><code>ammoalive</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>13</code></td>
+  <td>float <code>0</code></td>
+  <td>Changing this reportedly makes attacks aim above or below the target</td>
+</tr>
+</tbody>
+</table>
+<p>The nested <code>ptr</code> at index <code>6</code> contains additional integers/floats whose purpose is <strong>unknown</strong>. The author noted that one inner integer sample <strong><code>8</code></strong> (<code>bullet_info[6][2][0]</code> if the XML nesting is read literally) caused a <strong>crash as soon as the aircraft spawned when changed</strong> (<code>解析!A2060:J2062</code>). This is a critical <em>negative experiment</em>; do not treat the value as a safely tunable color/selector enum. The author also says that a nearby float is <em>probably not <code>ammocolor</code></em> (<code>J2052:J2054</code>).</p>
+<h2 id="implementation-rules">Implementation rules</h2>
+<ul>
+<li>Preserve unknown pointer nesting and indices when round-tripping SGO/XML; do not “normalize” it into a documented bullet class schema without evidence.</li>
+<li>A field annotated <code>ammoalive</code> does not automatically establish seconds, frames or lifetime tick units; preserve raw values until runtime measurement.</li>
+<li>Unchanged native structs are the safe default for fields whose mutation is reported to crash on spawn.</li>
+<li>Keep <code>GOLDUFO_BIG</code>'s <code>bullet_big_bomber_info</code> separate from <code>GOLDUFO_ACE</code>'s <code>bullet_info</code>. They are different textual source excerpts.</li>
+</ul>
+<p><strong>Source:</strong> <code>mod製作メモ.xlsx</code>, <code>解析!A1665:A1690</code>, <code>A2037:J2086</code>. The source includes uncertain annotations and reported experiments, not a full binary reverse engineering proof for these records. No original resource binary is redistributed.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>mod製作メモ.xlsx (Japanese community memo), SHA256 d78ab415bcbce59ac762b415cec087a3d82cd501a006e23d995cf0ec654447c5f5</li><li>Cell ranges cited per article; public permission relayed by user 2026-11-15</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-separately-recorded-profiles">Two separately recorded profiles</a><a href="#ace-bullet-info-record-excerpt">ACE bullet_info record excerpt</a><a href="#implementation-rules">Implementation rules</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"jp-e507-goldufo"};</script><script src="../assets/site.js" defer></script></body></html>

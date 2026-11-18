@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 / EDF 5 / EDF 6 CAS and CANM: actual record layouts and key conversion The games have different CAS state-controller layouts and CANM key encodings. A v"><title>EDF 4.1 / EDF 5 / EDF 6 CAS and CANM: actual record layouts and key conversion | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-animation.html">Animation</a></div><h1>EDF 4.1 / EDF 5 / EDF 6 CAS and CANM: actual record layouts and key conversion</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Animation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Native format source research and bounded pairwise corpus; not new runtime</div><div id="articleBody"><p>The games have different <strong>CAS state-controller layouts</strong> and <strong>CANM key encodings</strong>. A version-word edit can make a file look plausible to a parser while still mapping the wrong commands or rotations. This guide describes the <strong>measured 2026 paired-file and exact-binary research</strong>, not an independently established universal conversion law for every modded asset.</p>
+<h2 id="container-generations">Container generations</h2>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th style="text-align:right">EDF 4.1</th>
+  <th style="text-align:right">EDF 5</th>
+  <th style="text-align:right">EDF 6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>CAS\0</code> version word</td>
+  <td style="text-align:right"><code>0x200</code></td>
+  <td style="text-align:right"><code>0x203</code></td>
+  <td style="text-align:right"><code>0x204</code></td>
+</tr>
+<tr>
+  <td>CAS <code>data</code> command record</td>
+  <td style="text-align:right"><code>0x24</code> bytes</td>
+  <td style="text-align:right"><code>0x34</code> bytes</td>
+  <td style="text-align:right"><code>0x34</code> bytes</td>
+</tr>
+<tr>
+  <td>Embedded <code>CANM</code> version</td>
+  <td style="text-align:right"><code>0x200</code></td>
+  <td style="text-align:right"><code>0x200</code></td>
+  <td style="text-align:right"><code>0x300</code></td>
+</tr>
+<tr>
+  <td>CANM channel record</td>
+  <td style="text-align:right"><code>0x20</code> bytes</td>
+  <td style="text-align:right"><code>0x20</code> bytes</td>
+  <td style="text-align:right"><code>0x30</code> bytes</td>
+</tr>
+</tbody>
+</table>
+<p>A studied CAS header uses <strong>0x30 bytes</strong>, with its embedded-CANM offset at <strong>CAS <code>+0x08</code></strong>, followed by the counts and offsets for <code>tcontrol</code>, <code>vcontrol</code>, animation groups and bones. The embedded CANM begins on a <strong>16-byte boundary</strong>. CAS string references include <strong>signed relative offsets</strong> to UTF-16LE names. Do not transplant offsets from the old layout after inserting new records.</p>
+<p>A CANM has a <strong>0x20-byte header</strong>, 28-byte clip records and 8-byte track records. Each track contains a <code>uint16</code> bone index and <strong>three signed 16-bit</strong> indices for translation, rotation and scale (<code>-1</code> = no channel). Clip records hold a name pointer, duration, step/frame interval, frame count, and track count/location.</p>
+<h2 id="edf5-4-1-canm-0x200-channels">EDF5/4.1 CANM 0x200 channels</h2>
+<p>The measured <strong>0x20-byte</strong> channel stores a keyed/static flag, count, three <code>float32</code> base values, three <code>float32</code> scale/step values, and an offset to key data. Animated XYZ keys are stored as three <code>uint16</code> integers per key. For each component:</p>
+<p>[
+v_i(k)=\operatorname{float32}\bigl(base_i + \operatorname{float32}(key_i(k)\cdot step_i)\bigr).
+]</p>
+<p>In the studied rotation lane, the resulting XYZ values are <strong>Euler angles in radians</strong>, applied in source rotation order <strong><code>Rz · Ry · Rx</code></strong>. Floating-point evaluation order matters when comparing exact converted bytes.</p>
+<h2 id="edf6-canm-0x300-channel-kinds">EDF6 CANM 0x300 channel kinds</h2>
+<p>The channel expands to <strong>0x30 bytes</strong>: eight <code>float32</code> values (base XYZW and multiplier XYZW), then four signed 32-bit values (key offset, kind, count, reserved). In the analyzed native channels:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Kind</th>
+  <th>Role</th>
+  <th>Stored values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>Static vector</td>
+  <td>Base XYZ (W and steps set appropriately)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>Animated quantized vector</td>
+  <td>Base + <code>uint16</code> XYZ key × multiplier</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>Static quaternion</td>
+  <td>Base <code>float32 XYZW</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3</code></td>
+  <td>Animated quaternion</td>
+  <td>One <code>float32 XYZW</code> quadruplet per key</td>
+</tr>
+</tbody>
+</table>
+<p>The target engine reads quaternion vector data with aligned vector loads. The native writer therefore places quaternion key blocks on <strong>16-byte boundaries</strong>. For every reused source channel, a converter must separate <strong>vector</strong> and <strong>quaternion</strong> roles, because EDF5 can reuse a zero-valued channel for translation and Euler rotation, while EDF6 needs different representations.</p>
+<h2 id="euler-quaternion-not-merely-degree-conversion">Euler → quaternion: not merely degree conversion</h2>
+<p>The examined EDF6 path converts source Euler radians to an XYZW quaternion through an explicit sequence of X, Y and Z rotations, applying float32 rounding and the target runtime's <code>sinf</code>/<code>cosf</code> behavior. If the source has quantized keys, the exact original unquantized authoring angles may already be lost. Producing a geometrically equivalent rotation does <strong>not</strong> guarantee byte-exact target quaternions.</p>
+<p><strong>Measured evidence from retained matched-file tests:</strong></p>
+<ul>
+<li>All <strong>836</strong> analyzed CAS files across the three Root.cpk corpora could be parsed and round-tripped under the retained model.</li>
+<li>Among <strong>230</strong> same-name EDF5/EDF6 pairs, <strong>66</strong> matched byte-for-byte after conversion; <strong>21</strong> target files were substantively re-authored.</li>
+<li>The other <strong>143</strong> paired conversions were byte-identical apart from quaternion float differences and, in <strong>69</strong> cases, quaternion key-block ordering.</li>
+<li><strong>1,487/1,487</strong> measured static quaternions matched bitwise; among <strong>1,958,796</strong> animated quaternion keys, <strong>88,038</strong> matched bitwise, with the others differing within the source quantization/float rounding envelope reported by the original analysis.</li>
+<li><strong>204/205</strong> tested EDF4.1 CAS assets converted under the bounded implementation. <code>GIANTANT_HOKAO</code> contained uncommon source command IDs <code>2/3</code> without demonstrated mappings and was intentionally rejected.</li>
+</ul>
+<p>These numbers are <strong>corpus results</strong>, not proof that arbitrary custom CAS variants or future game builds have the same command set.</p>
+<h2 id="cas-commands-also-need-semantic-remapping">CAS commands also need semantic remapping</h2>
+<p>Command IDs changed between generations; the observed converter mapped known commands by <strong>same-named control/state/slot position</strong> in paired assets, not by blindly adding a constant to every opcode. EDF4.1's 0x24-byte <code>data</code> structs expand to 0x34 and inherited pointers/unused words require clearing where the destination native representation does. Unknown command identities must <strong>fail closed</strong> rather than adopting the nearest numeric opcode.</p>
+<h2 id="retargeting-after-a-skeleton-bind-pose-change">Retargeting after a skeleton/bind-pose change</h2>
+<p>If an MDB bone's bind translation changes, <strong>absolute</strong> CANM animation translations can pull it back to its original location. The qualified source procedure computes a per-bone local translation delta, applies it only to explicitly named absolute clips and modifies the <strong>base</strong> XYZ of a channel, leaving quantized keys and time steps intact. Additive/recoil clips should not automatically receive this offset.</p>
+<p>A channel shared by two tracks needing <em>different</em> translation adjustments cannot be patched unambiguously and must be rejected. Removing a runtime-plugin-owned bone track also differs from changing its key values. Quaternion rotation poses follow EDF's <strong>row-vector matrix convention</strong>; directly substituting the more common column-vector matrix will produce a wrong world-space result.</p>
+<p><strong>Evidence:</strong> retained <code>cas_legacy.py</code>, <code>cas_pose.py</code> source and their embedded research notes/tests. No new native game run was performed for this release. See <a href="animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">CAS player/controller requirements</a> and <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">MAB record format</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R10 HF4 R9 source package: components/objects/pylib/cas_legacy.py</li><li>R10 HF4 R9 source package: components/objects/pylib/cas_pose.py</li><li>EDFModelUtility CANM/CAS cross-game notes 2026-11-13</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#container-generations">Container generations</a><a href="#edf5-4-1-canm-0x200-channels">EDF5/4.1 CANM 0x200 channels</a><a href="#edf6-canm-0x300-channel-kinds">EDF6 CANM 0x300 channel kinds</a><a href="#euler-quaternion-not-merely-degree-conversion">Euler → quaternion: not merely degree conversion</a><a href="#cas-commands-also-need-semantic-remapping">CAS commands also need semantic remapping</a><a href="#retargeting-after-a-skeleton-bind-pose-change">Retargeting after a skeleton/bind-pose change</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"animation-cas-canm-cross-generation-structure-and-key-conversion"};</script><script src="../assets/site.js" defer></script></body></html>

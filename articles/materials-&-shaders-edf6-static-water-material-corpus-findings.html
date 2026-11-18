@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 native static-water material: observed shader and resource family The native map/model material shader family snd_BRDF_Map_Water is present in the inspecte"><title>EDF6 native static-water material: observed shader and resource family | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF6 native static-water material: observed shader and resource family</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Technical reference · Four-map retained native MDB shader/resource census</div><div id="articleBody"><p>The native map/model material shader family <strong><code>snd_BRDF_Map_Water</code></strong> is present in the inspected EDF6 map RAB corpus. The available evidence supports a static authored-water material profile and a set of texture inputs; it does <strong>not</strong> establish separate general-purpose <code>River</code> and <code>Ocean</code> shader variants.</p>
+<h2 id="exactly-what-the-retained-corpus-contains">Exactly what the retained corpus contains</h2>
+<p>Four source RAB inventories were searched read-only for MDB shader names and water/river/ocean-related resources:</p>
+<table>
+<thead>
+<tr>
+  <th>Native map RAB</th>
+  <th style="text-align:right">Parsed MDB models</th>
+  <th style="text-align:right"><code>snd_BRDF_Map_Water</code> occurrences</th>
+  <th style="text-align:right">Parse errors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>NW_EUROPE01</code></td>
+  <td style="text-align:right">165</td>
+  <td style="text-align:right"><strong>1</strong></td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507</code></td>
+  <td style="text-align:right">66</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>IG_CAVE503</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>IG_DESERT508</code></td>
+  <td style="text-align:right">76</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>The positive example is the model <strong><code>eu1_nw_field01_water.mdb</code></strong> in <code>NW_EUROPE01</code>. Associated resource names include:</p>
+<pre><code class="language-text">ig_watershore01.dds
+ig_watershore01.lod.dds
+ig_water01_n.dds
+ig_water01_n.lod.dds
+</code></pre>
+<p>These associations establish that the inspected water material uses multiple texture/resource roles including a normal-texture family. They do <strong>not</strong>, by themselves, prove the shader's complete HLSL sampling equations or every channel's semantic meaning.</p>
+<h2 id="authoring-parameters-in-the-bounded-profile">Authoring parameters in the bounded profile</h2>
+<p>The recovered experimental static-water exporter exposes a <em>measured profile</em> incorporating overall color, specular, roughness and metallic parameters, blending/depth controls, UV scale/scroll settings and separate bubble/normal-layer controls. The authoring representation contains <strong>two bubble layers</strong> and <strong>three normal-related controls</strong> (amount, scroll X/Z and UV scale) in that examined profile. This is a description of recovered source-owned authoring controls; do not reinterpret it as proof of the complete native shader algorithm.</p>
+<p>The material is applied to a bounded horizontal surface with UV0 and separately specified planar/collision assumptions. A valid MDB/RAB/MAPB build is not enough to demonstrate correct <strong>transparency order, depth blending, shader time behavior, culling or gameplay water interaction</strong>.</p>
+<h2 id="what-cannot-be-inferred">What cannot be inferred</h2>
+<ul>
+<li>No separately named river/ocean shader occurred in these <strong>four</strong> retained inventories. That is a finite census, not proof that EDF6 globally has no other water implementation.</li>
+<li><code>snd_BRDF_Map_Water</code> name alone does not prove that every wet/reflective surface should use it.</li>
+<li>A static-water authored writer being deterministic offline is <strong>not</strong> proof of in-game visual parity.</li>
+<li>Avoid creating fabricated <code>snd_BRDF_Map_River</code>/<code>...Ocean</code> families without independent native material or engine evidence.</li>
+</ul>
+<p>See <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB material shading</a>, <a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">native shader-family field guide</a> and <a href="maps-%26-navigation-advanced-map-authoring-scatter-grass-water-lod-destructible-collapse-building-stack.html">advanced water authoring</a>.</p>
+<p><em>Evidence:</em> 2026-10-16 four-map native RAB shader/resource census and bounded static-water source exporter. No new in-game water rendering qualification.</p>
+<h2 id="native-water-is-a-dedicated-map-object-not-just-an-mdb-material">Native water is a dedicated map object, not just an MDB material</h2>
+<p>The inspected <code>NW_EUROPE01</code> source model <code>eu1_nw_field01_water.mdx</code> is registered as <strong>MAPB T1 Class 10</strong>, with a 33-field water SGO (<code>Type=&quot;水&quot;</code>, <code>Collision_Enable=-1</code>, <code>Durability=0</code>, <code>CrashType=0</code>, <code>FenceType=-1</code>). Its MAPO slot references a visual MDB, <code>_hk.mdb</code> and <code>.hkt</code>; there are <strong>no p58 destruction groups or T50 pieces</strong>. The native MAD contains a <strong>static</strong> water collision body with 10 triangles that matches the ten-triangle planar visual footprint. This distinguishes <em>resource identity</em>, <em>shader ABI</em> and <em>collision shape</em> from any unproved fluid gameplay. See <a href="edf6-static-water-mapb-class10-sgo-and-havok-native-object.html">native EDF6 class-10 water object</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R48_WATER_FAMILY_RECONCILIATION_2026-10-16.md</li><li>R48_WATER_FAMILY_CENSUS.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#exactly-what-the-retained-corpus-contains">Exactly what the retained corpus contains</a><a href="#authoring-parameters-in-the-bounded-profile">Authoring parameters in the bounded profile</a><a href="#what-cannot-be-inferred">What cannot be inferred</a><a href="#native-water-is-a-dedicated-map-object-not-just-an-mdb-material">Native water is a dedicated map object, not just an MDB material</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-edf6-static-water-material-corpus-findings"};</script><script src="../assets/site.js" defer></script></body></html>

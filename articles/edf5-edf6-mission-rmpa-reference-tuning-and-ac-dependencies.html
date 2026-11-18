@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission RMPA reference-port tuning: 68 missions and script dependencies What changed and what did not In the paired EDF5-source vs reference-EDF6 RMPA corpus, 6"><title>Mission RMPA reference tuning: 68 affected missions and script references | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Missions &amp; Scripting</div><h1>Mission RMPA reference tuning: 68 affected missions and script references</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Missions &amp; Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-corpus/static reverse-engineering; no new game runtime test</div><div id="articleBody"><h2 id="what-changed-and-what-did-not">What changed and what did not</h2>
+<p>In the paired EDF5-source vs reference-EDF6 RMPA corpus, <strong>68 of 141 missions</strong> had at least one record tuned in the reference port. The changes comprised <strong>76 route records, 8 shapes and 48 spawn records</strong>. These are descriptions of a <em>reference conversion</em>, not proof that native EDF6 always rewrites positions during asset loading.</p>
+<table>
+<thead>
+<tr>
+  <th>Comparison</th>
+  <th style="text-align:right">Exact matches in paired corpus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Route waypoint global index rule</td>
+  <td style="text-align:right">5,103 / 5,103</td>
+</tr>
+<tr>
+  <td>Route GID, next topology and width</td>
+  <td style="text-align:right">5,103 / 5,103 each</td>
+</tr>
+<tr>
+  <td>Route kind/name</td>
+  <td style="text-align:right">5,058 / 5,103</td>
+</tr>
+<tr>
+  <td>Route coordinate record</td>
+  <td style="text-align:right">5,072 / 5,103</td>
+</tr>
+<tr>
+  <td>Shape type + GID</td>
+  <td style="text-align:right">1,355 / 1,355</td>
+</tr>
+<tr>
+  <td>Shape names</td>
+  <td style="text-align:right">1,353 / 1,355</td>
+</tr>
+<tr>
+  <td>Shape payloads</td>
+  <td style="text-align:right">1,349 / 1,355</td>
+</tr>
+<tr>
+  <td>Spawn GID</td>
+  <td style="text-align:right">3,386 / 3,387</td>
+</tr>
+<tr>
+  <td>Spawn positions</td>
+  <td style="text-align:right">3,340 / 3,387</td>
+</tr>
+</tbody>
+</table>
+<p>A position not matching byte for byte is not automatically a gameplay-level discrepancy: <code>0</code> vs <code>-0</code>, small rounding and deliberate coordinate shifts require separate interpretation. Conversely, reference-only shape-payload changes may affect a mission trigger even if the rest of the file parses normally.</p>
+<h2 id="the-68-affected-missions">The 68 affected missions</h2>
+<p>Each line gives changed routes / shapes / spawn records; the full CSV retains names of the first matching examples and all 68 numerical counts.</p>
+<table>
+<thead>
+<tr>
+  <th>Pack</th>
+  <th>Mission</th>
+  <th style="text-align:right">Routes</th>
+  <th style="text-align:right">Shapes</th>
+  <th style="text-align:right">Spawns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MP03</td>
+  <td><code>M000</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M001</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M005</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M007_5</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M008</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M009</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M010</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M011</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M014</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015_2</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015_3</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M016</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M017</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M019_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M020_5</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M021</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M027</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M029</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M032_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M034</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M034_5</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M035</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M036</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M037</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M041</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M042</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M042_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M044</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M045</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M046_3</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M047_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M050</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M052</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M054</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M054_5</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M056</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M060</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M061</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M063</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M067</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M069</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M070</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_1</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_2</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M075</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M076</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M079</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M080</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M081</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M083</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M090</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M099</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M202</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M203</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M204</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM001</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM003_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM003_3</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM005</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM018</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM020</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM006_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM007_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM010</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM014_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM017</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM023</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+</tr>
+</tbody>
+</table>
+<h2 id="which-changes-actually-have-mission-script-users">Which changes actually have mission-script users?</h2>
+<table>
+<thead>
+<tr>
+  <th>Record family</th>
+  <th style="text-align:right">Reference-tuned records</th>
+  <th style="text-align:right">Meaningful changes (audit classification)</th>
+  <th style="text-align:right">Records named in <code>MISSION.AC</code></th>
+  <th style="text-align:right">Literal occurrences</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Spawn</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">37</td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">55</td>
+</tr>
+<tr>
+  <td>Route</td>
+  <td style="text-align:right">76</td>
+  <td style="text-align:right">71</td>
+  <td style="text-align:right">35</td>
+  <td style="text-align:right">38</td>
+</tr>
+<tr>
+  <td>Shape</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">5</td>
+</tr>
+</tbody>
+</table>
+<p>The literal-name audit proves <strong>a script references a named record</strong>, not that the reference-port coordinate adjustment was necessary or harmless. For instance, the M005 <code>マザーシップ</code> spawn was shifted by +0.25 in one coordinate in the reference port and is consumed by <code>CreateNeutral</code>; the <code>M007_5</code> crowd route <code>群衆ルート01_2</code> has a +0.25 local route adjustment and is named by <code>CreateMob_Path</code>. These are real differences in a reference asset, not native engine mandates.</p>
+<h2 id="twenty-one-additional-empty-groups-in-the-reference-port">Twenty-one additional empty groups in the reference port</h2>
+<p>The reference comparison found <strong>5 empty route groups, 5 empty shape groups and 11 empty spawn groups</strong> not present in the clean source. None of these 21 group names had a matching script reference within the same namespace in the audited <code>MISSION.AC</code> set. That supports a narrow <em>name-reference closure</em> conclusion, not a statement that empty groups can never influence loading or state in other circumstances. Their exact names, missions and type are in <code>data/EDF5_TO_EDF6_MISSION_RMPA_21_EMPTY_GROUPS_R118.csv</code>.</p>
+<h2 id="provenance-and-runtime-boundary">Provenance and runtime boundary</h2>
+<ul>
+<li>The source-only mission RMPA recreation matches the known source semantics and AC literal references for 141/141 files; <strong>6,665</strong> source-script-to-RMPA literal references were checked with no missing generated name.</li>
+<li>This does <strong>not</strong> establish that all tuning is optional for correct gameplay. The source audit explicitly left the coordinate/payload effect unresolved without runtime evidence.</li>
+<li>Mission RMPA, map RMPA, and NAV are separate identities. <code>SetAiPath(...,&quot;navigationmap&quot;)</code> does not refer to a mission route named <code>navigationmap</code>.</li>
+</ul>
+<p><strong>Sources:</strong> <code>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_SHIPPING141_REFERENCE_PAIR_AUDIT_2026-08-27.json</code> and <code>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_REFERENCE_TUNING_AC_DEPENDENCY_AUDIT_2026-08-27.json</code>. Earlier clean EDF5 source corpus from <code>Missions and tables comparison.zip</code>; reference-port tuning is not described as stock EDF6 generation logic.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_SHIPPING141_REFERENCE_PAIR_AUDIT_2026-08-27.json</li><li>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_REFERENCE_TUNING_AC_DEPENDENCY_AUDIT_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-changed-and-what-did-not">What changed and what did not</a><a href="#the-68-affected-missions">The 68 affected missions</a><a href="#which-changes-actually-have-mission-script-users">Which changes actually have mission-script users?</a><a href="#twenty-one-additional-empty-groups-in-the-reference-port">Twenty-one additional empty groups in the reference port</a><a href="#provenance-and-runtime-boundary">Provenance and runtime boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-mission-rmpa-reference-tuning-and-ac-dependencies"};</script><script src="../assets/site.js" defer></script></body></html>

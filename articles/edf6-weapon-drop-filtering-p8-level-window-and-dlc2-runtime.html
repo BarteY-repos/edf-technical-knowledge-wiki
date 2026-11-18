@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 weapon-drop candidate eligibility: WEAPONTABLE.P8 and level windows EDF6&#39;s weapon candidate selection checks more than a mission&#39;s difficulty and nominal r"><title>EDF6 weapon drop eligibility: P8 filtering, level window and DLC2 test | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Weapon rewards and DLC classes</div><h1>EDF6 weapon drop eligibility: P8 filtering, level window and DLC2 test</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Weapon rewards and DLC classes</span></div><div class="referencebadge">Technical reference · Source-derived; separates static evidence and the limited modded-runtime results</div><div id="articleBody"><p>EDF6's weapon candidate selection checks more than a mission's difficulty and nominal reward-level range. Binary analysis and a limited test in a <strong>modified EDF6 runtime</strong> identify a class filter driven by <code>WEAPONTABLE</code> source property <code>P8</code>. It is a <strong>loot-family discriminator</strong>, separate from the mission's ModeList or MissionPack number.</p>
+<h2 id="candidate-filter-sequence-observed-in-one-edf6-binary">Candidate-filter sequence observed in one EDF6 binary</h2>
+<p>In the examined <code>EDF.dll</code> (SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>), the trace is:</p>
+<ol>
+<li><code>ResolveResult()</code> at <code>EDF+0x2C92E0</code> derives the eligible weapon-level interval.</li>
+<li>A downstream candidate-builder entry near <code>EDF+0xD81E0</code> reads decoded weapon rows; the analyzed source fields include <code>P5</code> and <code>P8</code>.</li>
+<li>The <strong><code>P8</code> filter is applied before the level-range filter</strong>. In the observed native rule, <code>P8=0</code> passes this classification check; nonzero <code>P8</code> must equal the active <em>logical MissionPack ID</em>.</li>
+<li>Eligible rows then continue through their level checks and the remaining game-selected reward steps.</li>
+</ol>
+<p>The decoded runtime structure at this stage included source <code>P5</code> at <code>+0x1C</code> and <code>P8</code> at <code>+0x28</code>; these are <strong>runtime decoded record offsets</strong>, not asserted bytes within raw file storage. The symbol names and RVA observations apply only to the cited binary build.</p>
+<h2 id="p8-is-not-the-missionpack-number">P8 is not the MissionPack number</h2>
+<table>
+<thead>
+<tr>
+  <th>Intended loot pool</th>
+  <th>Base <code>P8=0</code> candidates</th>
+  <th>DLC1 <code>P8=1</code></th>
+  <th>DLC2 <code>P8=2</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Base/ordinary class <code>0</code></td>
+  <td>Eligible by class</td>
+  <td>No</td>
+  <td>No</td>
+</tr>
+<tr>
+  <td>DLC1 class <code>1</code></td>
+  <td>Eligible by class</td>
+  <td>Eligible by class</td>
+  <td>No</td>
+</tr>
+<tr>
+  <td>DLC2 class <code>2</code></td>
+  <td>Eligible by class</td>
+  <td>No</td>
+  <td>Eligible by class</td>
+</tr>
+</tbody>
+</table>
+<p><strong>This table describes the class gate</strong>, before considering level ranges or other downstream conditions. DLC1 and DLC2 classes each include common/base <code>P8=0</code> rows; <code>P8=1</code> and <code>P8=2</code> are not interchangeable. In the observed custom port, <code>MissionPack03</code>, <code>04</code>, <code>05</code> represented native content classes <code>0</code>, <code>1</code>, <code>2</code>; that relationship was created deliberately and is <strong>not an automatic stock EDF6 rule</strong>.</p>
+<h2 id="actual-dlc2-discrimination-test">Actual DLC2 discrimination test</h2>
+<p>The retained 5 October 2026 test used a <strong>modified MissionPack09</strong>, explicitly assigned DLC2 class <code>2</code>, with EDF6's native <code>IG_TEST_BLUEFLD</code> map. Five SilverSpiders were placed in a simple mission to supply boxes. The offline preflight validated the source and binary signatures; a separate <em>later game run</em> reported:</p>
+<table>
+<thead>
+<tr>
+  <th>Runtime observation</th>
+  <th>Recorded value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Class resolution</td>
+  <td><code>packEntry=9</code>, desired class <code>2</code></td>
+</tr>
+<tr>
+  <td>Candidate level calculation</td>
+  <td><code>lo=81.25</code>, <code>hi=106.25</code>, <code>extra=1.25</code></td>
+</tr>
+<tr>
+  <td>Scanned <code>P8=2</code> rows</td>
+  <td><strong>110</strong></td>
+</tr>
+<tr>
+  <td>Newly admitted rows (<code>FIX_ADD</code>)</td>
+  <td><strong>34</strong></td>
+</tr>
+<tr>
+  <td>Added candidates' levels</td>
+  <td><strong>106.25–107.50</strong></td>
+</tr>
+<tr>
+  <td>Sample added row</td>
+  <td>index <code>1451</code>, level <code>107.50</code>, <code>P8=2</code></td>
+</tr>
+<tr>
+  <td>Visible result-screen drops</td>
+  <td><strong>N9 Eros Vulture ZAM</strong> and <strong>Gigantocopter 3 Delta</strong>, both <strong>Lv 107</strong>, Air Raider</td>
+</tr>
+</tbody>
+</table>
+<p>This test is <strong>runtime-positive evidence</strong> that the patched candidate builder can admit and reward DLC2-exclusive weapons for a custom MissionPack that the native ID-to-<code>P8</code> comparison would otherwise exclude. It is <strong>not evidence</strong> that unmodified MissionPack09 naturally selects DLC2 loot, that higher than Lv 107 rewards were observed, or that every row in the 110-row class was awarded. The high-end <code>hi+extra</code> behavior was recorded in the test interval; it should not be generalized into an undocumented global reward formula.</p>
+<h2 id="why-some-older-negative-tests-are-not-evidence">Why some older negative tests are not evidence</h2>
+<p>Earlier experimental runs labeled R1 and R2 failed their <em>binary signature validators</em> before the required game hooks could run. Their apparent no-op behavior therefore cannot falsify the loot-class hypothesis. In R1 the caller signature was anchored at an incorrect instruction boundary; R2 expected an incorrect <code>ResolveResult()</code> prologue. The later runtime observation comes from a distinct, validated test candidate. This section concerns <strong>confidence in the findings</strong>, not instructions to install any of those loaders.</p>
+<h2 id="follow-up-original-edf5-dlc2-port-mission-in-mp05">Follow-up: original EDF5 DLC2 port mission in MP05</h2>
+<p>A separate, later game run used the <strong>actual EDF5 DLC2 mission content</strong> in a customized EDF6 <code>MissionPack05</code>, rather than the earlier instrumented <code>MissionPack09</code> demonstration. The validated diagnostic log reported four true MP05 scans (<code>n=2…5</code>), with <code>packEntry=5</code> translated to <strong>loot class 2</strong>. Its recorded eligibility interval was <code>lo100=8798</code>, <code>hi100=11298</code>, <code>extra100=125</code> (hundredth-unit values). The log contained <strong>392 <code>FIX_ADD</code> records</strong> across the MP05 scan output. The newly admitted DLC2 <code>P8=2</code> candidate levels included <strong>106.25, 110.00, 111.25, 112.00 and 112.50</strong>.</p>
+<p>This is stronger evidence for <strong>class-2 candidate admission in real EDF5 DLC2 port content</strong>, rather than only the deliberately assigned MP09 test fixture. The number 392 is a count of logged additions, <strong>not</strong> a proven count of 392 distinct weapon identities or awarded items. Nor is a candidate of level 112.50 proof of an on-screen Lv112 reward: the earlier MP09 run separately showed two awarded Lv107 weapons, while the later MP05 evidence establishes admission to the scanned pool.</p>
+<p><strong>Attribution and scope:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/PATCH_1_0_5/EDF5_EDF6_PATCH_1_0_5_RC1_SOURCE_AND_AUDIT_AUTHORITY_2026-10-05.zip</code>, inner <code>package/REAL_MP05_DLC2_LOOT_RUNTIME_EVIDENCE.txt</code> and handoff; reported user game log and qualified modified binary. The original game engine's <code>P8</code> field behavior is static-binary evidence. The additional MP05 scan is a <strong>modified EDF6 runtime test</strong>, not the unmodified native EDF6 drop table, a complete DLC1 acceptance matrix, or a verified distribution of rewarded items.</p>
+<h2 id="what-remains-unproven">What remains unproven</h2>
+<p>The MP09 runtime acceptance confirms <strong>DLC2-exclusive Lv 107 rewards</strong> in one instrumented game session. A separate real-MP05 DLC2 session confirms additional <strong>eligible candidates up to 112.50</strong>, not on-screen 110+ awards. Together they still do not qualify all DLC1/DLC2 or arbitrary packs, all difficulties, every weapon level, or the distribution of high-level rewards. No new game run was performed for this wiki article.</p>
+<p><strong>Source provenance:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_LOOT/EDF5_EDF6_DLC_LOOT_R3C_RUNTIME_ACCEPTANCE_2026-10-05.md</code>; the corresponding <code>R3C_MP09_NATIVE_MAP_TEST_FINAL_OFFLINE_AUDIT_2026-10-05.json</code> is a <em>pre-runtime</em> static qualification and is <strong>not</strong> itself runtime acceptance; the earlier <code>R2_STATIC_LEDGER_2026-09-21.md</code> documents the binary filter trace. For the short class/pack distinction see <a href="missions-edf6-native-weapon-loot-classes-and-missionpack-translation.html">loot classes versus MissionPack IDs</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/PATCH_1_0_5/EDF5_EDF6_PATCH_1_0_5_RC1_SOURCE_AND_AUDIT_AUTHORITY_2026-10-05.zip</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#candidate-filter-sequence-observed-in-one-edf6-binary">Candidate-filter sequence observed in one EDF6 binary</a><a href="#p8-is-not-the-missionpack-number">P8 is not the MissionPack number</a><a href="#actual-dlc2-discrimination-test">Actual DLC2 discrimination test</a><a href="#why-some-older-negative-tests-are-not-evidence">Why some older negative tests are not evidence</a><a href="#follow-up-original-edf5-dlc2-port-mission-in-mp05">Follow-up: original EDF5 DLC2 port mission in MP05</a><a href="#what-remains-unproven">What remains unproven</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-weapon-drop-filtering-p8-level-window-and-dlc2-runtime"};</script><script src="../assets/site.js" defer></script></body></html>

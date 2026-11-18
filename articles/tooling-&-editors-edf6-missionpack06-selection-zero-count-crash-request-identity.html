@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Why a custom EDF6 MissionPack can crash before mission 1 loads A historical September 2026 EDF6 build exposed an unusually clean separation between loader timin"><title>EDF6 MissionPack selection crash: empty effective LIST and request identity | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 MissionPack selection crash: empty effective LIST and request identity</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span></div><div class="referencebadge">Technical reference · Direct observed Windows gameplay crash + native trace and later MP07 runtime PASS</div><div id="articleBody"><p>A historical September 2026 EDF6 build exposed an unusually clean separation between <strong>loader timing</strong>, <strong>MissionPack identity/parity</strong>, <strong>mission-list data</strong>, and <strong>mission gameplay</strong>. The game crashed immediately on selecting a generated MP06 pack; neither the mission's map nor its AC/RMPA had run. Later tracing, allocation correction and a source-path fix led to a <strong>user-observed, complete offline Mission Clear</strong> for the studied MP07 pack. This is a qualified case study, not a general promise about all custom packs.</p>
+<h2 id="the-observable-crash">The observable crash</h2>
+<p>The generated pack existed and had a one-mission <code>PackView</code> with <code>MISSION_001</code>, an OFFLINE/ONLINE LIST, local text resources, and correctly hashed <code>MISSION.AC</code> and <code>MISSION.RMPA</code>. The loader reported configless loading of slot 6. Yet <strong>selecting MissionPack06</strong> produced Windows exception <strong><code>0xC0000094</code></strong> (integer divide by zero) at <strong><code>EDF.dll+0xDD2A9</code></strong> in the studied binary.</p>
+<p>The analyzed game function computes a mission clear/progression ratio and divides by the currently selected mission count. At crash time that effective count was <strong>zero</strong>. That does <strong>not</strong> mean the generated LIST on disk contained zero rows. It means the <em>game's effective selected LIST state</em> was empty or unresolved at the moment the UI needed it.</p>
+<h2 id="root-cause-1-a-request-can-arrive-before-the-active-slot-is-published">Root cause 1: a request can arrive before the active slot is published</h2>
+<p>The R1C trace observed a legitimate CRI resource request:</p>
+<pre><code class="language-text">/cri_bind/MISSION/MISSIONLIST_MISSIONPACK06.OFFLINE.LIST.SGO
+</code></pre>
+<p>At the file-open callback, <code>MissionMgr+0x14FD0</code> still held <strong><code>-1</code></strong>, so a resolver that relied <em>only</em> on the manager's current active pack could not route the request to the custom provider. It incorrectly fell through to native lookup even though <strong>the requested path itself explicitly identified MP06</strong>.</p>
+<p>The bounded R2 request-identity fix parses an exact managed <code>MissionPackNN</code> in the requested path, validates the managed slot/provider, and uses that identity <strong>before</strong> falling back to <code>MissionMgr</code> state. This fixes a timing race without globally routing arbitrary resource strings or requiring an extra native <code>SetMode</code> transition. The distinction is crucial: changing <code>LIST</code> contents or the compiler cannot repair a file lookup that never reaches the correct provider.</p>
+<h2 id="root-cause-2-old-donor-parity-is-a-separate-compatibility-condition">Root cause 2: old donor parity is a separate compatibility condition</h2>
+<p>The authored bundle used <strong>source slot MP03</strong> (odd). The historical MPPP 1.0.2 validation path treats <strong>odd</strong> custom slots as the <code>MP01</code> validation class and <strong>even</strong> slots as the <code>MP02</code> class. The allocator had incorrectly assigned the bundle physical <strong>MP06</strong>, changing the parity of a legacy/donor-derived mode. A parity-preserving transaction migrated it to <strong>MP07</strong>, recorded MP06 as retired and prevented silent reuse of an old save namespace.</p>
+<p>These are two <strong>independent, previously confounded</strong> problems. Correcting request routing does not automatically make the selected pack compatible with its donor validation profile. Equally, moving MP06 to MP07 without correcting the early request lookup could still leave an unresolved LIST read.</p>
+<h2 id="evidence-sequence">Evidence sequence</h2>
+<table>
+<thead>
+<tr>
+  <th>Stage</th>
+  <th>Observed result</th>
+  <th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Initial MP06 selection</td>
+  <td><code>0xC0000094</code> at DLL <code>+0xDD2A9</code></td>
+  <td>Direct Windows/runtime negative</td>
+</tr>
+<tr>
+  <td>R1C request trace</td>
+  <td>MP06 LIST requested while <code>MissionMgr+0x14FD0 == -1</code></td>
+  <td>Exact native callback evidence</td>
+</tr>
+<tr>
+  <td>R2 request-identity patch</td>
+  <td>Exact Windows DLL build and runtime integration prepared; later redirect observed</td>
+  <td>Source/native patch plus runtime observation</td>
+</tr>
+<tr>
+  <td>Migrate source-MP03 authored bundle to physical MP07</td>
+  <td>Odd parity retained; MP06 retired</td>
+  <td>Transactional allocation evidence</td>
+</tr>
+<tr>
+  <td>MP07 selection under R2</td>
+  <td>LIST appeared; two request-identity redirects; no <code>0xC0000094</code></td>
+  <td><strong>Direct runtime PASS for list selection</strong></td>
+</tr>
+<tr>
+  <td>Alias-free provider + corrected LIST path</td>
+  <td>Mission opened, 10 <code>GiantAnt01</code> spawned, were killed, <code>Mission Cleared</code>; map restored</td>
+  <td><strong>Direct runtime PASS for this offline end-to-end case</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do not conflate</strong> the historical R17 legacy-composer experiment (which never separately demonstrated a parity-flipped MP03→MP06 runtime PASS) with this later A2Z authored-MP06 negative and MP07 positive lineage. Both reinforce caution, but they are different test fixtures.</p>
+<h2 id="generalizable-debugging-rules">Generalizable debugging rules</h2>
+<ul>
+<li>When a pack-selection UI divides by a selected mission count of zero, first prove the <strong>runtime LIST read and resolved provider</strong>, not only the file's presence on disk.</li>
+<li>Resource-request identity can precede <code>MissionMgr</code> active-slot state; an exact validated request path may be the only available authority during selection.</li>
+<li>Preserve original legacy donor parity and save/progression identity unless a <em>separate</em> supported conversion policy overrides it. The later normal <code>BASE_OWNED</code> authored path has different entitlement rules.</li>
+<li>Stop at the earliest failed gate: opening the LIST, launching a mission path, running AC/RMPA, and reaching Mission Clear are <strong>different</strong> boundaries.</li>
+<li>Prefer transactional provider migration and retained namespace tombstones to silent slot renumbering.</li>
+</ul>
+<p>See <a href="formats-%26-containers-edf6-alias-free-vfs-provider-root-vs-list-mission-path.html">alias-free provider versus LIST mission paths</a>, <a href="tooling-%26-editors-edf6-legacy-missionpack-07-08-runtime-parity-and-save-isolation.html">MissionPack07/08 tests</a>, and <a href="edf6-native-missionpack-mode-and-lobby-identity.html">donor-free BASE_OWNED policy</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_A2Z_FULL_SESSION_HANDOFF_MP06_SELECTION_CRASH_2026-09-29.md</li><li>Library: EDF6_A2Z_MP06_REQUEST_IDENTITY_FIX_R2_CHECKPOINT_2026-09-30.md</li><li>Library: EDF6_A2Z_MP07_PASS_ALIAS_FREE_GATE_R1_CHECKPOINT_2026-09-30.md</li><li>Library: EDF6_A2Z_ALIAS_FREE_OFFLINE_GAMEPLAY_FINAL_PASS_2026-09-30.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-observable-crash">The observable crash</a><a href="#root-cause-1-a-request-can-arrive-before-the-active-slot-is-published">Root cause 1: a request can arrive before the active slot is published</a><a href="#root-cause-2-old-donor-parity-is-a-separate-compatibility-condition">Root cause 2: old donor parity is a separate compatibility condition</a><a href="#evidence-sequence">Evidence sequence</a><a href="#generalizable-debugging-rules">Generalizable debugging rules</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"tooling-&-editors-edf6-missionpack06-selection-zero-count-crash-request-identity"};</script><script src="../assets/site.js" defer></script></body></html>

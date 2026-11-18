@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 Shield Bearers: barrier collision, teams and projectile stopping A Shield Bearer barrier in the examined EDF6 build is a physical collision/query object, n"><title>EDF6 Shield Bearers: barrier collision, teams and projectile stopping | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF6 Shield Bearers: barrier collision, teams and projectile stopping</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Collision &amp; Physics</span></div><div class="referencebadge">Technical reference · Native-data and static code observations; no new in-game runtime test</div><div id="articleBody"><p>A Shield Bearer barrier in the examined EDF6 build is a <strong>physical collision/query object</strong>, not merely a transparent visual effect. It also is not the same mechanism as a Hector's carried, breakable shield.</p>
+<h2 id="native-owners-and-layers">Native owners and layers</h2>
+<ul>
+<li>The relevant <code>E513_SHIELDBEARER</code> variants (<code>_L</code>, <code>_XL</code>, <code>_FIXED*</code>) are <code>AlienTrailer</code> objects.</li>
+<li>Each includes an <code>AlienTrailer_Barrier</code> subobject. The source identifies two barrier layers of <code>0x680</code> bytes, one at owner <code>+0x18C0</code> and one at <code>+0x1F40</code> in this build.</li>
+<li>A layer holds an Havok body and <code>BarrierInfo</code>. The examined body uses <strong>collision layer 14</strong> and carries a <strong>key-2 reference to <code>BarrierInfo</code></strong>. The barrier info includes the team, copied from the owner each frame.</li>
+<li>The projectile collector considers a key-2 barrier when the <code>BarrierInfo</code> team is <strong>hostile to the projectile side</strong>. The subsequent contact handler stops the shot at the barrier surface, including rounds that otherwise pierce normal targets.</li>
+</ul>
+<p>This is why a barrier can be visible yet not block every object equally: a collision layer, a team relation and the bullet's collision-handling path are all involved.</p>
+<h2 id="what-the-shield-does-not-prove">What the shield does <em>not</em> prove</h2>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>What static evidence supports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Hostile projectile reaches barrier</td>
+  <td>Eligible for barrier hit/stop handling</td>
+</tr>
+<tr>
+  <td>Piercing projectile</td>
+  <td>The studied handler still stops it at barrier contact</td>
+</tr>
+<tr>
+  <td>Friendly projectile</td>
+  <td>Hostility filter can exclude barrier interception</td>
+</tr>
+<tr>
+  <td>Vehicle hull enters barrier</td>
+  <td>Stock vehicle collision blocking <strong>not established</strong>; the examined helicopter barrier query was gated on a field without a proven native writer</td>
+</tr>
+<tr>
+  <td>Shield is invulnerable to every possible attack</td>
+  <td><strong>Not proven</strong> by the interception routine alone</td>
+</tr>
+</tbody>
+</table>
+<p>The source lists model radius families around S 50 m, L 100 m, LL 200 m and XL 470 m, but those are <strong>inferred from model data</strong>, not independently game-measured collision radii. Use them as approximate model context rather than hard-coded universal barrier spheres.</p>
+<h2 id="distinguish-other-collision-questions">Distinguish other collision questions</h2>
+<p>A barrier hit is not the same as a direct bullet's <strong>stop/hit layer filtering</strong> or an explosion's area-damage query. See <a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">EDF6 projectile filters</a> and <a href="maps-%26-navigation-edf6-area-damage-hit-layer-versus-direct-bullet.html">direct versus area damage</a>. A historical EDF4.1 mission incident involving a Shield Bearer and airstrike also needs its own mission-specific proof; the barrier mechanism alone does not establish the outcome.</p>
+<p><strong>Evidence and credit:</strong> <code>shield-bearer-barrier</code>, source analysis by hajisensai / All Forces (shield-re.md) in EDF Knowledge Hub, build <code>steam-678ccb46</code>. Static, with some radii and byte interpretations marked as inference. Representative gameplay combinations not rerun here.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip (novae/ajane), EDF6/enemies.md; build steam-678ccb46; named facts credited to hajisensai/All Forces, KittopiaCreator and KH chat 120 as indicated</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-owners-and-layers">Native owners and layers</a><a href="#what-the-shield-does-not-prove">What the shield does not prove</a><a href="#distinguish-other-collision-questions">Distinguish other collision questions</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-shield-bearer-barrier-collision-and-hostile-team-filtering"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Air Raider bomber requests: SGO record parameters and failed laser-guidance experiments Data layers The Japanese workbook compares bombardment request examples "><title>Air Raider bomber requests: parameters and laser-guidance tests | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Air Raider bomber requests: parameters and laser-guidance tests</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Community Japanese Workbook</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Translated contributed workbook notes; sample data, negative experiments and explicitly labeled inferences</div><div id="articleBody"><h2 id="data-layers">Data layers</h2>
+<p>The Japanese workbook compares bombardment request examples <strong>KM6Z4</strong>, <strong>Phobos Z</strong>, <strong>Phobos Z4</strong> and a <strong>Westa DA</strong> entry. Their sampled SGO records contain an object resource, multiple scalar parameters and a pointer to a subordinate projectile. The annotated mapping names fields such as <strong>bomber type</strong>, <strong>aircraft count</strong>, <strong>delay between aircraft</strong>, <strong>altitude</strong>, <strong>speed</strong>, <strong>attack-direction offset</strong>, <strong>distribution type</strong> and <strong>subprojectile node</strong> (<code>解析!A417:O447</code>).</p>
+<p>The excerpted object paths include <code>app:/object/Bomber501_2.sgo</code> and <code>app:/object/Bomber401.sgo</code>, but their presence in sample rows is not a universal list of allowed bomber objects. Do not infer game-wide aircraft class IDs or network protocol IDs from the displayed record positions.</p>
+<h2 id="source-supported-behavior-not-yet-a-general-formula">Source-supported behavior, not yet a general formula</h2>
+<p>The workbook notes an attack center shown as a <strong>blue inverted triangle</strong>. One sampled field is thought to select a point from the base toward the tip of the warning zone (zero at the base; approaching one toward the front). Another value apparently influences a forward/downward release trajectory: <strong>0</strong> gives a downward orientation, while increasing it is reported to lead in front of the aircraft. An additional field may describe spacing of aircraft. The author explicitly uses uncertain language for parts of this mapping (<code>解析!H439:H443</code>).</p>
+<p>Accordingly, an editor should expose these as <strong>observed fields with uncertain semantics</strong>, rather than promising a physically accurate predicted impact location. The author notes a visual difference between Phobos Z and another attack that might be caused by gravity, but does not isolate the cause (<code>解析!A481</code>).</p>
+<h2 id="laser-guidance-negative-experiment">Laser-guidance negative experiment</h2>
+<p>The author asked whether bombs released by a bomber can be actively redirected through a <strong>laser guidance device</strong>. The experiment reports a negative result in the tested configurations (<code>解析!A483:E491</code>):</p>
+<table>
+<thead>
+<tr>
+  <th>Released class or nested construction</th>
+  <th>What the source reports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MissileBullet01</code></td>
+  <td>Guidance itself did not operate, even with the laser-guidance flag set to <code>1</code></td>
+</tr>
+<tr>
+  <td><code>ClusterBullet01 → EfsBullet</code></td>
+  <td>Some guidance was observed, <strong>but not</strong> by the laser-designation tool</td>
+</tr>
+<tr>
+  <td><code>ClusterBullet01 → MissileBullet01</code></td>
+  <td>Some guidance was observed, <strong>but not</strong> by the laser-designation tool</td>
+</tr>
+</tbody>
+</table>
+<p>The author proposes that the bomber's white radar marker, hence perhaps a <strong>different team ID</strong>, may prevent it receiving laser-designation information. This is <strong>explicitly a hypothesis</strong>, not a diagnosed root cause. It must not be converted into a rule that all white-team entities reject laser targets. For exploratory team settings see <a href="jp-team-ai-radar-matrix.html">community team matrix</a>.</p>
+<h2 id="tooling-recommendations">Tooling recommendations</h2>
+<ul>
+<li>Keep bomber request / aircraft object / projectile instance as <strong>separate entities</strong> in the authoring model.</li>
+<li>Do not assume the visible warning-zone triangle uniquely determines actual landing points without trajectory and gravity tests.</li>
+<li>Mark laser target forwarding as <strong>not demonstrated</strong> for these examples; avoid silently turning the failed experiment into a successful mechanism.</li>
+<li>If testing guidance, log the projectile owner/team, actual target selection, guidance flag, target acquisition callback and emitted nested projectile class separately.</li>
+</ul>
+<p><strong>Source:</strong> <code>mod製作メモ.xlsx</code>, <code>解析!A417:O491</code>. The experiment is reported by the contributor; no runtime was repeated in this wiki revision.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>mod製作メモ.xlsx (Japanese community memo), SHA256 d78ab415bcbce59ac762b415cec087a3d82cd501a006e23d995cf0ec654447c5f5</li><li>Cell ranges cited per article; public permission relayed by user 2026-11-15</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#data-layers">Data layers</a><a href="#source-supported-behavior-not-yet-a-general-formula">Source-supported behavior, not yet a general formula</a><a href="#laser-guidance-negative-experiment">Laser-guidance negative experiment</a><a href="#tooling-recommendations">Tooling recommendations</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"jp-air-raider-bomber-guidance"};</script><script src="../assets/site.js" defer></script></body></html>

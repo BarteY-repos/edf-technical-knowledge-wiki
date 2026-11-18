@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Item Drops EDF6 item drops have at least two separable parameters in the contributor&#39;s memory-patch experiment: how frequently a drop is emitted and how an emit"><title>Item Drops | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Item Drops</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Documentation</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Community-provided Japanese memo; source-specific and not independently rerun</div><div id="articleBody"><p>EDF6 item drops have at least two separable parameters in the contributor's memory-patch experiment: <strong>how frequently a drop is emitted</strong> and <strong>how an emitted pickup is distributed among item types</strong>.</p>
+<h2 id="threshold-and-weights">Threshold and weights</h2>
+<p>The note describes each defeated enemy contributing points; once accumulated points exceed a <code>DropRate</code> threshold, a pickup is emitted. <strong>Smaller thresholds yield more pickups.</strong> Setting the threshold to zero or extremely small values is explicitly discouraged in the original note.</p>
+<p>A second array controls the <strong>relative category weights</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Category</th>
+  <th style="text-align:right">Source default</th>
+  <th style="text-align:right">Example edit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Weapon</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">22</td>
+</tr>
+<tr>
+  <td>Armor</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">21</td>
+</tr>
+<tr>
+  <td>Small healing</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">14</td>
+</tr>
+<tr>
+  <td>Large healing</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><strong>Total weights</strong></td>
+  <td style="text-align:right"><strong>38</strong></td>
+  <td style="text-align:right"><strong>60</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The workbook's example changes threshold from <code>0.947</code> to <code>0.600</code>.</p>
+<p>For a simplified expected-value approximation matching the sheet:</p>
+<p>[\operatorname{share}(i)=\frac{w_i}{\sum_j w_j}, \qquad \operatorname{drops\ per\ 100\ points}\approx\frac{100}{T}.]</p>
+<p>Category count per 100 points is then <code>100/T × share(i)</code>. The sheet reports <strong>105.60 total drops per 100 points</strong> at default threshold and <strong>166.67</strong> for the example edit. Weapons rise from <strong>~16.67 to ~61.11 per 100 points</strong>. These are spreadsheet rates; actual random outcomes and point quantization may differ.</p>
+<h2 id="implementation-boundary">Implementation boundary</h2>
+<p>The workbook notes two approaches:</p>
+<ul>
+<li><strong>Memory patch:</strong> changes a threshold and category-weight table globally, in the tested game build.</li>
+<li><strong>Resource replacement:</strong> changing all relevant per-enemy resource settings may require a much larger asset edit.</li>
+</ul>
+<p>The sample AOB/memory patch is <strong>version-sensitive</strong> and is not presented here as a universal signature. Validate against the exact executable before using any offsets or byte patterns.</p>
+<h2 id="scope-and-evidence">Scope and evidence</h2>
+<p>Source <code>アイテムドロップレート!B1:S31</code> contains the Japanese explanation, default and example weights, formulas and one patch example (attributed in that sheet to <code>redone</code>). The statistical model and editable values are reproduced from the sheet; native implementation beyond that experiment remains unverified here.</p>
+<h2 id="native-game-reference-additions">Native game reference additions</h2>
+<ul>
+<li><a href="edf41-edf5-edf6-item-crate-accumulator-and-category-probabilities.html">Crate spawning and category weights across three games</a></li>
+<li><a href="edf5-weapon-armor-end-mission-reward-roll-class-weights-and-level-window.html">EDF5 result-screen weapon and armor rolls</a></li>
+<li><a href="edf6-pickup-units-recovery-radius-and-online-claim-protocol.html">EDF6 local and online collection</a></li>
+</ul>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf5-native-mission-script-states-failed-results-and-save-commit.html">EDF5 mission result commits</a></li>
+</ul>
+<h2 id="related-game-mechanics-native-source-references">Related game mechanics (native-source references)</h2>
+<ul>
+<li><a href="edf5-edf6-weapon-table-row-schema-category-localization-id-ownership.html">Weapon table rows and level scaling</a></li>
+<li><a href="edf6-weapon-ownership-flags-starting-dlc-result-and-sorting.html">EDF6 new-weapon and upgrade flags</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Community Japanese workbook: `mod製作メモ.xlsx` (supplied 2026-11-15; publication rights to be confirmed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#threshold-and-weights">Threshold and weights</a><a href="#implementation-boundary">Implementation boundary</a><a href="#scope-and-evidence">Scope and evidence</a><a href="#native-game-reference-additions">Native game reference additions</a><a href="#further-native-game-references">Further native-game references</a><a href="#related-game-mechanics-native-source-references">Related game mechanics (native-source references)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-item-drops"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MDB model format Overview MDB is a model resource containing structural metadata, geometry streams and material relationships. The bytes must agree with the mes"><title>MDB model format | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-models.html">Models</a></div><h1>MDB model format</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Models &amp; MDB</span><span class="chip">Models</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled native/source research</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p><strong>MDB</strong> is a model resource containing structural metadata, geometry streams and material relationships. The bytes must agree with the mesh's vertex declaration; animation and object collision add further bone and physics constraints.</p>
+<table>
+<thead>
+<tr>
+  <th>Model part</th>
+  <th>What it controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Vertex declaration</td>
+  <td>Attribute types, sizes and stride for every mesh buffer</td>
+</tr>
+<tr>
+  <td>Mesh indices and weights</td>
+  <td>Geometry topology and skin binding</td>
+</tr>
+<tr>
+  <td>Material and sampler records</td>
+  <td>Shader family, parameters and texture slots</td>
+</tr>
+<tr>
+  <td>Bones, bind pose and sockets</td>
+  <td>Animation, attachments and related SHKT physics</td>
+</tr>
+</tbody>
+</table>
+<p>Start at <a href="docs-models.html">Models</a> for the subject index. Use the detailed sections below for exact source-backed findings and generation differences.</p>
+<hr />
+<h2 id="native-material-schema-versus-shader-reflection">Native material schema versus shader reflection</h2>
+<p><a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">How to read and write native MDB materials</a> explains the exact parameter sequence, sampler order, integer-bit parameter exceptions and why a reflected shader catalog must not be serialized directly as a material. For roughness and metallic formulas, see <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB shading parameters</a>.</p>
+<p>An <strong>MDB</strong> is a model resource used by Earth Defense Force. Its observable data can include name/bone/object relationships, meshes, vertex declarations and buffers, material records, shader identifiers and texture references. Those parts have to agree: a model is not just vertex positions with a shader name attached. We have strongest detailed structural examples from EDF5/EDF6 ordinary model assets, including buildings and props used in maps. <strong>These are not FieldRender/FMEP terrain formats.</strong></p>
+<h2 id="geometry-and-vertex-declarations">Geometry and vertex declarations</h2>
+<p>Each mesh describes how the bytes in its vertex stream should be interpreted. The declaration supplies a semantic (such as POSITION, TEXCOORD or BLENDINDICES), a stored element type and a per-vertex layout. Do not infer a universal stride from the game version alone.</p>
+<p>Observed declaration encodings in paired EDF5/EDF6 research:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Type</th>
+  <th>Observed lane shape</th>
+  <th style="text-align:right">Bytes</th>
+  <th>Common use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td><code>float32 × 4</code></td>
+  <td style="text-align:right">16</td>
+  <td><code>BLENDWEIGHT</code> and four-component lanes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td><code>float32 × 3</code></td>
+  <td style="text-align:right">12</td>
+  <td>Three-component float lanes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>7</code></td>
+  <td><code>float16 × 4</code></td>
+  <td style="text-align:right">8</td>
+  <td>POSITION/NORMAL/TANGENT/BINORMAL profiles</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>12</code></td>
+  <td><code>float32 × 2</code></td>
+  <td style="text-align:right">8</td>
+  <td>TEXCOORD</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>21</code></td>
+  <td><code>uint8 × 4</code></td>
+  <td style="text-align:right">4</td>
+  <td>BLENDINDICES</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important correction:</strong> declaration type <code>1</code> is <strong>16 bytes</strong>, not four. A parser using four bytes shifts all later elements and silently damages its view of the vertex buffer.</p>
+<p>Meshes can carry multiple UV streams, including repeated <code>TEXCOORD</code> semantics in non-obvious order. Vertices may need to be duplicated at UV, tangent and normal seams when constructing a target mesh. In observed static EDF6 map-model profiles, 60-, 68- and 76-byte strides occur, sometimes including rigid blend weight/index channels for visually static assets. Those are <strong>observed profiles, not universal MDB requirements</strong>.</p>
+<p>The studied exporter path uses 16-bit mesh indices. A mesh that exceeds that range needs rejection or a deliberate triangle-boundary split, rather than index truncation or an invented 32-bit variant. Sampled native EDF6 multi-mesh resources align each mesh vertex-buffer start to 16 bytes; this is a strong native-conformance practice, not proof that every misaligned MDB crashes.</p>
+<h2 id="object-names-bones-and-mesh-relationships">Object names, bones and mesh relationships</h2>
+<p>Name, Bone, Object and Mesh records are connected rather than freely interchangeable. A source-to-source writer should preserve shared name identity, relative-offset conventions, object-to-bone links, bounds and skinning metadata. Some games or authoring utilities support ordinary static geometry without a visible character rig, but that does not justify discarding blend channels from every native static-model profile.</p>
+<p>A reliable importer/exporter should parse the declaration and semantic relationships, preserve unknown records and shader ABI metadata where possible, and only regenerate fields it has a defensible interpretation for.</p>
+<h2 id="materials-what-is-actually-stored">Materials: what is actually stored</h2>
+<p>A material is not fully described by a familiar PBR tuple of color/roughness/metallic. Native MDB material profiles can include:</p>
+<ul>
+<li>An <strong>exact shader family</strong>, for example <code>snd_BRDF_Map_Common</code>, <code>snd_BRDF_Map_Common_Clip</code>, <code>snd_BRDF_Map_Build_Basic_NC</code> or older <code>snd_Map_*</code> families.</li>
+<li>An <strong>ordered parameter list</strong>, where each entry has a name, type/size encoding and stored value bytes.</li>
+<li>An <strong>ordered sampler list</strong>, with texture resource identities and filtering/addressing/LOD metadata.</li>
+<li>Render metadata and a corresponding vertex/UV/tangent contract.</li>
+</ul>
+<p>For example, observed EDF6 <code>snd_BRDF_Map_Common</code> material records use parameters <code>diffuse</code>, <code>metallic</code>, <code>normal_amount</code>, <code>roughness</code>, <code>specular_color</code> and <code>specular_diffuse_blend</code>, with sampler order <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code>. <code>Common_Clip</code> adds <code>alpha_clip</code>. These are observations for named families, <strong>not a schema for all MDB shaders</strong>.</p>
+<h2 id="how-do-roughness-and-metallic-work-in-mdb-materials">How do roughness and metallic work in MDB materials?</h2>
+<p>For the studied EDF6 <code>snd_BRDF_Map_Common</code> / <code>param_r_m_*</code> ordinary-model path, the <strong>packed texture modifies the scalar material parameters</strong>. In the observed family, <strong>G controls metallic</strong> and <strong>R controls roughness</strong>; an <code>_hr</code> packed texture also uses <strong>A to scale roughness</strong>:</p>
+<pre><code class="language-hlsl">float metallicValue = saturate(packed.g * material.metallic);
+float roughnessValue = saturate(packed.r * material.roughness);
+// If this is the _hr family:
+roughnessValue = saturate(packed.r * packed.a * material.roughness);
+</code></pre>
+<p>For the studied Common/Water-like normal-map convention, X is reconstructed from <strong>R×A</strong>, Y from <strong>G</strong>, and Z from the remaining unit-normal length. This is why a standard RGB normal map or a plain Principled BSDF can disagree with the EDF material. <strong>These formulas are specific to the identified shader family</strong>: legacy reflect/spec materials, some character shaders and FieldRender terrain use different or incompletely recovered semantics.</p>
+<p>See <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB shader parameters explained</a> for normal decoding, <code>specular_color</code>, cutouts, light masks and the broader shader family caveats. The <a href="materials-%26-shaders-native-structural-profile-reference-blender-addon.html">exact native profile tables</a> give family-specific parameter order and type/size values.</p>
+<h2 id="texture-data-and-resource-identity">Texture data and resource identity</h2>
+<p>An MDB can refer to logical texture identities, while texture payloads live in separate resource packaging such as RAB/DDS. The resource name, payload, filtering rules, sampler order and shader expectation have to agree. A working model may have editable MDB material bindings without forcing a rewrite of its geometry or collision.</p>
+<h2 id="what-changes-between-edf5-and-edf6">What changes between EDF5 and EDF6?</h2>
+<p>Paired models show changes beyond a header version: tangent/binormal streams may be added, vertices split at seams, materials reauthored, samplers reordered, texture channels changed, and object/name responsibilities altered. There is <strong>no universal conversion rule</strong> of “write EDF6 version, rename the shader, keep everything else.” Nor is there one mandatory EDF6 vertex declaration order for every material.</p>
+<p>A conversion tool must recognize supported source/target profiles, preserve semantic identities, and validate material ABI, shader, texture packing and required vertex lanes <strong>together</strong>. Native observations are stronger than plausible-looking imported previews.</p>
+<h2 id="important-boundaries">Important boundaries</h2>
+<ul>
+<li>Ordinary MDB mesh materials are not FMEP/FieldRender terrain. The latter uses a different terrain-material and texture-array path.</li>
+<li><code>_lod.mdb</code> does not guarantee a specific LOD shader; some native LOD companions reuse normal material families.</li>
+<li>A preserved unknown material can round-trip correctly even when a Blender/glTF-style preview is approximate.</li>
+<li>A shader's register-level texture binding order need not equal its MDB material sampler-list order.</li>
+</ul>
+<p>For deeper reading: <a href="models-%26-mdb-edf5-edf6-mdb-migration-findings-relevant-to-a-blender-importer-exporter-blender-addon.html">MDB migration profiles</a>, <a href="models-%26-mdb-vertex-layout-uv-skinning-and-lod-blender-addon.html">vertex layouts and skinning</a>, <a href="materials-%26-shaders-material-parameter-type-4-raw-integer-bits-in-float-sized-lanes-blender-addon.html">type-4 parameter encodings</a> and <a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">map render/collision separation</a>.</p>
+<h2 id="source-tree-cases-and-version-rewrites-are-not-full-model-parity">Source-tree cases and version rewrites are not full model parity</h2>
+<p>A historical paired-tree resource comparison reported <strong>218 position-only placement records (<code>T2</code>)</strong> that were byte-identical in its EDF5/EDF6 samples, while the displayed tree size remained a separate open question in that test. That finite record equivalence cannot establish general MDB mesh/material parity or native render-size rules. Likewise, an older converter upgrading a measured MDB version and rewriting fields was a <em>conversion attempt</em>, not proof that every model, skeleton and material family is equivalent across the games.</p>
+<p>When debugging a correct MDB that still crashes, check the <em>resource type registration</em> first: an earlier byte-exact in-memory MDB was fed into the wrong <code>.trb</code> handler. See <a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">typed-dispatch failure analysis</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_BLENDER_MDB_ADDON_INTEROP_RESEARCH_R4_2026-11-13.zip</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13.zip</li><li>Paired EDF5/EDF6 MDB converter research</li><li>R47 native MDB profile and writer articles</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#native-material-schema-versus-shader-reflection">Native material schema versus shader reflection</a><a href="#geometry-and-vertex-declarations">Geometry and vertex declarations</a><a href="#object-names-bones-and-mesh-relationships">Object names, bones and mesh relationships</a><a href="#materials-what-is-actually-stored">Materials: what is actually stored</a><a href="#how-do-roughness-and-metallic-work-in-mdb-materials">How do roughness and metallic work in MDB materials?</a><a href="#texture-data-and-resource-identity">Texture data and resource identity</a><a href="#what-changes-between-edf5-and-edf6">What changes between EDF5 and EDF6?</a><a href="#important-boundaries">Important boundaries</a><a href="#source-tree-cases-and-version-rewrites-are-not-full-model-parity">Source-tree cases and version rewrites are not full model parity</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"models-&-mdb-mdb-file-structure-meshes-and-materials-explained"};</script><script src="../assets/site.js" defer></script></body></html>

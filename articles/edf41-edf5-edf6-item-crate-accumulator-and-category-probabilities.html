@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1, EDF5 and EDF6 — how item crates spawn A defeated enemy does not independently roll a simple yes/no probability for every crate. In the source builds of "><title>EDF4.1/5/6 item crates: shared drop accumulator, category weights and caps | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Pickups and rewards</div><h1>EDF4.1/5/6 item crates: shared drop accumulator, category weights and caps</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Pickups and rewards</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-declared grades; this edition does not add native game runtime testing</div><div id="articleBody"><p>A defeated enemy does not independently roll a simple yes/no probability for every crate. In the source builds of <strong>EDF4.1, EDF5 and EDF6</strong>, a drop quantity from the enemy's <code>game_object_drop_item</code> contributes to a <strong>shared floating-point accumulator</strong> maintained by the pickup manager. The manager subtracts a fixed threshold for each crate due and then selects a crate category by weight. This explains why low-point enemies can apparently drop nothing for several kills, then one more kill produces an item.</p>
+<h2 id="drop-rate-is-a-threshold">Drop rate is a threshold</h2>
+<p>For the investigated builds, the threshold is <strong>0.947</strong>. The source describes the following approximate progression for a single drop event:</p>
+<ol>
+<li>Add the enemy's configured drop amount to the manager's current accumulator.</li>
+<li>While the accumulator is above the threshold, subtract <code>0.947</code> and attempt to spawn one crate.</li>
+<li>If the map is already at the on-field limit, that attempt produces no crate, <strong>but the threshold has already been subtracted</strong>.</li>
+<li>Retain the remainder for later enemy deaths.</li>
+</ol>
+<p>The formula for an ideal long-run average, <em>before caps and other rules</em>, is approximately <code>expected crates = sum(enemy drop amounts) / 0.947</code>. The accumulator is <strong>shared across kills</strong>, not a separate bucket for each enemy. A contributor compared EDF5 enemy SGO drop values with a Japanese community drop table: examples include <code>2.4</code> for a Silver Spider and <code>0.29</code> for a Black Ant, rather than 240% and 29% independent Bernoulli events.</p>
+<h2 id="category-probabilities-per-emitted-crate">Category probabilities per emitted crate</h2>
+<table>
+<thead>
+<tr>
+  <th>Category</th>
+  <th style="text-align:right">EDF4.1 weight</th>
+  <th style="text-align:right">EDF4.1 share</th>
+  <th style="text-align:right">EDF5 weight</th>
+  <th style="text-align:right">EDF6 weight</th>
+  <th style="text-align:right">EDF5/6 share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Weapon box</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">13.16%</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">15.79%</td>
+</tr>
+<tr>
+  <td>Armor box</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">47.37%</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">39.47%</td>
+</tr>
+<tr>
+  <td>Small recovery</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">31.58%</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">36.84%</td>
+</tr>
+<tr>
+  <td>Large recovery</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">7.89%</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">7.89%</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>38</strong></td>
+  <td style="text-align:right"><strong>100%</strong></td>
+  <td style="text-align:right"><strong>38</strong></td>
+  <td style="text-align:right"><strong>38</strong></td>
+  <td style="text-align:right"><strong>100%</strong></td>
+</tr>
+</tbody>
+</table>
+<p>These are conditional category shares <strong>after a crate is emitted</strong>. They are not the probability that a given enemy will drop an item. EDF4.1's category weights were found at <code>A96060</code>, EDF5's at <code>E9CD00</code>, and EDF6's at <code>17A6CE8</code>, each tied to its named executable build.</p>
+<p>All three source builds have an <strong>on-map limit of 128 crates</strong> and a <strong>mission collection limit of 1024</strong>. The latter is not the same as the former. Hitting the 128-on-map limit can permanently waste a crate that would otherwise be created because the threshold is still consumed.</p>
+<h2 id="what-happens-after-pickup">What happens after pickup?</h2>
+<p>Collecting weapon or armor crates is separate from awarding a particular weapon or increasing armor. EDF5's source shows that these categories initially increment mission counters; the final selection occurs in a separate mission-result roll. EDF6 also distinguishes box pickup from result-screen weapon selection. Health boxes are handled immediately by a different path. Online EDF6 adds host arbitration for pickup ownership, described in <a href="edf6-pickup-units-recovery-radius-and-online-claim-protocol.html">EDF6's pickup lifecycle</a>.</p>
+<h2 id="evidence-and-scope">Evidence and scope</h2>
+<p>This is a synthesis of <strong>static source research</strong>, not a fresh gameplay test. The EDF6 workbook documents an expected-value calculation but does not list every enemy's drop amount, so no universal enemies-to-crates count is implied. The exact 0.947 threshold and category weights refer to the studied Steam builds; do not treat their offsets as cross-version constants.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf41-pickups</code> facts <code>pickup-limits</code>, <code>drop-rate</code>, <code>edf41-drop-accumulator</code>, <code>edf41-crate-kind-weights</code>; <code>kh-edf5-drop-items</code> facts <code>drop-rate-accumulator</code>, <code>crate-kind-weights</code>, <code>dropitem-field-limit</code>, <code>dropitem-collect-cap</code>; <code>kh-edf6-pickups</code> facts <code>pickup-limits</code>, <code>drop-rate</code>, <code>drop-category-weights</code>, <code>drop-rate-model</code>, <code>dropitem-life</code>. Research compiled by novae (ajane), including contributions credited to FevGrave, Stafern, Kittopia and redone.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf41-pickups (steam-57aab039), curator novae/ajane and credited contributors</li><li>EDF Knowledge Hub export 2026-11-14 — kh-edf5-drop-items, kh-edf5-decals and kh-edf5-stingers-webs (steam-5d11de53), curator novae/ajane and credited contributors</li><li>EDF Knowledge Hub export 2026-11-14 — kh-edf6-pickups and kh-edf6-effects (steam-678ccb46), curator novae/ajane and credited contributors</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#drop-rate-is-a-threshold">Drop rate is a threshold</a><a href="#category-probabilities-per-emitted-crate">Category probabilities per emitted crate</a><a href="#what-happens-after-pickup">What happens after pickup?</a><a href="#evidence-and-scope">Evidence and scope</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-item-crate-accumulator-and-category-probabilities"};</script><script src="../assets/site.js" defer></script></body></html>

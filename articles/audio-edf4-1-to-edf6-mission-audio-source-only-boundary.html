@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 → EDF 6 mission audio: source-only boundary Evidence level: Offline source-closure PASS. The source package intentionally contains no game audio payload"><title>EDF 4.1 → EDF 6 mission audio: source-only boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-audio.html">Audio</a></div><h1>EDF 4.1 → EDF 6 mission audio: source-only boundary</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Audio</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Offline</div><div id="articleBody"><p><strong>Evidence level:</strong> Offline source-closure PASS. The source package intentionally contains no game audio payloads; actual build from user-owned game data and EDF6 runtime playback remain separate gates.</p>
+<h2 id="scope">Scope</h2>
+<p>The qualified EDF4.1 MissionBundle audio checkpoint defines four atomic output groups and ten output files:</p>
+<table>
+<thead>
+<tr>
+  <th>Group</th>
+  <th>Output role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>weapon</code></td>
+  <td><code>SOUND/PC/EDF41_WEAPON_SE.ACB</code> shared EDF4.1 SE bank</td>
+</tr>
+<tr>
+  <td><code>voice.JA</code></td>
+  <td><code>EDF41_VOICE.JA.AWB</code> + <code>_LIST.AWE</code></td>
+</tr>
+<tr>
+  <td><code>voice.EN</code></td>
+  <td><code>EDF41_VOICE.EN.AWB</code> + <code>_LIST.AWE</code></td>
+</tr>
+<tr>
+  <td><code>table</code></td>
+  <td>five EDF6 voice tables: CN / EN / JA / KR / SC</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Known exception:</strong> The group name <code>weapon</code> is historical. Retaining <code>EDF41_WEAPON_SE.ACB</code> for mission/object sound fidelity does <strong>not</strong> add EDF4.1 player weapons, models or playable-class data to the MissionBundle scope.</p>
+<h2 id="voice-table-behavior">Voice-table behavior</h2>
+<p><strong>Observed native behavior:</strong> Native EDF6 rows are preserved. Missing EDF4.1 cue keys gain caption rows rather than replacing the target table wholesale.</p>
+<p>The suffix normalizer removes exactly one terminal <code>_E</code> or <code>_S</code>, matching the qualified lookup behavior. Embedded <code>_E</code>/<code>_S</code> text is preserved.</p>
+<p><code>MusenBegin</code> and <code>MusenEnd</code> use the native no-subtitle marker.</p>
+<p><strong>Implementation rule:</strong> Extend target voice tables minimally; do not regenerate or reorder native EDF6 rows from a source-only approximation.</p>
+<h2 id="build-and-memory-boundary">Build and memory boundary</h2>
+<p>The runner processes one atomic group at a time so the large JA/EN voice-bank pair does not need to remain resident simultaneously. It verifies source presence/integrity, validates the exact output set, records SHA-256 and fails closed on the first failed group.</p>
+<p>A user-owned EDF4.1 installation or the accepted user-supplied All Forces source root may provide source inputs. EDF6 target inputs are likewise user-owned.</p>
+<h2 id="redistribution-boundary">Redistribution boundary</h2>
+<p><strong>Implementation rule:</strong> Distributable tooling contains conversion source only, not original ACB/AWB/AWE/voice-table payloads.</p>
+<p>The audited All Forces archive used for project research has no root license file. Its availability for private project research is not a public redistribution license.</p>
+<h2 id="runtime-boundary">Runtime boundary</h2>
+<p><strong>Unresolved:</strong> The R5 checkpoint proves source/import/suffix contracts only. Actual audio conversion using the game payloads, EDF6 playback, subtitle timing, multiplayer synchronization and later object-specific cases such as DragonBig401 remain runtime work.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF41_EDF6_RESEARCH/AUDIO_R5_2026-11-01/README.md</li><li>/EDF41_EDF6_RESEARCH/AUDIO_R5_2026-11-01/R5_OFFLINE_AUDIT.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#scope">Scope</a><a href="#voice-table-behavior">Voice-table behavior</a><a href="#build-and-memory-boundary">Build and memory boundary</a><a href="#redistribution-boundary">Redistribution boundary</a><a href="#runtime-boundary">Runtime boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"audio-edf4-1-to-edf6-mission-audio-source-only-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

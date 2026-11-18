@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Cross-source reconciliation This page lists current scoped decisions when independently collected EDF 4.1/5/6 research appears to disagree. It is a reader-frien"><title>Cross-source Reconciliation — Current Technical Decisions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / Index</div><h1>Cross-source Reconciliation — Current Technical Decisions</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Start</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Cross-source editorial reconciliation; no new runtime tests</div><div id="articleBody"><p>This page lists <strong>current scoped decisions</strong> when independently collected EDF 4.1/5/6 research appears to disagree. It is a reader-friendly companion to the machine-readable <code>CONFLICTS_AND_SUPERSEDED.json</code>. Every row distinguishes exact-build evidence from mod observations and unresolved hypotheses. Reconciliation means the claims were compared <strong>by scope</strong>, not that all 2,572 contributed assertions were independently repeated.</p>
+<h2 id="priority-technical-decisions">Priority technical decisions</h2>
+<table>
+<thead>
+<tr>
+  <th>Domain</th>
+  <th>Current decision</th>
+  <th>Read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF6 EOS packet lengths</td>
+  <td>Separate 1170-byte transport cap, 1400-byte defensive guard and a previously audited 1164-byte legitimate native output envelope</td>
+  <td><a href="networking-packet-cap-reconciliation.html">Packet-size and RUDP reconciliation</a></td>
+</tr>
+<tr>
+  <td>EDF6 reliability</td>
+  <td>EOS <code>UnreliableUnordered</code> does not imply game-level mode-0 messages lack retry/ACK; class 3 differs from class 4/5</td>
+  <td><a href="engine-re-edf5-edf6-player-state-packet-lanes.html">Networking lanes</a></td>
+</tr>
+<tr>
+  <td>EDF6 retry count</td>
+  <td>Six-vs-eight contributor count discrepancy is <strong>not resolved</strong> by cumulative 25.9 s evidence</td>
+  <td><a href="networking-packet-cap-reconciliation.html">Packet-size and RUDP reconciliation</a></td>
+</tr>
+<tr>
+  <td>EDF6 transform rhythm</td>
+  <td>90 ms flush and six-frame/update observations are <strong>not</strong> proven to imply permanent phase locking</td>
+  <td><a href="networking-packet-cap-reconciliation.html">Packet-size and RUDP reconciliation</a></td>
+</tr>
+<tr>
+  <td>EDF5→EDF6 camera</td>
+  <td>Follow/ride model broadly transfers; actual offsets and patch sites do not</td>
+  <td><a href="camera-edf5-edf6-reconciliation.html">Camera mapping</a></td>
+</tr>
+<tr>
+  <td>EDF5/6 keyboard</td>
+  <td>Build-specific game snapshots are not WinAPI key state nor automatically coherent for arbitrary external threads</td>
+  <td><a href="input-edf5-edf6-reconciliation.html">Input boundaries</a></td>
+</tr>
+<tr>
+  <td>EDF6 Raw Input</td>
+  <td>Replace relative acquisition at the verified provider; leave intentional downstream aim/shaping and UI path intact</td>
+  <td><a href="input-edf5-edf6-reconciliation.html">Input boundaries</a></td>
+</tr>
+<tr>
+  <td>Desync investigations</td>
+  <td>Trace actual serialization/send/receive/apply path per packet class and object</td>
+  <td><a href="networking-desync-diagnostic-workflow.html">Diagnostic workflow</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="evidence-classes">Evidence classes</h2>
+<ul>
+<li><strong>Exact native binary / demonstrated source route:</strong> strongest for that exact binary/build, but not a universal runtime claim.</li>
+<li><strong>Contributor <code>verified</code>:</strong> means the <strong>contributor reported</strong> a game test in a named build. This project did not re-run that test.</li>
+<li><strong>Contributor <code>static</code>:</strong> an observation from source, disassembly or documentation, potentially strong for a local data structure, but not new game-runtime proof.</li>
+<li><strong>Contributor <code>unverified</code>:</strong> an idea, inferred mechanism or reported pattern requiring further corroboration; do not use as a conversion implementation rule.</li>
+<li><strong>Historical/superseded:</strong> retain the older source and reason for replacement, but do not print both claims as equally current.</li>
+</ul>
+<h2 id="remaining-work">Remaining work</h2>
+<p>This release reconciles a small, high-risk subset and improves their user-facing articles. The <a href="docs-community-knowledge-hub.html">research appendices</a> remain a searchable <em>source archive</em>, not 2,572 independently authenticated final facts. Other EDF project families and inaccessible or unscanned source trees still require the master-spec reverse census. See <code>COVERAGE_AUDIT.json</code> for honest scope limits.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R85 Knowledge Hub contributor appendix and/or earlier R84 native research, exact links in article</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#priority-technical-decisions">Priority technical decisions</a><a href="#evidence-classes">Evidence classes</a><a href="#remaining-work">Remaining work</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-reconciliation"};</script><script src="../assets/site.js" defer></script></body></html>

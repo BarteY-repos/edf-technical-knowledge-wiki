@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1&#39;s save layout is package- and mode-aware The original PC EDF4.1 executable constructs a save tree under the folder string My Games/EDF4.1/SAVE_DATA, with"><title>EDF4.1 save files: SAVE_DATA, slot folders, mode-specific MST and MAIN.GST | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Native save formats</div><h1>EDF4.1 save files: SAVE_DATA, slot folders, mode-specific MST and MAIN.GST</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Game technical references</span><span class="chip">Native save formats</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>The original PC EDF4.1 executable constructs a save tree under the folder string <strong><code>My Games/EDF4.1/SAVE_DATA</code></strong>, with a <code>saveslot%02d</code> folder for each save slot. The documented strings come from the game executable, not from guessed filenames. The base folder is acquired through a Windows known-folder lookup, though the exact shell-folder constant was not resolved in the cited study.</p>
+<h2 id="names-visible-in-the-original-executable">Names visible in the original executable</h2>
+<table>
+<thead>
+<tr>
+  <th>Name or pattern</th>
+  <th>Role / level of evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>saveslot%02d</code></td>
+  <td>Save slot directory name pattern</td>
+</tr>
+<tr>
+  <td><code>SYSTEM.CFG</code></td>
+  <td>Shared system configuration; studied code builds a <code>SYSTEM</code> folder in place of a slot name</td>
+</tr>
+<tr>
+  <td><code>COMMON.CFG</code></td>
+  <td>Save-related configuration name</td>
+</tr>
+<tr>
+  <td><code>SYSTEMWIN32.CFG</code></td>
+  <td>Windows-specific system settings name</td>
+</tr>
+<tr>
+  <td><code>TROPHY.DAT</code></td>
+  <td>Achievement/statistics save name</td>
+</tr>
+<tr>
+  <td><code>MAIN.GST</code></td>
+  <td>The mode's principal game-state resource filename</td>
+</tr>
+<tr>
+  <td><code>%ls_M%02d.MST</code></td>
+  <td>Mode-specific mission progress filename pattern</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>.MST</code> filename is assembled using the loaded <code>CONFIG.SGO</code> <strong><code>PackageName</code></strong> and the ModeList <strong>row index</strong>, not only the visible campaign title. The stock package name is <code>DEFP</code>, so the first mode's progress name becomes <strong><code>DEFP_M00.MST</code></strong>. The <code>MAIN.GST</code> string is read from an explicit ModeList entry.</p>
+<h2 id="what-this-does-and-does-not-prove">What this does and does not prove</h2>
+<p>The source establishes the filename constants, folder pattern and mode-name construction. It does <strong>not</strong> independently document all bytes inside these save files, all platform variants, or how concurrent writes are handled. The presence of <code>TROPHY.DAT</code> in both EDF4.1 and EDF6 should not be taken as proof that their binary schemas match. In particular, the EDF6 achievement layout has its own game/build-specific documentation.</p>
+<p>A modded package can alter <code>PackageName</code> or mode rows, making filename identity a practical compatibility consideration. That is an observation about the game's native storage model, <strong>not a guide to editing or bypassing progression</strong>.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf41-globals</code>: <code>edf41-save-files</code> and <code>edf41-save-file-names</code>; original static source inspection by novae (ajane), build <code>steam-57aab039</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf41-globals</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#names-visible-in-the-original-executable">Names visible in the original executable</a><a href="#what-this-does-and-does-not-prove">What this does and does not prove</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-save-folder-slot-and-mission-mode-file-naming"};</script><script src="../assets/site.js" defer></script></body></html>

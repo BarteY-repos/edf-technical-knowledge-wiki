@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 corpse, severed-part and weapon-debris lifetimes EDF6 uses different disappearance timers for different kinds of objects. A corpse timer is not a shared en"><title>EDF6 corpse, severed-part and weapon-debris lifetimes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 corpse, severed-part and weapon-debris lifetimes</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Native-data and static code observations; no new in-game runtime test</div><div id="articleBody"><p>EDF6 uses <strong>different disappearance timers for different kinds of objects</strong>. A corpse timer is not a shared engine-wide constant, and debris persistence is not equivalent to a mission's enemy spawn cap. The following table summarizes values recovered from the specified stock <code>EDF.dll</code> code sites.</p>
+<table>
+<thead>
+<tr>
+  <th>Stock object/family</th>
+  <th style="text-align:right">Inspected timer</th>
+  <th>What the evidence actually measures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Spinner UFO</td>
+  <td style="text-align:right">30 seconds</td>
+  <td>Float threshold in the death/disappearance path</td>
+</tr>
+<tr>
+  <td>Shellfish / Nacre</td>
+  <td style="text-align:right">30 seconds</td>
+  <td>Float threshold in the examined path</td>
+</tr>
+<tr>
+  <td>Giant Ant</td>
+  <td style="text-align:right">15 seconds</td>
+  <td>Float threshold</td>
+</tr>
+<tr>
+  <td>Giant Spider</td>
+  <td style="text-align:right">15 seconds</td>
+  <td>Float threshold</td>
+</tr>
+<tr>
+  <td>Giant Bee</td>
+  <td style="text-align:right">15 seconds</td>
+  <td>Float threshold</td>
+</tr>
+<tr>
+  <td>DragonSmall (Tadpole)</td>
+  <td style="text-align:right">15 seconds</td>
+  <td>Float threshold</td>
+</tr>
+<tr>
+  <td>HumanoidBase</td>
+  <td style="text-align:right">20 or 30 seconds</td>
+  <td>Two native code values; exact decision context is not fully resolved here</td>
+</tr>
+<tr>
+  <td>BerserkerBase (androids)</td>
+  <td style="text-align:right">1,800 frames</td>
+  <td>Frame-count threshold, <strong>30 s if the counter advances at 60 Hz</strong></td>
+</tr>
+<tr>
+  <td>Detached humanoid limbs</td>
+  <td style="text-align:right">1,800 frames</td>
+  <td>Frame-count threshold, <strong>30 s at 60 Hz</strong></td>
+</tr>
+<tr>
+  <td>HumanoidWeaponBase::Drop</td>
+  <td style="text-align:right">600 frames</td>
+  <td>Frame-count threshold, <strong>10 s at 60 Hz</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The distinction between <strong>stored seconds</strong> and <strong>stored frame counts</strong> matters. A frame threshold does not guarantee real-time seconds under every variable-rate, paused or modified-timing scenario. A display FPS limit is not automatically the tick rate of these objects.</p>
+<h2 id="why-all-disappeared-objects-are-not-alike">Why all disappeared objects are not alike</h2>
+<ul>
+<li>A humanoid gun dropped from a destroyed part is its own scene object with physics and a roughly ten-second lifetime in the default path.</li>
+<li>An insect death body, humanoid limb and a boss state may have entirely separate duration policies.</li>
+<li>Cleaning up visual corpses does not prove the object was removed from a network scene registry, removed from all navigation blockers or eligible for reward drops. Those are distinct engine systems.</li>
+<li>A patch that repoints float loads or changes frame comparisons documents the original constants but is <strong>not evidence that the patched timeout is stock</strong>.</li>
+</ul>
+<h2 id="reference-and-attribution">Reference and attribution</h2>
+<p>Source fact <code>despawn-timers</code>, EDF6 <code>steam-678ccb46</code>, independently read in the EDF Knowledge Hub from KittopiaCreator's <code>AdjustObjDespawnTimers</code> code and EDF.dll instruction sites. Credit KittopiaCreator and novae/ajane. Values are static baseline readings, not gameplay timing remeasurements. Frame time conversions assume 60 ticks/s.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip (novae/ajane), EDF6/enemies.md; build steam-678ccb46; named facts credited to hajisensai/All Forces, KittopiaCreator and KH chat 120 as indicated</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-all-disappeared-objects-are-not-alike">Why all disappeared objects are not alike</a><a href="#reference-and-attribution">Reference and attribution</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-enemy-despawn-timers-and-visual-persistence"};</script><script src="../assets/site.js" defer></script></body></html>

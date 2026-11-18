@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 native event protocols are not the same thing as packet classes When reconstructing multiplayer behavior, distinguish the gameplay packet class, the event "><title>EDF6 network event registry: DamageObject, Mission, SceneObject and ItemDrop | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 network event registry: DamageObject, Mission, SceneObject and ItemDrop</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · EDF6 native-binary protocol registry and exact receiver/transport disassembly; no new multiplayer runtime test</div><div id="articleBody"><p>When reconstructing multiplayer behavior, distinguish the <strong>gameplay packet class</strong>, the <strong>event protocol within class 4</strong>, and internal engine/job codes. They have different identifiers, different receiver paths, and different meanings. The native-binary census here is for the qualified EDF6 DLL studied in the 2026 research; do not treat these numbers as a universal cross-build ABI.</p>
+<h2 id="three-game-traffic-routes">Three game traffic routes</h2>
+<table>
+<thead>
+<tr>
+  <th>Outer route</th>
+  <th>Receiver/owner</th>
+  <th>Application delivery</th>
+  <th>Typical responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Class 3 — <code>0x3300</code></td>
+  <td><code>SceneObjectReceiver</code></td>
+  <td><strong>Mode 1</strong>, not retained</td>
+  <td>Periodic state, ordinary player transforms</td>
+</tr>
+<tr>
+  <td>Class 4 — <code>0x3400</code></td>
+  <td><code>EventController</code></td>
+  <td><strong>Mode 0</strong>, Sandlot RUDP</td>
+  <td>Damage, HP-related events, mission/object events, immediate actions</td>
+</tr>
+<tr>
+  <td>Class 5 — <code>0x3500</code></td>
+  <td><code>NetworkBullet</code> / <code>BulletManager</code></td>
+  <td><strong>Mode 0</strong>, Sandlot RUDP for studied shipping senders</td>
+  <td>Projectile creation, publication and later contact state</td>
+</tr>
+</tbody>
+</table>
+<p>For the gameplay controller ID <code>3</code>, the class-4 route is assembled as <code>(controllerId &lt;&lt; 12) | 0x400 = 0x3400</code>. The event is then identified <strong>inside the event protocol</strong>, not by replacing the outer packet-class header with the event ID.</p>
+<h2 id="native-eventcontroller-protocol-registry">Native EventController protocol registry</h2>
+<p>The following IDs were recovered by native static analysis of EDF6's event-protocol registration, not invented from editor enums:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Protocol ID</th>
+  <th>Observed registered name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td><code>DamageObject</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td><code>Generator</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3</code></td>
+  <td><code>Mission</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td><code>SynchronizeGate</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>6</code></td>
+  <td><code>SceneObject</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>7</code></td>
+  <td><code>NoteEventSceneObject</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>8</code></td>
+  <td><code>ItemDrop</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9</code></td>
+  <td><code>System</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>10</code></td>
+  <td><code>TalkManager</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>100</code></td>
+  <td><code>Debug</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do not synthesize protocol ID 5:</strong> its absence from this measured registry is not proof of a general reserved-slot rule. Nor should one infer the wire schema or stable field ABI from a symbolic protocol name alone.</p>
+<h2 id="damage-and-hp-are-not-simply-part-of-walking-position">Damage and HP are not simply part of walking position</h2>
+<p>The native <code>Event_DamageObject</code> is registered at <strong>protocol ID 1</strong>. Its <code>EventBase</code> dispatch path hands the event to the <code>EventController</code> builder, which uses the class-4 <code>0x3400</code> lane and mode-0 retained RUDP. The numeric value <strong><code>0x2B</code></strong> seen in a later <code>DamageObject::OnEvent</code> path is an internal event/job code, <strong>not</strong> protocol ID <code>0x2B</code>.</p>
+<p>Thus a user can report apparently correct positions while still seeing incorrect HP, hit reactions or target destruction. Do not diagnose all of those observations as one missing <code>0x3300</code> movement snapshot. Confirm separately whether the relevant <code>DamageObject</code> event was generated, serialized, reliably acknowledged, received, and actually applied.</p>
+<h2 id="projectile-data-has-its-own-third-lane">Projectile data has its own third lane</h2>
+<p>EDF6 <code>NetworkBullet</code> registers a class-5 <code>0x3500</code> receiver. In the audited shipping binary, <strong>all 23 direct send callsites</strong> of the public NetworkBullet sender selected <code>mode=0</code>, hence the reliable per-peer RUDP path, not ordinary class-3 mode-1 delivery. EDF5 had a homologous RUDP projectile path, so a claim that EDF6 simply made normal bullet traffic unreliable is unsupported.</p>
+<p>However, retained delivery only recovers <strong>serialized bytes</strong>. It cannot restore omitted class-internal projectile state. Separate <code>FlameBullet02</code>, <code>LightningBullet01</code>, and <code>SolidExpBullet01</code> investigations demonstrate that initial motion, RNG/path state, and detonation countdown can be missing from the published selector payload.</p>
+<h2 id="evidence-and-testing-boundary">Evidence and testing boundary</h2>
+<p>The names, IDs, event routing, outer class IDs and mode selection are <strong>static binary evidence</strong>; the route is not a new endpoint established by independently sniffing a current live two-player session. For a network diagnosis, correlate both players' timestamps and the same object ID across class 3 snapshots, class 4 event records, class 5 bullet records, RUDP ACKs, and final in-world apply calls. See <a href="engine-re-edf5-edf6-player-state-packet-lanes.html">player-state packet lanes</a>, <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">RUDP behavior</a>, and <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">projectile reconstruction</a>.</p>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf6-online-hit-authority-kill-events-and-hp-delta-epochs.html">EDF6 HP deltas vs killing-hit events</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_NETWORK_EOS_REPAIR_EVIDENCE_LEDGER_2026-08-31_R7.json (NET-033–037)</li><li>Library: EDF6_ENGINE_RE_R17_DELIVERY_LOSS_RECOVERY_CHECKPOINT_2026-09-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#three-game-traffic-routes">Three game traffic routes</a><a href="#native-eventcontroller-protocol-registry">Native EventController protocol registry</a><a href="#damage-and-hp-are-not-simply-part-of-walking-position">Damage and HP are not simply part of walking position</a><a href="#projectile-data-has-its-own-third-lane">Projectile data has its own third lane</a><a href="#evidence-and-testing-boundary">Evidence and testing boundary</a><a href="#further-native-game-references">Further native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf6-native-event-protocol-registry-and-damage-object-route"};</script><script src="../assets/site.js" defer></script></body></html>

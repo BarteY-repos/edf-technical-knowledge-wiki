@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 / EDF5 / EDF6 — technical quick reference This reference explains what is known about the games, where to read the underlying research and why conclusion"><title>EDF4.1 / EDF5 / EDF6 — Technical quick reference | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-troubleshooting.html">Troubleshooting</a></div><h1>EDF4.1 / EDF5 / EDF6 — Technical quick reference</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Start / Quick Reference</span><span class="chip">Troubleshooting</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p>This reference explains <strong>what is known about the games</strong>, where to read the underlying research and why conclusions from one version cannot automatically be used for another. It is not a history of tool development.</p>
+<h2 id="first-decide-which-data-layer-you-are-reading">First decide which data layer you are reading</h2>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>Typical native resources</th>
+  <th>Main question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Game archives</td>
+  <td>CPK, RAB, CMPL, MARC</td>
+  <td>How is an asset stored, compressed and found?</td>
+</tr>
+<tr>
+  <td>Models</td>
+  <td>MDB, MDX, MAB, CAS, CANM</td>
+  <td>What are geometry, materials, bones and animations?</td>
+</tr>
+<tr>
+  <td>Maps</td>
+  <td>MAC, MAPB, MAPO, FMB, FMEP</td>
+  <td>What objects, terrain and visual features are placed?</td>
+</tr>
+<tr>
+  <td>Physics and navigation</td>
+  <td>MAD, SHKT, HKT, NVMD</td>
+  <td>What is solid, what moves, and where can AI travel?</td>
+</tr>
+<tr>
+  <td>Missions</td>
+  <td>BVM, AC, mission RMPA, SGO/DSGO</td>
+  <td>What events, spawns and script operations occur?</td>
+</tr>
+<tr>
+  <td>Multiplayer and progress</td>
+  <td>GameStatus, MissionMgr, mode LIST, MST, protocol data</td>
+  <td>Which state belongs to a player, session or game mode?</td>
+</tr>
+</tbody>
+</table>
+<p>A file that <strong>parses</strong> does not necessarily behave correctly in the game. Similarly, correctly rendered geometry does not establish collision, and a valid collision mesh does not establish AI navigation.</p>
+<h2 id="where-to-begin">Where to begin</h2>
+<ul>
+<li><a href="docs-file-formats.html">Native archive and resource formats</a>, <a href="docs-models.html">models and MDB</a> and <a href="docs-shaders.html">material/shader systems</a>.</li>
+<li><a href="docs-maps.html">Map containers and world placement</a>, <a href="docs-collision.html">collision</a> and <a href="docs-navigation.html">navigation</a>.</li>
+<li><a href="docs-missions.html">Missions</a>, <a href="docs-scripting.html">scripting</a> and <a href="missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">mission RMPA</a>.</li>
+<li><a href="docs-gameplay.html">Native gameplay and enemy AI</a>, <a href="docs-weapon-parameters.html">weapon parameters</a> and <a href="docs-weapon-upgrades.html">weapon upgrades</a>.</li>
+<li><a href="docs-networking.html">Network architecture</a> and <a href="edf6-native-missionpack-mode-and-lobby-identity.html">native progress/ModeList identity</a>.</li>
+</ul>
+<h2 id="high-value-differences-across-generations">High-value differences across generations</h2>
+<ol>
+<li><strong>MDB and CANM:</strong> familiar names do not imply a byte-identical on-disk ABI; vertex declarations, channels, materials and sampling differ.</li>
+<li><strong>Havok and NAV:</strong> geometry, collision and route graphs are separate. EDF4.1 navigation cannot safely be inferred from an EDF6 donor mesh.</li>
+<li><strong>BVM and AngelScript:</strong> event registration, API types, branch semantics and RMPA route names must be interpreted, not text-substituted.</li>
+<li><strong>MissionPack:</strong> selecting a mode, resolving its resource request, loading LIST/TXT and updating its save namespace occur at different stages.</li>
+<li><strong>Gameplay rules:</strong> HP factors, kill merit, equipment ownership and vehicle/object action IDs differ between titles; use the exact game's sources.</li>
+<li><strong>Rendering:</strong> shader names alone cannot reconstruct sampler order, packed texture channels or the special FieldRender path.</li>
+</ol>
+<h2 id="evidence-and-confidence">Evidence and confidence</h2>
+<p><strong>Contributor verified</strong> means the cited researcher reported a runtime test; it does <em>not</em> mean this wiki ran the test. <strong>Native binary/static</strong> refers to files or disassembly for a specified build; an address is not a universal constant. <strong>Open/unverified</strong> means a proposed interpretation still needs proof. Source-conversion or binary-serialization success is not equivalent to gameplay parity.</p>
+<p>For difficult discrepancies see the <a href="docs-reconciliation.html">cross-source reconciliation</a>, the <a href="known-traps-critical-negative-evidence-and-provenance.html">negative findings</a>, and the original attributed <a href="docs-community-knowledge-hub.html">Knowledge Hub appendices</a>.</p>
+<h2 id="some-established-examples">Some established examples</h2>
+<ul>
+<li><a href="edf41-edf5-edf6-enemy-hp-float32-scaling-and-shield-bearer-exception.html">Enemy HP and the EDF4.1 Shield Bearer exception</a>.</li>
+<li><a href="edf41-edf5-edf6-kill-merit-credit-and-callin-compression.html">Team merit and EDF5/6 support-credit compression</a>.</li>
+<li><a href="edf41-uforobo-argo-flight-transform-robot-attack-timers.html">EDF4.1 UfoRobo state machine</a>.</li>
+<li><a href="edf5-edf6-weapon-table-row-schema-category-localization-id-ownership.html">EDF5/EDF6 weapon-table row identity</a>.</li>
+<li><a href="edf6-mission-clear-difficulty-bits-level-fix-script-abi.html">EDF6 clear bits and difficulty-level interpolation</a>.</li>
+<li><a href="performance-profiler-p1-p2-p3r-visibility-cost.html">EDF6 shader and visibility performance</a>.</li>
+</ul>
+<p>The wiki retains original sources and their limitations. It is an evolving reference, not a guarantee that every build or source collection has been examined.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF_4_1_TO_6_COMPLETE_KNOWLEDGE_WIKI_MASTER_SPEC_2026-11-13.md</li><li>Current reconciled domain articles through R47</li><li>R55 groupwise source-checked reconciliation from R6 ledger and maintained binary parsers</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#first-decide-which-data-layer-you-are-reading">First decide which data layer you are reading</a><a href="#where-to-begin">Where to begin</a><a href="#high-value-differences-across-generations">High-value differences across generations</a><a href="#evidence-and-confidence">Evidence and confidence</a><a href="#some-established-examples">Some established examples</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"start-quick-reference"};</script><script src="../assets/site.js" defer></script></body></html>

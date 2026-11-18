@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 original Havok 2014 map and object corpus: what is actually established Evidence: A read-only, exact-consumption audit of 21 original EDF 4.1 Binary Tag"><title>EDF4.1 original Havok 2014: 21-file MAD/SHKT corpus and convex-contact limits | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Physics</div><h1>EDF4.1 original Havok 2014: 21-file MAD/SHKT corpus and convex-contact limits</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Physics &amp; Collision</span><span class="chip">Physics</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · EDF4.1 native source: 21/21 exact decoder consumption; offline 311 MOPP routes; target runtime not established</div><div id="articleBody"><p><strong>Evidence:</strong> A read-only, exact-consumption audit of <strong>21 original EDF 4.1 Binary Tagfile payloads</strong> dated 5 September 2026: <strong>5 <code>.MAD</code> map collision files and 16 <code>.SHKT</code> object physics files</strong>. It is <strong>not</strong> an EDF6 gameplay test, and the original game assets are deliberately not shipped in this reference.</p>
+<h2 id="the-format-identity-is-precise-but-not-a-converter">The format identity is precise but not a converter</h2>
+<p>All 21 examined payloads report <strong>Binary Tagfile version 5</strong> and Havok SDK identification <strong><code>hk_2014.1.0-r1</code></strong>. The audited decoder consumed the exact payload byte count in all <strong>21/21</strong> cases; each source file has a separate SHA-256 and explicit source/payload sizes. This supports the original EDF4.1 serialization observations, not the assertion that EDF5 or EDF6 uses the same physical shape layout. A shared Havok family label does not make later <code>hknp</code> collision bodies compatible with EDF4.1 <code>hkp</code> shapes by renaming a header.</p>
+<p><code>.MAD</code> represents map-side physics/collision; <code>.SHKT</code> represents object-side physics. Neither is an EDF6 FMEP vegetation/texture-array container. An original <code>.MAD</code> can contain a large mixture of MOPP meshes and relatively simple shape primitives; the file extension alone does not predict triangle counts or convex representation.</p>
+<h2 id="five-original-edf4-1-map-collision-profiles">Five original EDF4.1 map collision profiles</h2>
+<table>
+<thead>
+<tr>
+<th>Original map</th>
+<th style="text-align:right">Rigid bodies</th>
+<th style="text-align:right">Direct MOPP mesh paths accepted offline</th>
+<th style="text-align:right">Compact primitive branches accepted / examined</th>
+<th style="text-align:right">Direct primitive branches accepted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IG_CAVE01</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4 / 4</td>
+<td style="text-align:right">0 / 0</td>
+<td style="text-align:right">0 / 0</td>
+</tr>
+<tr>
+<td><code>IG_TESTLIGHTMAP</code></td>
+<td style="text-align:right">177</td>
+<td style="text-align:right">14 / 14</td>
+<td style="text-align:right">161 / 163</td>
+<td style="text-align:right">0 / 0</td>
+</tr>
+<tr>
+<td><code>IG_TEST_BLUEFLD</code></td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">0 / 0</td>
+<td style="text-align:right">1 / 1</td>
+<td style="text-align:right">0 / 0</td>
+</tr>
+<tr>
+<td><code>NW_UNDERGROUND01</code></td>
+<td style="text-align:right">386</td>
+<td style="text-align:right">45 / 45</td>
+<td style="text-align:right">334 / 334</td>
+<td style="text-align:right">7 / 7</td>
+</tr>
+<tr>
+<td><code>NW_KOUSOUBLD01</code></td>
+<td style="text-align:right">3,379</td>
+<td style="text-align:right">248 / 248</td>
+<td style="text-align:right">3,061 / 3,064</td>
+<td style="text-align:right">67 / 67</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>3,947</strong></td>
+<td style="text-align:right"><strong>311 / 311</strong></td>
+<td style="text-align:right"><strong>3,557 / 3,562</strong></td>
+<td style="text-align:right"><strong>74 / 74</strong></td>
+</tr>
+</tbody>
+</table>
+<p>These counts are <strong>audited offline shape-route coverage</strong>, not runtime collision success. The 311 direct MOPP mesh paths account for <strong>283,381 vertices and 471,929 triangles</strong> in the source geometry survey. <code>NW_KOUSOUBLD01</code> alone has 3,379 map rigid bodies, 248 accepted MOPP paths and 3,064 tested compact-primitive branches; it is not representative of the all-MOPP four-body cave.</p>
+<p>Notice the separate notions of <strong>serialized object count</strong>, <strong>map rigid-body count</strong>, <strong>MOPP paths</strong>, <strong>primitive branches</strong> and <strong>triangle count</strong>. The original <code>NW_KOUSOUBLD01.MAD</code> reports 13,697 serialized Havok objects but 3,379 map rigid bodies. Conflating those counters would inflate the apparent number of physical actors.</p>
+<h2 id="original-shape-graphs-are-not-one-universal-mesh">Original shape graphs are not one universal mesh</h2>
+<p>Observed root/child families include <code>hkpMoppBvTreeShape</code>, <code>hkpStorageExtendedMeshShape</code>, <code>hkpListShape</code>, <code>hkpConvexVerticesShape</code>, <code>hkpBoxShape</code>, <code>hkpCylinderShape</code>, and translation/transform wrappers. In <code>IG_TESTLIGHTMAP</code>, 16 root MOPPs include 14 direct extended meshes and two MOPP-wrapped lists; <code>NW_UNDERGROUND01</code> includes direct box and convex roots alongside lists and MOPPs. A target physics format must represent the <strong>effective contact surface and transformed shape</strong>, not just a leaf class name.</p>
+<h2 id="five-negative-compact-convex-candidates-are-meaningful">Five negative compact-convex candidates are meaningful</h2>
+<p>The compact branch had <strong>five failed map/body occurrences</strong> across two maps, representing <strong>three unique source body names</strong>. <code>sk_car_sedan02_hk.polymsh</code> and <code>sk_car_minivan01_hk.polymsh</code> each recur in <code>IG_TESTLIGHTMAP</code> and <code>NW_KOUSOUBLD01</code>: the high-vertex hulls did not satisfy the audited uint8 convex-reduction geometry budget (<code>484 → 228</code> and <code>594 → 214</code> vertices in the error reports). <code>nw_hct_koujimaku2.polymsh</code> is a distinct failed hull with duplicate directed edge <code>1→0</code>.</p>
+<p>Those failures do <strong>not</strong> mean that the original map collision is invalid. They mean that this <strong>particular neutral compact representation</strong> was not qualified for those bodies. Blindly lowering vertex counts can change support, contact extents and gameplay geometry.</p>
+<p>A separate exact EDF4.1/EDF5/EDF6 comparison of the two car shapes demonstrates why a <strong>support-surface-preserving</strong> approximation matters. For the selected minivan, source expanded half-extents and the derived target-oriented profile agreed within approximately <code>0.000328</code> in the reported comparison; the generated expanded-support difference from EDF4.1 was approximately <code>8.57e-8</code> for that comparison. This is a local geometric result, <strong>not</strong> proof of general convex equivalence or stable dynamics in EDF6.</p>
+<h2 id="reader-interpretation-and-remaining-limits">Reader interpretation and remaining limits</h2>
+<ul>
+<li>The full 21-file source directory is in <code>data/R158_EDF41_HAVOK2014_21_NATIVE_MAD_SHKT_SOURCE_CENSUS.csv</code> (original filenames, sizes, versions and hashes; no game bytes).</li>
+<li>Shape paths, original body totals and failure counts are in <code>data/R158_EDF41_HAVOK2014_FIVE_MAP_COLLISION_BRANCH_COUNTS.csv</code> and <code>data/R158_EDF41_HAVOK2014_FIVE_COMPACT_CONVEX_NEGATIVE_CASES.csv</code>.</li>
+<li>This establishes a useful EDF4.1 <strong>source oracle</strong> for target collision contact, while EDF6's <code>hknp</code> shapes and welded/heightfield behavior require independent target-native and in-game evidence.</li>
+<li>The audited stage for a production EDF4.1→EDF6 <code>.MAD</code> was <strong>not yet promoted</strong> by this source; no runtime certification follows from 21/21 exact decoding.</li>
+</ul>
+<p><strong>Primary source reports:</strong> <code>/EDF5_EDF6_RESEARCH/research/audits/edf41/EDF41_HAVOK2014_CORPUS_AUDIT_2026-09-05.json</code> and <code>EDF41_TESTLIGHT_OVERSIZED_CONVEX_LINEAGE_AUDIT_2026-09-05.json</code> in the same folder. See also <a href="kh-crosswalk-havok-versions.html">Havok version boundaries</a> and <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">EDF4.1 source-terrain/nav evidence</a>.</p>
+<h2 id="later-broader-18-map-mad-body-census-r59-separate-from-the-21-file-audit-above">Later, broader 18-map MAD body census (R59; separate from the 21-file audit above)</h2>
+<p>The November 17 native original-EDF4.1 investigation examined <strong>18 <code>.MAD</code> map archives and 18,520 <code>hkpRigidBody</code> instances</strong> — not the five MAD plus sixteen object SHKT payloads counted in the preceding R158 sample. It found <strong>16,301 list roots</strong>, <strong>1,608 MOPP roots</strong>, and smaller convex/primitive families; motion types <code>5/3/2</code> occurred <strong>17,660 / 849 / 11</strong> times. All 18 source <code>hkpPhysicsSystem</code> records set <code>active=1</code>, but this does <strong>not</strong> verify the running world's actual collision registration.</p>
+<p>Most importantly, although <code>hkpTypedBroadPhaseHandle</code> declares <code>collisionFilterInfo</code>, <strong>18,520/18,520</strong> body instances omit an explicitly serialized value. Do <strong>not</strong> interpret omission as zero or a universal NPC collision layer. See <a href="edf41-original-mapb-actor-matrix-and-havok2014-filter-presence.html">the full native MAPB matrix and Havok-filter analysis</a>, which also resolves the algebraic base-actor rotation order and separates that finding from still-unknown NPC contact behavior.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/audits/edf41/EDF41_HAVOK2014_CORPUS_AUDIT_2026-09-05.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/edf41/EDF41_TESTLIGHT_OVERSIZED_CONVEX_LINEAGE_AUDIT_2026-09-05.json</li><li>EDF41 R59 original Havok 2014 18-MAD source census (17 Nov 2026)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-format-identity-is-precise-but-not-a-converter">The format identity is precise but not a converter</a><a href="#five-original-edf4-1-map-collision-profiles">Five original EDF4.1 map collision profiles</a><a href="#original-shape-graphs-are-not-one-universal-mesh">Original shape graphs are not one universal mesh</a><a href="#five-negative-compact-convex-candidates-are-meaningful">Five negative compact-convex candidates are meaningful</a><a href="#reader-interpretation-and-remaining-limits">Reader interpretation and remaining limits</a><a href="#later-broader-18-map-mad-body-census-r59-separate-from-the-21-file-audit-above">Later, broader 18-map MAD body census (R59; separate from the 21-file audit above)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-havok2014-native-mad-shkt-21-source-corpus-and-convex-limits"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 controls: keybinding codes, class pages, conflict rules and CFG layout EDF5 stores bindings as integer input codes, not textual key names. In the source&#39;s "><title>EDF5 controls: keybinding codes, class pages, conflict rules and CFG layout | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Input and UI</div><h1>EDF5 controls: keybinding codes, class pages, conflict rules and CFG layout</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Input and UI</span></div><div class="referencebadge">Technical reference · Attribution and grade per source fact; this edition adds no game runtime test</div><div id="articleBody"><p>EDF5 stores bindings as <strong>integer input codes</strong>, not textual key names. In the source's examined build, a per-player binding block contains <strong>10 categories with 255 action slots</strong> in each category. The native menu exposes only named subsets of those slots, and the rest are not proof of usable user-facing controls.</p>
+<h2 id="code-domains">Code domains</h2>
+<table>
+<thead>
+<tr>
+  <th>Code range</th>
+  <th>Device / meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code></td>
+  <td>Unbound</td>
+</tr>
+<tr>
+  <td><code>1–0x0B</code></td>
+  <td>Gamepad A/B/X/Y, triggers, shoulder buttons, sticks and Back</td>
+</tr>
+<tr>
+  <td><code>0x0C–0x11</code></td>
+  <td>Mouse buttons, wheel and side buttons</td>
+</tr>
+<tr>
+  <td><code>0x12–0x78</code></td>
+  <td>Keyboard keys from the game's own lookup table</td>
+</tr>
+</tbody>
+</table>
+<p>The keyboard list includes letters, digits, numpad keys, F1–F12, modifiers, arrows, navigation/editing keys and several locale-specific keys. These are <strong>internal game codes</strong>, not Windows virtual-key values and not automatically DirectInput scan codes.</p>
+<h2 id="menu-pages-and-action-groups">Menu pages and action groups</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Page kind</th>
+  <th>Native action range</th>
+  <th>Group</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0–1</td>
+  <td><code>0x00–0x14</code></td>
+  <td>Gamepad pages</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>0x15–0x20</code></td>
+  <td>Common keyboard</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>0x21–0x27</code></td>
+  <td>Soldier classes</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>0x28–0x2F</code></td>
+  <td>Fencer</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>0x30–0x34</code></td>
+  <td>Drive</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>0x35–0x37</code></td>
+  <td>Tanks</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>0x38–0x3C</code></td>
+  <td>Combat Frame</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>0x3D–0x41</code></td>
+  <td>Bulga</td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>0x42–0x46</code></td>
+  <td>Depth Crawler</td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>0x47–0x49</code></td>
+  <td>Helicopter</td>
+</tr>
+</tbody>
+</table>
+<p>The source's per-class categories <strong>0 Ranger, 1 Wing Diver, 2 Air Raider, 3 Fencer</strong> contain overlapping common actions. A given menu label can be class-dependent: “Dash/Boost” represents different movement for Ranger and Wing Diver, and may not appear for Air Raider.</p>
+<h2 id="duplicate-bindings-and-reserved-codes">Duplicate bindings and reserved codes</h2>
+<p>The menu's assignment routine swaps a chosen key with another action on the same page that already uses it, rather than simply permitting arbitrary duplicates. A separate conflict routine reports <strong>0 reserved, 1 already selected, -1 available</strong>. Some assignments are mirrored across soldier-class categories when the page item carries a shared-action flag.</p>
+<p>One action stores <strong>one int32 code</strong>. The surveyed table does <strong>not encode modifier chords such as Alt+B as a compound key</strong>, even if the underlying OS can detect modifiers; an external remapper and the native binding table do different jobs.</p>
+<h2 id="persistent-configuration-and-scope">Persistent configuration and scope</h2>
+<p>The source places the table in the game's <code>COMMON.CFG</code> representation, following camera-setting fields, with an address formula based on player, category and action index. It also traces the menu text to localized <code>OptionPlayer_Keyboard*</code> strings. These addresses belong to the studied EDF5.exe; do not use them as universal offsets for every distribution or patch version.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf5-input</code> facts <code>keybind-table</code>, <code>keybind-codes</code>, <code>keybind-pages-vehicles</code>, <code>keybind-common-ids</code>, <code>keybind-assign</code>, <code>keybind-no-chords</code>; original EDF5 source investigator's code reading. No input-mod experiments were run in this edition. See <a href="edf5-native-input-pump-keyboard-snapshot-xinput-and-focus.html">Windows input path</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14: original EDF4.1/EDF5/EDF6 binary/SGO data and attributed contributor analyses; build-specific findings</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#code-domains">Code domains</a><a href="#menu-pages-and-action-groups">Menu pages and action groups</a><a href="#duplicate-bindings-and-reserved-codes">Duplicate bindings and reserved codes</a><a href="#persistent-configuration-and-scope">Persistent configuration and scope</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-native-key-binding-pages-codes-and-conflict-rules"};</script><script src="../assets/site.js" defer></script></body></html>

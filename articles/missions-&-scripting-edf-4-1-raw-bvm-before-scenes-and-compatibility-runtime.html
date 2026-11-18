@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 mission content: offline campaign, DLC, online-only scope and BEFORE.BVM Evidence level: Source-file classification, original script/container observatio"><title>EDF4.1 mission content: offline, DLC, online-only and BEFORE.BVM | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-scripting.html">Scripting</a></div><h1>EDF4.1 mission content: offline, DLC, online-only and BEFORE.BVM</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Bounded original-source classification, native BVM/RMPA readings; 147 reported vs 138 previously converted; nine online-only source IDs not yet directly enumerated</div><div id="articleBody"><p><strong>Evidence level:</strong> Source-file classification, original script/container observations and scoped conversion comparisons. The numbers describe distinct <em>content sets</em>; they do not certify complete EDF6 gameplay behavior. See the <a href="missions-%26-scripting-edf-4-1-mission-bundles-and-friendly-gameplay-fidelity.html">original-versus-converted mission coverage explanation</a>.</p>
+<h2 id="how-many-edf4-1-missions-belong-to-each-set">How many EDF4.1 missions belong to each set?</h2>
+<p>The retained original-source comparison distinguishes <strong>147 reported distinct EDF4.1 missions</strong> from the <strong>138-mission conversion subset</strong> documented in earlier research:</p>
+<table>
+<thead>
+<tr>
+<th>Content scope</th>
+<th align="right">Mission count</th>
+<th>In earlier 138-mission subset?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Main campaign, offline</td>
+<td align="right">89</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Main campaign, online-only stages</td>
+<td align="right">9</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td>DLC1</td>
+<td align="right">26</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>DLC2</td>
+<td align="right">23</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Reported original content union</strong></td>
+<td align="right"><strong>147</strong></td>
+<td><strong>138 included, 9 excluded</strong></td>
+</tr>
+</tbody></table>
+<p>The nine online-only stages are based on the retained original-source scope comparison; their complete IDs and placement in the original online <code>MISSIONLIST.SGO</code> have <strong>not</strong> been independently verified by a full original list census. Consequently, <strong>147 is a bounded content-accounting result, not a new direct list-file enumeration</strong>. Conversely, the converted set&#39;s 138/138 source test does not establish that original EDF4.1 contains only 138 missions.</p>
+<p>Original DLC mission identities include <code>DM101</code> and <code>DM202</code>. Their numeric IDs are not evidence that DLC and online-only contents share one simple sequential numbering scheme.</p>
+<h2 id="native-source-roles-and-cross-generation-script-differences">Native source roles and cross-generation script differences</h2>
+<p>EDF4.1 original mission logic is stored in <code>.BVM</code> scripts, while EDF6 normally consumes AngelScript <code>.AC</code> mission scripts. A converter can pass source syntax and reference checks while still missing original gameplay effects, events or NPC behavior. This is a distinction between <strong>native file semantics</strong> and <strong>converted content</strong>, not a description of a required editor workflow.</p>
+<p>Observed EDF4.1 BVM container elements include a <code>0x50</code>-byte header, 16-byte function-table records, packed opcode/operand widths, relative branches and a UTF-16LE string pool. The <a href="missions-%26-scripting-edf41-bvm-container-bytecode-and-edf5-script-recompilation.html">native BVM structure reference</a> explains these measurements and what is known to survive a cross-generation representation change.</p>
+<p>Mission-specific <code>.RMPA</code> data and map <code>.RMPA</code> data have distinct source roles even if the filename extension is shared. A valid resource graph depends on preserving that context.</p>
+<p>One historical conversion corpus reported <strong>138/138 passing offline checks</strong>, but those were source/link/build checks, <strong>not</strong> 138 successful EDF6 mission playthroughs. The omitted online-only set remains outside that denominator.</p>
+<h2 id="native-before-scenes">Native BEFORE scenes</h2>
+<p>Four pre-mission scenes remain BVM/RMPA rather than being renamed into AngelScript:</p>
+<ul>
+<li>M015;</li>
+<li>M016;</li>
+<li>M190;</li>
+<li>M192.</li>
+</ul>
+<p>The observed source roles are <strong><code>BEFORE.BVM</code> plus <code>BEFORE.RMPA</code></strong>, not ordinary <code>.AC</code> mission scripts. Renaming a file does not change its semantics; pre-mission presentation has its own UI and event timing. See <a href="missions-%26-scripting-edf41-before-bvm-black-screen-ui-order.html">the observed black-screen case</a>.</p>
+<h2 id="runtime-and-evidence-boundaries">Runtime and evidence boundaries</h2>
+<p>The historical offline source check included a compatibility implementation for EDF4.1 enemy/boss logic, pre-mission scenes, audio and a current-HP-only mission command. These are <strong>cross-generation implementation observations</strong>, not evidence that EDF6 natively provides every EDF4.1 behavior or that NPC movement is correct on EDF4.1 geometry.</p>
+<p>There are three distinct checks:</p>
+<ol>
+<li><strong>Original content:</strong> establish the correct <code>.BVM</code>/<code>.RMPA</code> files, campaign/online/DLC scope and original source identities.</li>
+<li><strong>Structural translation:</strong> check whether the target representation retains the same intended events, values and resource references.</li>
+<li><strong>Gameplay:</strong> observe the mission, allied recruitment and pathfinding, bosses, BEFORE presentation, sound and multiplayer under a matching EDF6 runtime.</li>
+</ol>
+<p>Only the first two were meaningfully addressed by the earlier 138-mission source verification; <strong>the third was not established for the complete campaign</strong>. A structurally valid converted mission can still fail because the native map NAV, asset binding or game-specific API behavior differs.</p>
+<h2 id="related-native-command-and-presentation-details">Related native command and presentation details</h2>
+<p>The <a href="missions-%26-scripting-edf41-bvm-3025-multiply-current-hp-native-call-abi.html">BVM 3025 research</a> distinguishes a current-health multiplier from modifying maximum HP. The <a href="missions-%26-scripting-edf41-before-bvm-black-screen-ui-order.html">BEFORE.BVM UI case</a> distinguishes a successfully running scene script and audible dialogue from visible presentation under an HQ black fade. Both are examples of <strong>game behavior that file conversion alone cannot certify</strong>.</p>
+<p><strong>Provenance and preservation:</strong> this explanation synthesizes the earlier 138-mission raw source check, its four BEFORE roles, the later 147-versus-138 original-content reconciliation, and the native BVM/3025 findings. The exact older technical/implementation-oriented wording is preserved separately in the archive as a prior-edition source snapshot; it is not promoted into the reader as a guide to an SDK, compatibility DLL or editor.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF41_EDF6_RESEARCH/MISSIONS_R7_2026-11-01/README.md</li><li>/EDF41_EDF6_RESEARCH/COMPATIBILITY_R9_2026-11-01/README.md</li><li>/EDF41_EDF6_RESEARCH/FULL_R10_HF3_2026-11-02/START_HERE_EDF41_R10_HF3_2026-11-02.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#how-many-edf4-1-missions-belong-to-each-set">How many EDF4.1 missions belong to each set?</a><a href="#native-source-roles-and-cross-generation-script-differences">Native source roles and cross-generation script differences</a><a href="#native-before-scenes">Native BEFORE scenes</a><a href="#runtime-and-evidence-boundaries">Runtime and evidence boundaries</a><a href="#related-native-command-and-presentation-details">Related native command and presentation details</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-edf-4-1-raw-bvm-before-scenes-and-compatibility-runtime"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 mission bytecode: clean shipping BVM versus EDF6&#39;s EDF5_OLD_SCRIPT Scope: the audited 141-mission shipping set in the EDF5→EDF6 comparison corpus. This is "><title>EDF5 mission BVM: clean source vs EDF6 OLD_SCRIPT differences | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / VM &amp; source identity</div><h1>EDF5 mission BVM: clean source vs EDF6 OLD_SCRIPT differences</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">VM &amp; source identity</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact 141-mission source-vs-legacy byte/semantic audit; offline</div><div id="articleBody"><p><strong>Scope:</strong> the audited <strong>141-mission shipping set</strong> in the EDF5→EDF6 comparison corpus. This is a byte-identity and game-script semantic distinction, not a description of a conversion program. The reference is bounded to the exact source set examined in the 27 August 2026 research and should not be generalized to arbitrary regional game editions.</p>
+<h2 id="two-similarly-named-bvm-collections-are-not-identical">Two similarly named BVM collections are not identical</h2>
+<p>The studied material included original EDF5 <code>MISSION/.../MISSION.BVM</code> files and a separately retained <code>EDF5_OLD_SCRIPT</code> tree on the EDF6 side. The names suggest the same script vintage, but exact binary comparison disproved equality:</p>
+<table>
+<thead>
+<tr>
+  <th>Exact 141-pair comparison</th>
+  <th style="text-align:right">Observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Original EDF5 shipping BVMs examined</td>
+  <td style="text-align:right"><strong>141</strong></td>
+</tr>
+<tr>
+  <td>Byte-identical pairs against corresponding <code>EDF5_OLD_SCRIPT</code> files</td>
+  <td style="text-align:right"><strong>0 / 141</strong></td>
+</tr>
+<tr>
+  <td>EDF6-side/legacy BVM larger by exactly <strong>80 bytes</strong></td>
+  <td style="text-align:right"><strong>65 / 141</strong></td>
+</tr>
+<tr>
+  <td>EDF6-side/legacy BVM larger by exactly <strong>96 bytes</strong></td>
+  <td style="text-align:right"><strong>76 / 141</strong></td>
+</tr>
+<tr>
+  <td>Other size deltas within the examined set</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The whole 141-file comparison therefore shows a <strong>consistent altered binary envelope</strong> on the legacy EDF6-side files. It does <em>not</em> prove whether each added byte corresponds to one field or header without a separate structural analysis. In particular, it is not sound to assume that <code>EDF5_OLD_SCRIPT</code> is a byte-for-byte untouched copy of the original EDF5 data simply because the mission IDs match.</p>
+<h2 id="which-missions-define-the-shipping-set">Which missions define the shipping set?</h2>
+<p>The canonical source comparison used <strong>112 base campaign union IDs</strong>, <strong>15 DLC1</strong> and <strong>14 DLC2</strong> (141 total). The source-base union encompasses offline/online-only differences; it is not the same as the count of one mode-specific original binary list. It excludes optional stress fixtures and the separate EDF4.1/TEST/TGS material from the larger supplied <strong>335-file</strong> BVM tree.</p>
+<p>For the full sequence of IDs recorded in a historical <em>converted</em> MissionPack LIST, consult the <a href="missions-edf5-content-r41-converted-mission-list-order-141-campaign-reference.html">141-entry mission order reference</a>. That is an ordering corpus; the clean original EDF5 <code>MISSION.BVM</code> source identity here is a different kind of evidence.</p>
+<h2 id="semantic-observations-made-against-the-clean-bvm-set">Semantic observations made against the clean BVM set</h2>
+<p>The source-only 141-mission comparison did not validate correctness merely by counting output files. Its retained exact audit recorded:</p>
+<table>
+<thead>
+<tr>
+  <th>Source-derived observation</th>
+  <th style="text-align:right">Examined total / result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>CreateEnemy2</code> sites recovered from original BVM</td>
+  <td style="text-align:right"><strong>722</strong></td>
+</tr>
+<tr>
+  <td>Corresponding generated <code>CreateEnemy2</code> sites</td>
+  <td style="text-align:right"><strong>722</strong></td>
+</tr>
+<tr>
+  <td>Source spawn transactions inspected for ordering</td>
+  <td style="text-align:right"><strong>3,471</strong></td>
+</tr>
+<tr>
+  <td>Transaction order failures in the audited path</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td>Mission AC files regenerated from the clean source and byte-identical to the historical R43 runtime-candidate output</td>
+  <td style="text-align:right"><strong>141 / 141</strong></td>
+</tr>
+<tr>
+  <td>Structural errors in that regenerated AC set</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>A focused compilation/source-equivalence suite reported <strong>29/29 PASS</strong>. The four separately inspected frog-related resource variants were also reproduced byte-identically in that historical path. These results are strong <strong>offline source-to-artifact parity evidence</strong>, not proof that all 141 missions completed or behaved identically in EDF6 runtime.</p>
+<h2 id="why-the-source-matters-for-vm-semantics">Why the source matters for VM semantics</h2>
+<p>A target-side script can contain port decisions or layout changes absent from the original EDF5 VM. The source corpus contained a <code>cvtstore</code> stack rule: the assignment leaves the stored lvalue on the stack, so a call with side effects must not be evaluated twice. Similarly, source <code>cuscall0 5014</code> used enum 15 for the tested background/fog event family, while unsupported <code>cuscall0 3450</code> lacked a proven direct AngelScript <code>SetAiSearchRadius</code> binding.</p>
+<p>The historical offline path separated that unresolved <strong>3450</strong> operation from a resource-level compatibility specialization. Later executable compatibility choices that omitted six such calls in <code>DM006_2</code> do <strong>not</strong> retroactively make omission equivalent to original source semantics. Original BVM behavior, reference-port behavior and target runtime acceptance remain distinct evidence layers.</p>
+<h2 id="interpreting-the-evidence-safely">Interpreting the evidence safely</h2>
+<ol>
+<li>Compare claims of exact <strong>source-script behavior</strong> against the verified original EDF5 BVM, not merely the <code>EDF5_OLD_SCRIPT</code> directory inside an EDF6 archive.</li>
+<li>Compare claims of <strong>target game runtime behavior</strong> against actual EDF6 tests. A byte-identical generated AC is an offline result.</li>
+<li>Keep the base-campaign union, each mode-specific LIST count and the 141-mission shipping set separate.</li>
+<li>Never infer an unknown BVM opcode mapping solely by matching AngelScript function names or by copying a historical converted script.</li>
+</ol>
+<p><strong>Sources:</strong> <code>MISSION/R44/README_R44.txt</code> and <code>MISSION/R44/R44_CURRENT_RESEARCH_STATE_2026-08-27.json</code>, checked against the prior R41 mission ordering and the R42 group typing audit. No new game runtime evidence was produced for this article.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MISSION/R44/README_R44.txt</li><li>MISSION/R44/R44_CURRENT_RESEARCH_STATE_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-similarly-named-bvm-collections-are-not-identical">Two similarly named BVM collections are not identical</a><a href="#which-missions-define-the-shipping-set">Which missions define the shipping set?</a><a href="#semantic-observations-made-against-the-clean-bvm-set">Semantic observations made against the clean BVM set</a><a href="#why-the-source-matters-for-vm-semantics">Why the source matters for VM semantics</a><a href="#interpreting-the-evidence-safely">Interpreting the evidence safely</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-original-bvm-versus-edf6-edf5-old-script-source-identity-reference"};</script><script src="../assets/site.js" defer></script></body></html>

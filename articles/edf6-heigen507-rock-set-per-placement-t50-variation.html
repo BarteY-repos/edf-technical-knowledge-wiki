@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 HEIGEN507: same rock family, different native collapse graph An EDF6 native MAPB T1 object family does not always identify one universal destruction graph."><title>EDF6 HEIGEN507 rock sets: T50 graphs vary per T2 placement | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Rock destructibles and per-placement T50 graphs</div><h1>EDF6 HEIGEN507 rock sets: T50 graphs vary per T2 placement</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Rock destructibles and per-placement T50 graphs</span></div><div class="referencebadge">Technical reference · Native source-corpus/static binary evidence, runtime limitations stated explicitly</div><div id="articleBody"><p>An EDF6 native <code>MAPB</code> <code>T1</code> object family does not always identify one universal destruction graph. The five <code>IG_HEIGEN507</code> rock-set families examined here have <strong>one MAPO slot per placement, four p58 pieces per placement, and stable body/resource ownership</strong>, yet their <code>T50</code> graph differs from one placed <code>T2</code> instance to another.</p>
+<h2 id="complete-five-family-native-census">Complete five-family native census</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">T1</th>
+  <th>Native resource</th>
+  <th style="text-align:right">T2 placements</th>
+  <th style="text-align:right">Distinct T50 graphs</th>
+  <th style="text-align:right">Slots per T2</th>
+  <th style="text-align:right">Pieces per T2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">14</td>
+  <td><code>sk_rock501a_set.mdx</code></td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right">15</td>
+  <td><code>sk_rock502a_set.mdx</code></td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right">16</td>
+  <td><code>sk_rock503a_set.mdx</code></td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right">17</td>
+  <td><code>sk_rock504a_set.mdx</code></td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right">18</td>
+  <td><code>sk_rock505a_set.mdx</code></td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right"><strong>Total</strong></td>
+  <td><strong>Five families</strong></td>
+  <td style="text-align:right"><strong>96</strong></td>
+  <td style="text-align:right"><strong>55</strong></td>
+  <td style="text-align:right"></td>
+  <td style="text-align:right"></td>
+</tr>
+</tbody>
+</table>
+<p>All five families were observed to have <strong>one stable slot pattern, one p58 group schema, one MAD body set and one RAB closure each</strong>. Together their native body-set union contained <strong>20 distinct bodies</strong> and their family resource closure <strong>22 RAB assets</strong> (without a separately required shared donor reference).</p>
+<p>The variation is not caused by a different number of mesh slots or a different rock body type in each placement. The changing information is the <strong>T50 topology</strong> attached to its specific placement.</p>
+<h2 id="exact-per-placement-identity-matters">Exact per-placement identity matters</h2>
+<p>A converter cannot safely cache one <code>T50</code> template under the <code>T1</code> resource name and reuse it for every T2. Doing so can silently change which rock fragments are connected, even when all referenced geometry, p58 pieces and collision bodies are identical.</p>
+<p>The stable native association is:</p>
+<pre><code class="language-text">MAPB T1 rock-set family
+    ↓
+MAPB T2 exact placement / variant
+    ↓
+MAPO slot -&gt; p58 four indexed pieces
+    ↓
+MAPO T50 associated with this exact T2
+    ↓
+MAD bodies used for those piece indices
+</code></pre>
+<p>An offline enumeration verified <strong>96/96</strong> placements without coercing any to a different template. A separate composition of <strong>all 55 distinct graphs</strong> preserved exact parsed T50 semantics and passed basic MAD structural checks; <strong>no new EDF6 runtime test</strong> accompanies this evidence.</p>
+<p>This is distinct from the <code>NW_EUROPE01</code> multi-storey buildings, where T50 often connects <em>different building slots</em>. The HEIGEN rocks show that <strong>placement-specific T50 variation also occurs inside a single slot with a fixed four-piece set</strong>.</p>
+<h2 id="scope-and-unresolved-questions">Scope and unresolved questions</h2>
+<p>The evidence covers these five named native rock-set resources; it does not establish that all EDF6 destructibles vary per T2, or explain <em>why</em> each HEIGEN placement receives its exact graph. A generic proximity or radius-based generator remains unverified. If faithfully reusing a native placement, preserve its <code>T2 → T50</code> identity; if authoring new fragments, do not present a guessed graph as exact Sandlot output.</p>
+<p>Related references: <a href="maps-%26-navigation-mapo-t50-crashmodel-collapse-graph-explained.html">native building T50 graphs and CrashModel</a> and <a href="maps-%26-navigation-native-destructible-havok-static-dynamic-body-profiles.html">native Havok static/dynamic body roles</a>.</p>
+<p><strong>Evidence:</strong> <code>MAP_STUDIO_R43_HEIGEN_ROCK_SET_MULTI_T50_PROGRESS_2026-10-16.md</code>, <code>R43_ALL_VARIANTS_SUMMARY.json</code>, and <code>R43_UNIQUE_T50_RESULT.json</code> under the retained <code>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/R43_HEIGEN_ROCK_SET_MULTI_T50_2026-10-16/</code> source set.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/R43_HEIGEN_ROCK_SET_MULTI_T50_2026-10-16/R43_ALL_VARIANTS_SUMMARY.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#complete-five-family-native-census">Complete five-family native census</a><a href="#exact-per-placement-identity-matters">Exact per-placement identity matters</a><a href="#scope-and-unresolved-questions">Scope and unresolved questions</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-heigen507-rock-set-per-placement-t50-variation"};</script><script src="../assets/site.js" defer></script></body></html>

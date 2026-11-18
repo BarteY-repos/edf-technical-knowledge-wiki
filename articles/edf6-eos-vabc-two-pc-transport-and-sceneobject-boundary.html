@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 EOS two-PC A/B/C/V experiment: delivered state versus applied Soldier state Evidence: Direct two-computer EDF6 runtime traces analyzed on 7 September 2026,"><title>EDF6 EOS V/A/B/C two-PC matrix: packet delivery vs Soldier state | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 EOS V/A/B/C two-PC matrix: packet delivery vs Soldier state</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span><span class="chip">EDF 5</span></div><div class="referencebadge">Technical reference · Eight real two-PC traces: bounded positive packet-path evidence; fix efficacy and 0x3500 unproven</div><div id="articleBody"><p><strong>Evidence:</strong> Direct two-computer EDF6 runtime traces analyzed on 7 September 2026, <strong>eight primary logs across four variants</strong> and one exact EDF6 binary. These observations apply to the tested traffic, session and build; they do not prove universal packet-loss freedom, correct remote animation, or a successful fix to player desync.</p>
+<h2 id="what-the-four-variants-actually-changed">What the four variants actually changed</h2>
+<p>The baseline <strong>V</strong> left the transport unchanged. <strong>A</strong> enabled <code>bAllowDelayedDelivery=true</code> for the audited ordinary unreliable EOS physical send, while <strong>B</strong> provided only the Link READY reset and <strong>C</strong> combined the two. All four variants had the same canonical <code>EDF.dll</code> SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code> and the same trace-DLL identity. The trace explicitly proved A/C activated the intended physical-send option; this was <strong>not</strong> a silent failure to load the test change.</p>
+<h2 id="the-decisive-count-comparison">The decisive count comparison</h2>
+<table>
+<thead>
+<tr>
+  <th>Run</th>
+  <th style="text-align:right">Host <code>0x3300</code> sent = client enqueued</th>
+  <th style="text-align:right">Client <code>0x3300</code> sent = host enqueued</th>
+  <th style="text-align:right">Host remote-Soldier applies</th>
+  <th style="text-align:right">Host mean / max apply spacing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>V</td>
+  <td style="text-align:right">22,863 = 22,863</td>
+  <td style="text-align:right">22,956 = 22,956</td>
+  <td style="text-align:right">3,803</td>
+  <td style="text-align:right">100.20 / 125 ms</td>
+</tr>
+<tr>
+  <td>A</td>
+  <td style="text-align:right">27,382 = 27,382</td>
+  <td style="text-align:right">27,305 = 27,305</td>
+  <td style="text-align:right">4,557</td>
+  <td style="text-align:right">100.18 / 125 ms</td>
+</tr>
+<tr>
+  <td>B</td>
+  <td style="text-align:right">27,386 = 27,386</td>
+  <td style="text-align:right">27,347 = 27,347</td>
+  <td style="text-align:right">4,558</td>
+  <td style="text-align:right">100.20 / 125 ms</td>
+</tr>
+<tr>
+  <td>C</td>
+  <td style="text-align:right">28,748 = 28,748</td>
+  <td style="text-align:right">28,672 = 28,672</td>
+  <td style="text-align:right">4,784</td>
+  <td style="text-align:right">100.16 / 125 ms</td>
+</tr>
+</tbody>
+</table>
+<p>The recipient's <strong><code>RX3300_PARSE</code> count also equalled <code>RX3300_ENQUEUE</code></strong> in every direction. Every observed EOS physical SEND returned Success: <strong>zero observed <code>NoConnection</code>, <code>LimitExceeded</code> or other nonzero send results</strong>. The dominant remote Soldier applied its <code>NetworkObject</code> updates at an approximately <strong>10 Hz</strong> cadence in all variants, without a measured gap greater than <strong>125 ms</strong> over each corresponding host interval. These are distinct checks: network delivery, SceneObject parser admission and concrete apply cadence.</p>
+<p>The exact direction-by-direction figures are in <code>data/R158_EDF6_EOS_VABC_3300_TWO_PC_RUNTIME_MATRIX.csv</code>. They show that <strong>ordinary EOS packet disappearance was not the failure in this capture</strong>. They do <em>not</em> establish that decoded position changes reached the final world/render/physics transform correctly.</p>
+<h2 id="why-a-b-and-c-do-not-establish-a-repaired-desync">Why A, B and C do not establish a repaired desync</h2>
+<p>The A/C delayed-delivery bit changed as intended, but the baseline already delivered <strong>all recorded</strong> ordinary SceneObject messages. There was therefore no observed physical loss for A to correct. The B READY-reset branch was <strong>not meaningfully exercised</strong>: neither mid-session stale READY nor a matching reconnect failure signature occurred. Normal READY=0 INITIAL transitions and late teardown-related clears are not evidence of that bug. The combined C run inherits those limits.</p>
+<p><code>DAMAGE_EVENT</code> totals matched across peers per run, but <strong><code>0x3500 NetworkBullet</code> was not exercised</strong> (<code>BULLET_TX=0</code> and <code>RX3500_BULLET=0</code>). Do not claim a projectile synchronization result from an ordinary movement matrix.</p>
+<h2 id="what-the-later-two-pc-capture-added">What the later two-PC capture added</h2>
+<p>The subsequent narrower <strong>R7</strong> capture and R8 investigation found a different, later boundary: persistent position divergence (approximately <strong>183 world units</strong> in the reported case) while sender updates continued and remote position-bearing staging/consumption became sparse. Matching physical packet hashes did not guarantee matching <strong>actual Soldier transforms</strong>. The later R8/R9 work therefore targeted per-object SceneObject staging, sequence freshness and concrete Soldier application rather than blindly changing EOS reliability. Do not conflate the R6 matrix's stable <strong>apply call cadence</strong> with proof that every individual call applied a <em>fresh positional payload</em>.</p>
+<p>A received absolute transform should generally recover after a single lost snapshot. Persistent divergence with present physical packets instead demands checks for packet-field composition, generation/index/type keys, decode/stage freshness, overwritten pending state, player movement controllers and world-transform interpolation. An action/jump <code>0x3400</code> or strong correction path must be analyzed separately from ordinary <code>0x3300</code>.</p>
+<h2 id="timing-and-authority-limits">Timing and authority limits</h2>
+<p>The PCs had substantial and varying Windows wall-clock offsets. Ordered cumulative captures suggest a low-latency local path, but <strong>one-way per-record latency is not established</strong> from unsynchronized clocks. Host-local apply intervals avoid that cross-PC ambiguity. Also, the observed results do not invalidate the <em>separate</em> stale-READY reconnect hypothesis: that failure state simply did not occur in the V/A/B/C sessions.</p>
+<p><strong>Primary source:</strong> <code>/EDF5_EDF6_RESEARCH/research/audits/EDF6_NETWORK_EOS_RUNTIME_MATRIX_VABC_ANALYSIS_2026-09-07.md</code>; earlier binary hypotheses and initially OPEN questions: <code>EDF6_NETWORK_EOS_REPAIR_EVIDENCE_LEDGER_2026-08-30.json</code>. Related: <a href="engine-re-edf5-edf6-player-state-packet-lanes.html">Player packet lanes</a>, <a href="engine-re-network-desync-r8-sceneobject-staging-frontier.html">R7/R8 SceneObject staging</a>, <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">RUDP reconnect lifetime</a>, <a href="networking-edf6-protocol-aware-tracing-reconnect-ab.html">Protocol-aware tracing</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/audits/EDF6_NETWORK_EOS_REPAIR_EVIDENCE_LEDGER_2026-08-30.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/EDF6_NETWORK_EOS_RUNTIME_MATRIX_VABC_ANALYSIS_2026-09-07.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-four-variants-actually-changed">What the four variants actually changed</a><a href="#the-decisive-count-comparison">The decisive count comparison</a><a href="#why-a-b-and-c-do-not-establish-a-repaired-desync">Why A, B and C do not establish a repaired desync</a><a href="#what-the-later-two-pc-capture-added">What the later two-PC capture added</a><a href="#timing-and-authority-limits">Timing and authority limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-eos-vabc-two-pc-transport-and-sceneobject-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

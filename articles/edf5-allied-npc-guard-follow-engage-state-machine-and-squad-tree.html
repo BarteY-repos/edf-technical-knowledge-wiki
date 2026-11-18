@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A friendly squad is a graph of native game objects, not a separate Squad class EDF5 allied soldiers execute StateMachine::Agent&lt;SoldierBase&gt;. The state-machine&#39;"><title>EDF5 allied SoldierBase AI: guard, follow, engage and squad tree | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Allied NPC AI</div><h1>EDF5 allied SoldierBase AI: guard, follow, engage and squad tree</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Allied NPC AI</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 allied soldiers execute <code>StateMachine::Agent&lt;SoldierBase&gt;</code>. The state-machine's active state and elapsed counters live in the soldier object. Its three primary state virtual functions correspond to <strong>guard</strong>, <strong>follow</strong> and <strong>engage</strong>; each receives an entry/update/exit phase.</p>
+<table>
+<thead>
+<tr>
+  <th>State</th>
+  <th>Native behaviour described by source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Guard</td>
+  <td>Return toward the stored home point, with a formation offset; switch to follow after assigning a leader</td>
+</tr>
+<tr>
+  <td>Follow</td>
+  <td>Move toward the leader's position plus a per-soldier offset; return to guard if the leader disappears</td>
+</tr>
+<tr>
+  <td>Engage</td>
+  <td>Choose and act on a live target; return to follow when target reference becomes null</td>
+</tr>
+</tbody>
+</table>
+<p>These states interact with a leader/follower tree. The leader pointer is <code>SoldierBase+0x3A0</code>, a linked-list head of followers is <code>+0x3A8</code>, the count is <code>+0x3B0</code>, and <code>+0x398</code> is the <strong>may-recruit</strong> flag. Calling native <code>SetFollow</code> first detaches a soldier from its old leader's list, attaches it to the new leader, updates its formation offset and releases its active route explorer. Changing only the leader pointer would not reproduce this transition.</p>
+<p>The native online follow message identifiers are <strong>0xB</strong> for host and <strong>0xC</strong> for guest in this EDF5 code path; the source contrasts EDF6's corresponding <strong>12 / 13</strong>. A network message ID is <em>not</em> the same as the visible NPC state ID. The source also found enemy squad script natives using the same underlying follow tree.</p>
+<p>The result is that soldier “follow” is simultaneously a state-machine behavior, a leader-tree membership and a potential networked transition. All three have to agree to understand a recruited squad's movement.</p>
+<p><strong>Sources:</strong> EDF Knowledge Hub <code>edf5/soldier-ai.md</code>, <code>edf5-soldier-ai-classes</code>, <code>edf5-soldier-ai-states</code>, <code>edf5-squad-tree</code> (static native code study). Build <code>steam-5d11de53</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/soldier-ai.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-allied-npc-guard-follow-engage-state-machine-and-squad-tree"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 lock-on weapons: target search, multi-lock, firing and network cancellation EDF6&#39;s lock-on mechanic is a weapon-local target state machine, not just a circ"><title>EDF6 lock-on weapons: target search, multi-lock, firing and network cancellation | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Weapons</div><h1>EDF6 lock-on weapons: target search, multi-lock, firing and network cancellation</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Weapons</span></div><div class="referencebadge">Technical reference · Original source reports static binary/file analysis, with separately labelled contributor in-game tests; no new tests this release</div><div id="articleBody"><p>EDF6's lock-on mechanic is a weapon-local target state machine, not just a circle drawn on the HUD. Its SGO describes target filters, cone, range, time, lock distribution and expiry. The surveyed source code tracks <strong>searching, an unfinished lock, a list of completed locks, shot assignment and network cancellation</strong> as distinct steps.</p>
+<h2 id="weapon-parameters">Weapon parameters</h2>
+<table>
+<thead>
+<tr>
+  <th>SGO key</th>
+  <th>Meaning in the examined build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>LockonType</code></td>
+  <td>Chooses lock behavior; <strong>0 and 5</strong> are treated as no lock-on in the observed paths</td>
+</tr>
+<tr>
+  <td><code>LockonTargetType</code></td>
+  <td>Determines candidate type; in a surveyed mapping 0 → search kind 3 (all), 1 → kind 2</td>
+</tr>
+<tr>
+  <td><code>Lockon_DistributionType</code></td>
+  <td>0 = target per burst shot; otherwise target per pellet</td>
+</tr>
+<tr>
+  <td><code>LockonAngle</code></td>
+  <td>Horizontal and vertical <strong>half-angles</strong>, radians</td>
+</tr>
+<tr>
+  <td><code>LockonRange</code></td>
+  <td>Maximum targeting range</td>
+</tr>
+<tr>
+  <td><code>LockonTime</code></td>
+  <td>Duration converted to update ticks</td>
+</tr>
+<tr>
+  <td><code>LockonHoldTime</code></td>
+  <td>Retention time of completed locks</td>
+</tr>
+<tr>
+  <td><code>LockonFailedTime</code></td>
+  <td>Grace duration while target exits the cone, in frames</td>
+</tr>
+<tr>
+  <td><code>Lockon_AutoTimeOut</code></td>
+  <td>Whether used/held locks automatically age out; internally an inverted flag</td>
+</tr>
+<tr>
+  <td><code>Lockon_FireEndToClear</code></td>
+  <td>Lock list clears on a specific reload-start transition when enabled</td>
+</tr>
+</tbody>
+</table>
+<p>Maximum lock count depends on distribution mode: in the surveyed computation, type 0 yields zero; distribution 0 uses <code>min(AmmoCount, FireBurstCount)</code> while the other path uses <code>FireCount</code>. Soldier equipment may apply separate multipliers for range, speed and repeated locking of the same target.</p>
+<h2 id="search-progress-firing">Search, progress, firing</h2>
+<p>The lock tick searches eligible registry targets <strong>only when not already locking one and the completed list is not full</strong>. The picker scores candidates in the cone. Lock progress grows in ticks; if the target leaves the cone the fail counter grows until expiry. A newly completed lock is appended to the list. This makes multi-target acquisition <em>sequential</em> rather than acquiring every target simultaneously.</p>
+<p>The firing code refuses to fire a lock-required weapon if the list is empty. It then assigns locks to the created shots, taking older nodes first. In distribution mode 1 successive pellets use successive lock nodes, with excess pellets not necessarily receiving homing; in mode 0 multiple pellets in one shot can share that shot's selected target. Some lock nodes persist after firing, depending on <code>AutoTimeOut</code> and hold timers.</p>
+<h2 id="online-cancellation-matters">Online cancellation matters</h2>
+<p>The code sends a <strong>weapon network message type 6</strong> when a lock fails or is cleared. The recipient clears its remote copy's active locking reference and progress. Without this notice, that remote copy can retain a <strong>ghost lock</strong> and skip the next new-target notice. This is a source-derived risk from the code paths, <strong>not a claim that every stock session suffers a visible ghost-lock bug</strong>.</p>
+<p><strong>Sources and credit:</strong> EDF Knowledge Hub <code>kh-edf6-weapons</code> facts <code>lockon-sgo-fields</code>, <code>lockon-search</code>, <code>lockon-fire-distribution</code>, <code>lockon-network-cancel</code>; hajisensai / All Forces code study, November 2026. Key RVAs <code>0x68A920</code>, <code>0x6963A0</code>, <code>0x690BB0</code>, <code>0x695150</code> are specific to the examined <code>steam-678ccb46</code> build. See <a href="edf6-missile-homing-guidance-delays-types-and-local-update.html">missile guidance</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub, export of 2026-11-14; original contributors ktaro (EDF6 SHKT research) and hajisensai / All Forces; EDF6 examined build steam-678ccb46</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#weapon-parameters">Weapon parameters</a><a href="#search-progress-firing">Search, progress, firing</a><a href="#online-cancellation-matters">Online cancellation matters</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-weapon-native-lockon-search-distribution-and-cancel"};</script><script src="../assets/site.js" defer></script></body></html>

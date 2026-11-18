@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 Deiroi landing in EDF6 — null-world raycasts and state transitions The symptom depends on how the mission spawns the enemy The studied EDF4.1 mission M41"><title>EDF4.1 Deiroi landing in EDF6 — null-world raycasts and state transitions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF4.1 Deiroi landing in EDF6 — null-world raycasts and state transitions</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">Collision &amp; Physics</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact-build source/engine-static cause and historical M412 crash, no fresh game test</div><div id="articleBody"><h2 id="the-symptom-depends-on-how-the-mission-spawns-the-enemy">The symptom depends on how the mission spawns the enemy</h2>
+<p>The studied EDF4.1 mission M412 creates Deiroi units in the air using generators on the UfoMother401 carrier. When those source actors are passed to the examined EDF6 <code>Deiroi</code> class, they can reach an <strong>airborne/falling state that native EDF6 missions in this study did not exercise</strong>. The retained exact-build analysis identified a crash in that state even without the EDF4.1 compatibility plugin.</p>
+<p>The crashing call constructs a ray from the unit's previous position to its current position, then invokes an older Havok-world raycast routine with a <strong>null world pointer</strong> (<code>xor ecx, ecx</code> at the studied call site). The callee assumes the world exists and dereferences <code>world + 0xC0</code>; the program faults before the enemy can transition to standing.</p>
+<h2 id="what-the-caller-actually-expects-back">What the caller actually expects back</h2>
+<p>The falling-state caller examines a ray result structure. The important fields in this studied ABI are:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Meaning for the falling-state caller</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>result + 0x10</code></td>
+  <td>Float hit fraction along previous→current ray</td>
+</tr>
+<tr>
+  <td><code>result + 0x50</code></td>
+  <td>Non-null hit marker / hit object, checked before landing transition</td>
+</tr>
+</tbody>
+</table>
+<p>The source-only bridge checks whether a valid old-world object was actually supplied. When present, it preserves the original raycast. Only when the world pointer is null does it call the EDF6 map-ground ray routine with the <strong>same endpoints</strong>. If a hit is found, it computes a fraction clamped to <code>[0,1]</code>, writes the expected fields and permits the native caller to enter its landing state. If no hit is found, it leaves the caller's initialized “no hit” state alone.</p>
+<p>This is <strong>not</strong> a general Havok raycast replacement, and it is <strong>not</strong> a new collision mesh or navigation repair. It is an exact call-site compatibility adaptation for a state that older mission scripts expose in a newer engine. The code refuses to patch when exact instruction bytes differ from those expected for the studied DLL.</p>
+<h2 id="lessons-for-porting-enemy-state-machines">Lessons for porting enemy state machines</h2>
+<ol>
+<li>A native-class update may contain a broken or unexercised substate; matching the class is not proof that an imported spawn path is safe.</li>
+<li>Reproduce the <strong>state transition</strong> (airborne→falling→grounded), not merely the enemy's initial position.</li>
+<li>Use the same ray endpoints and reproduce the exact result contract expected by the caller; a boolean hit alone may not suffice.</li>
+<li>Verify the target object's pointer/ABI and keep the replacement scoped to the failing state and build.</li>
+<li>Distinguish <strong>historical observed game crash</strong>, exact-build code analysis, a source-level corrective implementation, and a subsequent in-game confirmation. The last is not supplied by this wiki release.</li>
+</ol>
+<p><strong>Sources:</strong> EDF4.1 R10 HF4 R9 <code>components/compatibility/src/edf41deiroi.cpp</code> and its referenced M412/UfoMother401 investigation. The cited addresses belong only to the investigated EDF6.dll build.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/compatibility/src/edf41deiroi.cpp</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-symptom-depends-on-how-the-mission-spawns-the-enemy">The symptom depends on how the mission spawns the enemy</a><a href="#what-the-caller-actually-expects-back">What the caller actually expects back</a><a href="#lessons-for-porting-enemy-state-machines">Lessons for porting enemy state machines</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-edf41-deiroi-airborne-landing-null-havok-world"};</script><script src="../assets/site.js" defer></script></body></html>

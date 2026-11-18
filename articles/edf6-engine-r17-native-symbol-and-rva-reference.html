@@ -1,0 +1,2992 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 native Engine RE symbol and RVA atlas — 336 named records This is a build-specific technical index of the native EDF6 executable, not a catalog of stable p"><title>EDF6 native Engine RE: 336 symbols and exact RVAs | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / </div><h1>EDF6 native Engine RE: 336 symbols and exact RVAs</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span></div><div class="referencebadge">Technical reference · Exact build static evidence; not a gameplay runtime qualification</div><div id="articleBody"><p>This is a <strong>build-specific technical index</strong> of the native EDF6 executable, not a catalog of stable public API calls. Entries are the consolidated <code>R17</code> semantic-symbol records. The source archive SHA-256 is <code>93419d55b395c9452e1b23fbccdb37baba3cdb9c4c63f71bac5e31e809e86784</code> and the inspected game <code>EDF.dll</code> SHA-256 is <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>.</p>
+<p><strong>Meaning of an address:</strong> the RVA is relative to the game's analyzed PE image base <code>0x180000000</code>, not a byte offset in an archive or a portable address in other EDF builds. <code>VA</code> is the associated virtual address for that image. <code>kind=site</code> labels a particular instruction or probe location, not necessarily a callable function entry. <code>kind=global</code> or <code>kind=thunk</code> must likewise not be treated as an ordinary function. The semantic names are <em>researcher labels</em>, not exported symbols or ABI guarantees.</p>
+<p>The source's confidence label is preserved unchanged: <code>PROVEN</code> means an evidence-backed static binary claim, not a newly tested game feature; <code>HIGH</code>/<code>MEDIUM</code> are weaker. All 336 records are marked <code>CURRENT</code> by this <strong>source database</strong>, not globally verified against every EDF6 release.</p>
+<p><strong>Useful companion references:</strong> <a href="edf6-engine-r17-native-struct-field-offset-reference.html">145 struct offsets</a>; <a href="edf6-engine-r17-binary-site-claims-not-promoted-to-symbol.html">188 non-promoted site/structure claims</a>; <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">RUDP and reconnect</a>; <a href="engine-re-edf5-edf6-runtime-binary-architecture.html">native Engine RE overview</a>.</p>
+<p>The full names, summaries, domains, confidence and source references are also available as a downloadable CSV in <code>reference/EDF6_R17_NATIVE_SYMBOLS_336.csv</code>. Search the article for an RVA, engine class name, or subsystem. See each domain table for the exact record status; table rows are <strong>source-derived</strong>, not independently redisassembled in this wiki release.</p>
+<h2 id="reader-s-map-what-this-article-covers">Reader's map: what this article covers</h2>
+<p>This is an editorial orientation to existing sections, not a replacement for their full source notes. Every technical claim must be read with its original evidence grade, build and attribution.</p>
+<ul>
+<li><strong>Mission functions:</strong> <a href="#mission-94-symbols">Mission — 94 symbols</a> — the mission subsystem symbol index.</li>
+<li><strong>Network functions:</strong> <a href="#network-73-symbols">Network — 73 symbols</a> — network code locations.</li>
+<li><strong>Rendering functions:</strong> <a href="#renderer-31-symbols">Renderer — 31 symbols</a> — renderer-related symbols.</li>
+<li><strong>Projectile functions:</strong> <a href="#projectile-20-symbols">Projectile — 20 symbols</a> — projectile construction and handling.</li>
+<li><strong>Weapon functions:</strong> <a href="#weapon-36-symbols">Weapon — 36 symbols</a> — weapon-related routines.</li>
+<li><strong>Usage restrictions:</strong> <a href="#scope-limits">Scope limits</a> — build-specific confidence and portability limits.</li>
+</ul>
+<h2 id="camera-3-symbols">Camera — 3 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0xF7B80</code></td>
+  <td>function</td>
+  <td>Camera</td>
+  <td>CharacterGhostCamera::render-worker state/materialization (vslot5)</td>
+  <td>PROVEN</td>
+  <td>Later graphics-worker vslot5 stage; builds projective/copy camera blocks. Newer R33 evidence explicitly rejects historical fixed-update interpretation.</td>
+</tr>
+<tr>
+  <td><code>0xF8210</code></td>
+  <td>function</td>
+  <td>Camera</td>
+  <td>CharacterGhostCamera::slot3</td>
+  <td>PROVEN</td>
+  <td>Snapshots SceneCamera current transform +0x220..+0x250 to +0xB00..+0xB30.</td>
+</tr>
+<tr>
+  <td><code>0xF86A0</code></td>
+  <td>function</td>
+  <td>Camera</td>
+  <td>CharacterGhostCamera::slot4</td>
+  <td>PROVEN</td>
+  <td>Fixed camera writer; writes final orientation rows and increments generation +0x52C.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="core-2-symbols">Core — 2 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x707130</code></td>
+  <td>function</td>
+  <td>Core</td>
+  <td>CPP_OnBoot</td>
+  <td>PROVEN</td>
+  <td>Canonical boot entry used by the loader bootstrap contract.</td>
+</tr>
+<tr>
+  <td><code>0x1193C70</code></td>
+  <td>function</td>
+  <td>Core</td>
+  <td>System callback dispatcher</td>
+  <td>PROVEN</td>
+  <td>Iterates System+0xCC0 callback vector and invokes vslot +0x20.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="gameplay-3-symbols">Gameplay — 3 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x547C30</code></td>
+  <td>function</td>
+  <td>Gameplay/Damage</td>
+  <td>Human::DamageInfo</td>
+  <td>PROVEN</td>
+  <td>Human DamageInfo path reached by Reverse Shooter negative DamageInfo even while player is downed.</td>
+</tr>
+<tr>
+  <td><code>0x54A58B</code></td>
+  <td>site</td>
+  <td>Gameplay/Damage</td>
+  <td>Human DamageInfo message-dispatch return site</td>
+  <td>PROVEN</td>
+  <td>Observed direct return site used to scope Revive Gun functional proof.</td>
+</tr>
+<tr>
+  <td><code>0x54FCF0</code></td>
+  <td>function</td>
+  <td>Gameplay/Revive</td>
+  <td>Native Human revive/set-HP helper</td>
+  <td>PROVEN</td>
+  <td>Vanilla helper runtime-proven to clear downed state and restore HP when invoked for a valid downed player.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="humanoid-7-symbols">Humanoid — 7 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x446D90</code></td>
+  <td>function</td>
+  <td>Humanoid</td>
+  <td>Humanoid state/action dispatcher</td>
+  <td>PROVEN</td>
+  <td>Dispatcher used after ClimbCollisionCheck result acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x464970</code></td>
+  <td>function</td>
+  <td>Humanoid</td>
+  <td>Humanoid_Basic constructor</td>
+  <td>HIGH</td>
+  <td>Constructor region for Humanoid_Basic; shape/config defaults recovered.</td>
+</tr>
+<tr>
+  <td><code>0x466EC4</code></td>
+  <td>thunk</td>
+  <td>Humanoid</td>
+  <td>Humanoid vslot +0x220 thunk</td>
+  <td>PROVEN</td>
+  <td>Pure virtual thunk dispatching through Humanoid vtable slot +0x220.</td>
+</tr>
+<tr>
+  <td><code>0x467200</code></td>
+  <td>function</td>
+  <td>Humanoid</td>
+  <td>Humanoid native custom-call dispatcher</td>
+  <td>PROVEN</td>
+  <td>Dispatcher for BVM custom-call families 0..3; cuscall1 uses a 64-entry ID table plus collision resolution.</td>
+</tr>
+<tr>
+  <td><code>0x469610</code></td>
+  <td>function</td>
+  <td>Humanoid</td>
+  <td>HumanoidBase::ClimbCollisionCheck</td>
+  <td>PROVEN</td>
+  <td>Geometry query whose accepted result can feed explicit Humanoid relocation.</td>
+</tr>
+<tr>
+  <td><code>0x4716CD</code></td>
+  <td>site</td>
+  <td>Humanoid/Weapon</td>
+  <td>Humanoid ready-weapon mask HectorBridge seam</td>
+  <td>PROVEN</td>
+  <td>Hook seam where EBX holds native ready-slot mask before message 0x11 serialization; HectorBridge scopes arbitration to registered Hector parents.</td>
+</tr>
+<tr>
+  <td><code>0x478BD0</code></td>
+  <td>function</td>
+  <td>Humanoid</td>
+  <td>Humanoid direct-position state handler</td>
+  <td>PROVEN</td>
+  <td>Consumes Work position/normal and reaches character setPosition.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="input-7-symbols">Input — 7 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x7058C7</code></td>
+  <td>site</td>
+  <td>Input</td>
+  <td>Game::Update primary action-bank callsite</td>
+  <td>PROVEN</td>
+  <td>Passes simulationTicks into action-bank chain</td>
+</tr>
+<tr>
+  <td><code>0x705A60</code></td>
+  <td>function</td>
+  <td>Input</td>
+  <td>Application action/input callback</td>
+  <td>HIGH</td>
+  <td>Application callback implementation entering action/input-side update chain.</td>
+</tr>
+<tr>
+  <td><code>0x1182A10</code></td>
+  <td>function</td>
+  <td>Input</td>
+  <td>Low-level input callback dispatcher</td>
+  <td>PROVEN</td>
+  <td>Accepted-frame low-level input callback before Application virtual Update.</td>
+</tr>
+<tr>
+  <td><code>0x1182BC0</code></td>
+  <td>function</td>
+  <td>Input</td>
+  <td>ActionUpdate</td>
+  <td>PROVEN</td>
+  <td>Action wrapper update; second argument decrements repeat countdown; primary path receives simulationTicks.</td>
+</tr>
+<tr>
+  <td><code>0x11831F0</code></td>
+  <td>function</td>
+  <td>Input</td>
+  <td>Native relative mouse provider</td>
+  <td>PROVEN</td>
+  <td>Relative mouse provider with unique direct gameplay callsite inside input update.</td>
+</tr>
+<tr>
+  <td><code>0x1188270</code></td>
+  <td>function</td>
+  <td>Input</td>
+  <td>Native input update</td>
+  <td>PROVEN</td>
+  <td>Input update containing gameplay relative mouse provider call and MouseMove publication.</td>
+</tr>
+<tr>
+  <td><code>0x11A2FF3</code></td>
+  <td>site</td>
+  <td>Input</td>
+  <td>Accepted-frame low-level input callback callsite</td>
+  <td>PROVEN</td>
+  <td>Main-loop call to 0x1182A10 before Application Update</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mission-94-symbols">Mission — 94 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0xD66CA</code></td>
+  <td>site</td>
+  <td>Mission/Config</td>
+  <td>CONFIG initialization hook site</td>
+  <td>PROVEN</td>
+  <td>Hook site inside the native CONFIG initialization path.</td>
+</tr>
+<tr>
+  <td><code>0xD7770</code></td>
+  <td>site</td>
+  <td>Mission/Scaling</td>
+  <td>Direct scaling-helper call</td>
+  <td>PROVEN</td>
+  <td>direct scaling-helper call; final R5 policy: verified caller.</td>
+</tr>
+<tr>
+  <td><code>0xD83EF</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot diagnostic hook site</td>
+  <td>PROVEN</td>
+  <td>Post-GetWeaponEntry diagnostic hook site used by first valid R3/R3b P8 hypothesis candidate.</td>
+</tr>
+<tr>
+  <td><code>0xD83FE</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot P5 compare resume site</td>
+  <td>PROVEN</td>
+  <td>Native resume after P5 compare/JNE in DLC loot classifier path.</td>
+</tr>
+<tr>
+  <td><code>0xD840D</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot P5 zero-path site</td>
+  <td>PROVEN</td>
+  <td>Native zero path following the P5 comparison.</td>
+</tr>
+<tr>
+  <td><code>0xD8414</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot P8 class compare site</td>
+  <td>PROVEN</td>
+  <td>R3b fix hook/class compare site for the P8 loot-class mapping hypothesis.</td>
+</tr>
+<tr>
+  <td><code>0xD8423</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot compare resume site</td>
+  <td>PROVEN</td>
+  <td>Native resume after patched loot-class compare.</td>
+</tr>
+<tr>
+  <td><code>0xD92B0</code></td>
+  <td>site</td>
+  <td>Mission/Config</td>
+  <td>MissionPack verification replacement entry</td>
+  <td>PROVEN</td>
+  <td>Qualified MissionPack verification replacement site; not covered by .pdata as a runtime-function begin.</td>
+</tr>
+<tr>
+  <td><code>0xD96A6</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot drop caller site</td>
+  <td>PROVEN</td>
+  <td>Qualified drop caller instruction preceding the originally mis-anchored R1 signature.</td>
+</tr>
+<tr>
+  <td><code>0xDA8E0</code></td>
+  <td>function</td>
+  <td>Mission/Config</td>
+  <td>Native LoadConfig</td>
+  <td>PROVEN</td>
+  <td>Native CONFIG fragment/package registration function retained by the safe CONFIG-less model.</td>
+</tr>
+<tr>
+  <td><code>0xDB65B</code></td>
+  <td>site</td>
+  <td>Mission/Config</td>
+  <td>CONFIG reload hook site</td>
+  <td>PROVEN</td>
+  <td>Hook site inside the native CONFIG reload path.</td>
+</tr>
+<tr>
+  <td><code>0xDC460</code></td>
+  <td>function</td>
+  <td>Mission/Config</td>
+  <td>MissionMgr::SetGameMode</td>
+  <td>PROVEN</td>
+  <td>Native high-level game-mode transition. Extra plugin-injected calls are forbidden after destructive FIX14 evidence.</td>
+</tr>
+<tr>
+  <td><code>0xDE250</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Armor cap conversion helper</td>
+  <td>PROVEN</td>
+  <td>Native armor-cap conversion helper called by R6 UI/cap compatibility hook.</td>
+</tr>
+<tr>
+  <td><code>0xE0650</code></td>
+  <td>site</td>
+  <td>Mission/Config</td>
+  <td>Mission LIST count helper</td>
+  <td>PROVEN</td>
+  <td>Native helper used to obtain LIST count from active mission/package data.</td>
+</tr>
+<tr>
+  <td><code>0xE0C50</code></td>
+  <td>function</td>
+  <td>Mission/Config</td>
+  <td>Mission LIST field2 getter</td>
+  <td>PROVEN</td>
+  <td>Native helper used by semantic mission LIST compatibility logic.</td>
+</tr>
+<tr>
+  <td><code>0xE18B0</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Player-count scaling helper</td>
+  <td>PROVEN</td>
+  <td>Indexes four CONFIG scaling profiles by participant_count-1; no native bounds check.</td>
+</tr>
+<tr>
+  <td><code>0xE2AD0</code></td>
+  <td>function</td>
+  <td>Mission/Config</td>
+  <td>MissionMgr::LoadPackage</td>
+  <td>PROVEN</td>
+  <td>Native package materialization function called by SetGameMode.</td>
+</tr>
+<tr>
+  <td><code>0xE3F80</code></td>
+  <td>function</td>
+  <td>Mission/Config</td>
+  <td>MissionPack name replacement entry</td>
+  <td>PROVEN</td>
+  <td>Qualified full-replacement entry for MissionPack naming/selection compatibility.</td>
+</tr>
+<tr>
+  <td><code>0x1D6120</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext weak-lock helper</td>
+  <td>PROVEN</td>
+  <td>Weak-reference lock helper used by recovered Coop8 PlayerInfo lifecycle path.</td>
+</tr>
+<tr>
+  <td><code>0x1D6E60</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext deleting destructor</td>
+  <td>PROVEN</td>
+  <td>Destructor hook surface used to clean sidecar PlayerInfo weak references.</td>
+</tr>
+<tr>
+  <td><code>0x1D9520</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext::CreatePlayers</td>
+  <td>PROVEN</td>
+  <td>Online create-players path; logical count preserved while physical fixed-four cursors are virtualized.</td>
+</tr>
+<tr>
+  <td><code>0x1D958C</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers GS-cookie store</td>
+  <td>PROVEN</td>
+  <td>/GS cookie occupies rbp+0x80, proving a fifth linear spawn record would corrupt the frame cookie.</td>
+</tr>
+<tr>
+  <td><code>0x1D95F4</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers real participant-count load</td>
+  <td>PROVEN</td>
+  <td>Loads real selected participant count from MissionState+0x14FF8.</td>
+</tr>
+<tr>
+  <td><code>0x1D9600</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers native physical-count constant</td>
+  <td>PROVEN</td>
+  <td>Native physical spawn/orientation record count constant remains four.</td>
+</tr>
+<tr>
+  <td><code>0x1D968E</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Spawn/orientation preparation count site</td>
+  <td>PROVEN</td>
+  <td>Physical record count held at four</td>
+</tr>
+<tr>
+  <td><code>0x1D98B6</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers logical flag-index site</td>
+  <td>PROVEN</td>
+  <td>Logical P0..P7 flags live at rsp+0x28..+0x2F.</td>
+</tr>
+<tr>
+  <td><code>0x1D99ED</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>MissionContext native weak-array base site</td>
+  <td>PROVEN</td>
+  <td>Native PlayerInfo weak-array base is MissionContext+0x100.</td>
+</tr>
+<tr>
+  <td><code>0x1D9A3B</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Flag/weak cursor setup</td>
+  <td>PROVEN</td>
+  <td>flag/weak cursor setup; final R5 policy: layout evidence.</td>
+</tr>
+<tr>
+  <td><code>0x1D9A7E</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Create-player logical-index argument site</td>
+  <td>PROVEN</td>
+  <td>Create args receive logical player index.</td>
+</tr>
+<tr>
+  <td><code>0x1D9AC8</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>PlayerInfo creation helper callsite</td>
+  <td>PROVEN</td>
+  <td>Evidence callsite for PlayerInfo creation/helper.</td>
+</tr>
+<tr>
+  <td><code>0x1D9B17</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>MissionContext weak-store branch site</td>
+  <td>PROVEN</td>
+  <td>Relay used to skip nonexistent fifth native weak store</td>
+</tr>
+<tr>
+  <td><code>0x1D9B50</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers common P4+ relay target</td>
+  <td>PROVEN</td>
+  <td>Common relay target used by P4+ sidecar path.</td>
+</tr>
+<tr>
+  <td><code>0x1D9B9F</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>MissionContext physical cursor advance site</td>
+  <td>PROVEN</td>
+  <td>Logical loop linear; physical cursor becomes logical&amp;3</td>
+</tr>
+<tr>
+  <td><code>0x1D9BA6</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>CreatePlayers real-count loop comparison</td>
+  <td>PROVEN</td>
+  <td>Logical create-player loop compares against real selected participant count.</td>
+</tr>
+<tr>
+  <td><code>0x1DA340</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext actor lookup</td>
+  <td>PROVEN</td>
+  <td>PlayerInfo/actor lookup hook surface used for P4..P7 sidecars.</td>
+</tr>
+<tr>
+  <td><code>0x1DA430</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Context+0x140 separate int-array read</td>
+  <td>PROVEN</td>
+  <td>context+0x140 separate int-array read; final R5 policy: proves +0x140 is not fifth weak_ptr.</td>
+</tr>
+<tr>
+  <td><code>0x1DA450</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext::IsOnline</td>
+  <td>PROVEN</td>
+  <td>MissionContext online-state query used by recovered Coop8 runtime policy.</td>
+</tr>
+<tr>
+  <td><code>0x1DA61B</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Separate array iterates 16 entries</td>
+  <td>PROVEN</td>
+  <td>separate array iterates 16 entries; final R5 policy: different field.</td>
+</tr>
+<tr>
+  <td><code>0x1DB0E1</code></td>
+  <td>site</td>
+  <td>Mission/Reflection</td>
+  <td>Reflected m_player_info_array base</td>
+  <td>PROVEN</td>
+  <td>reflected m_player_info_array base; final R5 policy: native reflection remains four.</td>
+</tr>
+<tr>
+  <td><code>0x1DB121</code></td>
+  <td>site</td>
+  <td>Mission/Reflection</td>
+  <td>Reflected weak-array loop limit 4</td>
+  <td>PROVEN</td>
+  <td>reflected weak-array loop limit 4; final R5 policy: do not expand native reflected array.</td>
+</tr>
+<tr>
+  <td><code>0x1DB410</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Context+0x140 separate int-array write</td>
+  <td>PROVEN</td>
+  <td>context+0x140 separate int-array write; final R5 policy: proves +0x140 is not fifth weak_ptr.</td>
+</tr>
+<tr>
+  <td><code>0x1DB9F0</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext actor remove</td>
+  <td>PROVEN</td>
+  <td>Actor remove/release hook surface used for P4..P7 sidecars.</td>
+</tr>
+<tr>
+  <td><code>0x1DC450</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>MissionContext create-player helper</td>
+  <td>PROVEN</td>
+  <td>Per-player helper in online MissionContext creation path.</td>
+</tr>
+<tr>
+  <td><code>0x2C92E0</code></td>
+  <td>function</td>
+  <td>Mission/Loot</td>
+  <td>DLC loot resolve-result helper</td>
+  <td>PROVEN</td>
+  <td>Qualified result-resolution function signature used by R3b validation.</td>
+</tr>
+<tr>
+  <td><code>0x54F0DF</code></td>
+  <td>site</td>
+  <td>Mission/Scaling</td>
+  <td>Direct scaling-helper call</td>
+  <td>PROVEN</td>
+  <td>direct scaling-helper call; final R5 policy: verified caller.</td>
+</tr>
+<tr>
+  <td><code>0x54F1B1</code></td>
+  <td>site</td>
+  <td>Mission/Scaling</td>
+  <td>Direct scaling-helper call</td>
+  <td>PROVEN</td>
+  <td>direct scaling-helper call; final R5 policy: verified caller.</td>
+</tr>
+<tr>
+  <td><code>0x5911B9</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Logical user-index creation-argument site</td>
+  <td>PROVEN</td>
+  <td>Logical user identity propagated into player-creation arguments; must not be globally remapped.</td>
+</tr>
+<tr>
+  <td><code>0x591219</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout-consumer callsite in player creation</td>
+  <td>PROVEN</td>
+  <td>Callsite feeding the fixed-four loadout consumer during player creation.</td>
+</tr>
+<tr>
+  <td><code>0x591234</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Player-factory callsite in player creation</td>
+  <td>PROVEN</td>
+  <td>Callsite entering player factory from creation path.</td>
+</tr>
+<tr>
+  <td><code>0x595960</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Mission loadout consumer</td>
+  <td>PROVEN</td>
+  <td>Downstream loadout consumer; native physical loadout domain has four slots.</td>
+</tr>
+<tr>
+  <td><code>0x5959DD</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Surrounding consumer index/signature region</td>
+  <td>PROVEN</td>
+  <td>surrounding consumer index/signature region; final R5 policy: evidence only; actual final byte patch begins at 0x5959E1.</td>
+</tr>
+<tr>
+  <td><code>0x5959E1</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout physical-index gate</td>
+  <td>PROVEN</td>
+  <td>Maps valid loadout index to local physical index &amp;3 in Coop8</td>
+</tr>
+<tr>
+  <td><code>0x5A3F90</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Player factory</td>
+  <td>PROVEN</td>
+  <td>Downstream player factory consuming synthesized physical loadout block.</td>
+</tr>
+<tr>
+  <td><code>0x5A435D</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Physical loadout-tail reread site</td>
+  <td>PROVEN</td>
+  <td>Downstream reread proving synthetic physical loadout storage must survive through factory return.</td>
+</tr>
+<tr>
+  <td><code>0x7089F0</code></td>
+  <td>site</td>
+  <td>Mission/Loot</td>
+  <td>DLC MissionPack mode writer</td>
+  <td>PROVEN</td>
+  <td>Qualified mode-writer site used to map MP04/MP05 to EDF5 DLC1/DLC2 classification.</td>
+</tr>
+<tr>
+  <td><code>0x708A06</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — non-room writer 1</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x70C331</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — non-room writer 2</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x70FABE</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>Script SetMode pre-call veto site</td>
+  <td>PROVEN</td>
+  <td>AngelScript-facing SetMode pre-call veto; avoids injecting an extra SetGameMode transition.</td>
+</tr>
+<tr>
+  <td><code>0x734705</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Logical user collection/index consumer</td>
+  <td>PROVEN</td>
+  <td>logical user collection/index consumer; final R5 policy: evidence.</td>
+</tr>
+<tr>
+  <td><code>0x773840</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Mission loadout serializer</td>
+  <td>PROVEN</td>
+  <td>Gameplay-authoritative loadout serializer; R6 translates Fencer cap before vanilla min(selectedRaw,cap) and serialization.</td>
+</tr>
+<tr>
+  <td><code>0x786BC2</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Online-system armor-cap callsite</td>
+  <td>PROVEN</td>
+  <td>Exact direct callsite patched transactionally to R6 cap conversion wrapper.</td>
+</tr>
+<tr>
+  <td><code>0x78D24C</code></td>
+  <td>site</td>
+  <td>Mission/Network</td>
+  <td>MissionSync logical participant limit</td>
+  <td>PROVEN</td>
+  <td>Logical participant rejection limit patch site</td>
+</tr>
+<tr>
+  <td><code>0x78EB20</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout SoldierType source read site</td>
+  <td>PROVEN</td>
+  <td>Caller reads current SoldierType from MissionMgr+0x6E90.</td>
+</tr>
+<tr>
+  <td><code>0x78EB27</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout SoldierType store site</td>
+  <td>PROVEN</td>
+  <td>Caller stores SoldierType into loadout+0x04.</td>
+</tr>
+<tr>
+  <td><code>0x78EC3D</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout selected-armor source read site</td>
+  <td>PROVEN</td>
+  <td>Caller reads selected raw armor from MissionMgr+0x6F88 class family.</td>
+</tr>
+<tr>
+  <td><code>0x78EC45</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout selected-armor store site</td>
+  <td>PROVEN</td>
+  <td>Caller stores selected raw armor into loadout+0x24.</td>
+</tr>
+<tr>
+  <td><code>0x78ECC2</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout slot-index store site A</td>
+  <td>PROVEN</td>
+  <td>Caller stores network player/slot index (or -1) into loadout+0x00.</td>
+</tr>
+<tr>
+  <td><code>0x78ECC7</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout slot-index store site B</td>
+  <td>PROVEN</td>
+  <td>Companion slot-index store path into loadout+0x00.</td>
+</tr>
+<tr>
+  <td><code>0x78FFAC</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Four-result-Item initialization limit</td>
+  <td>PROVEN</td>
+  <td>Evidence-only four-physical-Item result initialization limit.</td>
+</tr>
+<tr>
+  <td><code>0x78FFDC</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Result logical index acceptance gate</td>
+  <td>PROVEN</td>
+  <td>Logical result index acceptance patch site</td>
+</tr>
+<tr>
+  <td><code>0x790600</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>Mission loadout parser</td>
+  <td>PROVEN</td>
+  <td>Native synchronized loadout parser used by Coop8 recovery.</td>
+</tr>
+<tr>
+  <td><code>0x790878</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout parser write region</td>
+  <td>PROVEN</td>
+  <td>Mission loadout parser write-region evidence.</td>
+</tr>
+<tr>
+  <td><code>0x790BA6</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Loadout parser participant-count write</td>
+  <td>PROVEN</td>
+  <td>Participant-count write evidence inside mission loadout parser.</td>
+</tr>
+<tr>
+  <td><code>0x791567</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — non-room writer 3</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x793670</code></td>
+  <td>function</td>
+  <td>Mission/Player</td>
+  <td>NetGameStatus result Item sink</td>
+  <td>PROVEN</td>
+  <td>Result contribution sink; four physical Items retained by Coop8 design.</td>
+</tr>
+<tr>
+  <td><code>0x8E69A0</code></td>
+  <td>function</td>
+  <td>Mission/Lobby</td>
+  <td>Lobby join reset entry</td>
+  <td>PROVEN</td>
+  <td>Join path reset preventing joined clients from acquiring false host-owned durable room provenance.</td>
+</tr>
+<tr>
+  <td><code>0x8ED9DD</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>Async active-pack writer hook site</td>
+  <td>PROVEN</td>
+  <td>Async active-pack writer and room/lobby hook coverage site.</td>
+</tr>
+<tr>
+  <td><code>0x8F22D6</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>HUiRoom constructor seam</td>
+  <td>PROVEN</td>
+  <td>Durable host-owned MODDED-room provenance seam at HUiRoom construction.</td>
+</tr>
+<tr>
+  <td><code>0x9008F4</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>Lobby final-commit defense hook site</td>
+  <td>PROVEN</td>
+  <td>Final commit defense hook in modded-room policy.</td>
+</tr>
+<tr>
+  <td><code>0x90090A</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — LobbyFinalCommit writer</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x902F8B</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>LobbyPublic hook site</td>
+  <td>PROVEN</td>
+  <td>Public/listed lobby policy hook site.</td>
+</tr>
+<tr>
+  <td><code>0x9049BE</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>RoomExit reset hook site</td>
+  <td>PROVEN</td>
+  <td>Room-exit state reset hook site.</td>
+</tr>
+<tr>
+  <td><code>0x904B51</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>Lobby904B hook site</td>
+  <td>PROVEN</td>
+  <td>Qualified room/lobby transition hook site.</td>
+</tr>
+<tr>
+  <td><code>0x904B65</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — Lobby904B writer</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x904DE4</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>DLC/request normalization hook site</td>
+  <td>PROVEN</td>
+  <td>DLC/request normalization hook site.</td>
+</tr>
+<tr>
+  <td><code>0x91AA55</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>LobbyCreate hook site</td>
+  <td>PROVEN</td>
+  <td>Room-creation hook site; local active-pack writer occurs at +0xD.</td>
+</tr>
+<tr>
+  <td><code>0x91AA62</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — LobbyCreate writer</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x9234FC</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>LobbySettings hook site</td>
+  <td>PROVEN</td>
+  <td>Lobby settings policy hook site.</td>
+</tr>
+<tr>
+  <td><code>0x925A1E</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>Lobby925A hook site</td>
+  <td>PROVEN</td>
+  <td>Qualified room/lobby transition hook site.</td>
+</tr>
+<tr>
+  <td><code>0x925A32</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — Lobby925A writer</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x925CE6</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>LobbyCampaignCommit hook site</td>
+  <td>PROVEN</td>
+  <td>Campaign commit hook site; local active-pack writer follows at 0x925CF7.</td>
+</tr>
+<tr>
+  <td><code>0x925CF7</code></td>
+  <td>site</td>
+  <td>Mission/Lobby</td>
+  <td>MissionMgr active-pack writer — LobbyCampaignCommit writer</td>
+  <td>PROVEN</td>
+  <td>Direct writer to MissionMgr+0x14FD0 from the canonical nine-writer census.</td>
+</tr>
+<tr>
+  <td><code>0x9552F0</code></td>
+  <td>site</td>
+  <td>Mission/Player</td>
+  <td>Room armor-cap callsite</td>
+  <td>PROVEN</td>
+  <td>Exact room/UI callsite patched transactionally to R6 cap conversion wrapper.</td>
+</tr>
+<tr>
+  <td><code>0x20B2890</code></td>
+  <td>global</td>
+  <td>Mission/Core</td>
+  <td>MissionMgr global pointer</td>
+  <td>PROVEN</td>
+  <td>Canonical global used by Fencer compatibility code and multiple retained focused-disassembly xrefs.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="missionscript-2-symbols">MissionScript — 2 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x212A0B</code></td>
+  <td>site</td>
+  <td>MissionScript</td>
+  <td>BVM cuscall0 3450 handler region</td>
+  <td>PROVEN</td>
+  <td>Handler writes float to resolved object+0x470; search/encounter-radius semantic family.</td>
+</tr>
+<tr>
+  <td><code>0x228120</code></td>
+  <td>function</td>
+  <td>MissionScript</td>
+  <td>Native object+0x470 setter helper</td>
+  <td>PROVEN</td>
+  <td>Distinct native helper resolves object then writes float to +0x470; AngelScript exposure not yet identified.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="network-73-symbols">Network — 73 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x125180</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>net::NetworkObject ordinary-state apply</td>
+  <td>PROVEN</td>
+  <td>Base NetworkObject vslot6/+0x30 ordinary decoded-state apply method reached by SceneObjectReceiver.</td>
+</tr>
+<tr>
+  <td><code>0x22F0B0</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet TX state dispatcher</td>
+  <td>PROVEN</td>
+  <td>BulletBase primary-vtable slot13; builds NetworkBullet subtype payloads and sends them through the public TX entry with shipping mode0.</td>
+</tr>
+<tr>
+  <td><code>0x22F660</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet subtype receive dispatcher</td>
+  <td>PROVEN</td>
+  <td>BulletBase eos::NetworkBullet secondary-vtable slot3 dispatcher; dispatches subtype byte to subtype-specific receive handlers including subtype0 0x233400.</td>
+</tr>
+<tr>
+  <td><code>0x232E80</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet selector2 receive collision contact</td>
+  <td>PROVEN</td>
+  <td>Receives selector2 external-object/contact payload, reconstructs an 0x50-byte contact record and appends it to replicated-state +0x6C0.</td>
+</tr>
+<tr>
+  <td><code>0x2330B0</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet selector2 serialize collision contact</td>
+  <td>PROVEN</td>
+  <td>Serializes the latest contact record external-object identity, auxiliary dword, contact point XYZ and contact normal.</td>
+</tr>
+<tr>
+  <td><code>0x233400</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet subtype0 receive spatial state</td>
+  <td>PROVEN</td>
+  <td>Subtype0 receiver: reads 12-byte motion/direction vector to BulletBase+0xB90 and 12-byte projectile position/state to +0xB80.</td>
+</tr>
+<tr>
+  <td><code>0x233450</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet subtype0 serialize spatial state</td>
+  <td>PROVEN</td>
+  <td>Subtype0 serializer: writes BulletBase+0xB90 motion/direction state then +0xB80 projectile position/state.</td>
+</tr>
+<tr>
+  <td><code>0x233690</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet selector1 receive contact/reference context</td>
+  <td>PROVEN</td>
+  <td>Receives/resolves selector1 external-object contact/reference context; reconstructs +0xC00..+0xC54 and does not restore spatial +0xB80/+0xB90 or R14 class RNG state.</td>
+</tr>
+<tr>
+  <td><code>0x2339E0</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase NetworkBullet selector1 serialize contact/reference context</td>
+  <td>PROVEN</td>
+  <td>Serializes selector1 external-object reference/key, identifier and local contact/reference vectors from +0xC20/+0xC30 when +0xC00 is active.</td>
+</tr>
+<tr>
+  <td><code>0x592130</code></td>
+  <td>function</td>
+  <td>Network/Player</td>
+  <td>Player RX dispatcher</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (19 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x592180</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player RX forwarding</td>
+  <td>PROVEN</td>
+  <td>Forwards staged remote player state into PlayerCtrlSyncChecker/anchor path.</td>
+</tr>
+<tr>
+  <td><code>0x596130</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player reconciliation caller</td>
+  <td>PROVEN</td>
+  <td>Caller chain into 0x77AD40 -&amp;gt; 0x77AD70 reconciliation.</td>
+</tr>
+<tr>
+  <td><code>0x59C3B0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player rebase threshold caller</td>
+  <td>HIGH</td>
+  <td>Caller entering proven ~3.0 world-unit rebase threshold helper.</td>
+</tr>
+<tr>
+  <td><code>0x59E210</code></td>
+  <td>function</td>
+  <td>Network/Player</td>
+  <td>Player immediate-state path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (16 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x59FB10</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Soldier ordinary-state mask builder</td>
+  <td>PROVEN</td>
+  <td>Builds the ordinary type6/class3 state mask; local-controlled branch includes bit 0x10 carrying core direction/orientation state.</td>
+</tr>
+<tr>
+  <td><code>0x59FDB0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Soldier periodic state serializer</td>
+  <td>PROVEN</td>
+  <td>Concrete ordinary player-state serializer feeding class3/0x3300.</td>
+</tr>
+<tr>
+  <td><code>0x72F050</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Network logical type6 send wrapper</td>
+  <td>PROVEN</td>
+  <td>Thin wrapper that hardcodes logical type 6 and tail-jumps to generic logical sender 0x72E820. This layer alone does not prove outer 0x3300/class3 framing.</td>
+</tr>
+<tr>
+  <td><code>0x734670</code></td>
+  <td>function</td>
+  <td>Network/Coop8</td>
+  <td>Indexed network-user vector builder</td>
+  <td>PROVEN</td>
+  <td>Builds the indexed user vector used by mission/player construction while preserving logical user identity.</td>
+</tr>
+<tr>
+  <td><code>0x7378F0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver player-state parser</td>
+  <td>PROVEN</td>
+  <td>Concrete 0x3300 receive parser in ordinary remote player path.</td>
+</tr>
+<tr>
+  <td><code>0x742A9D</code></td>
+  <td>site</td>
+  <td>Network/Lobby</td>
+  <td>CreateLobby max-members immediate</td>
+  <td>PROVEN</td>
+  <td>Vanilla immediate 4; Coop8 patch site for configured 5..8</td>
+</tr>
+<tr>
+  <td><code>0x749C91</code></td>
+  <td>site</td>
+  <td>Network/Lobby</td>
+  <td>SetMaxMembers immediate</td>
+  <td>PROVEN</td>
+  <td>Later lobby max-member authority patch site</td>
+</tr>
+<tr>
+  <td><code>0x74FD50</code></td>
+  <td>function</td>
+  <td>Network/Damage</td>
+  <td>eos::EventController 0x3400 receive callback</td>
+  <td>PROVEN</td>
+  <td>Gameplay EventController receive route for class4/0x3400 event traffic including DamageObject protocol 1.</td>
+</tr>
+<tr>
+  <td><code>0x750380</code></td>
+  <td>function</td>
+  <td>Network/Damage</td>
+  <td>eos::EventController event send/build entry</td>
+  <td>PROVEN</td>
+  <td>EventController send/build family entry used by EventBase send delegation for class4 event traffic.</td>
+</tr>
+<tr>
+  <td><code>0x752200</code></td>
+  <td>function</td>
+  <td>Network/Damage</td>
+  <td>eos::Event_DamageObject deleting destructor</td>
+  <td>PROVEN</td>
+  <td>Event_DamageObject vtable slot0; code resets base vtable/releases EventBase-owned reference and conditionally frees 0x48-byte object.</td>
+</tr>
+<tr>
+  <td><code>0x7525C0</code></td>
+  <td>function</td>
+  <td>Network/Damage</td>
+  <td>eos::Event_DamageObject::Factory deleting destructor</td>
+  <td>PROVEN</td>
+  <td>Event_DamageObject::Factory vtable slot0; standard deleting-destructor form resets FactoryBase vtable and conditionally frees 8-byte object.</td>
+</tr>
+<tr>
+  <td><code>0x754350</code></td>
+  <td>function</td>
+  <td>Network/Damage</td>
+  <td>eos::Event_DamageObject::OnEvent</td>
+  <td>PROVEN</td>
+  <td>DamageObject event OnEvent virtual; exact RTTI class ownership plus compiler-emitted lambda RTTI naming OnEvent.</td>
+</tr>
+<tr>
+  <td><code>0x756020</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>Scene event receiver</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x7577B0</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>SceneObject per-type node resolver</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x757EC0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>SceneObject state stage/coalescer</td>
+  <td>PROVEN</td>
+  <td>Stage/coalescing layer after SceneObjectReceiver parser.</td>
+</tr>
+<tr>
+  <td><code>0x758060</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver decoded ordinary-state apply stage</td>
+  <td>PROVEN</td>
+  <td>Consumes staged ordinary state after decode; pending state is consumed before NetworkObject gate, pre-apply callback and ordinary apply virtuals.</td>
+</tr>
+<tr>
+  <td><code>0x7581C0</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>SceneObject receiver reset</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (18 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x75D2E0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Network low-priority state scheduler</td>
+  <td>PROVEN</td>
+  <td>Inherited bandwidth scheduler with 150/350/450/20 policy; homolog exists in EDF5.</td>
+</tr>
+<tr>
+  <td><code>0x75FC70</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>Network ingress 0x3300 receiver</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x761C80</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>eos gameplay sender context mode setter</td>
+  <td>PROVEN</td>
+  <td>Stores sender mode in the generic gameplay sender context at context+0x628.</td>
+</tr>
+<tr>
+  <td><code>0x761D40</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>eos gameplay sender generic flush</td>
+  <td>PROVEN</td>
+  <td>Flushes the generic gameplay sender context; mode0 dispatches into the Sandlot RUDP builder path.</td>
+</tr>
+<tr>
+  <td><code>0x761E60</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>SceneObject fragment flush</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x763F40</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::BulletManager class5 sender-context initializer</td>
+  <td>PROVEN</td>
+  <td>Initializes BulletManager class5 sender contexts; normal NetworkBullet shipping traffic uses mode0.</td>
+</tr>
+<tr>
+  <td><code>0x764060</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::BulletManager 0x3500 receive callback</td>
+  <td>PROVEN</td>
+  <td>Receives the class5/0x3500 NetworkBullet route after the exact route predicate at 0x764040.</td>
+</tr>
+<tr>
+  <td><code>0x764470</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::BulletManager class5 record build helper</td>
+  <td>PROVEN</td>
+  <td>Class5 NetworkBullet record-build helper reached from the mode0 queue/build path.</td>
+</tr>
+<tr>
+  <td><code>0x7646B0</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::BulletManager mode0 queue/build path</td>
+  <td>PROVEN</td>
+  <td>NetworkBullet mode0 queue/build path leading to the class5 record builder.</td>
+</tr>
+<tr>
+  <td><code>0x7647E0</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::BulletManager mode1 queue/build path</td>
+  <td>PROVEN</td>
+  <td>Contrasting BulletManager mode1 path using sender context +0x50; retained NetworkBullet shipping traffic uses mode0/+0x60 instead.</td>
+</tr>
+<tr>
+  <td><code>0x765570</code></td>
+  <td>function</td>
+  <td>Network/Projectile</td>
+  <td>eos::NetworkBullet public TX entry</td>
+  <td>PROVEN</td>
+  <td>Public class5 NetworkBullet send entry. All 23 examined shipping callsites pass mode 0, selecting the normal Sandlot-RUDP bullet path.</td>
+</tr>
+<tr>
+  <td><code>0x7739E0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>net::NetworkObject ordinary-state pre-apply callback</td>
+  <td>PROVEN</td>
+  <td>Virtual callback invoked by SceneObjectReceiver immediately before ordinary decoded state apply (vtable +0x90 / slot18).</td>
+</tr>
+<tr>
+  <td><code>0x773B50</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>net::NetworkObject send-class dispatcher</td>
+  <td>PROVEN</td>
+  <td>Central NetworkObject virtual send dispatcher taking the flag0/flag1 class selector; the two classes remain distinct into downstream sender paths.</td>
+</tr>
+<tr>
+  <td><code>0x774920</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>net::NetworkObject ordinary-state receive gate</td>
+  <td>PROVEN</td>
+  <td>NetworkObject virtual gate used by SceneObjectReceiver ordinary decoded apply; requires linked state and accepts cached Soldier objects.</td>
+</tr>
+<tr>
+  <td><code>0x774AF0</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>net::NetworkObject cached-Soldier RTTI initializer</td>
+  <td>PROVEN</td>
+  <td>Caches whether the NetworkObject dynamically casts to SoldierBase at NetworkObject+0x30; concrete registration-time callsite 0x75BAE0.</td>
+</tr>
+<tr>
+  <td><code>0x77AB90</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player rebase threshold helper</td>
+  <td>PROVEN</td>
+  <td>Helper in ~3.0 world-unit rebase threshold path.</td>
+</tr>
+<tr>
+  <td><code>0x77AC60</code></td>
+  <td>function</td>
+  <td>Network/Player</td>
+  <td>Player forced-rebase path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (16 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x77AC90</code></td>
+  <td>site</td>
+  <td>Network/Player</td>
+  <td>Player reconciliation checker init</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (20 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x77AD40</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player reconciliation wrapper</td>
+  <td>PROVEN</td>
+  <td>Thin stage immediately before concrete 0x77AD70 consumer.</td>
+</tr>
+<tr>
+  <td><code>0x77AD70</code></td>
+  <td>function</td>
+  <td>Network</td>
+  <td>Player reconciliation consumer</td>
+  <td>PROVEN</td>
+  <td>Produces hard-position / velocity-error / orientation correction flags.</td>
+</tr>
+<tr>
+  <td><code>0x12ABE80</code></td>
+  <td>function</td>
+  <td>Network/Lifecycle</td>
+  <td>Network ready-state set path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (18 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12ABF30</code></td>
+  <td>site</td>
+  <td>Network/Lifecycle</td>
+  <td>Network ready-state clear path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (14 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12AC420</code></td>
+  <td>function</td>
+  <td>Network/Coop8</td>
+  <td>NetworkUser remote-flag query</td>
+  <td>PROVEN</td>
+  <td>User remote/local flag query used by recovered Coop8 player-construction logic.</td>
+</tr>
+<tr>
+  <td><code>0x12B4660</code></td>
+  <td>function</td>
+  <td>Network/Parser</td>
+  <td>Network varint reader</td>
+  <td>PROVEN</td>
+  <td>R8 direct signature-qualified helper (12 bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12C2DE0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot RUDP mode0 enqueue/builder</td>
+  <td>PROVEN</td>
+  <td>Mode0 Sandlot RUDP enqueue/builder shared under class4/class5 gameplay traffic.</td>
+</tr>
+<tr>
+  <td><code>0x12C2FD0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot mode1 non-retained enqueue/builder</td>
+  <td>PROVEN</td>
+  <td>Builds the mode1 path that converges on 0x12D1040 without a retained ReliableInfo record.</td>
+</tr>
+<tr>
+  <td><code>0x12C6D60</code></td>
+  <td>function</td>
+  <td>Network/Lifecycle</td>
+  <td>Remote-close path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (16 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12C7890</code></td>
+  <td>function</td>
+  <td>Network/Lifecycle</td>
+  <td>Remote-close raw path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (14 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12C8BC0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>EOS P2P unreliable send wrapper</td>
+  <td>PROVEN</td>
+  <td>Shipping EOS send-wrapper region used by the logical unreliable transport paths; handles EOS_NoConnection by accepting connection without retrying the failed packet in this wrapper.</td>
+</tr>
+<tr>
+  <td><code>0x12CB3E0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot ReliableMgr allocation/init helper</td>
+  <td>PROVEN</td>
+  <td>Allocates and initializes ReliableMgr state including sender-pending and receiver-dedupe containers, cleanup timing state and controller back-reference.</td>
+</tr>
+<tr>
+  <td><code>0x12CC0A0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>eos::packet::Controller reliable-state construction path</td>
+  <td>PROVEN</td>
+  <td>Constructs packet Sender/Receiver/ReliableMgr shared state and stores the ReliableMgr shared pointer at controller +0x60/+0x68.</td>
+</tr>
+<tr>
+  <td><code>0x12CDF20</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot packet reliable/control receive parser</td>
+  <td>PROVEN</td>
+  <td>Parses 0x1200/0x1300/0x1400 control families and dispatches reliable DATA/ACK/dedupe retirement behavior.</td>
+</tr>
+<tr>
+  <td><code>0x12CEA10</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>SceneObject logical flush</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12CEE60</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot reliable retry/dedupe maintenance scheduler</td>
+  <td>PROVEN</td>
+  <td>Scans sender-pending ReliableInfo records for retry expiry, re-enqueues retained bytes, applies retry backoff/fault flag, and ages receiver dedupe markers.</td>
+</tr>
+<tr>
+  <td><code>0x12CFCD0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot reliable DATA dedupe/ACK handler</td>
+  <td>PROVEN</td>
+  <td>Handles 0x1200 reliable DATA: sequence dedupe, 0x1300 ACK emission and receiver-dedupe timestamp insertion.</td>
+</tr>
+<tr>
+  <td><code>0x12CFFD0</code></td>
+  <td>function</td>
+  <td>Network/SceneObject</td>
+  <td>SceneObject logical enqueue</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x12D0120</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot RUDP physical flush</td>
+  <td>PROVEN</td>
+  <td>Physical RUDP flush that converges on eos::packet::ControllerImpl ordinary-unreliable virtual send.</td>
+</tr>
+<tr>
+  <td><code>0x12D0AC0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot RUDP retained-record builder</td>
+  <td>PROVEN</td>
+  <td>Retained/retry record builder in the Sandlot RUDP layer; carries the reliable gameplay wrapper before physical EOS transmission.</td>
+</tr>
+<tr>
+  <td><code>0x12D1040</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>Sandlot non-retained no-retry-record frame builder</td>
+  <td>PROVEN</td>
+  <td>Builds/enqueues current Sandlot frame without retained sequence +0x38, 0x401200 wrapper, or retained record/list allocation; calls common lower enqueue directly.</td>
+</tr>
+<tr>
+  <td><code>0x12D2E10</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>eos::packet::ControllerImpl no-delay unreliable send virtual</td>
+  <td>PROVEN</td>
+  <td>Distinct logical no-delay unreliable transport virtual (vslot4/+0x20); shipping EDF6 flattens it to the same non-delayed EOS unreliable behavior.</td>
+</tr>
+<tr>
+  <td><code>0x12D2EF0</code></td>
+  <td>function</td>
+  <td>Network/Transport</td>
+  <td>eos::packet::ControllerImpl ordinary unreliable send virtual</td>
+  <td>PROVEN</td>
+  <td>Logical ordinary-unreliable transport virtual (vslot3/+0x18). In shipping EDF6 it uses EOS UnreliableUnordered with delayed delivery disabled.</td>
+</tr>
+<tr>
+  <td><code>0x12D5AA0</code></td>
+  <td>function</td>
+  <td>Network/Lifecycle</td>
+  <td>Initial network link path</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (15 stolen bytes).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="physics-4-symbols">Physics — 4 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x11A6480</code></td>
+  <td>function</td>
+  <td>Physics</td>
+  <td>EDF6 capsule-like shape constructor</td>
+  <td>MEDIUM</td>
+  <td>Constructor used in recovered Humanoid_Basic physical shape setup.</td>
+</tr>
+<tr>
+  <td><code>0x11AF6F0</code></td>
+  <td>function</td>
+  <td>Physics</td>
+  <td>Native transform getter helper</td>
+  <td>PROVEN</td>
+  <td>R8 direct signature-qualified helper (12 bytes).</td>
+</tr>
+<tr>
+  <td><code>0x11E0350</code></td>
+  <td>function</td>
+  <td>Physics/Network</td>
+  <td>Physical setPosition target</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (18 stolen bytes).</td>
+</tr>
+<tr>
+  <td><code>0x11E0470</code></td>
+  <td>function</td>
+  <td>Physics/Network</td>
+  <td>Physical setTransform target</td>
+  <td>PROVEN</td>
+  <td>R8 signature-qualified inline detour site (14 stolen bytes).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="projectile-20-symbols">Projectile — 20 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x4E820</code></td>
+  <td>function</td>
+  <td>Projectile/RNG</td>
+  <td>Caller-state randomized 3D vector generator</td>
+  <td>PROVEN</td>
+  <td>Advances caller-supplied LCG state twice and generates a randomized 3D vector around input axis/range.</td>
+</tr>
+<tr>
+  <td><code>0x4EB60</code></td>
+  <td>function</td>
+  <td>Projectile/RNG</td>
+  <td>Caller-state randomized vector wrapper</td>
+  <td>PROVEN</td>
+  <td>Wrapper around 0x4E820 with fixed/default range inputs; preserves caller-owned RNG state semantics.</td>
+</tr>
+<tr>
+  <td><code>0x22E9C0</code></td>
+  <td>function</td>
+  <td>Projectile/Core</td>
+  <td>BulletBase construction replicated-state bridge</td>
+  <td>PROVEN</td>
+  <td>Constructs BulletBase and passes complete-object transform +0x60 plus embedded replicated-state subobject +0x140 to 0x231CC0.</td>
+</tr>
+<tr>
+  <td><code>0x230CA0</code></td>
+  <td>function</td>
+  <td>Projectile/Collision</td>
+  <td>BulletBase collision/contact record producer</td>
+  <td>PROVEN</td>
+  <td>Builds and appends the 0x50-byte collision/contact record in replicated-state +0x6C0 from contact point, normal and collided-object context.</td>
+</tr>
+<tr>
+  <td><code>0x231640</code></td>
+  <td>function</td>
+  <td>Projectile/Collision</td>
+  <td>BulletBase contact-normal motion response</td>
+  <td>PROVEN</td>
+  <td>Uses the latest collision record normal and +0xB90 motion; applies normal-based reflection (-2*dot term) or dispatches a custom response.</td>
+</tr>
+<tr>
+  <td><code>0x231CC0</code></td>
+  <td>function</td>
+  <td>Projectile/Network</td>
+  <td>BulletBase replicated projectile-state initializer</td>
+  <td>PROVEN</td>
+  <td>Initializes the embedded complete-Bullet+0x140 state subobject from the created-object transform, including subtype0 position +0xB80 and motion/direction +0xB90.</td>
+</tr>
+<tr>
+  <td><code>0x2321B0</code></td>
+  <td>function</td>
+  <td>Projectile/Network</td>
+  <td>BulletBase replicated-state contact/reference updater</td>
+  <td>PROVEN</td>
+  <td>Common Bullet state update path that activates and builds selector1 external-object contact/reference context at replicated-state +0xC00..+0xC54.</td>
+</tr>
+<tr>
+  <td><code>0x2349D0</code></td>
+  <td>function</td>
+  <td>Projectile/Collision</td>
+  <td>BulletBase ordinary motion integrator contact-context gate</td>
+  <td>PROVEN</td>
+  <td>Ordinary motion update returns early when external contact context +0xC00 is active.</td>
+</tr>
+<tr>
+  <td><code>0x235540</code></td>
+  <td>function</td>
+  <td>Projectile/Core</td>
+  <td>Bullet replicated motion-direction updater</td>
+  <td>PROVEN</td>
+  <td>Converts a supplied displacement/direction vector and stores it into embedded replicated projectile state +0xB90 (complete Bullet +0xCD0).</td>
+</tr>
+<tr>
+  <td><code>0x235B30</code></td>
+  <td>function</td>
+  <td>Projectile/Collision</td>
+  <td>BulletBase external-contact local normal world rebuild</td>
+  <td>PROVEN</td>
+  <td>Transforms selector1 local normal/direction +0xC30 through the contacted object transform to world space.</td>
+</tr>
+<tr>
+  <td><code>0x2369CE</code></td>
+  <td>function</td>
+  <td>Projectile/Collision</td>
+  <td>BulletBase external-contact local position world anchor</td>
+  <td>PROVEN</td>
+  <td>Transforms selector1 local position +0xC20 through the contacted object transform and writes anchored world projectile position +0xB80.</td>
+</tr>
+<tr>
+  <td><code>0x259E40</code></td>
+  <td>function</td>
+  <td>Projectile/Lightning</td>
+  <td>LightningBullet01 constructor</td>
+  <td>PROVEN</td>
+  <td>Constructs LightningBullet01 and consumes Bullet+0x130 RNG state to initialize randomized path state.</td>
+</tr>
+<tr>
+  <td><code>0x25AD10</code></td>
+  <td>function</td>
+  <td>Projectile/Lightning</td>
+  <td>LightningBullet01 OnUpdate</td>
+  <td>PROVEN</td>
+  <td>RTTI slot5 update; consumes Bullet+0x130 RNG state and drives randomized path/current-position/motion state.</td>
+</tr>
+<tr>
+  <td><code>0x260AA0</code></td>
+  <td>function</td>
+  <td>Projectile/Flame</td>
+  <td>FlameBullet02 constructor</td>
+  <td>PROVEN</td>
+  <td>Constructs FlameBullet02; consumes Bullet+0x130 RNG state to initialize class motion randomization state.</td>
+</tr>
+<tr>
+  <td><code>0x2622A0</code></td>
+  <td>function</td>
+  <td>Projectile/Flame</td>
+  <td>FlameBullet02 OnUpdate</td>
+  <td>PROVEN</td>
+  <td>RTTI slot5 update; applies constructor-randomized class state to common network motion/direction state.</td>
+</tr>
+<tr>
+  <td><code>0x267910</code></td>
+  <td>function</td>
+  <td>Projectile/Missile</td>
+  <td>MissileBullet01 constructor selector2 enable path</td>
+  <td>PROVEN</td>
+  <td>RTTI-owned MissileBullet01 construction range; unconditionally enables Bullet+0xE8C bit0x4 at 0x2692DA.</td>
+</tr>
+<tr>
+  <td><code>0x26AF70</code></td>
+  <td>function</td>
+  <td>Projectile/Missile</td>
+  <td>MissileBullet02 constructor selector2 enable path</td>
+  <td>PROVEN</td>
+  <td>RTTI-owned MissileBullet02 construction range; unconditionally enables Bullet+0xE8C bit0x4 at 0x26C983.</td>
+</tr>
+<tr>
+  <td><code>0x28DB80</code></td>
+  <td>function</td>
+  <td>Projectile/Explosive</td>
+  <td>SolidExpBullet01 constructor</td>
+  <td>PROVEN</td>
+  <td>Constructs SolidExpBullet01; consumes Bullet+0x130 RNG state to initialize randomized detonation countdown.</td>
+</tr>
+<tr>
+  <td><code>0x28E950</code></td>
+  <td>function</td>
+  <td>Projectile/Explosive</td>
+  <td>SolidExpBullet01 detonation/BlowHit spawn helper</td>
+  <td>PROVEN</td>
+  <td>Builds BlowHit01 InitParam from projectile state and spawns the detonation/hit object at current projectile transform.</td>
+</tr>
+<tr>
+  <td><code>0x28F340</code></td>
+  <td>function</td>
+  <td>Projectile/Explosive</td>
+  <td>SolidExpBullet01 OnUpdate</td>
+  <td>PROVEN</td>
+  <td>RTTI slot5 update; decrements randomized countdown and invokes 0x28E950 when it expires.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="renderer-31-symbols">Renderer — 31 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x2698AE</code></td>
+  <td>site</td>
+  <td>Renderer/Projectile</td>
+  <td>Missile01 transform-publisher callsite</td>
+  <td>PROVEN</td>
+  <td>Class-specific Missile01 presentation publisher callsite.</td>
+</tr>
+<tr>
+  <td><code>0x26E4A6</code></td>
+  <td>site</td>
+  <td>Renderer/Projectile</td>
+  <td>Missile02 transform-publisher callsite</td>
+  <td>PROVEN</td>
+  <td>Class-specific Missile02 presentation publisher callsite.</td>
+</tr>
+<tr>
+  <td><code>0x288395</code></td>
+  <td>site</td>
+  <td>Renderer/Projectile</td>
+  <td>Rocket/LowLight transform-publisher callsite</td>
+  <td>PROVEN</td>
+  <td>Class-specific Rocket/LowLight presentation publisher callsite.</td>
+</tr>
+<tr>
+  <td><code>0x2DAF90</code></td>
+  <td>site</td>
+  <td>Renderer/Weather</td>
+  <td>Rain reset/reseed helper</td>
+  <td>PROVEN</td>
+  <td>Rain reset helper reseeds fields beyond normal positional step, including +0x14 and +0x20.</td>
+</tr>
+<tr>
+  <td><code>0x2F3510</code></td>
+  <td>function</td>
+  <td>Renderer/VFX</td>
+  <td>Line renderer entry</td>
+  <td>PROVEN</td>
+  <td>Canonical Line renderer entry; 3 direct callers in machine census.</td>
+</tr>
+<tr>
+  <td><code>0x2F35F0</code></td>
+  <td>site</td>
+  <td>Renderer/VFX</td>
+  <td>Line renderer record-pointer load</td>
+  <td>PROVEN</td>
+  <td>Qualified Line renderer record pointer load from component+0x158.</td>
+</tr>
+<tr>
+  <td><code>0x2F5940</code></td>
+  <td>function</td>
+  <td>Renderer/VFX</td>
+  <td>Ribbon renderer entry</td>
+  <td>PROVEN</td>
+  <td>Canonical Ribbon renderer entry; 16 direct callers in machine census.</td>
+</tr>
+<tr>
+  <td><code>0x2F5A74</code></td>
+  <td>site</td>
+  <td>Renderer/VFX</td>
+  <td>Ribbon renderer record-pointer load</td>
+  <td>PROVEN</td>
+  <td>Qualified Ribbon renderer record pointer load from component+0x158.</td>
+</tr>
+<tr>
+  <td><code>0x3027B0</code></td>
+  <td>function</td>
+  <td>Renderer/VFX</td>
+  <td>Particle renderer entry</td>
+  <td>PROVEN</td>
+  <td>Canonical Particle renderer entry; 15 direct callers in machine census.</td>
+</tr>
+<tr>
+  <td><code>0x30287E</code></td>
+  <td>site</td>
+  <td>Renderer/VFX</td>
+  <td>Particle renderer record-pointer load</td>
+  <td>PROVEN</td>
+  <td>Qualified Particle renderer record pointer load from component+0x1A8.</td>
+</tr>
+<tr>
+  <td><code>0x1104280</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker Control callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: Control.</td>
+</tr>
+<tr>
+  <td><code>0x1118B45</code></td>
+  <td>site</td>
+  <td>Renderer/Present</td>
+  <td>DXGI Present call window</td>
+  <td>PROVEN</td>
+  <td>EDF callsite wrapping IDXGISwapChain::Present for native/DXVK-neutral blocking telemetry.</td>
+</tr>
+<tr>
+  <td><code>0x111CC20</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker fence/barrier</td>
+  <td>PROVEN</td>
+  <td>Synchronous post-frame graphics-worker barrier; catastrophic stall discriminator.</td>
+</tr>
+<tr>
+  <td><code>0x111CD3B</code></td>
+  <td>site</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics barrier Sleep(0) site</td>
+  <td>PROVEN</td>
+  <td>Yield site inside graphics-worker barrier readiness loop.</td>
+</tr>
+<tr>
+  <td><code>0x1120B90</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker Release callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: Release.</td>
+</tr>
+<tr>
+  <td><code>0x1126080</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker State7A callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: State7A.</td>
+</tr>
+<tr>
+  <td><code>0x11262F0</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker State2 callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: State2.</td>
+</tr>
+<tr>
+  <td><code>0x1127000</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker State7B callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: State7B.</td>
+</tr>
+<tr>
+  <td><code>0x118DFF0</code></td>
+  <td>function</td>
+  <td>Renderer</td>
+  <td>SceneCamera renderer-facing materialization</td>
+  <td>PROVEN</td>
+  <td>Consumes SceneCamera+0x220 and materializes renderer-facing state.</td>
+</tr>
+<tr>
+  <td><code>0x118E500</code></td>
+  <td>function</td>
+  <td>Renderer</td>
+  <td>Synchronous render-pass enqueue</td>
+  <td>PROVEN</td>
+  <td>Synchronous pass enqueue reached from the frame render dispatcher.</td>
+</tr>
+<tr>
+  <td><code>0x11977F0</code></td>
+  <td>function</td>
+  <td>Renderer</td>
+  <td>Frame render dispatcher</td>
+  <td>PROVEN</td>
+  <td>Per-render dispatcher used by R19 render-pipeline profiling.</td>
+</tr>
+<tr>
+  <td><code>0x1197B50</code></td>
+  <td>site</td>
+  <td>Renderer</td>
+  <td>Scene render-prep callsite</td>
+  <td>PROVEN</td>
+  <td>Unique direct callsite into 0x118DFF0 identified in camera ledger</td>
+</tr>
+<tr>
+  <td><code>0x11A3990</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Main-loop prelock B</td>
+  <td>PROVEN</td>
+  <td>Second main-loop prelock/spin helper measured by R23.</td>
+</tr>
+<tr>
+  <td><code>0x11A3A03</code></td>
+  <td>site</td>
+  <td>Renderer/Queue</td>
+  <td>Prelock B Sleep(1) site 1</td>
+  <td>PROVEN</td>
+  <td>First periodic Sleep(1) fallback inside prelock B.</td>
+</tr>
+<tr>
+  <td><code>0x11A3B86</code></td>
+  <td>site</td>
+  <td>Renderer/Queue</td>
+  <td>Prelock B Sleep(1) site 2</td>
+  <td>PROVEN</td>
+  <td>Second periodic Sleep(1) fallback inside prelock B.</td>
+</tr>
+<tr>
+  <td><code>0x11B30C0</code></td>
+  <td>function</td>
+  <td>Renderer/Transform</td>
+  <td>Common transform publisher</td>
+  <td>PROVEN</td>
+  <td>Common transform publisher with 96 direct E8 callers; global hook rejected as too broad.</td>
+</tr>
+<tr>
+  <td><code>0x11B5A70</code></td>
+  <td>function</td>
+  <td>Renderer/Umbra</td>
+  <td>Graphics worker BigA / Umbra visibility callback</td>
+  <td>PROVEN</td>
+  <td>Dominant profiled BigA callback, traced to Umbra Camera::processVisibility(Commander*).</td>
+</tr>
+<tr>
+  <td><code>0x11B5B30</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Graphics worker BigB callback</td>
+  <td>PROVEN</td>
+  <td>R28 targeted graphics-worker callback family: BigB.</td>
+</tr>
+<tr>
+  <td><code>0x11D43F0</code></td>
+  <td>function</td>
+  <td>Renderer</td>
+  <td>Renderer child helper</td>
+  <td>PROVEN</td>
+  <td>Common renderer-child helper reached by profiled direct child callsites.</td>
+</tr>
+<tr>
+  <td><code>0x11DC100</code></td>
+  <td>function</td>
+  <td>Renderer/Queue</td>
+  <td>Main-loop prelock A</td>
+  <td>PROVEN</td>
+  <td>Main-loop prelock/spin helper measured by R23 before fixed/render gate.</td>
+</tr>
+<tr>
+  <td><code>0x11DC196</code></td>
+  <td>site</td>
+  <td>Renderer/Queue</td>
+  <td>Prelock A Sleep(1) site</td>
+  <td>PROVEN</td>
+  <td>Periodic Sleep(1) fallback site inside prelock A.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rendering-32-symbols">Rendering — 32 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x269940</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet01::~MissileBullet01</td>
+  <td>PROVEN</td>
+  <td>MissileBullet01 main-vtable destructor slot1.</td>
+</tr>
+<tr>
+  <td><code>0x26A570</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet01::secondary draw</td>
+  <td>PROVEN</td>
+  <td>MissileBullet01 secondary renderer draw.</td>
+</tr>
+<tr>
+  <td><code>0x26A810</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet01::OnSyncRender</td>
+  <td>PROVEN</td>
+  <td>MissileBullet01 main-vtable OnSync slot3.</td>
+</tr>
+<tr>
+  <td><code>0x26A880</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet01::OnUpdate</td>
+  <td>PROVEN</td>
+  <td>MissileBullet01 main-vtable fixed OnUpdate slot5; authoritative +0x90 written before return.</td>
+</tr>
+<tr>
+  <td><code>0x26CDF0</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet02::~MissileBullet02</td>
+  <td>PROVEN</td>
+  <td>MissileBullet02 main-vtable destructor.</td>
+</tr>
+<tr>
+  <td><code>0x26DFC0</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet02::secondary draw</td>
+  <td>PROVEN</td>
+  <td>MissileBullet02 secondary renderer draw.</td>
+</tr>
+<tr>
+  <td><code>0x26E260</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet02::OnSyncRender</td>
+  <td>PROVEN</td>
+  <td>MissileBullet02 main-vtable OnSync.</td>
+</tr>
+<tr>
+  <td><code>0x26E4C0</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>MissileBullet02::OnUpdate</td>
+  <td>PROVEN</td>
+  <td>MissileBullet02 main-vtable fixed OnUpdate.</td>
+</tr>
+<tr>
+  <td><code>0x287A70</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>RocketBullet01::~RocketBullet01</td>
+  <td>PROVEN</td>
+  <td>RocketBullet01 main-vtable destructor.</td>
+</tr>
+<tr>
+  <td><code>0x287AF0</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>RocketBullet01_LowLight::~RocketBullet01_LowLight</td>
+  <td>PROVEN</td>
+  <td>Rocket LowLight separate main-vtable destructor.</td>
+</tr>
+<tr>
+  <td><code>0x287B70</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>RocketBullet01::secondary draw</td>
+  <td>PROVEN</td>
+  <td>Rocket and LowLight shared secondary renderer draw.</td>
+</tr>
+<tr>
+  <td><code>0x287DD0</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>RocketBullet01::OnSyncRender</td>
+  <td>PROVEN</td>
+  <td>Rocket and LowLight shared main-vtable OnSync.</td>
+</tr>
+<tr>
+  <td><code>0x287E40</code></td>
+  <td>function</td>
+  <td>Rendering/Projectile</td>
+  <td>RocketBullet01::OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Rocket and LowLight shared fixed OnUpdate; authoritative +0x90 write at 0x287F80.</td>
+</tr>
+<tr>
+  <td><code>0x2D4840</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen weather common OnSync helper</td>
+  <td>PROVEN</td>
+  <td>Common weather OnSync helper; publishes scalar fields but does not copy manager record lists.</td>
+</tr>
+<tr>
+  <td><code>0x2D7150</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Fog::secondary draw</td>
+  <td>PROVEN</td>
+  <td>Fog secondary render-interface draw.</td>
+</tr>
+<tr>
+  <td><code>0x2D7200</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Fog::fixed OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Fog fixed update owns current manager records.</td>
+</tr>
+<tr>
+  <td><code>0x2D8A80</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_FugitiveDust::secondary draw</td>
+  <td>PROVEN</td>
+  <td>Dust secondary render-interface draw.</td>
+</tr>
+<tr>
+  <td><code>0x2D8B70</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_FugitiveDust::fixed OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Dust fixed update owns current manager records.</td>
+</tr>
+<tr>
+  <td><code>0x2DB170</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Rain::secondary draw</td>
+  <td>PROVEN</td>
+  <td>Rain secondary render-interface draw.</td>
+</tr>
+<tr>
+  <td><code>0x2DB270</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Rain::fixed OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Rain fixed update invokes manager updater on full+0x390.</td>
+</tr>
+<tr>
+  <td><code>0x2DE1C0</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Snow::secondary draw</td>
+  <td>PROVEN</td>
+  <td>Snow secondary render-interface draw.</td>
+</tr>
+<tr>
+  <td><code>0x2DE280</code></td>
+  <td>function</td>
+  <td>Rendering/Weather</td>
+  <td>FullScreen_Snow::fixed OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Snow fixed update invokes manager updater on full+0x390.</td>
+</tr>
+<tr>
+  <td><code>0x2F3B60</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Line live fixed helper</td>
+  <td>PROVEN</td>
+  <td>Line live fixed helper operating on ring component at main+0x1A0.</td>
+</tr>
+<tr>
+  <td><code>0x2F41C0</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Line presentation-holder callback</td>
+  <td>PROVEN</td>
+  <td>Line presentation holder vtable slot1.</td>
+</tr>
+<tr>
+  <td><code>0x2F43A0</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Line fixed-holder worker callback</td>
+  <td>PROVEN</td>
+  <td>Line fixed holder vtable slot1; dispatches live fixed helper on main+0x1A0.</td>
+</tr>
+<tr>
+  <td><code>0x2F6110</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Ribbon live fixed helper</td>
+  <td>PROVEN</td>
+  <td>Ribbon live fixed helper operating on ring component at main+0x190.</td>
+</tr>
+<tr>
+  <td><code>0x2F6310</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Ribbon presentation-holder callback</td>
+  <td>PROVEN</td>
+  <td>Ribbon presentation holder vtable slot1.</td>
+</tr>
+<tr>
+  <td><code>0x2F64F0</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Ribbon fixed-holder worker callback</td>
+  <td>PROVEN</td>
+  <td>Ribbon fixed holder vtable slot1; dispatches live fixed helper on main+0x190.</td>
+</tr>
+<tr>
+  <td><code>0x302EE0</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Particle live fixed helper</td>
+  <td>PROVEN</td>
+  <td>Particle live fixed helper operating on ring component at main+0x1A0.</td>
+</tr>
+<tr>
+  <td><code>0x3033A0</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Particle presentation-holder callback</td>
+  <td>PROVEN</td>
+  <td>Particle presentation holder vtable slot1.</td>
+</tr>
+<tr>
+  <td><code>0x303580</code></td>
+  <td>function</td>
+  <td>Rendering/Particle</td>
+  <td>Particle fixed-holder worker callback</td>
+  <td>PROVEN</td>
+  <td>Particle fixed holder vtable slot1; dispatches live fixed helper on main+0x1A0.</td>
+</tr>
+<tr>
+  <td><code>0x6BF9F0</code></td>
+  <td>function</td>
+  <td>Rendering/Animation</td>
+  <td>AnimationModel::OnRender</td>
+  <td>PROVEN</td>
+  <td>Primary AnimationModel vslot1 render entry. R17 runtime disproved the old interpolation method, not the function identity.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resourceio-1-symbols">ResourceIO — 1 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x741C0</code></td>
+  <td>function</td>
+  <td>ResourceIO</td>
+  <td>CRI file-open entry</td>
+  <td>PROVEN</td>
+  <td>Canonical CRI open seam used by the Mod Platform VFS/resource interception path.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rtti-6-symbols">RTTI — 6 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x5510E0</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>AssultSoldier::immediate-state path override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Player immediate-state path via AssultSoldier RTTI vtable slot 15 (subobject +0x120).</td>
+</tr>
+<tr>
+  <td><code>0x564230</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>Engineer::immediate-state path override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Player immediate-state path via Engineer RTTI vtable slot 15 (subobject +0x120).</td>
+</tr>
+<tr>
+  <td><code>0x5682E0</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>HeavyArmor::immediate-state path override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Player immediate-state path via HeavyArmor RTTI vtable slot 15 (subobject +0x120).</td>
+</tr>
+<tr>
+  <td><code>0x57FCC0</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>PaleWing::RX forwarding override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Player RX forwarding via PaleWing RTTI vtable slot 53 (subobject +0x0).</td>
+</tr>
+<tr>
+  <td><code>0x581940</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>PaleWing::immediate-state path override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Player immediate-state path via PaleWing RTTI vtable slot 15 (subobject +0x120).</td>
+</tr>
+<tr>
+  <td><code>0x582E40</code></td>
+  <td>function</td>
+  <td>RTTI/SemanticPromotion</td>
+  <td>PaleWing::periodic state serializer override</td>
+  <td>PROVEN</td>
+  <td>Binary-proven override of Soldier periodic state serializer via PaleWing RTTI vtable slot 52 (subobject +0x0).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sceneobject-4-symbols">SceneObject — 4 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x1100010</code></td>
+  <td>function</td>
+  <td>SceneObject/Transform</td>
+  <td>Named-node hierarchy child world-matrix propagation</td>
+  <td>PROVEN</td>
+  <td>Propagates parent world matrices through child nodes and writes child world rows at +0xB0/+0xC0/+0xD0/+0xE0.</td>
+</tr>
+<tr>
+  <td><code>0x1100B90</code></td>
+  <td>site</td>
+  <td>SceneObject/Transform</td>
+  <td>Named-node hierarchy root world-matrix update entry</td>
+  <td>PROVEN</td>
+  <td>Writes root world matrix rows then invokes child hierarchy propagation. PE runtime-function table has no standalone boundary for this entry, so it is retained as a site/entry rather than asserted function start.</td>
+</tr>
+<tr>
+  <td><code>0x1189C00</code></td>
+  <td>function</td>
+  <td>SceneObject/Core</td>
+  <td>SceneObject base transform initialization path</td>
+  <td>PROVEN</td>
+  <td>Copies InitParam+0x8 transform into the created SceneObject transform at object+0x60..+0x90.</td>
+</tr>
+<tr>
+  <td><code>0x1194280</code></td>
+  <td>function</td>
+  <td>SceneObject/Core</td>
+  <td>SceneObject generic create transform bridge</td>
+  <td>PROVEN</td>
+  <td>Generic creation path stores the incoming transform pointer at InitParam+0x8 before factory dispatch.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="soldier-1-symbols">Soldier — 1 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x59ABB0</code></td>
+  <td>function</td>
+  <td>Soldier/Weapon</td>
+  <td>SoldierBase OnUpdate attachment-source refresh path</td>
+  <td>PROVEN</td>
+  <td>Refreshes Soldier root/model and named-node hierarchy early, then later propagates root and bound source nodes into owned Weapons via 0x68FD00.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="timing-6-symbols">Timing — 6 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x66CD0</code></td>
+  <td>function</td>
+  <td>Timing</td>
+  <td>EDF elapsed-QPC helper</td>
+  <td>HIGH</td>
+  <td>Helper used by fixed counter; returns elapsed QPC relative to EDF base.</td>
+</tr>
+<tr>
+  <td><code>0x705715</code></td>
+  <td>site</td>
+  <td>Timing</td>
+  <td>Game::Update fixed XGS callsite</td>
+  <td>PROVEN</td>
+  <td>Primary fixed simulation/XGS call precedes action publication</td>
+</tr>
+<tr>
+  <td><code>0x1198DA0</code></td>
+  <td>function</td>
+  <td>Timing</td>
+  <td>System fixed-callback dispatcher</td>
+  <td>PROVEN</td>
+  <td>Stores incoming tick count and executes System fixed callback vector when ticks &amp;gt; 0.</td>
+</tr>
+<tr>
+  <td><code>0x11A2F4F</code></td>
+  <td>site</td>
+  <td>Timing</td>
+  <td>Main-loop fixed-counter callsite</td>
+  <td>PROVEN</td>
+  <td>Primary fixed-counter callsite</td>
+</tr>
+<tr>
+  <td><code>0x11A2F6B</code></td>
+  <td>site</td>
+  <td>Timing</td>
+  <td>Main-loop fixed-counter retry callsite</td>
+  <td>PROVEN</td>
+  <td>Retry fixed-counter callsite</td>
+</tr>
+<tr>
+  <td><code>0x11DAE60</code></td>
+  <td>function</td>
+  <td>Timing</td>
+  <td>Fixed counter</td>
+  <td>PROVEN</td>
+  <td>Computes/compares EDF elapsed-QPC-domain fixed boundary.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ui-4-symbols">UI — 4 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x5DD5CA</code></td>
+  <td>site</td>
+  <td>UI/Subtitle</td>
+  <td>Caption presentation lookup callsite</td>
+  <td>PROVEN</td>
+  <td>Final CaptionPresentation caller used to scope CaptionLookup metadata capture.</td>
+</tr>
+<tr>
+  <td><code>0x7B17F0</code></td>
+  <td>function</td>
+  <td>UI/Subtitle</td>
+  <td>Caption lookup function</td>
+  <td>PROVEN</td>
+  <td>Final production CaptionLookup hook capturing caption timing metadata.</td>
+</tr>
+<tr>
+  <td><code>0x7D7660</code></td>
+  <td>function</td>
+  <td>UI/Subtitle</td>
+  <td>UiDebugMessage node-insert helper</td>
+  <td>PROVEN</td>
+  <td>Production fresh-node insert/copy helper hook for subtitle scroll correction.</td>
+</tr>
+<tr>
+  <td><code>0x7D9C26</code></td>
+  <td>site</td>
+  <td>UI/Subtitle</td>
+  <td>UiDebugMessage Add-node return site</td>
+  <td>PROVEN</td>
+  <td>Validated Add-side fresh-node return/caller identity used to restrict node edits.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="weapon-36-symbols">Weapon — 36 symbols</h2>
+<table>
+<thead>
+<tr>
+  <th>RVA</th>
+  <th>Kind</th>
+  <th>Domain</th>
+  <th>Research label</th>
+  <th>Confidence</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0xD7CE0</code></td>
+  <td>function</td>
+  <td>Weapon/Config</td>
+  <td>Weapon star-scaled parameter WSLRF evaluator</td>
+  <td>PROVEN</td>
+  <td>Common Weapon config parameter evaluator for seven-value WSLRF records. Reads correlated weapon star/save slot state, clamps to per-field max star, evaluates setting-type/factor/exponent scaling, and returns the runtime value consumed by WeaponBase field assignment.</td>
+</tr>
+<tr>
+  <td><code>0x68A920</code></td>
+  <td>function</td>
+  <td>Weapon/Core</td>
+  <td>WeaponBase constructor/config parser</td>
+  <td>PROVEN</td>
+  <td>Common Weapon construction/config parser. Initializes Weapon RNG provisionally then reseeds Weapon+0xBC8 from one step of the process-global RNG state.</td>
+</tr>
+<tr>
+  <td><code>0x68FD00</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase owner attachment/node propagation</td>
+  <td>PROVEN</td>
+  <td>Copies owner Soldier source-node world transforms from Weapon+0xE88/+0xE98 bindings into Weapon-local nodes and rebuilds Weapon+0xFD0 hierarchy.</td>
+</tr>
+<tr>
+  <td><code>0x690420</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase batched fire-state subtype1 RX/reconcile</td>
+  <td>PROVEN</td>
+  <td>Receives cumulative subtype1 fire counter plus class-specific extension. Accepts non-decreasing target counters, preserves Charge/PreCharge extension through pending/commit gating, and segments old-target catch-up before committing a changed new class state.</td>
+</tr>
+<tr>
+  <td><code>0x691560</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase per-projectile spread transform builder</td>
+  <td>PROVEN</td>
+  <td>Builds the final per-projectile 4x4 fire transform from the synchronized per-shot transform, FireSpreadType/Width and RNG/index state.</td>
+</tr>
+<tr>
+  <td><code>0x6915A6</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase common fire-spread transform selector</td>
+  <td>PROVEN</td>
+  <td>Common FireSpreadType dispatcher. Spread types 1/3 consume one Weapon RNG LCG step for random spread; 0/2/4 do not consume spread RNG.</td>
+</tr>
+<tr>
+  <td><code>0x691EAB</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase batched fire send/catch-up update dispatcher</td>
+  <td>PROVEN</td>
+  <td>Maintains the six-Weapon-update subtype1 send delay for local owners and routes remote proxies to deferred target-counter projectile catch-up.</td>
+</tr>
+<tr>
+  <td><code>0x692540</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase direct fire subtype0 RX/reconstruction</td>
+  <td>PROVEN</td>
+  <td>Direct fire receiver. Always rebuilds a receiver-local per-shot transform first; sync_level 0/1 overlays sender orientation/full transform, while -1 keeps receiver-local transform, then common projectile creation follows.</td>
+</tr>
+<tr>
+  <td><code>0x6934F0</code></td>
+  <td>function</td>
+  <td>Weapon/Core</td>
+  <td>WeaponBase common OnUpdate</td>
+  <td>PROVEN</td>
+  <td>Common Weapon update. Advances Weapon+0xBC8 exactly once near entry before later fire/state/subtype1 dispatcher work.</td>
+</tr>
+<tr>
+  <td><code>0x694430</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase positive missing-fire-counter distance helper</td>
+  <td>PROVEN</td>
+  <td>Returns max(target_fire_counter - local_realized_fire_counter, 0), used by Charge/PreCharge catch-up parameter application.</td>
+</tr>
+<tr>
+  <td><code>0x6947E0</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase deferred fire-counter projectile catch-up</td>
+  <td>PROVEN</td>
+  <td>Consumes cumulative Weapon target fire counter +0x1544. Remote mode realizes missing counter positions over time using receiver-local state; a later larger delivered subtype1 target can opportunistically close an earlier count gap.</td>
+</tr>
+<tr>
+  <td><code>0x694910</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase direct fire subtype0 TX serializer</td>
+  <td>PROVEN</td>
+  <td>Direct per-shot fire sender. Suppressed by final policy bit4; for sync_level -1 sends no muzzle transform, level0 sends sender orientation, level1 sends full sender orientation+translation; policy bit0 selects Sandlot lower lane and bit3 gates RNG seed sync.</td>
+</tr>
+<tr>
+  <td><code>0x6952D0</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase optional-seed selector0 packet helper</td>
+  <td>PROVEN</td>
+  <td>Reusable selector0 packet helper. Serializes Weapon+0xBC8 only when caller-supplied flag byte bit0 is set.</td>
+</tr>
+<tr>
+  <td><code>0x695340</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase common selector0 state packet builder</td>
+  <td>PROVEN</td>
+  <td>Common selector0 state builder. Its local optional-seed flag is explicitly zeroed before packet serialization, so the BC8 branch is inactive in this builder.</td>
+</tr>
+<tr>
+  <td><code>0x695F20</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase batched fire-state subtype1 TX</td>
+  <td>PROVEN</td>
+  <td>Builds batched subtype1 cumulative fire-state payload. Clears send delay/dirty before entering the Sandlot non-retained/no-retry-record lane, so a lost final dirty state has no application-layer resend.</td>
+</tr>
+<tr>
+  <td><code>0x6967C0</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase charge/precharge projectile-parameter recompute</td>
+  <td>PROVEN</td>
+  <td>Applies class modifier/interpolation state to live Weapon shot parameters including FireCount, FireAccuracy, AmmoSpeed, AmmoDamage, AmmoExplosion and AmmoSize.</td>
+</tr>
+<tr>
+  <td><code>0x6969A0</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase per-shot muzzle transform composition refresh</td>
+  <td>PROVEN</td>
+  <td>Rebuilds a per-shot entry from Weapon/root and named-node state. fire_model_direction mode0 uses Weapon+0x150 orientation with node-composed translation; mode1 uses named-node/model orientation and translation.</td>
+</tr>
+<tr>
+  <td><code>0x696FD0</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase common projectile creation path</td>
+  <td>PROVEN</td>
+  <td>Shared local/remote projectile creation path; invokes the spread transform builder then passes that exact transform into generic SceneObject creation.</td>
+</tr>
+<tr>
+  <td><code>0x698500</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>WeaponBase selected-shot transform refresh</td>
+  <td>PROVEN</td>
+  <td>Selects current per-shot entry and refreshes it through 0x6969A0; direct local fire calls this immediately before 0x694910.</td>
+</tr>
+<tr>
+  <td><code>0x69C090</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_ChargeShoot subtype1 pending-to-committed state commit</td>
+  <td>PROVEN</td>
+  <td>Leaf vslot33 commit site copying pending Charge extension state into committed fields after counter acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x69C0B0</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_ChargeShoot subtype1 pending-state deserializer</td>
+  <td>PROVEN</td>
+  <td>Reads Charge subtype1 extension state into pending fields and reports whether it differs from committed state; commit is separate.</td>
+</tr>
+<tr>
+  <td><code>0x69C4D0</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_ChargeShoot local subtype1 extension snapshot</td>
+  <td>PROVEN</td>
+  <td>Leaf vslot34 snapshot site capturing current derived Charge state into committed subtype1 fields after local fire marks cumulative target dirty.</td>
+</tr>
+<tr>
+  <td><code>0x69C510</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>Weapon_ChargeShoot committed-state projectile parameter apply</td>
+  <td>PROVEN</td>
+  <td>Uses committed Charge extension state and missing-counter distance to derive inputs for common 0x6967C0 projectile-parameter recomputation.</td>
+</tr>
+<tr>
+  <td><code>0x69C6E0</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_ChargeShoot subtype1 committed-state serializer</td>
+  <td>PROVEN</td>
+  <td>Serializes committed Charge subtype1 extension state used with cumulative fire-counter publication.</td>
+</tr>
+<tr>
+  <td><code>0x6A77F0</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_PreChargeShoot subtype1 pending-to-committed state commit</td>
+  <td>PROVEN</td>
+  <td>Leaf vslot33 commit site copying pending PreCharge extension state after counter acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x6A7800</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_PreChargeShoot subtype1 pending-state deserializer</td>
+  <td>PROVEN</td>
+  <td>Reads PreCharge subtype1 extension state into pending field and reports difference from committed state.</td>
+</tr>
+<tr>
+  <td><code>0x6A7910</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_PreChargeShoot local subtype1 extension snapshot</td>
+  <td>PROVEN</td>
+  <td>Leaf vslot34 snapshot site copying current derived PreCharge state into committed subtype1 field after local fire marks target dirty.</td>
+</tr>
+<tr>
+  <td><code>0x6A7920</code></td>
+  <td>function</td>
+  <td>Weapon/Projectile</td>
+  <td>Weapon_PreChargeShoot committed-state projectile parameter apply</td>
+  <td>PROVEN</td>
+  <td>Uses committed PreCharge state to derive interpolation input for common 0x6967C0 projectile-parameter recomputation.</td>
+</tr>
+<tr>
+  <td><code>0x6A7A30</code></td>
+  <td>site</td>
+  <td>Weapon/Network</td>
+  <td>Weapon_PreChargeShoot subtype1 committed-state serializer</td>
+  <td>PROVEN</td>
+  <td>Leaf vslot29 serializer site for committed PreCharge subtype1 extension state.</td>
+</tr>
+<tr>
+  <td><code>0x6B3FE0</code></td>
+  <td>function</td>
+  <td>Weapon/State</td>
+  <td>Weapon_VehicleSwingShoot state callback transition helper</td>
+  <td>PROVEN</td>
+  <td>Installs/replaces the VehicleSwingShoot class-local callback used to alternate activation and active swing-progress states.</td>
+</tr>
+<tr>
+  <td><code>0x6B4080</code></td>
+  <td>function</td>
+  <td>Weapon/State</td>
+  <td>Weapon_VehicleSwingShoot active swing-progress callback entry</td>
+  <td>PROVEN</td>
+  <td>Entry of active swing callback family; computes progress from remaining burst count / FireBurstCount, updates runtime swing override basis, and returns to activation callback when the burst completes.</td>
+</tr>
+<tr>
+  <td><code>0x6B4100</code></td>
+  <td>function</td>
+  <td>Weapon/State</td>
+  <td>Weapon_VehicleSwingShoot activation callback</td>
+  <td>PROVEN</td>
+  <td>On qualifying activation snapshots owner/source transform, installs runtime swing override mode2 at progress 0, triggers common fire helper, and switches to active swing-progress callback.</td>
+</tr>
+<tr>
+  <td><code>0x6B4190</code></td>
+  <td>function</td>
+  <td>Weapon/Transform</td>
+  <td>Weapon_VehicleSwingShoot runtime override-basis installer</td>
+  <td>PROVEN</td>
+  <td>Interpolates configured swing begin/end state using progress/pow, builds override transform, writes it to every per-shot entry+0xD0 and sets every entry+0xE0 to mode2.</td>
+</tr>
+<tr>
+  <td><code>0x6B4298</code></td>
+  <td>site</td>
+  <td>Weapon/Transform</td>
+  <td>Weapon_VehicleSwingShoot per-shot direction mode2 write</td>
+  <td>PROVEN</td>
+  <td>Exact loop site writing per-shot entry+0xE0 = 2 after installing the swing-derived override basis at entry+0xD0.</td>
+</tr>
+<tr>
+  <td><code>0x767150</code></td>
+  <td>function</td>
+  <td>Weapon/Network</td>
+  <td>WeaponBase fire synchronization policy synthesis</td>
+  <td>PROVEN</td>
+  <td>Synthesizes fire policy flags and sync_level from exact xgs_scene_object_class policy, AmmoClass policy and Weapon-derived heuristic; final bit4 selects batched subtype1 under a strict predicate.</td>
+</tr>
+<tr>
+  <td><code>0x1F54128</code></td>
+  <td>global</td>
+  <td>Weapon/Core</td>
+  <td>Process-global RNG state</td>
+  <td>PROVEN</td>
+  <td>Shared mutable 64-bit LCG state used by Weapon construction and many unrelated subsystems; Weapon ctor advances it and derives the live Weapon RNG seed from its upper bits.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="scope-limits">Scope limits</h2>
+<p>No runtime game session was executed for this atlas. Avoid transposing these RVAs to another build without independent image hashes and disassembly confirmation. Original binary files are not redistributed. The separate address-claims registry contains some <em>unpromoted</em> evidence which must <strong>not</strong> be reclassified as named functions from numeric similarity alone.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R17_2026-09-29.zip</li><li>R17 static EDF6 executable research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#reader-s-map-what-this-article-covers">Reader&#39;s map: what this article covers</a><a href="#camera-3-symbols">Camera — 3 symbols</a><a href="#core-2-symbols">Core — 2 symbols</a><a href="#gameplay-3-symbols">Gameplay — 3 symbols</a><a href="#humanoid-7-symbols">Humanoid — 7 symbols</a><a href="#input-7-symbols">Input — 7 symbols</a><a href="#mission-94-symbols">Mission — 94 symbols</a><a href="#missionscript-2-symbols">MissionScript — 2 symbols</a><a href="#network-73-symbols">Network — 73 symbols</a><a href="#physics-4-symbols">Physics — 4 symbols</a><a href="#projectile-20-symbols">Projectile — 20 symbols</a><a href="#renderer-31-symbols">Renderer — 31 symbols</a><a href="#rendering-32-symbols">Rendering — 32 symbols</a><a href="#resourceio-1-symbols">ResourceIO — 1 symbols</a><a href="#rtti-6-symbols">RTTI — 6 symbols</a><a href="#sceneobject-4-symbols">SceneObject — 4 symbols</a><a href="#soldier-1-symbols">Soldier — 1 symbols</a><a href="#timing-6-symbols">Timing — 6 symbols</a><a href="#ui-4-symbols">UI — 4 symbols</a><a href="#weapon-36-symbols">Weapon — 36 symbols</a><a href="#scope-limits">Scope limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-engine-r17-native-symbol-and-rva-reference"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Picking up an EDF5 crate is a separate protocol from spawning it The EDF5 item-drop event handler recognizes three different message types. This resolves a comm"><title>EDF5 online pickups: message types 0/1/2, host decisions and duplicate suppression | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Networking / loot</div><h1>EDF5 online pickups: message types 0/1/2, host decisions and duplicate suppression</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Networking / loot</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R133 test</div><div id="articleBody"><p>The EDF5 item-drop event handler recognizes three different message types. This resolves a common misunderstanding: a client does not simply delete everyone else's crate because its local physics capsule touched something. It reports the pickup, and the authority-side route distinguishes a request from a confirmed collection.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Type byte</th>
+  <th>Meaning</th>
+  <th>Recipient's effective action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td><strong>Spawn</strong></td>
+  <td>Build a local crate copy with the shared serial/seed</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td><strong>Pickup request</strong></td>
+  <td>Authority checks it, resolves the requesting player and can issue the confirmation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td><strong>Pickup confirmed</strong></td>
+  <td>Award the pickup to the appropriate player locally and mark the serial's crate collected</td>
+</tr>
+</tbody>
+</table>
+<p>The local pickup reporter records <strong>serial, item category and player network ID</strong> (<code>SoldierBase</code> net ID at <code>+0xF8</code> in the studied build). On the authority machine it can publish a type-2 confirmation; elsewhere it sends a request. The host resolves the player and calls the local award path before broadcasting the confirmation.</p>
+<h2 id="why-one-crate-cannot-normally-be-counted-twice">Why one crate cannot normally be counted twice</h2>
+<p>For weapon and armor categories the authority checks whether a requested serial is still an uncollected item. The first valid request marks it collected; a second request for the same serial is ignored. This is a source-established <strong>de-duplication rule</strong>, not a prediction based only on how pickup animations look.</p>
+<p>When a client receives type 2, it resolves the player by network ID, applies the collection locally, finds its own crate copy by serial and sets a collected byte. The ordinary cleanup loop then deletes that copy. The source's note that it 'blinks out' describes this state change, not a physical teleport of one globally authoritative crate mesh.</p>
+<h2 id="shared-rewards-and-unresolved-timing">Shared rewards and unresolved timing</h2>
+<p>A contributor confirmed from play that online weapon/armor pickups are <strong>shared rewards</strong>. That agrees with the code: each peer processes confirmed collection to its local inventory/reward counters. The original notes leave one issue unresolved—whether a type-1 request arriving <strong>after mission result synchronization</strong> can be lost to the tally. Do not present a deterministic late-pickup outcome without a controlled runtime trace.</p>
+<p><strong>Sources:</strong> EDF Knowledge Hub <code>edf5/online.md</code>, facts <code>pickup-online-report</code>, <code>pickup-protocol-host</code>, <code>host-dedup-pickups</code>, <code>remote-pickup-mark</code>, <code>loot-shared-online</code>, <code>late-pickup-requests</code>. Static protocol and one contributor-verified sharing observation, no new online test.</p>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="#article-start">Full EDF5 crate protocol sequence</a></li>
+</ul>
+<h2 id="complete-spawn-to-pickup-state-sequence-consolidated">Complete spawn-to-pickup state sequence (consolidated)</h2>
+<p>The spawn and collection messages form <strong>different stages</strong>, even though the same logical crate serial is reused throughout. The following describes the investigated EDF5 executable; message numbering does not prove a complete transport-layer wire schema.</p>
+<pre><code class="language-text">Eligible enemy death
+  └─ session authority check
+      ├─ create local crate copy
+      └─ send type 0 {seed, serial, position, two floats}
+          └─ each receiver creates and simulates a local crate copy
+
+Local soldier touches weapon/armor crate
+  ├─ authority machine: validate serial -&gt; confirm type 2
+  └─ other machine: report type 1 {serial, category, player net ID}
+                          └─ authority validates -&gt; type 2
+                                  ├─ award the appropriate player
+                                  ├─ mark local serial collected
+                                  └─ delete local crate copy during cleanup
+</code></pre>
+<p>A type-0 spawn message is <strong>not</strong> a kill-credit/attacker message. The seed/serial establish the crate's reproducible logical identity; its physical trajectory is simulated locally after spawn. Authority was inferred from the inspected native session gate, but the exact authority callback was not fully named in that study. This diagram is a <strong>reconstruction of native code flow</strong>, not a captured multiplayer packet log. Sources: EDF5 <code>edf5/online.md</code>, <code>drop-death-paths</code>, <code>drop-authority-check</code>, <code>crate-spawn-broadcast</code>, <code>crate-spawn-receive</code>, <code>pickup-online-report</code>, <code>pickup-protocol-host</code>, <code>host-dedup-pickups</code>, <code>remote-pickup-mark</code> (static disassembly).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/online.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-one-crate-cannot-normally-be-counted-twice">Why one crate cannot normally be counted twice</a><a href="#shared-rewards-and-unresolved-timing">Shared rewards and unresolved timing</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#complete-spawn-to-pickup-state-sequence-consolidated">Complete spawn-to-pickup state sequence (consolidated)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-online-crate-pickup-types-host-dedup-remote-mark"};</script><script src="../assets/site.js" defer></script></body></html>

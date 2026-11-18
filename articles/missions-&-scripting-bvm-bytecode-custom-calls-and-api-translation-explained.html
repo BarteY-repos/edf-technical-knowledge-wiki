@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BVM bytecode and custom calls A custom-call number is an operand, not a new bytecode instruction. That distinction is important when reading EDF mission scripts"><title>BVM bytecode and custom calls | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-scripting.html">Scripting</a></div><h1>BVM bytecode and custom calls</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact native / Reconciled with scoped runtime evidence</div><div id="articleBody"><p><strong>A custom-call number is an operand, not a new bytecode instruction.</strong> That distinction is important when reading EDF mission scripts. The EDF5/EDF6 <code>MISSION.BVM</code> frontend uses compact VM instructions and encoded operands, while the actual engine action is selected by a custom-call identifier. The target AngelScript API may express the same action as a method, a global function, or—occasionally—have no exposed binding at all.</p>
+<p><strong>Source-identity caution:</strong> The inspected clean EDF5 shipping BVM corpus is not byte-identical to the <code>EDF5_OLD_SCRIPT</code> files stored on the EDF6 side (0/141 exact pairs in the audited set). See <a href="missions-edf5-original-bvm-versus-edf6-edf5-old-script-source-identity-reference.html">the source-identity comparison</a>. This matters when attributing an opcode or custom call to original EDF5 behavior.</p>
+<h2 id="reading-an-instruction-correctly">Reading an instruction correctly</h2>
+<p>In the researched BVM stream, byte <code>0xAC</code> represents the <code>cuscall0</code> opcode. If the following argument bytes are <code>D0 07</code>, their <strong>little-endian</strong> value is <code>0x07D0 = 2000</code>, which identifies an engine custom call. Neither <code>D0</code> nor <code>07</code> should be interpreted as a second BVM opcode.</p>
+<pre><code class="language-text">AC D0 07
+│  └─┬─┘
+│    └── u16 LE custom-call ID = 2000 (0x07D0)
+└────── cuscall0 opcode
+</code></pre>
+<p>The example establishes the operand/dispatch distinction; a full decoder must still honor each instruction's actual arity, stack convention and length. The observed invalid/crashing <em>BVM instruction opcode</em> range is <strong><code>0x39</code>–<code>0x3F</code></strong>, not merely <code>0x3A</code>–<code>0x3F</code>. This bytecode range is unrelated to custom-call identifiers such as <code>2000</code> or <code>3450</code>.</p>
+<h2 id="engine-call-identity-and-port-mappings">Engine-call identity and port mappings</h2>
+<p>The following mappings are drawn from paired EDF5 scripts, native EDF6 AngelScript material and binary-backed translation work. They apply to the inspected call signatures and contexts; they do not imply that arbitrary object types support every method.</p>
+<table>
+<thead>
+<tr>
+  <th>Source custom call</th>
+  <th>Studied effect</th>
+  <th>Target-side expression / constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>2000</code></td>
+  <td>Create enemy</td>
+  <td><code>CreateEnemy</code> semantics; not a misread opcode</td>
+</tr>
+<tr>
+  <td><code>2001</code></td>
+  <td>Alternate enemy creation</td>
+  <td><code>CreateEnemy2</code>, independently distinguished from <code>2000</code></td>
+</tr>
+<tr>
+  <td><code>2008</code></td>
+  <td>Area enemy-group creation</td>
+  <td><code>CreateEnemyGroup_Area</code>; <strong>not</strong> inherently flying-only. Separate spawn steps may be required</td>
+</tr>
+<tr>
+  <td><code>3100</code></td>
+  <td>AI route/movement speed</td>
+  <td><code>SetAiMoveSpeed(...)</code>; an older <code>SetAiRouteSpeed</code> name is superseded</td>
+</tr>
+<tr>
+  <td><code>3101</code></td>
+  <td>Assign AI route</td>
+  <td><code>SetAiRoute(...)</code> in the paired context</td>
+</tr>
+<tr>
+  <td><code>3102</code></td>
+  <td>Assign AI path</td>
+  <td><code>SetAiPath(...)</code>, independently distinguished from route assignment</td>
+</tr>
+<tr>
+  <td><code>4004</code> / <code>4005</code></td>
+  <td>Random AI conversation</td>
+  <td><code>EnableAiRandomTalk()</code> / <code>DisableAiRandomTalk()</code> rather than a forced constant</td>
+</tr>
+<tr>
+  <td><code>3450</code></td>
+  <td>Search/encounter radius</td>
+  <td><strong>Runtime effect known</strong>, but no exposed AngelScript binding established for the audited build</td>
+</tr>
+</tbody>
+</table>
+<p>These are examples of <strong>semantic translation</strong>, not literal replacement of numeric IDs with arbitrary text. A translator must preserve source argument order and types, ownership of the target object, execution timing and preconditions. The retained <code>ASCOMMON.H</code> reference <strong>defines <code>RadioBegin</code> and <code>RadioEnd</code> as provided helpers</strong>; earlier notes inferring they must be engine built-ins from a native script's direct <code>RadioVoice()</code> usage were superseded. Their definition does not imply every source mission calls them: preserve direct <code>Voice</code> calls, higher-level radio wrappers and their distinct source control flow rather than swapping them by name.</p>
+<h3 id="why-call-3450-cannot-simply-be-renamed">Why call <code>3450</code> cannot simply be renamed</h3>
+<p>Exact-binary analysis identifies <code>3450</code> as an <strong>object + float</strong> operation. The EDF5 BVM handler stores the value at <code>Object + 0x2E0</code>; the EDF6 BVM equivalent stores it at <code>Object + 0x470</code>. A separate EDF6 native helper performs that target write, but the reviewed AngelScript interface did <strong>not</strong> expose a matching binding.</p>
+<p>It is not safe to substitute the similarly named <code>SetEncountReportRadius</code> (<code>3024</code>) or <code>SetAiFormationRadius</code> (<code>3150</code>): they access different object fields and have different effects. In the examined shipping set, <code>3450</code> occurred six times in <code>DLC/DM006_2</code>. The later user-accepted compatibility policy deliberately omitted these specific writes after a <code>3450-OFF</code> runtime test loaded, spawned the frogs and reached mission completion. <strong>Emit an explicit accepted-fidelity-loss warning, not a silent drop.</strong> Exact semantic parity remains unproven, but this is no longer a blocker for documentation or the playable port.</p>
+<h3 id="six-independently-reconstructed-object-vehicle-stack-contracts">Six independently reconstructed object/vehicle stack contracts</h3>
+<p>Beyond the enemy/AI table above, the paired source BVM stack and EDF6 target signatures were independently checked for <code>cuscall0 52</code> (<code>SetEnablePause(bool)</code>), <code>cuscall0 910</code> (<code>DeleteMob()</code>), <code>cuscall3 1000</code> (<code>SetMoveArea(string)</code>), <code>cuscall0 1024</code> (<code>RideVehicle(Object)</code>), <code>cuscall0 1027</code> (<code>SetupVehicle(Object)</code>), and <code>cuscall0 1028</code> (<code>Object.Vehicle_SetRideEnable(bool)</code>). In the last case the BVM stack contains <strong>object receiver below boolean</strong>, while the AngelScript method takes only the boolean explicit parameter.</p>
+<p>This is why decoding a method call as a global function, or flattening all call banks into one numeric namespace, can change game behavior even when the visible API name looks appropriate. The complete small table is in <a href="missions-%26-scripting-bvm-engine-call-and-factor-reference-table.html">BVM custom-call reference</a>. The reconstructed source/API mapping is statically verified, not a fresh EDF6 in-game test.</p>
+<h2 id="registering-and-scheduling-events">Registering and scheduling events</h2>
+<p>Event registration is a separate layer from the VM custom-call opcode grammar. In the audited BVM scheduler, <code>multi == 1</code> processes <strong>all</strong> ready registrations; otherwise it selects the highest-delay ready registration. The target EDF6 AngelScript event types are equivalent in scheduling behavior:</p>
+<pre><code class="language-text">BVM multi == 1  → EVENT_TYPE_ASYNC (1)
+BVM multi != 1  → EVENT_TYPE_SYNC  (0)
+</code></pre>
+<p>This is based on the compared EDF5 and EDF6 native schedulers, not just names. In the measured 141-mission corpus, <strong>5,193</strong> raw registrations reduced to <strong>5,112 reachable</strong> registrations (<code>4,540</code> with <code>multi=0</code>, <code>572</code> with <code>multi=1</code>). The other 81 were unreachable scaffolding; do not publish them as active mission events. The source <code>multi</code> and target EventType are different physical fields: equivalent behavior does not mean identical ABI layout.</p>
+<h2 id="what-an-implementer-should-do">What an implementer should do</h2>
+<ol>
+<li>Decode the VM stream and operand widths before interpreting call IDs.</li>
+<li>Reconstruct the stack values, object identity and actual argument order at the call site.</li>
+<li>Compare source effects against paired native target scripts or binary consumers.</li>
+<li>Keep mission <strong>registration/factor/handler topology</strong> separate from the textual order of decompiled methods.</li>
+<li>Preserve unknown calls and fail explicitly; don't invent a convenient replacement.</li>
+<li>Verify the output through source/compile and, when claiming gameplay parity, actual runtime evidence.</li>
+</ol>
+<p><strong>Evidence:</strong> exact EDF5/EDF6 BVM scheduler and <code>3450</code> binary contract (studied 2026 builds); paired mission scripts and the R37 transpiler research. No general claim of runtime parity for every EDF5 mission API. For related information see <a href="missions-%26-scripting-event-registration-scheduling-and-state.html">event registration and re-arming</a>, <a href="missions-%26-scripting-canonical-blocker-cuscall0-3450.html">accepted <code>3450</code> fidelity waiver</a> and <a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">mission RMPA</a>.</p>
+<h2 id="vm-stack-and-side-effects-avoid-silent-event-changes">VM stack and side effects: avoid silent event changes</h2>
+<p>Not all target AngelScript helpers return the same kind of value that the source VM expects. A particularly important group of source BVM calls is <strong>side-effect-only</strong>:</p>
+<pre><code class="language-text">2002 2003 2004 2005 2006 2007 2008 2009
+2010 2020 2021 2022
+902  (CreateMob_Path)
+</code></pre>
+<p>In the studied 145-mission source set, the group transaction family above had no immediate result consumer (<code>store</code>, <code>storeabs</code>, <code>storerel</code>, <code>cvtstore</code>, <code>pop</code>) and had to be emitted <strong>immediately as statements</strong>. Retaining a target helper's return expression on the simulated VM stack caused later calls to consume or reorder it, which had caused missing UFO group creation in M020/M080. For opcode <code>902</code>, delayed emission also moved <code>CreateMob_Path</code> calls <em>after</em> <code>SendTeamEncount</code> in M008, changing gameplay order.</p>
+<p>The same exact-pair analysis establishes that <strong>direct <code>cuscall0 4000</code> with a voice string is <code>Voice(string)</code></strong>, not <code>PlaySe</code>. It must also be distinguished from higher-level <code>RadioVoice</code> wrappers whose implementation might contain the same low-level custom call.</p>
+<p>The general rule is: reconstruct <strong>source stack effect and source side-effect ordering</strong>, then map the target API; do not infer source return semantics from the target function's signature. These are exact-corpus findings, not a declaration that every custom-call ID has been reverse engineered.</p>
+<h2 id="source-to-target-call-reference">Source-to-target call reference</h2>
+<p>A <a href="missions-%26-scripting-bvm-engine-call-and-factor-reference-table.html">custom-call and factor reference</a> now lists the inspected <code>2000</code>–<code>2009</code> enemy/group family, <code>3100</code>–<code>3173</code> AI operations, team/vehicle behavior, <code>3500</code>–<code>3502</code> group operations, lighting, animations and event factors. It separates static exact-pair mapping evidence from runtime-positive cases and preserves the <code>3450</code> missing-AngelScript-binding boundary.</p>
+<h3 id="edf4-1-native-ids-are-not-edf5-custom-call-ids">EDF4.1 native IDs are not EDF5 custom-call IDs</h3>
+<p>See the <a href="missions-%26-scripting-edf41-bvm-container-bytecode-and-edf5-script-recompilation.html">EDF4.1 BVM→EDF5 exact recompile guide</a>. It distinguishes EDF4.1 table-1 native <code>3000 SetEncountReportRadius</code> (requiring a custom plugin table-1 <code>3003</code> in the studied compatibility path) from EDF5 <code>cuscall0 3450 SetAiSearchRadius</code> (a separate, consciously omitted six-call effect). Native IDs must be interpreted with their table and generation, not mapped by similar human names.</p>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="missions-%26-scripting-source-void-and-ordering-rules-do-not-regress.html">EDF5 void calls, switches and voice ABI</a></li>
+</ul>
+<h2 id="edf4-1-example-createenemy2-is-observable-as-distinct-call-sites">EDF4.1 example: <code>CreateEnemy2</code> is observable as distinct call sites</h2>
+<p>The original EDF4.1 <code>M014</code> decompiled BVM uses <strong>20 calls to <code>cuscall0 2001</code></strong>: eleven source <code>Nephila</code> and nine <code>SpiderNet20/40/80</code> resources, some referencing the same named map spawnpoint. By contrast, original EDF4.1 <code>M002</code> uses <strong>ten <code>cuscall0 2000</code> sites</strong> for single enemies, and <code>M001</code>/<code>M003</code> use the <code>2002</code> group-creation form. This is a bounded six-mission illustration of <strong>different custom-call operands, argument lists and resource classes</strong>, not evidence that <code>2000</code>/<code>2001</code>/<code>2002</code> can be substituted at runtime.</p>
+<p>The two <code>CreateMob_Path</code> (<code>902</code>) calls and seven <code>CreateFriend</code> (<code>1010</code>) calls in original EDF4.1 <code>M014</code> likewise show that crowd/path, allied and hostile creations share a mission graph without sharing one interchangeable API. Do not conflate this <strong>EDF4.1 M014</strong> city-script example with <strong>EDF5 M014 “Secret of the Cave”</strong> and its three-source-call reinforcement fix. See the <a href="missions-%26-scripting-edf41-bvm-container-bytecode-and-edf5-script-recompilation.html">EDF4.1 six-mission native BVM comparison</a>; this edition inspected the decompiled source statically and ran no gameplay parity test.</p>
+<h2 id="r173-registration-graph-caution-a-callback-body-is-not-itself-an-event">R173 registration graph caution: a callback body is not itself an event</h2>
+<p>A static function list can overstate the events a mission has actually wired. In the <strong>original EDF4.1 BVM</strong> subset <code>M001</code>–<code>M004</code>, <code>M012</code>, <code>M014</code>, R173 followed <code>RegisterEvent</code> (<code>cuscall0 2</code>) callback names starting from <code>Main</code> and derived a bounded registration-closure graph. A procedure may exist without being registered anywhere in that graph (e.g. EDF4.1 <code>M002</code>'s <code>Func1709960674</code>); another procedure may contain a registration that never enters the Main-rooted closure (EDF4.1 <code>M012</code>'s <code>Func1974397686</code> registering <code>Func801877805</code>).</p>
+<p>For <code>M012</code>, immediate factor calls such as <code>9000</code> wait, <code>9100</code> all-enemy-destroy, <code>9201</code> object-destroy and <code>9300</code> AI-movement-end are distinct conditions attached to registration sites. In one case, the native source registers <code>Func508242891</code> and then lists <strong>six <code>9300</code> sites</strong> corresponding to six carrier references. This is not license to assume they behave as a simple simultaneous AND, a linear wait, or a fixed time delay: exact factor grouping and runtime scheduling require independent engine-level evidence. <code>RegisterEvent</code> source presence alone establishes <strong>authored registration</strong>, not event execution.</p>
+<p><strong>Evidence and limitation:</strong> static six-file EDF4.1 decompiled BVM graph, <code>data/R173_EDF41_BVM_EVENT_REGISTER_GRAPH_EDGES.csv</code> and <code>data/R173_EDF41_BVM_EVENT_CALLBACK_CLOSURE.csv</code>. It is not the 44-pair native <strong>EDF5</strong> scheduler study and does not override its separate confirmed <code>EVENT_TYPE_SYNC</code>/<code>EVENT_TYPE_ASYNC</code> findings. No EDF4.1 or EDF6 gameplay was replayed for R173.</p>
+<h2 id="r174-original-edf5-mission-call-atlas-141-source-scripts-19-operation-ids">R174 original EDF5 mission call atlas: 141 source scripts, 19 operation IDs</h2>
+<p>A retained historical <strong>R42 independent decompilation of original EDF5 <code>MISSION.BVM</code></strong> counted <strong>3,471 authored enemy/group/generator/drop-boat creation transactions</strong> across 141 shipping missions, using 19 distinct <code>cuscall0</code> IDs. R174 publishes the full <strong>per-mission, per-opcode</strong> source census in <code>data/R174_EDF5_ORIGINAL_141_MISSION_SPAWN_SOURCE_CALL_CENSUS.csv</code>. These are <strong>static source call sites</strong>, not the number of enemies active or spawned over any complete playthrough: a callback may execute zero, one or many times, and group constructors may create more than one actor per call.</p>
+<table>
+<thead>
+<tr>
+  <th>EDF5 source mission</th>
+  <th style="text-align:right">Recorded creation transactions</th>
+  <th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>M004</code></td>
+  <td style="text-align:right">162</td>
+  <td>Highest call-site count in this audited source set</td>
+</tr>
+<tr>
+  <td><code>DLC/DM024</code></td>
+  <td style="text-align:right">109</td>
+  <td>Historical R42 target pairing failed; <strong>source count itself remains valid</strong></td>
+</tr>
+<tr>
+  <td><code>M202</code></td>
+  <td style="text-align:right">95</td>
+  <td>The source census includes these special mission IDs in its 141 selected scripts</td>
+</tr>
+<tr>
+  <td><code>DLC/DM012</code></td>
+  <td style="text-align:right">89</td>
+  <td>Another historically mismatched R42 target, not a current gameplay failure</td>
+</tr>
+<tr>
+  <td><code>M203</code></td>
+  <td style="text-align:right">80</td>
+  <td>Source count, not on-screen simultaneous population</td>
+</tr>
+<tr>
+  <td><code>M034</code></td>
+  <td style="text-align:right">77</td>
+  <td>Historical target comparison status distinct from native call count</td>
+</tr>
+</tbody>
+</table>
+<p>The 19 source operation totals are preserved without reassigning one ID to an unrelated generation: <code>2000</code> <strong>664</strong>, <code>2001</code> <strong>722</strong>, <code>2002</code> <strong>119</strong>, <code>2003</code> <strong>80</strong>, <code>2004</code> <strong>84</strong>, <code>2005</code> <strong>12</strong>, <code>2006</code> <strong>162</strong>, <code>2007</code> <strong>75</strong>, <code>2008</code> <strong>171</strong>, <code>2009</code> <strong>140</strong>, <code>2010</code> <strong>3</strong>, <code>2011</code> <strong>37</strong>, <code>2020</code> <strong>53</strong>, <code>2021</code> <strong>2</strong>, <code>2022</code> <strong>14</strong>, <code>2030</code> <strong>157</strong>, <code>2100</code> <strong>571</strong>, <code>2101</code> <strong>270</strong>, <code>2200</code> <strong>135</strong>. This is an original EDF5 source-site atlas, <strong>not</strong> an EDF4.1 call-ID mapping or per-class spawn census.</p>
+<p><strong>Do not merge historical comparison stages.</strong> The earlier R42 source/target <em>function/argument comparator</em> reported <strong>113/141 missions passing</strong>, <strong>28 failing</strong>, <strong>60 mismatched functions</strong>, and <strong>3,634 target candidate transactions</strong>. The later <strong>source-order matcher</strong> instead matched <strong>3,465/3,471 source transactions</strong>, with <strong>zero sequence-order failures</strong>, leaving six source <code>2000</code> calls in <code>DLC/DM006_2/Main</code> unmatched because the then-candidate used specialized frog-object routes. These counts concern different definitions of <em>match</em>, not contradictory native BVM content. R44/R65 and later 1.0.6 source comparisons have separate authority for later candidate builds. None is a claim that a modern EDF6 runtime misses six live enemies.</p>
+<p>For exact native argument layouts, see <a href="edf5-bvm-native-spawn-arguments-squad-leader-count.html">EDF5 squad and transport call fields</a>, and for generator waves see <a href="edf5-bvm-setgenerator-20100-message-owners-waves.html">EDF5 generator message and lifecycle</a>. The R174 source atlas is intentionally <strong>per opcode and mission</strong> rather than attempting to infer the number of spawned actors from a source call count.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Native EDF5/EDF6: R37_BINARY_MISSION_RUNTIME_CONTRACT_2026-08-26.json</li><li>EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li><li>R6 historical primary handoffs and verified conversion corrections</li><li>Library: EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li><li>Library: EDF4.1 original M001–M004, M012, M014 decompiled BVM source audit (exact file hashes in R172 census)</li><li>EDF4.1 original six decompiled source BVMs, SHA-256 verified R172/R173; Library /EDF5_EDF6_RESEARCH/research/audits/edf41/bvm/</li><li>Original EDF5 shipping MISSION.BVM, R42 source-side audit (independent BVM ASM capture, 141 missions); 2026-09-05 Exact44 cue-bearing source/reference event-domain census; R174 tables and source-hash ledger</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#reading-an-instruction-correctly">Reading an instruction correctly</a><a href="#engine-call-identity-and-port-mappings">Engine-call identity and port mappings</a><a href="#why-call-3450-cannot-simply-be-renamed">　Why call 3450 cannot simply be renamed</a><a href="#six-independently-reconstructed-object-vehicle-stack-contracts">　Six independently reconstructed object/vehicle stack contracts</a><a href="#registering-and-scheduling-events">Registering and scheduling events</a><a href="#what-an-implementer-should-do">What an implementer should do</a><a href="#vm-stack-and-side-effects-avoid-silent-event-changes">VM stack and side effects: avoid silent event changes</a><a href="#source-to-target-call-reference">Source-to-target call reference</a><a href="#edf4-1-native-ids-are-not-edf5-custom-call-ids">　EDF4.1 native IDs are not EDF5 custom-call IDs</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#edf4-1-example-createenemy2-is-observable-as-distinct-call-sites">EDF4.1 example: CreateEnemy2 is observable as distinct call sites</a><a href="#r173-registration-graph-caution-a-callback-body-is-not-itself-an-event">R173 registration graph caution: a callback body is not itself an event</a><a href="#r174-original-edf5-mission-call-atlas-141-source-scripts-19-operation-ids">R174 original EDF5 mission call atlas: 141 source scripts, 19 operation IDs</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-bvm-bytecode-custom-calls-and-api-translation-explained"};</script><script src="../assets/site.js" defer></script></body></html>

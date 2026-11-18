@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Animation Overview The main families are CANM (keyed animation data), CAS (animation players and controllers) and MAB (animation-related events). The exact mean"><title>Animation | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Animation</a></div><h1>Animation</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Animation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>The main families are <strong><code>CANM</code></strong> (keyed animation data), <strong><code>CAS</code></strong> (animation players and controllers) and <strong><code>MAB</code></strong> (animation-related events). The exact meaning of a track depends on the generation and the target model's bones. Moving frames between games can require quantization conversion and bone-axis adaptation.</p>
+<h2 id="format-overview">Format overview</h2>
+<table>
+<thead>
+<tr>
+  <th>Format</th>
+  <th>Role</th>
+  <th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CANM</td>
+  <td>Animation key records and quantized/typed channels</td>
+  <td><a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">Cross-generation CANM</a></td>
+</tr>
+<tr>
+  <td>CAS</td>
+  <td>Named players, state variables and animation orchestration</td>
+  <td><a href="animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">CAS controllers</a></td>
+</tr>
+<tr>
+  <td>MAB</td>
+  <td>Event timing and references (including audio)</td>
+  <td><a href="animation-mab-event-clock-and-audio-channel-ownership.html">MAB event records</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="cross-version-caveats">Cross-version caveats</h2>
+<p>The documented <strong>MAB offset-base flag</strong> changes across studied generations: EDF4.1/EDF5 <code>0x03</code> denotes block-relative offsets, while EDF6 <code>0x83</code> uses record-relative offsets. This does not eliminate all retargeting and event-semantic work. CANM source quantization may already have discarded precision, so a converted target quaternion is not guaranteed <strong>bit-identical</strong> to a native EDF6 key.</p>
+<h2 id="skeleton-and-runtime-checks">Skeleton and runtime checks</h2>
+<p>Keep bind poses, animation tracks, controller variables, IK, child attachments and SHKT physics consistent. A controller name missing from the target's variable table is not harmless: it can be an out-of-bounds access. For direct examples see <a href="animation-edf41-friendly-soldier-spine-axis-grip-ik-and-climb-states.html">Soldier spine and IK axes</a> and <a href="animation-edf41-boss-constructor-cas-rest-pose-vs-target-auto-play.html">Constructor/rest pose lifecycle</a>.</p>
+<h2 id="native-game-system-research">Native game-system research</h2>
+<ul>
+<li><a href="edf6-cas-animation-state-vm-vcontrols-and-clip-programs.html">EDF6 CAS animation VM, state nodes and VControls</a></li>
+</ul>
+<h2 id="further-edf-game-documentation">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf5-distant-enemy-animation-frame-skip-not-simulation-step.html">EDF5 insect and human pose-job cadence</a></li>
+</ul>
+<h2 id="edf-4-1-npc-enemy-and-boss-asset-sharing">EDF 4.1 NPC, enemy and boss asset sharing</h2>
+<p>Use the <a href="animation-edf41-mission-object-cas-mrab-61-resource-graph.html">source-backed 111-object animation-resource graph</a> to determine which converted EDF4.1 NPC variants refer to the same CAS or MRAB paths. It reconciles 45 distinct CAS paths and 16 MRAB archive paths, with class-level and per-root tables, but does <strong>not</strong> claim completed runtime retargeting or original-game asset completeness.</p>
+<h2 id="how-to-locate-native-npc-diagnostic-fixtures">How to locate native NPC diagnostic fixtures</h2>
+<p><a href="edf5-edf6-native-bat-debug-scenarios-and-ai-test-fixtures.html">Original EDF5/EDF6 native diagnostic BAT scenario census</a> covers 517 source scenarios, their observed scene directives, 161 same-name comparisons, and references to NPC/vehicle SGOs. It provides <strong>static scene fixture evidence only</strong>: it does not decode <code>.CAS</code>/<code>.CANM</code>/<code>.MAB</code>, verify AI or animation runtime, or establish a player-facing photo mode.</p>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="animation-mab-event-clock-and-audio-channel-ownership.html">MAB animation events — clip clocks, event parameters, and owned sound channels</a><a href="animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">EDF6 CAS player groups, controller variables and safe trackless grafts</a><a href="animation-canm-cas-and-mab-formats-explained.html">Animation formats — CANM, CAS and MAB</a><a href="animation-edf41-small-dragon-ragdoll-body-name-mismatch-and-hit-reaction.html">EDF4.1 small dragons in EDF6: partial-ragdoll body names and hit-reaction crash</a><a href="animation-edf41-boss-constructor-cas-rest-pose-vs-target-auto-play.html">Animation constructor traps — EDF4.1 bind pose versus EDF6 auto-started CAS clips</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#format-overview">Format overview</a><a href="#cross-version-caveats">Cross-version caveats</a><a href="#skeleton-and-runtime-checks">Skeleton and runtime checks</a><a href="#native-game-system-research">Native game-system research</a><a href="#further-edf-game-documentation">Further EDF game documentation</a><a href="#edf-4-1-npc-enemy-and-boss-asset-sharing">EDF 4.1 NPC, enemy and boss asset sharing</a><a href="#how-to-locate-native-npc-diagnostic-fixtures">How to locate native NPC diagnostic fixtures</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-animation"};</script><script src="../assets/site.js" defer></script></body></html>

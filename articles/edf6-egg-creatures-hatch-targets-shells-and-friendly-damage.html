@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 enemy eggs: hatch targets, shell models and damage flags The examined EDF6 egg objects are data-driven: their SGO entries identify which creature appears a"><title>EDF6 enemy eggs: hatch targets, shell models and damage flags | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 enemy eggs: hatch targets, shell models and damage flags</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Native-data and static code observations; no new in-game runtime test</div><div id="articleBody"><p>The examined EDF6 egg objects are data-driven: their SGO entries identify <strong>which creature appears</strong> and <strong>which shell object remains or breaks</strong>. These are object definitions, not mission-owned spawn groups or hidden probabilities. The recovered class is <code>GiantAntEgg</code>; a related <code>GiantAntEgg_Break</code> object follows a different model-parameter path.</p>
+<h2 id="egg-species-encoded-in-stock-object-sgos">Egg species encoded in stock object SGOs</h2>
+<table>
+<thead>
+<tr>
+  <th>SGO family (base / <code>b</code> form)</th>
+  <th><code>object</code> — creature to hatch</th>
+  <th>Shell/model clue</th>
+  <th style="text-align:right">Observed durability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>giantant01egg</code> / <code>giantant01eggb</code></td>
+  <td><code>giantant01</code> (black ant)</td>
+  <td><code>AntEgg.mdb</code>, white egg</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>giantant02begg</code> / <code>giantant02beggb</code></td>
+  <td><code>giantant02B</code> (red ant)</td>
+  <td><code>AntEgg_Red.mdb</code>, larger bounds</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>goldantegg</code> / <code>goldanteggb</code></td>
+  <td><code>goldant</code> (golden ant)</td>
+  <td><code>AntEgg_Gold.mdb</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>e619_squid_small_egg</code> / <code>e619_squid_small_eggb</code></td>
+  <td><code>e618_squid_small</code> (Haze)</td>
+  <td>A separate tall model</td>
+  <td style="text-align:right">1</td>
+</tr>
+</tbody>
+</table>
+<p><code>object</code> selects the hatched enemy, while <code>break_object</code> names the shell/broken representation. The sample includes <strong>eight EDF6 names in four base/<code>b</code> pairs</strong>. A source comparison also found the same relevant values in the six EDF5 ant-egg SGOs studied, but the Haze family is not thereby proved to exist in EDF5.</p>
+<h2 id="b-variant-and-friendly-damage"><code>b</code> variant and friendly damage</h2>
+<p>The observed <code>b</code> variant differs from the corresponding plain one in <strong><code>is_friendly_damage_activate</code></strong>: plain <code>0</code>, <code>b</code> <code>1</code>. This is an <strong>SGO field value</strong>, not proof of every possible in-game friendly-fire interaction. In particular, do not infer that the monster which hatches is friendly, that all projectiles damage the shell, or that every mission uses the <code>b</code> variant. Those conclusions require a mission placement and runtime hit test.</p>
+<h2 id="changemodelparam-distinction"><code>ChangeModelParam</code> distinction</h2>
+<p>The native <code>GiantAntEgg</code> path loads a <code>ChangeModelParam</code> entry, whereas <code>GiantAntEgg_Break</code> did <strong>not</strong> use that path in the examined build. A separately documented KittopiaCreator patch looks up <code>ChangeModelParam</code> and applies it to the break object's animation model. <strong>The patch is evidence of a difference in the original routines, not a stock feature of <code>GiantAntEgg_Break</code>.</strong></p>
+<h2 id="where-an-egg-actually-appears">Where an egg actually appears</h2>
+<p>The object SGO tells you which creature it could hatch. It does not independently prove the egg's <strong>mission position, activation event, health scaling or spawning frequency</strong>. These come from mission AC/BVM and mission RMPA or other objects. See <a href="edf5-edf6-mission-rmpa-141-mission-record-catalog.html">mission-owned spawn records</a> and <a href="missions-%26-scripting-enemy-generators-count-semantics-and-controller-pattern.html">enemy-generator semantics</a>.</p>
+<p><strong>Evidence and credit:</strong> source-read SGO values and KittopiaCreator's static patch note, EDF Knowledge Hub (novae/ajane, 14 Nov 2026), fact IDs <code>ant-egg-hatch-object</code> (KH chat 120) and <code>anteggbreak-changemodelparam</code> (KittopiaCreator). Address examples such as <code>0x41114E</code> are <strong>build-specific</strong> to <code>steam-678ccb46</code>. No new game runtime test was conducted.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip (novae/ajane), EDF6/enemies.md; build steam-678ccb46; named facts credited to hajisensai/All Forces, KittopiaCreator and KH chat 120 as indicated</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#egg-species-encoded-in-stock-object-sgos">Egg species encoded in stock object SGOs</a><a href="#b-variant-and-friendly-damage">b variant and friendly damage</a><a href="#changemodelparam-distinction">ChangeModelParam distinction</a><a href="#where-an-egg-actually-appears">Where an egg actually appears</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-egg-creatures-hatch-targets-shells-and-friendly-damage"};</script><script src="../assets/site.js" defer></script></body></html>

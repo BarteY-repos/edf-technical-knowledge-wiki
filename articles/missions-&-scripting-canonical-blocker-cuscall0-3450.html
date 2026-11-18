@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SetAiSearchRadius (3450) — accepted compatibility omission Status: KNOWN / INTENTIONALLY OMITTED in the selected playable compatibility path. Not a blocker for "><title>SetAiSearchRadius (3450) — accepted compatibility omission | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-scripting.html">Scripting</a></div><h1>SetAiSearchRadius (3450) — accepted compatibility omission</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime</div><div id="articleBody"><p><strong>Status: KNOWN / INTENTIONALLY OMITTED in the selected playable compatibility path. Not a blocker for this community wiki or the functional EDF5 → EDF6 port.</strong> It remains an acknowledged <em>six-call gameplay-fidelity difference</em>, not a solved generic AngelScript binding.</p>
+<h2 id="what-the-call-does">What the call does</h2>
+<p>In EDF5 mission bytecode, <code>cuscall0 3450</code> is <code>SetAiSearchRadius(Object, float)</code>. This changes the AI object's search/encounter radius, not its formation radius or the range of an unrelated encounter report. Direct native binary analysis found the float write at:</p>
+<table>
+<thead>
+<tr>
+  <th>Native build</th>
+  <th>Observed object field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF5</td>
+  <td><code>object + 0x2E0</code></td>
+</tr>
+<tr>
+  <td>EDF6</td>
+  <td><code>object + 0x470</code></td>
+</tr>
+</tbody>
+</table>
+<p>An EDF6 native helper writes the target field, but no <strong>safely callable AngelScript equivalent</strong> was established by the reviewed binary/registration audit. Similar names <code>SetEncountReportRadius</code> (<code>3024</code>) and <code>SetAiFormationRadius</code> (<code>3150</code>) write to distinct fields and must not be substituted.</p>
+<h2 id="the-six-mission-specific-calls">The six mission-specific calls</h2>
+<p>Only the researched shipping <code>DLC/DM006_2</code> (EDF5 DLC2 #4) contained the following occurrences:</p>
+<table>
+<thead>
+<tr>
+  <th>Mission object</th>
+  <th style="text-align:right">Source radius</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>frog01_1</code></td>
+  <td style="text-align:right">200</td>
+</tr>
+<tr>
+  <td><code>frog02_1</code></td>
+  <td style="text-align:right">250</td>
+</tr>
+<tr>
+  <td><code>frog03_1</code></td>
+  <td style="text-align:right">250</td>
+</tr>
+<tr>
+  <td><code>frog04_2</code></td>
+  <td style="text-align:right">400</td>
+</tr>
+<tr>
+  <td><code>frog05_1</code></td>
+  <td style="text-align:right">250</td>
+</tr>
+<tr>
+  <td><code>frog06_1</code></td>
+  <td style="text-align:right">500</td>
+</tr>
+</tbody>
+</table>
+<p>These values are properties of one source mission, not defaults for every frog or a universal radius multiplier.</p>
+<h2 id="why-the-operation-was-knowingly-omitted">Why the operation was knowingly omitted</h2>
+<p>Older research attempted to preserve the effect by introducing four modified source-derived frog SGOs. That route crashed during mission loading, whereas a targeted <code>3450-OFF</code> build:</p>
+<ul>
+<li>loaded the mission without the reported crash;</li>
+<li>spawned the frogs normally;</li>
+<li>allowed the player to complete the mission.</li>
+</ul>
+<p>The historical <strong>27 August 2026</strong> A/B candidate was labeled diagnostic-only because it did not reproduce all EDF5 radius behavior. The <strong>current explicitly acknowledged scope choice</strong> is to accept that omission for the playable port rather than promote the runtime-negative SGO modification or invent an AngelScript method.</p>
+<p>This distinction matters: <strong>playable/runtime-positive does not mean full search-radius parity</strong>. The observed mission completion qualifies the tested candidate; it is not a universal guarantee for all variants, builds or AI behaviors.</p>
+<h2 id="implementation-and-documentation-policy">Implementation and documentation policy</h2>
+<ol>
+<li>In the source/BVM model, recognize <code>3450</code> by name and arguments; keep six call-site diagnostics and a documented <code>omitted-with-accepted-fidelity-loss</code> policy.</li>
+<li>A compiler can remain strict/fail-closed when exact semantic parity is requested. A <em>separate, explicit compatibility mode</em> may omit these six calls with a visible warning, preserving the user's accepted policy.</li>
+<li>Never automatically map <code>3450</code> to <code>3024</code>/<code>3150</code>, inject an unverified native helper call or silently patch arbitrary object SGOs.</li>
+<li>If someone later wants <strong>exact EDF5 AI search behavior</strong>, that is optional future fidelity research: first establish a safe EDF6 binding or a target-native resource transformation and qualify it in runtime.</li>
+</ol>
+<p><strong>Classification:</strong> known source semantics; known tested playable omission; accepted fidelity waiver; optional precise lowering not proven. It must <strong>not</strong> be listed as an outstanding blocker for finishing the wiki.</p>
+<p><strong>Retained evidence:</strong> <code>DM006_2_3450_OFF_AUDIT_2026-08-27.json</code>; <code>EDF5_EDF6_FULL_SESSION_HANDOFF_2026-08-27_R12_R43_DLC_RUNTIME.md</code>; <code>EDF5_EDF6_FULL_SESSION_HANDOFF_R14_R49_DM010_R48_DM021_CAVE501_2026-08-28.md</code>; R37 binary mission contract. The acceptance/waiver reflects the later clarified project requirement, not an August claim of full parity.</p>
+<h2 id="historical-exact-output-gate-is-not-the-accepted-gameplay-solution">Historical exact-output gate is not the accepted gameplay solution</h2>
+<p>The older EDF5 source-only pipeline <em>can reproduce</em> four source-derived SGO variants for the six <code>cuscall0 3450</code> uses in <code>DM006_2</code>, with 141/141 historical AC/RMPA output parity. The historical pipeline deliberately <strong>fails closed</strong> without <code>--source-object-root</code> when that source call is present. Its optional resource path takes <strong>three</strong> original E503 armor-frog source SGOs (<code>AF</code>, <code>LC</code>, <code>SG</code>) and emits <strong>four</strong> radius-specific variants. All four output hashes matched the 4 September 2026 exact-recovery audit.</p>
+<p>That result is an <strong>offline/historical reproduction result</strong>, not proof of a safe current runtime lowering. Later in-game evidence was negative for the SGO-specialization path but positive for the deliberately stripped <code>3450-OFF</code> mission. The selected playable path therefore keeps the previously stated <strong>six-call, explicitly disclosed AI fidelity waiver</strong>. An exact-parity tool may still enforce strict failure if the behavior is required; a playable compatibility tool must not silently substitute a different native or AngelScript function.</p>
+<p>The recovered R1 code remains a <strong>separate reference tool</strong>: it must not overwrite the canonical BVM compiler. The one omitted zero-byte checkpoint file in the portable recovery does not invalidate the 141 byte-identical generated mission outputs, but means <strong>complete archive byte identity was not shown</strong>.</p>
+<p><strong>Sources:</strong> <code>MISSION_PIPELINE/R1/</code> source and two 141-mission gate JSONs; later runtime evidence described above. The historical R1 and current accepted omission are separate evidence tiers.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_3450_RUNTIME_NARROWING_2026-08-27.json</li><li>R44_CURRENT_RESEARCH_STATE_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-call-does">What the call does</a><a href="#the-six-mission-specific-calls">The six mission-specific calls</a><a href="#why-the-operation-was-knowingly-omitted">Why the operation was knowingly omitted</a><a href="#implementation-and-documentation-policy">Implementation and documentation policy</a><a href="#historical-exact-output-gate-is-not-the-accepted-gameplay-solution">Historical exact-output gate is not the accepted gameplay solution</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-canonical-blocker-cuscall0-3450"};</script><script src="../assets/site.js" defer></script></body></html>

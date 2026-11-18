@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5: water, object glass and building windows are not one shader A port or asset viewer can show multiple transparent or reflective-looking surfaces, but their"><title>EDF5 water, glass and windows: three different reflection paths | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Rendering / materials</div><h1>EDF5 water, glass and windows: three different reflection paths</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Rendering / materials</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R132 test</div><div id="articleBody"><p>A port or asset viewer can show multiple transparent or reflective-looking surfaces, but their source shaders do not necessarily execute in the same render pass. The EDF5 DX11.CPK analysis distinguishes at least three common families.</p>
+<table>
+<thead>
+<tr>
+  <th>Material family</th>
+  <th>Named shader</th>
+  <th>Observed drawing path</th>
+  <th>Reflection/interior data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Water</td>
+  <td><code>SND_MAP_WATER_TRANSPARENT.SGO</code></td>
+  <td>Forward, after deferred combine</td>
+  <td>Global environment cubemap, scrolling normals, parallax maps, scene view position</td>
+</tr>
+<tr>
+  <td>Standalone glass object</td>
+  <td><code>SND_MAP_OBJECT_GLASS.SGO</code></td>
+  <td>Forward / ZPass</td>
+  <td>Global environment cubemap, normals and reflect parameters</td>
+</tr>
+<tr>
+  <td>Building window</td>
+  <td><code>SND_MAP_BUILD_WINDOW.SGO</code></td>
+  <td>G-buffer / Deferred (also instanced and ZPass variants)</td>
+  <td>View-dependent <strong>interior texture</strong>; local cubemap contribution through later lighting combine</td>
+</tr>
+</tbody>
+</table>
+<p>The water pixel shader references three scrolling normal maps, three parallax textures, <code>bubble_albedo</code>, the global cubemap, shadow depth and the view-position texture. <code>xgl_user_param</code> includes <code>water_color</code>, reflection weighting, <code>blend_depth</code>, metallic and roughness. The glass-object shader exposes reflection and translucency falloff controls. <strong>Neither of these forward shaders binds a scene-color input</strong>, so they cannot simply sample a hypothetical fully rendered scene for SSR without a separate binding/change.</p>
+<h2 id="interior-mapping-is-not-a-true-3d-room">Interior mapping is not a true 3D room</h2>
+<p>The building-window shader samples a two-dimensional <code>interior_texture</code> with a <strong>view-dependent offset</strong>, including an instanced random seed. It uses <code>window_frame_texture</code>, <code>window_normal</code>, normals and a reflect parameter. That can create the impression of depth or rooms behind windows, but the source does not prove actual interior geometry or a physical space visible through the wall.</p>
+<p>The documentation preserves a remaining uncertainty: which visual component of some city images arises from the interior texture and which from the later cubemap combine had not been experimentally isolated. The shader resource bindings support the pipeline separation, not a complete visual attribution for every pane.</p>
+<p><strong>Source:</strong> EDF Knowledge Hub <code>edf5/shaders.md</code>, facts <code>water-glass-forward</code>, <code>window-interior-mapping</code>, <code>water-ps-math</code>, <code>window-glass-geometry</code> where cited in the original source. Static DXBC evidence only.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/shaders.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#interior-mapping-is-not-a-true-3d-room">Interior mapping is not a true 3D room</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-forward-water-glass-versus-deferred-interior-window"};</script><script src="../assets/site.js" defer></script></body></html>

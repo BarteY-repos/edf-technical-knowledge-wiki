@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Effects (EFS / ESB / EFARC) EDF6 effects are assembled from effect definitions, models and textures. They should not be confused with ordinary model materials o"><title>Effects (EFS / ESB / EFARC) | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>Effects (EFS / ESB / EFARC)</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Documentation</span><span class="chip">File Formats</span></div><div class="referencebadge">Technical reference · Community-provided Japanese memo; source-specific and not independently rerun</div><div id="articleBody"><p>EDF6 effects are assembled from <strong>effect definitions</strong>, <strong>models</strong> and <strong>textures</strong>. They should not be confused with ordinary model materials or audio banks.</p>
+<h2 id="file-and-node-hierarchy">File and node hierarchy</h2>
+<table>
+<thead>
+<tr>
+  <th>Format/name</th>
+  <th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>.efarc</code></td>
+  <td>Archive resembling RAB; contains <code>EFFECT</code>, <code>MODEL</code>, <code>TEXTURE</code> folders in the tested examples</td>
+</tr>
+<tr>
+  <td><code>.esb</code></td>
+  <td>Binary definition of an individual effect, typically referenced under <code>EFFECT</code></td>
+</tr>
+<tr>
+  <td><code>EFS</code></td>
+  <td>Effect-system graph/description; some weapon classes are <code>EfsBullet</code> or <code>EfsMuzzleFlush</code></td>
+</tr>
+<tr>
+  <td><code>Singleton</code></td>
+  <td>Contains a set of <code>NodeTransform</code>, <code>RenderInfo</code> and <code>NodeColor</code> components in the documented profile</td>
+</tr>
+<tr>
+  <td><code>Emitter</code></td>
+  <td>A separate sibling component with emission geometry and timing</td>
+</tr>
+</tbody>
+</table>
+<p>The workbook reports extraction/repacking through EDF Tools (repacking could produce <code>.rab</code>, then be renamed to <code>.efarc</code>) and XML conversion through EFS Tool. <strong>Tool support is incomplete.</strong> Specifically, the note says that EFS Tool cannot handle <code>NodeShape_Plane</code> in some cases and may crash during conversion; do not assume the game itself crashes simply because the tool does.</p>
+<h2 id="renderinfo-texture-experiment-backed-fields"><code>RenderInfo_Texture</code>: experiment-backed fields</h2>
+<p>Source sample: <code>E609_JORMUNGAND.efarc</code>, <code>head_large_laser_fire.esb</code>, <code>Singleton1</code>. The author changed fields one at a time.</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Observation</th>
+  <th>Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>Texture</code></td>
+  <td>Referenced DDS path, e.g. <code>FLASHRING10.DDS</code></td>
+  <td>Direct sample</td>
+</tr>
+<tr>
+  <td>3rd element, <code>scale</code></td>
+  <td>Overall effect scale; reducing 8 to 1 made it smaller</td>
+  <td>Experiment</td>
+</tr>
+<tr>
+  <td>4th, <code>rendermode</code></td>
+  <td>Modes 0–3 change rendering; precise blend formula unresolved</td>
+  <td>Tentative</td>
+</tr>
+<tr>
+  <td>7th (<code>unk4</code>)</td>
+  <td>Setting 1 stopped a particular rotation</td>
+  <td>Sample-specific</td>
+</tr>
+<tr>
+  <td>9th, candidate <code>pixelType</code></td>
+  <td>Values 0/1 change appearance; meaning is hypothesized</td>
+  <td>Unverified semantics</td>
+</tr>
+<tr>
+  <td>11th float (sample −4)</td>
+  <td>Changing toward positive altered occlusion/depth ordering relative to camera/weapon</td>
+  <td>Experiment; exact unit unresolved</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Do not replace <code>unk*</code> values with invented enum names.</strong> The XML tool labels are partial, and many observations are subjective comparisons.</p>
+<h2 id="interpolation-and-emission-geometry">Interpolation and emission geometry</h2>
+<p><code>NodeCIScale_All</code> / <code>scale &gt; type</code> was tested with these interpretations:</p>
+<ul>
+<li><code>0</code> and <code>4</code>: the tested object was invisible;</li>
+<li><code>1</code>: smooth-looking interpolation with potential overshoot;</li>
+<li><code>2</code>: <strong>linear</strong> interpolation;</li>
+<li><code>3</code>: <strong>step</strong> / no interpolation.</li>
+</ul>
+<p>For <code>NodeShape_Plane</code>, the contributor observed that a rotation node changes emission direction; two float dimensions controlled rectangle width/height. In the <em>tested setup</em>, setting ID1 from 0 to 1 caused a crash. Other field meanings remain unverified.</p>
+<p><code>RenderInfo_Model</code> can reference an MDB and contains <code>ChangeParams</code>, including time-varying shader parameter channels such as <code>diffuse</code> RGBA. See <a href="docs-shaders.html">Shaders</a> for the ordinary MDB material path, which is not interchangeable with an ESB effect node.</p>
+<h2 id="space-orientation-caveat">Space/orientation caveat</h2>
+<p>The normal vector at an impact generally affects how an impact effect is oriented. In the <code>DEMOMISSILE_VSRING.EFARC</code> examples, certain <code>NodeParticle_Particle3D &gt; NodeVector_XYZ</code> and <code>NodeParticle_Particle2D &gt; XScale/YScale</code> values behaved relative to world axes. The workbook <strong>did not establish a universal world-space override for all nodes</strong>.</p>
+<h2 id="evidence-and-publication">Evidence and publication</h2>
+<p>Source <code>efs!A1:O38</code>, <code>efs!A68:E117</code>, <code>efs!A122:O150</code>, <code>efs!A169:O209</code> in <code>mod製作メモ.xlsx</code>, plus embedded illustrative screenshots. <strong>Screenshots are omitted from this draft</strong> until contributor attribution and reuse permission are clarified. This material describes individual experiments, not a complete reverse-engineered ESB schema.</p>
+<h2 id="native-game-reference-additions">Native game reference additions</h2>
+<ul>
+<li><a href="edf6-efs-esb-emitter-graph-particles-curves-and-renderinfo.html">EDF6 EFS/ESB graph and particle components</a></li>
+<li><a href="edf6-effectgenutil-visual-explosions-lights-and-damage-separation.html">EDF6 visual explosion dispatcher</a></li>
+<li><a href="edf5-decals-blood-acid-marks-visibility-eviction-and-stacking.html">EDF5 world-space decal lifetime</a></li>
+</ul>
+<h2 id="workbook-s-19-efs-root-timing-probes-source-bounded">Workbook's 19 EFS-root timing probes (source-bounded)</h2>
+<p>The original workbook contains <strong>19 named source-parameter combinations</strong> for root <code>EFS unk1</code> and <code>anim_frames</code>, tested using a <strong>Tempest Final Option projectile</strong> (<code>efs!B87:D112</code>). In the author's observations: <strong>three</strong> combinations remained visible until impact; <strong>six</strong> lost the entire effect after about one second; <strong>six</strong> lost only the emitter plus point light; and <strong>four</strong> lost only the emitter. Examples:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right"><code>unk1</code></th>
+  <th style="text-align:right"><code>anim_frames</code></th>
+  <th>Contributor observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">−1</td>
+  <td style="text-align:right">0 or 600</td>
+  <td>Elements remained visible until impact</td>
+</tr>
+<tr>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td>Elements remained visible until impact</td>
+</tr>
+<tr>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">60</td>
+  <td>Emitter and point light disappeared after ~1 s</td>
+</tr>
+<tr>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">600</td>
+  <td>Whole effect disappeared after ~1 s</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">0</td>
+  <td>Only emitter disappeared after ~1 s</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">60 or 600</td>
+  <td>Whole effect disappeared after ~1 s</td>
+</tr>
+</tbody>
+</table>
+<p>These observations are <strong>not monotonic</strong> in <code>anim_frames</code>; nearby configurations exhibit different lifetime outcomes. Thus there is <strong>no evidence for one universal “frame count = lifetime” equation</strong> covering every effect subcomponent. The author tentatively suspected interaction with another <code>Effect unk2</code> field, without proving it. The full 19-case ledger, including negative results, is <code>reference/R154_EFS_TIMING_19_SOURCE_EXPERIMENTS.csv</code>. This is an original <strong>contributor gameplay experiment</strong>, not a new game run in the current wiki edition.</p>
+<p>The <code>NodeShape_Plane</code> warning above is also historical and <strong>superseded within the original workbook</strong>: <code>efs!T12</code> says the noted unsupported-case tool issue was subsequently fixed. The workbook still reports an <strong>in-game crash in a specific modified <code>NodeShape_Plane</code> ID1 test</strong> at <code>efs!B132:D133</code>, which must not be conflated with that XML tool bug.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Community Japanese workbook: `mod製作メモ.xlsx` (supplied 2026-11-15; publication rights to be confirmed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#file-and-node-hierarchy">File and node hierarchy</a><a href="#renderinfo-texture-experiment-backed-fields">RenderInfo_Texture: experiment-backed fields</a><a href="#interpolation-and-emission-geometry">Interpolation and emission geometry</a><a href="#space-orientation-caveat">Space/orientation caveat</a><a href="#evidence-and-publication">Evidence and publication</a><a href="#native-game-reference-additions">Native game reference additions</a><a href="#workbook-s-19-efs-root-timing-probes-source-bounded">Workbook&#39;s 19 EFS-root timing probes (source-bounded)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-effects"};</script><script src="../assets/site.js" defer></script></body></html>

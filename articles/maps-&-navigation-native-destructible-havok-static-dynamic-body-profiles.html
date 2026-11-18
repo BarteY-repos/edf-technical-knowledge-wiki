@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 destructible props: static bodies, dynamic debris and native Havok material profiles An EDF6 map prop that changes from intact to destroyed is more than tw"><title>EDF6 destructible props: static bodies, dynamic debris and native Havok material profiles | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF6 destructible props: static bodies, dynamic debris and native Havok material profiles</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; Physics</span></div><div class="referencebadge">Technical reference · Bounded HEIGEN native donor; authored bodies validated offline only</div><div id="articleBody"><p>An EDF6 map prop that changes from <strong>intact</strong> to <strong>destroyed</strong> is more than two visual MDB meshes. The retained native destructible-body examples include separate physics body roles, motion properties and mass distribution data in Havok/MAD. For a custom collision writer, preserving only the mesh shape without these roles is not sufficient to match the observed native profile.</p>
+<h2 id="native-single-slot-example">Native single-slot example</h2>
+<p>In the examined HEIGEN507 native map, a single bounded reference model was used to understand the schema. The resource was <code>sk_rock501a_l.mdx</code> (T1 slot 5), with one p58 group and one piece. Its paired bodies had these measured properties:</p>
+<table>
+<thead>
+<tr>
+  <th>Role</th>
+  <th>Referenced native Havok body</th>
+  <th>Motion</th>
+  <th style="text-align:right">Mass</th>
+  <th style="text-align:right">Motion properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Intact / primary</td>
+  <td><code>sk_rock501a_l.polymsh1</code></td>
+  <td><code>motionType=0</code> (static)</td>
+  <td style="text-align:right">Not used as the dynamic debris mass</td>
+  <td style="text-align:right">Native source profile</td>
+</tr>
+<tr>
+  <td>Broken debris</td>
+  <td><code>sk_rock501a_l_hk.polymsh1</code></td>
+  <td><code>motionType=2</code> (dynamic)</td>
+  <td style="text-align:right"><strong>5.0</strong></td>
+  <td style="text-align:right">ID <strong>1</strong>, with valid mass distribution reference</td>
+</tr>
+</tbody>
+</table>
+<p>For the tested pair the pose is identity; the <strong>XYZ</strong> components of linear/angular velocities are zero. The stored vectors have <em>four</em> components and the source contained a non-zero <strong>W</strong> value. Treating the whole vector4 as ordinary XYZ velocity and demanding W=0 incorrectly rejects a legitimate native reference.</p>
+<p>A valid native-looking dynamic body also requires a <code>hknpRefMassDistribution</code> and a valid <code>motionPropertiesId</code>; do not produce a decorative debris mesh whose physics record has an uninitialized mass distribution.</p>
+<h2 id="rebuilding-from-authored-geometry">Rebuilding from authored geometry</h2>
+<p>The retained tests generated <em>new authored</em> collision shapes and identities while using this native reference only for bounded system/material/quality/motion/mass semantics. The native shapes were <strong>not imported</strong> into the custom map.</p>
+<p>The standalone two-prop test yielded <strong>7 MAD bodies</strong> (3 base, 2 authored static, 2 authored dynamic), with each debris body mass 5.0 and valid motion properties. A larger mixed-source test retained 500 native bodies alongside four authored bodies, for <strong>507</strong> total. Both passed source-only MAD wire, first-primitive-index and compressed-mesh broadphase checks and were A/B byte-identical.</p>
+<p>These results show that static/dynamic body roles and mass distribution can be generated coherently at the <strong>binary structural level</strong>. They do <strong>not</strong> prove the game will trigger replacement, spawn debris, preserve the expected collision/motion or restore it after reload.</p>
+<h2 id="practical-implications">Practical implications</h2>
+<ul>
+<li>Do not infer a complete destruction system merely from the appearance of <code>*_hk</code> resources or a <code>CrashType</code> field.</li>
+<li>Keep the intact body and dynamic debris body as different motion roles.</li>
+<li>Preserve validated motion property IDs and mass distribution semantics for the exact reference family.</li>
+<li>Use the 3D vector components to check initial zero velocity; do not reject a valid vector4 because the padding/auxiliary W lane is nonzero.</li>
+<li>Recheck collision broadphase and first-primitive-index invariants after composing native and authored geometry.</li>
+<li>Treat damage triggering, broken-visual replacement and runtime debris physics as independent <strong>gameplay validation</strong> questions.</li>
+</ul>
+<p>The numeric <strong>5.0 mass, ID 1, and motion types 0/2</strong> are scoped to the named HEIGEN reference. They are not globally required for all EDF6 destructible props, nor is this source-only result a runtime claim.</p>
+<p>For module-to-module destruction, see <a href="maps-%26-navigation-mapo-t50-crashmodel-collapse-graph-explained.html">T50 collapse connectivity</a>. For collision check pitfalls, see <a href="maps-%26-navigation-havok-broadphase-tombstones-and-float32-validation.html">Havok broadphase validation</a>.</p>
+<h2 id="placement-specific-t50-is-independent-of-the-havok-body-set">Placement-specific T50 is independent of the Havok body set</h2>
+<p>The five native HEIGEN507 <code>sk_rock50[1-5]a_set.mdx</code> families collectively have <strong>96 placements and 55 distinct T50 graphs</strong>, despite each family having a stable four-piece p58/body relationship. A body set that is structurally valid in MAD is not enough to recover the <em>placement's</em> destruction edges. Consult <a href="edf6-heigen507-rock-set-per-placement-t50-variation.html">HEIGEN507 per-placement rock T50 graphs</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R42_DESTRUCTIBLE_REAL_NATIVE_PHYSICS_2026-10-16.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-single-slot-example">Native single-slot example</a><a href="#rebuilding-from-authored-geometry">Rebuilding from authored geometry</a><a href="#practical-implications">Practical implications</a><a href="#placement-specific-t50-is-independent-of-the-havok-body-set">Placement-specific T50 is independent of the Havok body set</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-native-destructible-havok-static-dynamic-body-profiles"};</script><script src="../assets/site.js" defer></script></body></html>

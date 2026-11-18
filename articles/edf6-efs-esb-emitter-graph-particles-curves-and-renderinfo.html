@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 EFS/ESB — anatomy of a particle effect EDF6 has an EFS effect graph that is distinct from ordinary model materials and audio. In the source&#39;s native exampl"><title>EDF6 EFS/ESB effects: effect roots, emitters, particles, animation curves and renderers | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Effects and rendering</div><h1>EDF6 EFS/ESB effects: effect roots, emitters, particles, animation curves and renderers</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Effects and rendering</span></div><div class="referencebadge">Technical reference · Source-declared grades; this edition does not add native game runtime testing</div><div id="articleBody"><p>EDF6 has an <strong>EFS effect graph</strong> that is distinct from ordinary model materials and audio. In the source's native examples, effect definitions are <code>.esb</code> resources inside <code>.efarc</code> archives whose layout resembles RAB. An <code>.efarc</code> can hold its model, texture and sprite-setting resources alongside the effect definitions. The graph dispatches <strong>components</strong>, not one monolithic particle object.</p>
+<h2 id="hierarchy-and-timing">Hierarchy and timing</h2>
+<table>
+<thead>
+<tr>
+  <th>Node</th>
+  <th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>Effect Root</code></td>
+  <td>References the effect to dispatch, an integer start delay in frames and an unknown field</td>
+</tr>
+<tr>
+  <td><code>Effect</code></td>
+  <td>Owns an array of components, a system lifetime and additional unresolved fields</td>
+</tr>
+<tr>
+  <td><code>Singleton</code></td>
+  <td>One model, glow, quad or other renderer with transform and color</td>
+</tr>
+<tr>
+  <td><code>Emitter</code></td>
+  <td>Repeatedly creates moving particle instances from a shape and emission rule</td>
+</tr>
+<tr>
+  <td><code>NodeParticle_Particle2D</code></td>
+  <td>Defines lifetime, color, scalar curves and 2D-oriented particle rendering</td>
+</tr>
+<tr>
+  <td><code>NodeParticle_Particle3D</code></td>
+  <td>Defines 3D particle movement/scale/rotation evolution and lifetime</td>
+</tr>
+</tbody>
+</table>
+<p>The source observes <code>Effect Root</code> with the child effect reference before its timing/unknown values <strong>in the raw binary order</strong>. A third-party XML tool may present a different field order. Tool output ordering is not proof of a different EDF6 wire format.</p>
+<h2 id="emitter-anatomy">Emitter anatomy</h2>
+<p>The observed <strong>17-field</strong> emitter includes <code>NodeTransform</code>, emission <code>NodeShape</code>, a particle definition, color, initial rotation/scale, initial-speed curve, an <code>EmissionRate</code> curve and a <code>MaxParticle</code> limit. One field is labelled <code>IsRelative</code>: in the source's interpretation, relative particles continue moving with the parent emitter, whereas non-relative particles can trail behind. Several unclassified integer and float fields remain <strong>unknown</strong> and should not be given invented enum names.</p>
+<p><code>AnimationCurve</code> contains a type/flags region of uncertain meaning, a float variance, a keyframe count and seven floats per keyframe. The source identifies keyframe time and value; the other five floats are not decoded conclusively. A time value is <strong>usually frames</strong>, but the source explicitly notes exceptions.</p>
+<h2 id="rendering-a-particle">Rendering a particle</h2>
+<p><code>RenderInfo_Texture</code> uses a referenced texture, scalar size, a render-mode field and optional geometry such as a ring mesh. <code>RenderInfo_Model</code> uses an embedded <code>.mdb</code> model and can carry animation-driven shader parameter changes. <code>RenderInfo_LocusExtendLine</code> creates a trail whose length/lifetime and width can evolve over time; <code>RenderInfo_ExtLine</code> stretches a line between an earlier location and the particle's current position.</p>
+<p>Some texture render flags appear to affect blend mode, screen-depth interaction or rotation, but <strong>their exact semantics are not settled</strong>. Different language pages and experiments disagree on one rotation flag. A reader should preserve native values rather than normalizing everything into a guessed universal material type.</p>
+<h2 id="evidence-limits">Evidence limits</h2>
+<p>The node families, archive relationship and selected fields come from static inspections and documented community experiments. This edition neither generated new effects in EDF6 nor tested every emitter type. <code>EFS</code> and regular <code>.mdb</code> materials have independent lifetime and rendering contracts, even when an effect renderer references an MDB asset.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf6-effects</code> facts <code>efs-overview</code>, <code>efs-effect-root</code>, <code>efs-effect</code>, <code>efs-singleton</code>, <code>efs-emitter</code>, <code>efs-animation-curve</code>, <code>efs-particle2d</code>, <code>efs-particle3d</code>, <code>efs-renderinfo-texture</code>, <code>efs-renderinfo-model</code>, <code>efs-renderinfo-locus</code>, <code>efs-renderinfo-extline</code>; original Japanese/English community research collected by novae (ajane).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf6-pickups and kh-edf6-effects (steam-678ccb46), curator novae/ajane and credited contributors</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#hierarchy-and-timing">Hierarchy and timing</a><a href="#emitter-anatomy">Emitter anatomy</a><a href="#rendering-a-particle">Rendering a particle</a><a href="#evidence-limits">Evidence limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-efs-esb-emitter-graph-particles-curves-and-renderinfo"};</script><script src="../assets/site.js" defer></script></body></html>

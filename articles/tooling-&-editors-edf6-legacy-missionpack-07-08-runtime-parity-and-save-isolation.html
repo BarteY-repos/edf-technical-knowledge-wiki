@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 legacy MissionPacks above 05 — what was actually tested? The core EDF6 ModeList loader is not demonstrated to have a hard five-pack limit. Legacy custom pa"><title>EDF6 MP07/MP08 mission loading, progression isolation and online-host evidence | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 MP07/MP08 mission loading, progression isolation and online-host evidence</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span></div><div class="referencebadge">Technical reference · September 3, 2026 user runtime observations + isolated offline parity-flip candidate; peer join not qualified</div><div id="articleBody"><p>The core EDF6 <code>ModeList</code> loader is not demonstrated to have a hard five-pack limit. Legacy custom packs still depend on <strong>coherent namespace ownership, matching LIST/TXT resources, save namespaces, and historical mppp DLC-validation parity</strong>. The strongest retained direct game evidence tests <strong>MissionPack07 and MissionPack08</strong> — not an arbitrary pack number.</p>
+<h2 id="why-physical-pack-parity-mattered-in-the-old-plugin">Why physical pack parity mattered in the old plugin</h2>
+<p>The public historical mppp contract uses odd custom MissionPack IDs to validate against official MP01 and even custom IDs against MP02. Thus a safe <strong>legacy/import</strong> rebase shifts an entire provider by the <em>same even delta</em> rather than mixing identities:</p>
+<pre><code class="language-text">Existing port:       MP03 MP04 MP05
+Second provider:     MP03 MP04
+Rebased provider:    MP07 MP08
+</code></pre>
+<p>It must rewrite more than filenames: ModeList game-mode names, <code>MissionPackNN.MST</code> save identities, pack ID field 9, LIST/TXT references, physical mission content roots and all embedded LIST row paths. Preserve unrelated display/icon identifiers unless an exact rule justifies changing them.</p>
+<p>A newer authored <code>BASE_OWNED</code> MissionBundle uses a <strong>different ownership model</strong>. Do not claim all contemporary custom bundles require the historic parity/DLC donor scheme.</p>
+<h2 id="later-runtime-evidence-supersedes-the-early-mp07-failure">Later runtime evidence supersedes the early MP07 failure</h2>
+<p>An early MP07 black screen came from a <strong>confounded test fixture</strong> that copied only <code>MISSION.AC</code>, omitting the rest of the required mission subtree. The later R11/R12 tests copied the complete provider-owned subtree instead. The measured chronology is:</p>
+<table>
+<thead>
+<tr>
+  <th>Runtime or structural test</th>
+  <th>Retained result</th>
+  <th>What it proves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MP03 control versus rebased MP07, same mission</td>
+  <td><strong>Both offline PASS</strong></td>
+  <td>Odd parity rebase can load real gameplay on the tested build</td>
+</tr>
+<tr>
+  <td>MP04 control versus rebased MP08</td>
+  <td><strong>Both offline PASS</strong></td>
+  <td>Even parity rebase can also load gameplay</td>
+</tr>
+<tr>
+  <td>Progress recorded in MP08 vs MP04</td>
+  <td><strong>Isolation PASS</strong></td>
+  <td>Save/progression namespaces did not alias in the tested case</td>
+</tr>
+<tr>
+  <td>Create online host/room for MP08</td>
+  <td><strong>PASS</strong></td>
+  <td>Host-creation path accepted this pack ID</td>
+</tr>
+<tr>
+  <td>Two machines joining and starting rebased MP07/08</td>
+  <td><strong>Not directly tested</strong></td>
+  <td>No multiplayer interop claim is warranted</td>
+</tr>
+</tbody>
+</table>
+<p>Separate earlier two-player reports for MP03/04/05 do <strong>not</strong> supply missing MP07/08 peer proof. A successful host-creation UI step is not a peer-join test.</p>
+<h2 id="do-we-need-to-modify-mppp-to-add-more-packs">Do we need to modify mppp to add more packs?</h2>
+<p>The investigated public mppp v1.0.2 release advertises support for a third custom pack “or more.” The original <code>ModeList</code> loader also reads its row count dynamically. R13 runtime evidence further disproved a hard MP05 cutoff on the qualified environment. <strong>Neither fact</strong> proves arbitrary parity flips, save-key migration safety, public-room compatibility, or nonidentical mod compositions between peers.</p>
+<h2 id="the-mp03-mp06-parity-flip-experiment-remained-pending">The MP03 → MP06 parity-flip experiment remained pending</h2>
+<p>R17 built a tightly controlled <em>candidate</em>: clone a working full MP03 tree and all LIST/TXT companions to MP06, clone corresponding ModeList rows and MST namespace, and do not alter <code>mppp.dll</code>. It passed nine offline/integration gates including exact restore. <strong>No retained runtime PASS exists for this parity flip.</strong> The safe production policy therefore remained even-delta allocation (R16), despite the possibility that both-DLC ownership could make dense allocation workable.</p>
+<p>Never silently renumber an already-published pack because saved progress is keyed to its physical namespace. A composer must preserve a persistent namespace lock and provide an explicit migration process if a policy ever changes.</p>
+<h2 id="practical-compatibility-and-deployment-test-order">Practical compatibility and deployment test order</h2>
+<p>For a <strong>legacy</strong> provider, establish in order: (1) original pack as control; (2) rebased pack with complete mission subtree, not just AC; (3) LIST/TXT/image and ModeList integrity; (4) save isolation; (5) online host creation; (6) actual second-peer join/start with identical generated composition. Stop after a failed gate rather than editing unrelated mission script logic.</p>
+<p>The historical mppp deliberately limited public-room usage; custom peers should not be assumed to have compatible mods simply because a lobby is visible. Reusing a room-creation success to claim multiplayer interoperability would overstate the evidence.</p>
+<p>See <a href="edf6-native-missionpack-mode-and-lobby-identity.html">legacy namespace rebase contract</a>, <a href="formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">CONFIG three-way merge</a> and <a href="edf6-native-missionpack-mode-and-lobby-identity.html">current donor-free authored bundles</a>.</p>
+<p><strong>Evidence boundary:</strong> R12/R13 historical user game runs, R17 static parity candidate. All such tests are version/environment-scoped and were not rerun for this wiki release.</p>
+<h2 id="later-authored-a2z-mp06-negative-and-mp07-complete-offline-pass">Later authored-A2Z MP06 negative and MP07 complete offline PASS</h2>
+<p>A separate September 29–30 <strong>authored MissionBundle / A-to-Z</strong> lineage (not the historical R17 legacy-composer parity-flip fixture) actually observed <code>0xC0000094</code> at <code>EDF.dll+0xDD2A9</code> when selecting <strong>physical MP06</strong>. The on-disk pack contained a valid one-mission LIST, but its resource request arrived before <code>MissionMgr+0x14FD0</code> had a valid active-slot value. The loader therefore missed the exact requested LIST provider. The authored content additionally inherited <strong>odd</strong> MP03 source-mode semantics while physical MP06 was <strong>even</strong>. A request-identity routing fix plus transactional migration to physical <strong>MP07</strong> closed both separate issues; the MP07 list then appeared in real EDF6 runtime. See <a href="tooling-%26-editors-edf6-missionpack06-selection-zero-count-crash-request-identity.html">the MP06 root-cause case study</a>.</p>
+<p>A further <strong>alias-free</strong> VFS revision initially reached the LIST but could not launch its mission due to a stale <code>./mods/MISSION/...</code> row path. After correcting that path to <code>./Mods/.edf6ml/providers/p/...</code>, a retained user-observed <strong>offline</strong> test completed the custom Golden-map mission with 10 <code>GiantAnt01</code>, reached <code>Mission Cleared</code>, and restored the test payload. This is a bounded runtime end-to-end proof for <strong>that authored MP07 setup</strong>, not proof of parity-flipped MP06 acceptance, of MP07/08 two-peer compatibility, or of arbitrary later builds. See <a href="formats-%26-containers-edf6-alias-free-vfs-provider-root-vs-list-mission-path.html">alias-free LIST path and mission startup</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MISSIONPACK_MULTI_LEGACY_MERGE_RESEARCH_2026-09-01.md</li><li>EDF6_LEGACY_MOD_COMPOSER_MP07_RUNTIME_PASS_R12_2026-09-03.md</li><li>EDF6_LEGACY_MOD_COMPOSER_MP0708_RUNTIME_QUALIFICATION_R13_2026-09-03.md</li><li>EDF6_LEGACY_MOD_COMPOSER_PARITY_FLIP_DISCRIMINATOR_R17_2026-09-03.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-physical-pack-parity-mattered-in-the-old-plugin">Why physical pack parity mattered in the old plugin</a><a href="#later-runtime-evidence-supersedes-the-early-mp07-failure">Later runtime evidence supersedes the early MP07 failure</a><a href="#do-we-need-to-modify-mppp-to-add-more-packs">Do we need to modify mppp to add more packs?</a><a href="#the-mp03-mp06-parity-flip-experiment-remained-pending">The MP03 → MP06 parity-flip experiment remained pending</a><a href="#practical-compatibility-and-deployment-test-order">Practical compatibility and deployment test order</a><a href="#later-authored-a2z-mp06-negative-and-mp07-complete-offline-pass">Later authored-A2Z MP06 negative and MP07 complete offline PASS</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"tooling-&-editors-edf6-legacy-missionpack-07-08-runtime-parity-and-save-isolation"};</script><script src="../assets/site.js" defer></script></body></html>

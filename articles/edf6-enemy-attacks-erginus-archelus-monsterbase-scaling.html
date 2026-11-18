@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 boss attack scaling: MonsterBase, Erginus and Archelus Evidence: Static EDF6 steam-678ccb46 reverse engineering and SGO data in the EDF Knowledge Hub snaps"><title>EDF6 Erginus and Archelus: MonsterBase attack scaling | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 Erginus and Archelus: MonsterBase attack scaling</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> Static EDF6 <code>steam-678ccb46</code> reverse engineering and SGO data in the <em>EDF Knowledge Hub</em> snapshot of 14 November 2026. The equations below describe <strong>source attack values</strong>, not observed player damage after online and other multipliers.</p>
+<h2 id="why-boss-speed-and-boss-damage-cannot-be-treated-as-the-same-level-scalar">Why boss speed and boss damage cannot be treated as the same level scalar</h2>
+<p><code>MonsterBase</code> stores a current attack record from an <code>attack_setting</code> array. The analyzed record contains the attack name, a speed value, damage values (sometimes a list), an auxiliary scalar and flags. The level setup computes <code>g = L/10</code>, with <code>L</code> the raw object level.</p>
+<p>For an attack's animation-event melee hit, the native callback uses the record's <strong>first damage value multiplied by <code>g</code></strong>. Its other attack fields may control the contact region, hit flags and attack speed. Speed changes with level only if the SGO speed item is an expression array; plain source floats remain constant.</p>
+<h2 id="erginus-per-hit-and-per-projectile-damage">Erginus: per-hit and per-projectile damage</h2>
+<table>
+<thead>
+<tr>
+  <th>Named attack family</th>
+  <th style="text-align:right">Original Erginus (<code>monster501</code>)</th>
+  <th style="text-align:right">King variant (<code>monster501_king</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ordinary chop</td>
+  <td style="text-align:right"><code>100L</code></td>
+  <td style="text-align:right"><code>150L</code></td>
+</tr>
+<tr>
+  <td>Step chop</td>
+  <td style="text-align:right"><code>160L</code></td>
+  <td style="text-align:right"><code>240L</code></td>
+</tr>
+<tr>
+  <td>Two-handed step chop</td>
+  <td style="text-align:right"><code>200L</code></td>
+  <td style="text-align:right"><code>300L</code></td>
+</tr>
+<tr>
+  <td>Tail</td>
+  <td style="text-align:right"><code>240L</code></td>
+  <td style="text-align:right"><code>360L</code></td>
+</tr>
+<tr>
+  <td>Tackle</td>
+  <td style="text-align:right"><code>280L</code></td>
+  <td style="text-align:right"><code>420L</code></td>
+</tr>
+<tr>
+  <td>Ground hit</td>
+  <td style="text-align:right"><code>6L</code> to <code>8L</code></td>
+  <td style="text-align:right"><code>12L</code> to <code>15L</code></td>
+</tr>
+</tbody>
+</table>
+<p>These are the interpreted data-derived contact values by source attack row. A source speed number (e.g. 1.0 or 1.5) is not an additional damage multiplier unless the attack consumer uses it that way.</p>
+<p>Erginus's breath uses an embedded <code>LightningBullet01</code> projectile. For the observed <code>attack_breath_t</code> row, damage is <code>12L</code> <strong>per fired bullet</strong>; for <code>attack_breath_b</code>, <code>2L</code>. The king version has <code>18L</code> and <code>9L</code>. The source did not close the total number of bullets per breath, so the article deliberately avoids a fabricated “total breath damage” figure.</p>
+<h2 id="archelus-monster504-sparks-and-contact-hits-differ">Archelus (<code>Monster504</code>): sparks and contact hits differ</h2>
+<p>The main attack record's damage item may contain multiple values. Archelus's projectile constructor selects the <strong>second</strong> entry if present, whereas an animation contact hit uses the <strong>first</strong>. This is why “attack damage” cannot be one scalar for the entire row.</p>
+<table>
+<thead>
+<tr>
+  <th>Attack example</th>
+  <th>Source value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ordinary spark projectile</td>
+  <td><code>1.5L</code> per bullet</td>
+</tr>
+<tr>
+  <td>Thorn-roll thorn projectile</td>
+  <td><code>1.5L</code> per thorn</td>
+</tr>
+<tr>
+  <td>Thorn-roll contact</td>
+  <td><code>2L</code></td>
+</tr>
+<tr>
+  <td><code>_vs_big</code> spark or thorn projectile</td>
+  <td><code>10L</code></td>
+</tr>
+<tr>
+  <td><code>_vs_big</code> thorn-roll contact</td>
+  <td><code>100L</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>e504_monstera_m034_3</code> variant has lower source values in several attacks; applying the normal Archelus numbers blindly to that variant would be inaccurate.</p>
+<h2 id="speed-adjustment-and-attack-intervals">Speed adjustment and attack intervals</h2>
+<p>The source-defined optional speed rule for list-valued speed fields is:</p>
+<p><code>attack_speed = min(L × a + b, c)</code>, for an item encoded as <code>[b,c,a]</code>.</p>
+<p>In the inspected Erginus, king and Archelus attack rows the speed fields were ordinary floats, so <strong>that particular per-attack speed did not scale with level</strong>. Archelus also has an independent <code>monster_base_animation_speed</code> array. For its example <code>[0.8,1.5,0.9,0.01]</code>, the corresponding expression is <code>clamp(0.9 + 0.01L,0.8,1.5)</code>. This is a separate animation-speed control, not a damage curve.</p>
+<p>Archelus's <code>bullet_level_adjust</code> was <code>[1.0,4.0,20.0,400,400]</code> as plain source values. Some byte-level parameter interpretations remain <strong>unverified</strong>, and the exact attack-interval consumer was not followed fully; they should not be promoted to a complete physics model.</p>
+<h2 id="evidence-limitations">Evidence limitations</h2>
+<ul>
+<li>These are <strong>native data and code reads</strong>, not full combat sessions at fixed difficulty.</li>
+<li>The emitter's animation event, projectile count, collision filter and ModeList may alter what a player experiences.</li>
+<li>A stage-specific enemy asset may have different SGO rows while retaining the same broad family name.</li>
+</ul>
+<p><strong>Source:</strong> <a href="kh-edf6-enemy-attacks.html">EDF6 enemy attack evidence and exact binary sites</a>: <code>monster-base-level-setup</code>, <code>monster-attack-setting-record</code>, <code>monster-attack-speed-item1</code>, <code>monster-melee-damage-level</code>, <code>monster501-melee-values</code>, <code>monster501-breath-level</code>, <code>monster504-shot-level</code>, <code>monster504-bullet-level-adjust</code>. Attribution: novae (ajane), <em>EDF Knowledge Hub</em> revision <code>54f89cd</code> (2026-11-14).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-boss-speed-and-boss-damage-cannot-be-treated-as-the-same-level-scalar">Why boss speed and boss damage cannot be treated as the same level scalar</a><a href="#erginus-per-hit-and-per-projectile-damage">Erginus: per-hit and per-projectile damage</a><a href="#archelus-monster504-sparks-and-contact-hits-differ">Archelus (Monster504): sparks and contact hits differ</a><a href="#speed-adjustment-and-attack-intervals">Speed adjustment and attack intervals</a><a href="#evidence-limitations">Evidence limitations</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-enemy-attacks-erginus-archelus-monsterbase-scaling"};</script><script src="../assets/site.js" defer></script></body></html>

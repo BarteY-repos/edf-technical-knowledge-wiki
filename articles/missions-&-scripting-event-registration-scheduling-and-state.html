@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission events: registration, scheduling, state and re-arming Mission control flow is a graph of registrations and handlers, not merely a list of functions in a"><title>Mission events: registrations, scheduling and shared state | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-scripting.html">Scripting</a></div><h1>Mission events: registrations, scheduling and shared state</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled native scheduler and mission source evidence</div><div id="articleBody"><p>Mission control flow is a graph of <strong>registrations</strong> and <strong>handlers</strong>, not merely a list of functions in a decompiled BVM. This distinction matters when translating EDF5 mission behaviour into EDF6 AngelScript (<code>MISSION.AC</code>), and it is useful when reading a mission's native event machinery.</p>
+<h2 id="registration-versus-handler">Registration versus handler</h2>
+<p>A registration supplies an incoming trigger/factor set, delay and check policy. A handler is the <strong>target event body</strong> and owns the event state and counter. Several registrations can point at one target handler without creating several independent target event states.</p>
+<p>The relevant research distinguishes:</p>
+<table>
+<thead>
+<tr>
+  <th>Element</th>
+  <th>Owns</th>
+  <th>Does not imply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Registration (edge)</td>
+  <td>Trigger factors, delay, check mode</td>
+  <td>A separate copy of the target's state</td>
+</tr>
+<tr>
+  <td>Event target (node)</td>
+  <td>Handler, persistent state, counter, invocation policy</td>
+  <td>That every incoming factor is one giant combined AND</td>
+</tr>
+<tr>
+  <td>Scheduler</td>
+  <td>Selection/append of ready registrations</td>
+  <td>A naive textual function-call order</td>
+</tr>
+</tbody>
+</table>
+<p>This model comes from native source/target observations and later source/target event reconciliation. An older description with target-owned factors was superseded by the more precise <strong>registration-owned factors</strong> model.</p>
+<h2 id="multi-is-an-exact-comparison-not-generic-truthiness"><code>multi</code> is an exact comparison, not generic truthiness</h2>
+<p>In the observed EDF5/EDF6 BVM scheduler, <code>multi == 1</code> means that <strong>all ready registrations</strong> are appended for processing. Other values select one ready registration according to the scheduler's delay rule. EDF6 AngelScript event types map to:</p>
+<pre><code class="language-text">source multi == 1  → EVENT_TYPE_ASYNC (1)
+source multi != 1  → EVENT_TYPE_SYNC  (0)
+</code></pre>
+<p>Using <code>multi != 0</code> is not equivalent to the observed comparison. The ASYNC wrapper must also avoid the SYNC voice/game-thread handshake (<code>WaitVoice</code>, <code>GetTalkers</code>) when that handshake is not part of the actual source path.</p>
+<h2 id="reachable-registrations-matter">Reachable registrations matter</h2>
+<p>A decompiler can expose dead compiler-generated registration branches. In the studied exact44 paired set, <strong>2,233 textual RegisterEvent occurrences</strong> reduced to <strong>2,214 reachable registrations</strong> and <strong>2,106 unique reachable target handlers</strong>. IDs are assigned to unique targets in first-registration order, not based on sparse compiler <code>Func_N</code> labels.</p>
+<p>These figures describe the studied fixture. They are not fixed counts for all EDF missions.</p>
+<h2 id="repeated-and-counter-based-events">Repeated and counter-based events</h2>
+<p>The reconciled authoring model distinguishes three invocation policies:</p>
+<ul>
+<li><code>once</code>: run only once;</li>
+<li><code>repeat</code>: re-arm after invocation and permit subsequent triggers;</li>
+<li><code>nth</code>: share a target counter and invoke only at the specified count.</li>
+</ul>
+<p>Multiple <code>once</code> registrations are source-backed <strong>OR fan-in</strong>: any one qualifying incoming registration may trigger the same target. For a single registration, factors may form AND/OR conditions <strong>inside that registration</strong>. An arbitrary logical AND spanning unrelated registrations is not established and should not be invented by an importer.</p>
+<p>A cycle such as <code>Start → A → B → A</code> may be represented using explicit re-arm policies. Direct self-registration and Start/Main re-entry need separate evidence; they are not automatically safe simply because a cyclic graph can be drawn.</p>
+<h2 id="exact-factor-distinctions">Exact factor distinctions</h2>
+<p>Some numeric factor codes are easily conflated. The retained mapping includes:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Code</th>
+  <th>Observed factor meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>9201</code></td>
+  <td><code>Factor_ObjectDestroy</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9202</code></td>
+  <td><code>Factor_ObjectEncount</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9300</code></td>
+  <td><code>Factor_AiMoveEnd</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9301</code></td>
+  <td><code>Factor_AiMoveEndOrDie</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9116</code></td>
+  <td><code>Factor_GroupObjectCount</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9117</code></td>
+  <td><code>Factor_GroupObjectEncount</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9205</code></td>
+  <td><code>Factor_RideVehicle</code></td>
+</tr>
+</tbody>
+</table>
+<p>Do <strong>not</strong> collapse <code>9201</code> and <code>9202</code> into the same event merely because their names and use cases are adjacent.</p>
+<h2 id="how-to-interpret-an-unknown-handler">How to interpret an unknown handler</h2>
+<p>First reconstruct <strong>reachability</strong>, <strong>registration ownership</strong>, <strong>event identity</strong>, <strong>factor conditions</strong>, and <strong>side effects</strong>. Only then infer what the handler will do in-game. A source-to-source compiler can preserve these graph properties without asserting that every unobserved engine API has exact target semantics.</p>
+<h2 id="bytecode-versus-engine-call-identifiers">Bytecode versus engine call identifiers</h2>
+<p>A BVM <code>cuscall0</code> instruction is a bytecode operation with a <em>separate</em> numeric engine-call ID operand. For example, <code>AC D0 07</code> means opcode <code>0xAC</code> followed by little-endian ID <strong>2000</strong>; it does <strong>not</strong> introduce opcodes <code>D0</code> or <code>07</code>. The shipping invalid/crashing BVM instruction opcode range is <code>0x39</code>–<code>0x3F</code> in the examined build.</p>
+<p>Read <a href="missions-%26-scripting-bvm-bytecode-custom-calls-and-api-translation-explained.html">BVM bytecode and custom-call translation</a> for API mappings, argument/stack semantics, and cases where an engine operation has no demonstrated AngelScript binding.</p>
+<h2 id="related-discoveries">Related discoveries</h2>
+<ul>
+<li><a href="missions-%26-scripting-how-missions-events-and-rmpa-work.html">Mission scripting and RMPA overview</a></li>
+<li><a href="missions-%26-scripting-r37-control-flow-dataflow-api-parity.html">Event control-flow and dataflow mappings</a></li>
+<li><a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">Native mission RMPA profile</a></li>
+</ul>
+<p><strong>Evidence status:</strong> native scheduler comparison for the <code>multi</code> rule, source/corpus reconciliation for reachability and target identity, later Mission Studio semantics for registration-owned factors and re-arm/counter policies. Not a claim that every mission API has been runtime-qualified.</p>
+<h2 id="event-state-allocation-reachability-and-delay-exact-pair-findings">Event state allocation, reachability and delay: exact-pair findings</h2>
+<p>A handler may be armed more than once. The examined 44 exact EDF5 source/official EDF6 pairs contained <strong>2,233 textual</strong> <code>RegisterEvent</code> calls, but only <strong>2,214 reachable</strong> from <code>Main</code> through direct calls and event-target edges. Those reachable registrations referenced <strong>2,106 unique handler targets</strong>. The paired EDF6 <code>MAX_EVENT_ID</code> totals also equal <strong>2,106</strong>, supporting the following implementation model:</p>
+<pre><code class="language-text">one handler body (node) -&gt; one persistent event ID / state
+many incoming registrations (edges) -&gt; potentially the same handler ID
+</code></pre>
+<p>Allocate event IDs for <strong>unique target handlers in first-registration order</strong>, not from sparse decompiler labels (<code>Func_27</code>, <code>Func_42</code>, etc.) or once per registration. Unreachable <code>Func_N</code> registrations produced by compiler flattening must not become active mission events. <strong>Do not remove ordinary named utility functions solely because they are not called from Main</strong>: some target-facing helpers are preserved for external/reference use.</p>
+<p>For the inspected <code>RegisterEvent</code> <strong>end-event</strong> pattern, source delay <code>100.0f</code> maps to target <code>100000000.0f</code> only when <code>is_end &amp;&amp; source_delay == 100.0f</code>. This is a narrow sentinel rule, not evidence for global scaling of all mission timings. One examined M029 high-level official port normalizes an empty relay chain; that difference does not imply that the source BVM lost its downstream triggers.</p>
+<h3 id="sync-async-scheduling-in-engine-terms">Sync/async scheduling in engine terms</h3>
+<p>The BVM runtime checks the registration's <code>multi</code> field by <strong>equality with <code>1</code></strong>. If it equals <code>1</code>, all ready registrations are appended. Otherwise one ready registration with the greatest delay wins. The EDF6 AngelScript event scheduler sorts by descending delay, then uses <code>EVENT_TYPE_ASYNC=1</code> to append ready events or <code>EVENT_TYPE_SYNC=0</code> to select the first. That is why <code>multi == 1</code> — <strong>not</strong> generic nonzero truthiness — is the valid translation for the examined builds.</p>
+<p>In the 141-shipping-mission corpus, <strong>5,193</strong> raw registrations reduced to <strong>5,112 reachable</strong> registrations: <code>4,540</code> with <code>multi=0</code> and <code>572</code> with <code>multi=1</code>. Differences in manually authored official <code>EventType</code> choices for M015/M016/M024/M035 do not rewrite independently measured source scheduler semantics.</p>
+<p><strong>Why this matters:</strong> if a converter creates duplicate target nodes or guesses event IDs from function names, it can change counters, re-arm behavior, voice ordering and mission completion even when the generated AngelScript compiles successfully. Source-reachable registration topology is therefore a stronger parity check than raw counts of decompiled instructions.</p>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="#article-start">EDF5 source graph/counter census</a></li>
+<li><a href="edf5-bvm-event-scheduler-multi-delay-and-end-sentinel.html">EDF5 native scheduler flags</a></li>
+</ul>
+<h2 id="original-edf5-source-examples-shared-counters-and-relay-cases-consolidated">Original EDF5 source examples: shared counters and relay cases (consolidated)</h2>
+<p>In the exact44 source-paired audit, <strong>2,233 textual</strong> <code>RegisterEvent</code> statements reduce to <strong>2,214 reachable</strong> registrations, <strong>2,106 distinct target handlers</strong> and <strong>2,147 factor sites</strong>. The 19 discarded statements reside in unreachable compiler-generated regions. Targets, not sparse compiler <code>Func_N</code> names, identify persistent handler state.</p>
+<p><code>M018</code> illustrates why shared counters matter: <code>Func_3</code> is armed twice, and the second execution releases <strong>60 red ants</strong>. <code>M029</code> is a bounded special case where the original BVM arms two empty relay handlers from <code>Main</code>, but the official target port chains them. <code>M041</code> has a pre-registration call <code>9000</code> denoting a <strong>body wait</strong>, not a factor on the child registration. None is permission to rewrite arbitrary graph topology. Source: EDF5 <code>edf5/mission-vm.md</code>, <code>bvm-event-reachability</code>, <code>bvm-event-slot-per-handler</code>, <code>bvm-handler-counter-guard</code>, <code>bvm-m029-relay</code>, <code>bvm-m041-wait-idiom</code> (source/official static pairing).</p>
+<h2 id="event-body-domains-voice-and-gameplay-are-not-interchangeable">Event-body domains: voice and gameplay are not interchangeable</h2>
+<p>A separate source-matched 44-mission <strong>reference event-domain</strong> census aligned <strong>1,387 cue-bearing EDF5 <code>Func_N</code> handler bodies</strong> by ordered cue signatures: <strong>1,176</strong> aligned to <code>voice_script</code>, <strong>211</strong> to <code>game_script</code>; <strong>6</strong> cue signatures were ambiguous in matching but retained the same resulting domain, and <strong>0</strong> source cue-bearing bodies remained unmatched in the measured reference. This is evidence that collapsing every EDF5 source event into the EDF6 <code>*_game_event_usercode</code> path may discard important game/voice <strong>execution-domain separation</strong>. It does <strong>not</strong> establish that the loss causes any specific reported subtitle-scroll symptom.</p>
+<p>A conservative proposed classifier that accepted only obviously radio/speech-only or pure Talk transactions assigned <strong>1,121/1,387</strong> bodies. It was correct for <strong>1,035</strong>, wrong for <strong>86</strong>, and abstained for <strong>266</strong> — <strong>92.33% precision among classified cases</strong>, inadequate for automatic source-to-target rewrites. The high correlations of <code>RadioBegin</code> (<strong>64/64</strong>) and <code>RadioEnd</code> (<strong>65/65</strong>) with the <em>game</em> domain are a warning that <code>Radio*</code> is not a voice-domain guarantee. <code>TalkBegin</code> and <code>WaitVoice</code> likewise occur in both measured domains. Multiple calls in a handler, not API name alone, determine the supported classification. The 44-entry evidence is a <strong>reference corpus</strong>; the retained domain census itself warns against claiming it proves every native/Sandlot convention, even though separately verified official 44-mission archives exist.</p>
+<h3 id="multi-registration-targets-have-one-shared-threshold-not-duplicated-guards">Multi-registration targets have one shared threshold, not duplicated guards</h3>
+<p>In the examined M020_5 event graph, <strong>two registrations</strong> both target source <code>Func_6</code> and share a counter threshold of <strong>2</strong>. In the failing conversion, an outer target wrapper rejected the second invocation (<code>m_counter != 1</code>), while a second counter in the handler body itself rejected the first (<code>Func_6___Counter != 2</code>); together these guards prevented the body <em>on both invocations</em>. The blocked continuation would ordinarily activate the two carrier generators. The source-matched high-level reference instead uses one target-owned guard <code>m_counter != 2</code> and no second guard inside the event body.</p>
+<p>The same bounded reference comparison identified <strong>14 counter-threshold handlers across 11 mission scripts</strong> with <code>N &gt; 1</code>. Known examples include <code>M015_3</code> thresholds <strong>2/3/4/5</strong>, <code>M016</code> threshold <strong>3</strong>, and <code>M020_5</code> threshold <strong>2</strong>. These are counter-event semantics: the registration factors remain edge-owned while <strong>counter state belongs to the shared target</strong>. There is no license to promote a broad counter-pattern rewrite without verifying the source bytecode and effective target branch.</p>
+<p><strong>Evidence:</strong> <code>EDF5_EDF6_EXACT44_EVENT_DOMAIN_CENSUS_2026-09-05.json</code> (44 reference missions, <strong>not a gameplay test</strong>); <code>EDF5_EDF6_M020_5_R75_EVENT_COUNTER_OFFLINE_AUDIT_2026-09-05.md</code> and <code>R75_OFFICIAL_MULTI_COUNTER_CENSUS_2026-09-05.json</code> (source BVM/ASM comparison and failing modified-runtime progression symptom).</p>
+<h2 id="edf4-1-source-counterexample-a-handler-body-does-not-prove-event-registration">EDF4.1 source counterexample: a handler body does not prove event registration</h2>
+<p>A six-mission original EDF4.1 BVM decompilation sample provides a narrow independent illustration of the registration-versus-handler distinction: <code>M002</code> contains the shared <code>Func1709960674</code> clear-handler body but <strong>zero textual <code>RegisterEvent</code> and <code>AllEnemyDestroy</code> call sites</strong>, whereas <code>M001</code>, <code>M003</code> and <code>M004</code> each contain one of each. Therefore a decompiler inventory that merely counts named <code>Func...</code> handlers overstates what is demonstrably registered in the source. This finding is <strong>EDF4.1 source evidence</strong>, separate from the preceding EDF5/EDF6 exact44 scheduler numbers; it is not proof about complete runtime reachability.</p>
+<p>The more complex EDF4.1 <code>M012</code> offers a positive contrast: <strong>19</strong> textual <code>RegisterEvent</code> call sites are paired throughout the source with time, enemy-clear, object-destruction and AI-move factors. In particular, <code>Func455038071</code> is registered after generator configuration with a <code>9201</code> object-destroy factor for the first carrier. Later registrations depend on other factors and mother-object action sequences. These facts establish a staged <em>source event graph</em>, <strong>not</strong> whether every branch succeeds in a target EDF6 runtime. Exact IDs, source hashes and call-site line numbers are in the <a href="missions-%26-scripting-edf41-bvm-container-bytecode-and-edf5-script-recompilation.html">six-BVM source census</a> and its R172 CSV evidence.</p>
+<h2 id="r174-edf5-original-mission-examples-which-voice-cues-run-in-which-event-domain">R174 EDF5 original mission examples: which voice cues run in which event domain?</h2>
+<p>The earlier Exact44 reference identified <strong>1,387 cue-bearing EDF5 <code>Func_N</code> handler bodies</strong> in <strong>44 source-matched missions</strong>, with 1,176 matched to <code>voice_script</code> and 211 matched to <code>game_script</code>. The new per-mission crosswalk makes the source cases inspectable rather than reducing them to one percentage. These are <strong>reference alignment labels</strong>, not proof that an arbitrary runtime <code>RadioVoice</code> or <code>TalkBegin</code> call always executes in one particular game-thread domain.</p>
+<table>
+<thead>
+<tr>
+  <th>EDF5 mission</th>
+  <th style="text-align:right">Matched cue-bearing <code>Func_N</code></th>
+  <th style="text-align:right">Reference voice domain</th>
+  <th style="text-align:right">Reference game domain</th>
+  <th>Notable observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>M079</code></td>
+  <td style="text-align:right">94</td>
+  <td style="text-align:right">45</td>
+  <td style="text-align:right">49</td>
+  <td>Mixed domain; <strong>48</strong> of the 86 naive classifier errors occur here</td>
+</tr>
+<tr>
+  <td><code>M091_4</code></td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">44</td>
+  <td style="text-align:right">16</td>
+  <td>Mixed domain; <strong>14</strong> naive errors</td>
+</tr>
+<tr>
+  <td><code>M021</code></td>
+  <td style="text-align:right">54</td>
+  <td style="text-align:right">47</td>
+  <td style="text-align:right">7</td>
+  <td><code>RadioBegin</code>, <code>TalkBegin</code> and <code>RadioEnd</code> coexist in game-domain handlers</td>
+</tr>
+<tr>
+  <td><code>M020_5</code></td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">44</td>
+  <td style="text-align:right">2</td>
+  <td>Two <code>FR_AE065B*</code> cue-bearing handlers each have two reference candidates in <strong>the game domain</strong></td>
+</tr>
+<tr>
+  <td><code>M058</code></td>
+  <td style="text-align:right">52</td>
+  <td style="text-align:right">51</td>
+  <td style="text-align:right">1</td>
+  <td>Two further <code>FR_AE065B*</code> cue-bearing handlers each have two candidates in <strong>the voice domain</strong></td>
+</tr>
+<tr>
+  <td><code>M032_5</code></td>
+  <td style="text-align:right">33</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">7</td>
+  <td><code>AE005_032_E</code> repeats in two source handler matches, both game-domain candidates</td>
+</tr>
+</tbody>
+</table>
+<p>All <strong>six</strong> ambiguous cue-signature matches are confined to these <strong>three missions</strong> (<code>M020_5</code>, <code>M032_5</code>, <code>M058</code>) and are <strong>domain-consistent within each ambiguous match</strong>. This narrows the uncertainty: the exact target function identity remains ambiguous, but the available candidates agree on the <strong>reference game/voice domain</strong>. It does not independently verify the native EDF runtime thread, matching algorithm, audio playback order, or callback timing.</p>
+<p>Two named counterexamples prevent overreaching from API names alone:</p>
+<ul>
+<li><code>M001 / Func_41</code> has <code>TalkBegin</code>, three <code>Talk_AddSingle</code> calls and <code>TalkEnd</code>, but the reference places that function under <strong><code>game_script</code></strong> rather than <code>voice_script</code>.</li>
+<li><code>M021 / Func_38</code> combines <code>RadioBegin</code>, <code>TalkBegin</code>, <code>Talk_AddSingle</code>, <code>TalkEnd</code>, <code>RadioEnd</code>, <code>WaitVoice</code> and event creation, yet the source-matched reference is again <strong><code>game_script</code></strong>.</li>
+</ul>
+<p>In the 86 wrong predictions made by the old call-pattern classifier, <strong>48 occur in M079 and 14 in M091_4</strong>. Thus its error distribution is highly uneven across missions; the earlier global 92.33% classified-case precision must not be interpreted as uniform per-mission reliability. The five R174 CSVs under <code>data/</code> include all 44 mission totals, all 1,387 source function matches, the six ambiguous pairs and the 86 misclassified examples. The primary source BVM, not a reference AC candidate, remains the strongest authority for event semantics. No new EDF5/EDF6 runtime evidence was generated.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_MEGA_WIKI_R6_2026-08-26.md: R37 event model</li><li>EDF6 Mission Studio registration and re-arm reconciliation</li><li>R48 mission event article corpus</li><li>Library: EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/EDF5_EDF6_EXACT44_EVENT_DOMAIN_CENSUS_2026-09-05.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/EDF5_EDF6_EXACT44_EVENT_DOMAIN_CENSUS_2026-09-05.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/EDF5_EDF6_M020_5_R75_EVENT_COUNTER_OFFLINE_AUDIT_2026-09-05.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/R75_OFFICIAL_MULTI_COUNTER_CENSUS_2026-09-05.json</li><li>Library: EDF4.1 original M001–M004, M012, M014 decompiled BVM source audit (exact file hashes in R172 census)</li><li>Original EDF5 shipping MISSION.BVM, R42 source-side audit (independent BVM ASM capture, 141 missions); 2026-09-05 Exact44 cue-bearing source/reference event-domain census; R174 tables and source-hash ledger</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#registration-versus-handler">Registration versus handler</a><a href="#multi-is-an-exact-comparison-not-generic-truthiness">multi is an exact comparison, not generic truthiness</a><a href="#reachable-registrations-matter">Reachable registrations matter</a><a href="#repeated-and-counter-based-events">Repeated and counter-based events</a><a href="#exact-factor-distinctions">Exact factor distinctions</a><a href="#how-to-interpret-an-unknown-handler">How to interpret an unknown handler</a><a href="#bytecode-versus-engine-call-identifiers">Bytecode versus engine call identifiers</a><a href="#related-discoveries">Related discoveries</a><a href="#event-state-allocation-reachability-and-delay-exact-pair-findings">Event state allocation, reachability and delay: exact-pair findings</a><a href="#sync-async-scheduling-in-engine-terms">　Sync/async scheduling in engine terms</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#original-edf5-source-examples-shared-counters-and-relay-cases-consolidated">Original EDF5 source examples: shared counters and relay cases (consolidated)</a><a href="#event-body-domains-voice-and-gameplay-are-not-interchangeable">Event-body domains: voice and gameplay are not interchangeable</a><a href="#multi-registration-targets-have-one-shared-threshold-not-duplicated-guards">　Multi-registration targets have one shared threshold, not duplicated guards</a><a href="#edf4-1-source-counterexample-a-handler-body-does-not-prove-event-registration">EDF4.1 source counterexample: a handler body does not prove event registration</a><a href="#r174-edf5-original-mission-examples-which-voice-cues-run-in-which-event-domain">R174 EDF5 original mission examples: which voice cues run in which event domain?</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-event-registration-scheduling-and-state"};</script><script src="../assets/site.js" defer></script></body></html>

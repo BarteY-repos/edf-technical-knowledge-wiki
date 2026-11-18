@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 — CharacterControl_Cling is not a walking controller EDF6 uses a distinct Havok-linked xgs::havok::CharacterControl_Cling for ground-attached and wall-atta"><title>EDF6 cling controller: insects, wall attachment, gravity, launch immunity and robot users | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Character motion</div><h1>EDF6 cling controller: insects, wall attachment, gravity, launch immunity and robot users</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Character motion</span></div><div class="referencebadge">Technical reference · Build-scoped static analysis; original contributor evidence grades cited; no new R126 gameplay runtime</div><div id="articleBody"><p>EDF6 uses a distinct Havok-linked <code>xgs::havok::CharacterControl_Cling</code> for ground-attached and wall-attached actors. Its users include the <code>InsectBase</code> family (ants, spiders, bees, Dango and small dragons), Nephila, Berserker-family walking enemies, and the player's <code>Vehicle502_GroundRobo</code>. The same actor may change to a flight-specific mode that bypasses ordinary cling velocity integration.</p>
+<h2 id="native-state-model">Native state model</h2>
+<table>
+<thead>
+<tr>
+  <th>Controller field</th>
+  <th>Meaning in the studied build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td>Mode; nonzero bypasses ordinary velocity update (for example, GiantBee flight)</td>
+</tr>
+<tr>
+  <td><code>+0x50</code> / <code>+0x60</code></td>
+  <td>Attachment normal and smoothed normal</td>
+</tr>
+<tr>
+  <td><code>+0x70</code></td>
+  <td>Attached/grounded byte</td>
+</tr>
+<tr>
+  <td><code>+0x73</code></td>
+  <td>Contact recorded for current step</td>
+</tr>
+<tr>
+  <td><code>+0x80</code></td>
+  <td>Ballistic velocity (a vector, meters/second)</td>
+</tr>
+<tr>
+  <td><code>+0xA0</code></td>
+  <td>Gravity vector; default <code>(0, −9.8, 0)</code></td>
+</tr>
+<tr>
+  <td><code>+0xB0</code> / <code>+0xB4</code></td>
+  <td>Collision sphere radius and extra probe distance</td>
+</tr>
+<tr>
+  <td><code>+0xB8</code></td>
+  <td>Number of frames during which landing is suppressed</td>
+</tr>
+</tbody>
+</table>
+<p>When attached, the controller clears its ballistic velocity and relies on the attachment/movement branch. When detached, the update pushes ballistic velocity (plus temporary contributions) into the body and integrates gravity. The original ant/controller initialization scales gravity for one insect path; a single universal gravity constant for all enemies is therefore unjustified.</p>
+<h2 id="launch-is-a-velocity-assignment-not-a-force-impulse">Launch is a velocity assignment, not a force impulse</h2>
+<p>The observed <code>Cling Launch</code> native sets the attachment flag to zero, writes a supplied velocity and records a no-landing frame count. Its callers use different counts: <strong>2</strong> for a sampled GiantAnt blast-knockback path, <strong>0</strong> for a jump, and <strong>4/8</strong> on robot paths. A zero-count launch can immediately reattach on the next contact; a nonzero count temporarily suppresses that landing. The launch alone does not switch animation state.</p>
+<p>When the controller is in nonzero flight mode, this launch path does not provide the same result: the update bypasses its velocity integration, leaving movement under the actor's separate flight routine. That helps distinguish the handling of a grounded insect from a flying bee, without claiming a new gameplay experiment.</p>
+<p><strong>Primary evidence:</strong> <code>kh-edf6-character-control</code>: <code>cling-controller-layout</code>, <code>cling-launch</code>, <code>cling-users</code>. Build <code>steam-678ccb46</code>. Static source analysis credited to hajisensai / All Forces and KH curators.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 — kh-edf6-character-control (fact IDs retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-state-model">Native state model</a><a href="#launch-is-a-velocity-assignment-not-a-force-impulse">Launch is a velocity assignment, not a force impulse</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-cling-controller-insect-robot-attachment-and-launch"};</script><script src="../assets/site.js" defer></script></body></html>

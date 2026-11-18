@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 CAS player groups, controller variables and safe trackless grafts Why can a converted object appear to have valid bones and clips but still crash when its "><title>EDF6 CAS player groups, controller variables and safe trackless grafts | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-animation.html">Animation</a></div><h1>EDF6 CAS player groups, controller variables and safe trackless grafts</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Animation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact-build binary/class-lookup research; source-only graft logic</div><div id="articleBody"><p>Why can a converted object appear to have valid bones and clips but still crash when its native EDF6 class spawns? The class can require <strong>named CAS controller groups (<code>players</code>) and variables</strong> that did not exist in EDF4.1.</p>
+<h2 id="the-important-distinction-player-group-state-and-track">The important distinction: player group, state and track</h2>
+<p>A CAS <code>anmgroup</code> owns named states (<code>mcanm</code>) and their animation/control data. A class may resolve an entire <strong>player group by name</strong> during construction. In the examined EDF6 path, a missing <strong>player</strong> can produce an invalid unchecked lookup. A missing state or clip within an existing player may instead be tolerated, which does <strong>not</strong> make the missing whole group safe.</p>
+<p>The retained example is an EDF4.1 <code>UfoCarrier301</code> grafted onto the target EDF6 <code>UfoCarrier508</code> class: the EDF6 class looks for <code>in_ring</code> and <code>out_ring</code> animation players, representing motion absent from the old carrier. Removing their graphical motion is fine; omitting required names is not.</p>
+<h2 id="variable-vcontrol-safety">Variable (<code>vcontrol</code>) safety</h2>
+<p>A target EDF6 class may set controller variables by name every frame. The analyzed lookup for a <strong>missing setter target</strong> returns <code>-1</code>; the setter then treats that index as a valid array position and can write out of bounds. A missing getter-only variable can return <code>0.0</code>, changing tuning behavior without an immediate crash.</p>
+<p>Known requirements for the studied Berserker-like class include <code>v_move_angle</code>, <code>v_move_velocity</code>, <code>v_tilt_dir</code> and <code>v_tilt_lerp</code> during update, plus <code>v_damage_reaction_ratio</code> when hit. A vcontrol record in this family occupies <strong>0x14 bytes</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Byte offset</th>
+  <th>Field in measured record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>+0x00</code></td>
+  <td>Relative name reference</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x04</code></td>
+  <td>Mode flag; <code>0</code> plain variable, <code>1</code> follows a tcontrol</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x08</code></td>
+  <td>Variable kind</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x0C</code></td>
+  <td>Initial <code>float32</code> value</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x10</code></td>
+  <td>Additional word / tcontrol index when applicable</td>
+</tr>
+</tbody>
+</table>
+<p>A bounded graft may copy <strong>plain</strong> donor variables that the source CAS lacks. Variables coupled to another tcontrol require extra index rewriting and were intentionally refused by the retained safe implementation.</p>
+<h2 id="trackless-grafting-for-target-runtime-compatibility">Trackless grafting for target-runtime compatibility</h2>
+<p>The source-compatible approach does <strong>not</strong> copy the donor's animation motion onto the EDF4.1 model. It inserts only missing <em>named player/controller structures</em> and appends <strong>trackless CANM clips</strong> preserving their donor <strong>names, loop flag, duration, step and frame count</strong>. The target class can find and trigger the required control paths without moving alien donor bones.</p>
+<p>The measured graft procedure:</p>
+<ol>
+<li>Parse the source-compatible EDF6 CAS and the EDF6 donor CAS; reject other/unknown generations.</li>
+<li>Find target-required <code>anmgroup</code> names and plain <code>vcontrol</code> names that are missing from the source CAS.</li>
+<li>Append donor animation groups and their associated <code>tcontrols</code>, <strong>renumbering</strong> control indices against the target's existing table.</li>
+<li>Append corresponding CANM clips, but with <strong>zero tracks</strong>, and remap old clip indices inside appended tcontrols.</li>
+<li>Recompute signed relative offsets for strings and records after the new clip table has grown.</li>
+<li>Refuse data commands whose argument layout is not proven to contain only a tcontrol index.</li>
+</ol>
+<p>The retained code permits data-command IDs <strong>0</strong> and <strong>4</strong> when their discriminator at <code>+0x14</code> is <code>2</code>; it treats <code>mcanm +0x20</code> as a possible tcontrol index, with the special <code>0xBF800000</code> sentinel meaning no tcontrol. These are <strong>measured in that grafting path</strong>, not a specification of every possible custom CAS opcode.</p>
+<p>Some class-required states can be <strong>aliases</strong> of existing states, preserving a compatible state name without inventing new movement. A separate <code>hollow</code> procedure clears clip track counts for placeholder donor motion while keeping the state/clip metadata. Only explicitly identified runtime-owned tracks should be stripped.</p>
+<h2 id="practical-failure-signs">Practical failure signs</h2>
+<table>
+<thead>
+<tr>
+  <th>Symptom</th>
+  <th>First thing to inspect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Immediate crash when object spawns</td>
+  <td>Missing class-required <code>anmgroup</code> player name</td>
+</tr>
+<tr>
+  <td>Crash after updates or on taking damage</td>
+  <td>Missing class-written <code>vcontrol</code> or invalid index</td>
+</tr>
+<tr>
+  <td>Model animates into donor pose</td>
+  <td>Donor tracks were copied instead of adding trackless clips</td>
+</tr>
+<tr>
+  <td>Wrong clip or broken string</td>
+  <td>New <code>tcontrol</code>/clip indices or relative offsets were not rebased</td>
+</tr>
+<tr>
+  <td>Odd lean/recoil without crash</td>
+  <td>Missing getter-only variable reads zero or additive clip semantics changed</td>
+</tr>
+</tbody>
+</table>
+<p>This information explains <strong>one measured class/controller ABI family</strong>, not a guarantee that every EDF6 class uses the same names or tolerates identical missing states.</p>
+<p><strong>Evidence:</strong> retained <code>cas_graft.py</code>, <code>cas_legacy.py</code> and <code>cas_pose.py</code> source; exact EDF6 binary lookup analyses described in those source comments. The grafted content is <strong>source-only compatibility evidence</strong>, not a new Windows/runtime PASS. For CANM channel bytes and Euler→quaternion handling, see <a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">actual cross-generation CAS/CANM conversion</a>.</p>
+<h2 id="deliberate-missing-variables-versus-true-missing-controller-defects">Deliberate missing variables versus true missing-controller defects</h2>
+<p>Do not graft every target-only CAS variable automatically. In the preserved EDF4.1 soldier profile, target <code>v_vehicle_grip_l_ik_target</code> and <code>v_vehicle_grip_r_ik_target</code> are intentionally left absent: target code checks <code>-1</code> indices before writing, while the source CAS lacks a matching consumer. This is unlike a required player/control-variable absence that the native class dereferences unchecked. Related source-only policies for torso-axis mode and ledge-climb are in <a href="animation-edf41-friendly-soldier-spine-axis-grip-ik-and-climb-states.html">friendly soldier skeleton compatibility</a>.</p>
+<h3 id="absolute-canm-clip-rebasing-is-not-a-trackless-graft">Absolute CANM clip rebasing is not a trackless graft</h3>
+<p>The studied EDF6 CAS 0x204 / CANM 0x300 format stores absolute local transforms in selected clips. If MDB bind translations change, a source absolute clip can pull a bone to the old position. A retained source-only <a href="cross-game-conversion-edf6-vehicle-ragdoll-shkt-bind-pose-refit-and-cas-rebasing.html">rig/CAS rebasing procedure</a> adjusts only supported translation channel bases and rejects shared channel indices that require incompatible deltas. It leaves additive clips and keyframes unchanged and avoids double application of root motion.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R10 HF4 R9 source package: components/objects/pylib/cas_graft.py</li><li>R10 HF4 R9 source package: components/objects/pylib/cas_pose.py</li><li>R10 HF4 R9 source package: components/objects/pylib/cas_legacy.py</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-important-distinction-player-group-state-and-track">The important distinction: player group, state and track</a><a href="#variable-vcontrol-safety">Variable (vcontrol) safety</a><a href="#trackless-grafting-for-target-runtime-compatibility">Trackless grafting for target-runtime compatibility</a><a href="#practical-failure-signs">Practical failure signs</a><a href="#deliberate-missing-variables-versus-true-missing-controller-defects">Deliberate missing variables versus true missing-controller defects</a><a href="#absolute-canm-clip-rebasing-is-not-a-trackless-graft">　Absolute CANM clip rebasing is not a trackless graft</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"animation-edf6-cas-players-vcontrols-and-trackless-grafts"};</script><script src="../assets/site.js" defer></script></body></html>

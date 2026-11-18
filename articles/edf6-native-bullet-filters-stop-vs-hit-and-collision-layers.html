@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 bullets: stopping ray, damaging sweep and the 32-layer collision table Evidence: A combination of reported in-game filter tests and exact native steam-678c"><title>EDF6 bullet contact: stop/hit filters and full native collision layers | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF6 bullet contact: stop/hit filters and full native collision layers</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Collision &amp; Physics</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> A combination of <strong>reported in-game filter tests</strong> and exact native <code>steam-678ccb46</code> binary inspection from the <em>EDF Knowledge Hub</em> (2026-11-14, revision <code>54f89cd</code>; original tests credited there). The full matrix in the optional CSV is derived from the source's 32-layer table; it is not newly measured in this release.</p>
+<h2 id="two-filters-answer-different-questions">Two filters answer different questions</h2>
+<p>In the studied EDF6 build, a bullet has <strong>two collision-filter values</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th style="text-align:right">Default low-five-bit layer</th>
+  <th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Flag 1 (<code>BulletControl+0x890</code>, bullet <code>+0x9D0</code>)</td>
+  <td style="text-align:right"><strong>12</strong></td>
+  <td>Sweeps a thin <strong>ray</strong> along the projectile's trajectory. A blocking result shortens the path and stops motion.</td>
+</tr>
+<tr>
+  <td>Flag 2 (<code>BulletControl+0x894</code>, bullet <code>+0x9D4</code>)</td>
+  <td style="text-align:right"><strong>11</strong></td>
+  <td>Runs a projectile-sized <strong>sphere/shape cast</strong> over that already-shortened path to find damageable targets. A piercing shot can continue through these targets.</td>
+</tr>
+</tbody>
+</table>
+<p>A Flag-2 hit is not necessarily a Flag-1 stop. A shield is a documented special case: a hit in the damage-query route can stop the bullet. An object matching neither query is ignored by that bullet path.</p>
+<p>That difference explains why a target may block a shot but take no damage, or take damage without ending a piercing shot. The order also matters: Flag 2 is evaluated over a path potentially shortened by Flag 1.</p>
+<h2 id="layer-comparisons-are-not-naive-integer-equality">Layer comparisons are not naive integer equality</h2>
+<p>The basic layer is <code>filterInfo &amp; 31</code>. More complex <code>filterInfo</code> values may additionally contain subsystem and system-group information. When query and body belong to the same non-zero system group, the native filter may use sub-ID and exclusion fields rather than the ordinary collision table. The matrix below therefore applies to the <strong>zero-group ordinary game-layer policy</strong> examined in the source, not every possible fabricated filter value.</p>
+<p>The community's numeric experiments verified that, for the tested zero-group cases, values <code>32</code>, <code>64</code> and <code>128</code> behave like layer 0, and <code>255</code>, <code>32767</code> and <code>0xFFFFFFFF</code> like layer 31 because their low five bits match.</p>
+<h2 id="frequently-encountered-body-layers">Frequently encountered body layers</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Layer</th>
+  <th>Observed native targets</th>
+  <th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">5</td>
+  <td>Live small enemies and allied infantry in the examined mode-1 family</td>
+  <td>Alive enemy's direct-hit body can differ from its corpse</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td>Dead mode-1 enemies, several vehicles, some physical debris</td>
+  <td>Most ragdoll parts default here</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td>Queen-class insects and several Red Anchor devices</td>
+  <td>Distinct from ordinary ant hit body</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td>MonsterBase family (e.g. Siren and Archelus), War Barga</td>
+  <td>Boss-style body classification</td>
+</tr>
+<tr>
+  <td style="text-align:right">14</td>
+  <td>Kraken/Red Anchor shield bodies</td>
+  <td>Shield contact is a special projectile boundary</td>
+</tr>
+<tr>
+  <td style="text-align:right">15</td>
+  <td>Buildings and some small nests</td>
+  <td>Ordinary geometry/hit queries may include these</td>
+</tr>
+<tr>
+  <td style="text-align:right">17</td>
+  <td>Terrain</td>
+  <td>Not the same layer as breakable map objects</td>
+</tr>
+<tr>
+  <td style="text-align:right">19</td>
+  <td>GeneratorPoll, large nest and some Anchor devices</td>
+  <td>Generator devices have their own collision path</td>
+</tr>
+<tr>
+  <td style="text-align:right">20</td>
+  <td>Map props including poles and trees</td>
+  <td>Not necessarily treated like terrain</td>
+</tr>
+<tr>
+  <td style="text-align:right">27/29</td>
+  <td>Certain ModelDebris bodies</td>
+  <td>Layer 29 has no ordinary collisions except with layer 0</td>
+</tr>
+</tbody>
+</table>
+<p>The evidence includes direct game tests for many target-layer assignments, but several layer labels are still unresolved. <strong>A layer number is not an entity class identifier.</strong> Multiple unrelated objects can use the same layer.</p>
+<h2 id="explosion-queries-do-not-use-the-same-filter-as-ordinary-bullet-contact">Explosion queries do not use the same filter as ordinary bullet contact</h2>
+<p>The studied explosion/area-damage query uses layer <strong>13</strong>. In the ordinary collision table it collides with layers <strong>5, 6, 7, 8, 9, 14, 15, 16, 19 and 20</strong> (and the universal layer 0). Terrain layer 17 does not appear in that list. It is therefore possible for a body to be contacted by one bullet route but excluded from an explosion query.</p>
+<p>This distinction is especially important for source-to-target SHKT collision mismatches and for diagnostic reports like “the beam touches the object, but the explosion does nothing.” It does <strong>not</strong> by itself prove the cause of any specific Genocide Cannon problem; the accepted damage handler and visual effect also matter.</p>
+<h2 id="data-reference-complete-ordinary-collision-table">Data reference: complete ordinary collision table</h2>
+<p>The optional <strong>32×32 collision matrix CSV</strong> is distributed as <code>data/EDF6_NATIVE_COLLISION_LAYERS_32X32_R117.csv</code> in the public ZIP. Rows are the queried filter layer; columns 0–31 are body layers; <code>1</code> means the ordinary table allows contact, <code>0</code> means it does not. It deliberately omits the nonzero-system-group special case. The reconstructed matrix is also checked for symmetry before packaging.</p>
+<p>Notable properties of the recovered matrix: layer 0 matches all 32 layers; layers 30 and 31 match only 0, 30 and 31; layer 29 matches layer 0 only. These statements are <strong>about the native filter table</strong>, not about whether a body is present in the game world or whether its class can take damage.</p>
+<h2 id="provenance-and-limitations">Provenance and limitations</h2>
+<p>The code's two-phase bullet query and the reported collision experiments are distinct evidence grades. Recovered layer positions and addresses are valid for the cited build, not a guarantee for all EDF6 updates. No in-game physics test was performed for R117.</p>
+<p><strong>Primary appendix:</strong> <a href="kh-edf6-bullet-collision.html">EDF6 — Bullet Collision</a>, especially <code>bullet-flag-roles</code>, <code>bullet-flag-defaults</code>, <code>bullet-filter-test</code>, <code>collision-table-full</code>, <code>layer-0xd-explosion</code>, <code>layers-of-targets</code>, <code>layer-alive-5-dead-6</code>, <code>layer-names-update</code>. See also <a href="maps-%26-navigation-edf6-area-damage-hit-layer-versus-direct-bullet.html">area damage versus direct bullets</a>.</p>
+<p><strong>Attribution:</strong> <em>EDF Knowledge Hub</em> / novae (ajane) and original community contributors credited in that appendix, snapshot <code>54f89cd</code> (2026-11-14).</p>
+<h2 id="native-game-reference-guides">Native game reference guides</h2>
+<ul>
+<li><a href="edf6-walking-on-moving-platforms-why-support-velocity-is-not-inherited.html">EDF6 supportable moving-body collision layers</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-filters-answer-different-questions">Two filters answer different questions</a><a href="#layer-comparisons-are-not-naive-integer-equality">Layer comparisons are not naive integer equality</a><a href="#frequently-encountered-body-layers">Frequently encountered body layers</a><a href="#explosion-queries-do-not-use-the-same-filter-as-ordinary-bullet-contact">Explosion queries do not use the same filter as ordinary bullet contact</a><a href="#data-reference-complete-ordinary-collision-table">Data reference: complete ordinary collision table</a><a href="#provenance-and-limitations">Provenance and limitations</a><a href="#native-game-reference-guides">Native game reference guides</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-bullet-filters-stop-vs-hit-and-collision-layers"};</script><script src="../assets/site.js" defer></script></body></html>

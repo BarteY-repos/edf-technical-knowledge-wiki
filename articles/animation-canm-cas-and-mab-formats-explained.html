@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Animation formats — CANM, CAS and MAB Overview EDF animation has three different data roles: CANM stores keyed motion, CAS coordinates named players/controllers"><title>Animation formats — CANM, CAS and MAB | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-animation.html">Animation</a></div><h1>Animation formats — CANM, CAS and MAB</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Animation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled native and reference research</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>EDF animation has three different data roles: <strong>CANM</strong> stores keyed motion, <strong>CAS</strong> coordinates named players/controllers, and <strong>MAB</strong> contains timed events. Those systems must agree with the target MDB skeleton.</p>
+<h2 id="format-directory">Format directory</h2>
+<table>
+<thead>
+<tr>
+  <th>Format</th>
+  <th>Role</th>
+  <th>Version constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>CANM</code></td>
+  <td>Bone/object keyframes, typed and quantized channels</td>
+  <td>EDF4.1, EDF5 and EDF6 channel layouts must be checked individually</td>
+</tr>
+<tr>
+  <td><code>CAS</code></td>
+  <td>Animation players, controller variables and state</td>
+  <td>Missing controller variables are not safe no-ops</td>
+</tr>
+<tr>
+  <td><code>MAB</code></td>
+  <td>Events, timing and resource bindings</td>
+  <td>Pointer base mode <code>0x03</code> vs <code>0x83</code> varies by generation</td>
+</tr>
+</tbody>
+</table>
+<p>Start at <a href="docs-animation.html">Animation</a> for a version-aware guide, then use the detailed findings below for exact layouts and limits.</p>
+<hr />
+<h2 id="mab-pointer-base-differences">MAB pointer-base differences</h2>
+<p>The prior brief MAB note had an incorrect blanket rule. <strong>MAB v15 internal pointers are not always absolute</strong>: EDF4.1/EDF5 use mode <code>0x03</code> (block-relative), while examined EDF6 uses mode <code>0x83</code> (owning-struct-relative); the four top-level directory offsets remain block-relative. The bounded source research validated 1,153 EDF4.1, 1,652 EDF5 and 2,487 EDF6 MABs. Read the <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">full measured MAB layout and conversion rule</a> rather than assuming a version-word swap. For event names, SGO parameters and sound ownership, read <a href="animation-mab-event-clock-and-audio-channel-ownership.html">MAB event clocks</a>.</p>
+<h2 id="exact-canm-key-kinds-and-cas-controller-abi">Exact CANM key kinds and CAS controller ABI</h2>
+<p><a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">The measured cross-generation CAS/CANM format and conversion</a> gives the real record layouts and field counts: 0x30-byte CAS header, 0x20/0x30 CANM channels, 28-byte clips, 8-byte tracks, four target channel kinds and float32 Euler-to-quaternion behavior. It also records the bounded 836-file CAS round-trip and 230 paired EDF5/EDF6 corpus, including why animated quaternion bits are often not exactly reconstructible from already quantized EDF5 data.</p>
+<p><a href="animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">Named CAS player groups and vcontrols</a> explain why importing an old object's clip data without certain <strong>named controllers</strong> can crash an EDF6 target class, and why trackless donor-state placeholders are preferable to donor-bone animation copying.</p>
+<p>The animation findings concern <strong>several distinct containers and behaviors</strong>, not one “EDF animation version.” A converter that edits only the version number is insufficient when record layouts, rotation representation and cross-references change.</p>
+<h2 id="canm-animated-channel-data">CANM: animated channel data</h2>
+<p>Observed EDF5 and EDF6 CANM are structurally different:</p>
+<table>
+<thead>
+<tr>
+  <th>Property</th>
+  <th>EDF5</th>
+  <th>EDF6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CANM format version</td>
+  <td><code>0x200</code> / decimal <code>512</code></td>
+  <td><code>0x300</code> / decimal <code>768</code></td>
+</tr>
+<tr>
+  <td>Approximate channel record size</td>
+  <td><code>0x20</code></td>
+  <td><code>0x30</code></td>
+</tr>
+<tr>
+  <td>Rotation/channel interpretation</td>
+  <td>Euler-radian channels in studied profiles</td>
+  <td>Absolute XYZW quaternion representation in studied animated-rotation profiles</td>
+</tr>
+<tr>
+  <td>Additional channel fields</td>
+  <td>Earlier layout</td>
+  <td>Added XYZW base/multiplier and encoding type</td>
+</tr>
+</tbody>
+</table>
+<p>A raw version bump destroys these semantic differences. The observed converter findings require real decoding of older channel values, correct encoding into the target representation and preservation of metadata that the target format expects.</p>
+<h2 id="cas-wrapper-data-is-not-the-canm-generation">CAS: wrapper data is not the CANM generation</h2>
+<p>CAS wraps animation/control/group/state information and can contain forward references into trailing CANM/string data. Observed CAS wrapper version words across the games are:</p>
+<table>
+<thead>
+<tr>
+  <th>Game</th>
+  <th>CAS wrapper value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF 4.1</td>
+  <td><code>00020000</code></td>
+</tr>
+<tr>
+  <td>EDF 5</td>
+  <td><code>03020000</code></td>
+</tr>
+<tr>
+  <td>EDF 6</td>
+  <td><code>04020000</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>CAS wrapper generation and embedded CANM generation must be tracked separately.</strong> A file's outer CAS version does not tell an importer how to interpret all trailing animation channels. A universal cross-game CAS conversion schema has not been established.</p>
+<h2 id="mab-decoded-v15-locators-event-tracks-and-pointer-bases-corrected">MAB: decoded v15 locators, event tracks and pointer bases (corrected)</h2>
+<p>The earlier short note described <code>BoneAdjust</code>, <code>AnimationAdjust</code> and <code>FloatGroup</code> record types, gave universal <strong>absolute offsets</strong>, and quoted <code>0x08</code> / <code>0x10</code> record sizes. <strong>That provisional description is not the validated <code>MAB\0</code> v15 layout and must not be used to read or convert the examined EDF4.1/5/6 v15 files.</strong> Its original text is preserved under the R150 prior-article snapshots of R151 for provenance.</p>
+<p>The validated <code>0x24</code>-byte header at version <code>0x0F</code> has four block-relative directory offsets at <code>+0x14…+0x20</code>. Header <code>+0x08</code> specifies the format of <strong>internal</strong> offsets: <code>0x03</code> in the observed EDF4.1/5 sources means block-relative, while <code>0x83</code> in examined EDF6 files means owning-struct-relative. The actual decoded record families are <strong>8-byte locator-list headers, 0x20-byte locator records, 0x10-byte event-track headers and 0x10-byte event keys</strong>, followed by vectors, optional embedded SGO parameters and strings. Sentinels and ordinary integer fields must not be rewritten as pointers. The source parser validated 1,153 EDF4.1, 1,652 EDF5 and 2,487 EDF6 MABs in its bounded corpus.</p>
+<p>MAB stores important <strong>animation event timing</strong>, locator/muzzle attachments and audio-related event data; it is not a universal static-collision dependency. Pointer-base migration is demonstrably solvable for this v15 family, but a valid converted file may still reference missing target skeleton bones, wrong locations, or target-class event consumers. See the <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">complete measured layout, pointer rule and conversion boundary</a> and <a href="animation-mab-event-clock-and-audio-channel-ownership.html">event clock/audio ownership</a>.</p>
+<p>The <a href="animation-edf41-mission-object-cas-mrab-61-resource-graph.html">111-root CAS/MRAB reference graph</a> counts <code>.CAS</code> and <code>.MRAB</code> <em>logical paths</em> from an EDF4.1 mission-object compatibility manifest. It contains no explicit <code>.MAB</code> or <code>.CANM</code> paths, which must not be interpreted as evidence those containers do not exist or are not loaded elsewhere.</p>
+<p>For a hit-reaction failure caused by a class selecting absent ragdoll bodies, see <a href="animation-edf41-small-dragon-ragdoll-body-name-mismatch-and-hit-reaction.html">EDF4.1 small-dragon partial-ragdoll names</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6 Model Utility R4 animation notes</li><li>R47 MAB v15 format reference</li><li>Paired CANM/CAS game-generation research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#format-directory">Format directory</a><a href="#mab-pointer-base-differences">MAB pointer-base differences</a><a href="#exact-canm-key-kinds-and-cas-controller-abi">Exact CANM key kinds and CAS controller ABI</a><a href="#canm-animated-channel-data">CANM: animated channel data</a><a href="#cas-wrapper-data-is-not-the-canm-generation">CAS: wrapper data is not the CANM generation</a><a href="#mab-decoded-v15-locators-event-tracks-and-pointer-bases-corrected">MAB: decoded v15 locators, event tracks and pointer bases (corrected)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"animation-canm-cas-and-mab-formats-explained"};</script><script src="../assets/site.js" defer></script></body></html>

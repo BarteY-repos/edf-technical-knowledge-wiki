@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 map MAPO conversion: object-row relayout and exact-size traps Scope: Source-backed offline reconstruction of one NW_HILLYCITY_LIGHT EDF4.1→EDF6 map. The"><title>EDF 4.1 map MAPO conversion: object-row relayout and exact-size traps | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF 4.1 map MAPO conversion: object-row relayout and exact-size traps</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Historical byte/oracle + offline serializer relayout; no runtime qualification</div><div id="articleBody"><p><strong>Scope:</strong> Source-backed offline reconstruction of one <code>NW_HILLYCITY_LIGHT</code> EDF4.1→EDF6 map. These offsets and counts describe the particular legacy/target MAPO record family, not a universal MAPO revision rule.</p>
+<h2 id="the-two-layers-that-must-not-be-confused">The two layers that must not be confused</h2>
+<p>A <code>MAC</code> file is an outer map container. <code>map.mapo</code> is <strong>one embedded payload</strong>. Byte positions, sizes and digests for the whole container are therefore not MAPO dimensions. A historical reconstruction mistakenly treated <strong>7,872,840 bytes (whole MAC)</strong> as a MAPO-sized figure; that claim and the derived missing-edge hypothesis were disproved.</p>
+<p>The verified source MAPO in this case is <strong>3,034,994 bytes</strong>, with a <strong>0x58-byte</strong> header and <strong>44,213 object rows</strong>, each <strong>0x38 bytes</strong>. The EDF6-compatible serializer expands the core to a <strong>0x60-byte</strong> header and <strong>0x3C-byte</strong> object rows.</p>
+<table>
+<thead>
+<tr>
+  <th>Core field</th>
+  <th style="text-align:right">Older source layout</th>
+  <th style="text-align:right">Reconstructed target layout</th>
+  <th style="text-align:right">Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MAPO header</td>
+  <td style="text-align:right"><code>0x58</code> (88 B)</td>
+  <td style="text-align:right"><code>0x60</code> (96 B)</td>
+  <td style="text-align:right">+8 B</td>
+</tr>
+<tr>
+  <td>Object row</td>
+  <td style="text-align:right"><code>0x38</code> (56 B)</td>
+  <td style="text-align:right"><code>0x3C</code> (60 B)</td>
+  <td style="text-align:right">+4 B per row</td>
+</tr>
+<tr>
+  <td>Object rows</td>
+  <td style="text-align:right">44,213</td>
+  <td style="text-align:right">44,213</td>
+  <td style="text-align:right">Preserved in this map</td>
+</tr>
+<tr>
+  <td>Object table growth</td>
+  <td style="text-align:right">—</td>
+  <td style="text-align:right"><code>44,213 × 4</code></td>
+  <td style="text-align:right">+176,852 B</td>
+</tr>
+<tr>
+  <td>Header + table growth</td>
+  <td style="text-align:right">—</td>
+  <td style="text-align:right"><code>8 + 176,852</code></td>
+  <td style="text-align:right"><strong>+176,860 B</strong></td>
+</tr>
+</tbody>
+</table>
+<p>This is <strong>a record relayout</strong>, not a demand to add 176,860 arbitrary padding bytes at the file end. Pointer tables, offsets and later payloads need to agree with the new locations.</p>
+<h2 id="why-the-final-mapo-is-much-larger">Why the final MAPO is much larger</h2>
+<p>The converted payload also carries additional target structures including collision and collapse data. In the observed R1D reconstruction these were <strong>291 groups, 2,863 T58 pieces, 8,980 T50 outer records and 386,865 T50 subrecords, with zero T50 edges</strong>. Those figures are a case-specific evidence census, <strong>not</strong> an engine-wide rule that T50 always has no edges; other native EDF6 maps do have substantial collapse-link graphs.</p>
+<p>The reconstruction yielded a <strong>6,816,056-byte</strong> MAPO candidate. That exactly matches the retained historical target length but <strong>does not match its SHA-256</strong>. An assembled <strong>7,872,840-byte</strong> MAC also matches the old whole-MAC length without matching the historical bytes. Therefore the formerly suspected missing bulk payload was not the remaining problem; ordering, serialization and source semantics remain.</p>
+<h2 id="how-to-validate-a-converter">How to validate a converter</h2>
+<ol>
+<li>Identify the <em>outer</em> container size and the <em>inner</em> MAPO size independently.</li>
+<li>Read the actual object-row count before changing a stride; never borrow an object's count from a donor map.</li>
+<li>Rebuild offsets and relative references after header and record expansion.</li>
+<li>Validate auxiliary T58/T50 placement and source/collision-body identity independently of total byte length.</li>
+<li>Compare the exact target digest only when the relevant target build and original bytes are available.</li>
+</ol>
+<h3 id="do-not-mix-mapo-table-families">Do not mix MAPO table families</h3>
+<p>The separate <strong>0x1C (28-byte)</strong> MAPO item stride documented elsewhere in this wiki applies to another measured table family. It is <strong>not</strong> an alternative spelling of this <code>0x38→0x3C</code> object-row relayout. Always identify the table/record family before reusing a stride.</p>
+<p><strong>Evidence:</strong> <code>EDF41_R1D_MAPO_CORE_RELAYOUT_CLOSURE_2026-11-14_R1.json</code>, R1D map reconstruction outputs, source/target size and hash controls. Evidence class: <strong>offline reconstruction, not game-runtime verification</strong>.</p>
+<p>Related: <a href="maps-%26-navigation-edf41-r1d-active-body-eligibility-and-oracle-diagnostics.html">R1D collision-body eligibility</a> and <a href="maps-%26-navigation-mapb-binary-header-records-and-cross-game-rebasing.html">MAPB table rebasing</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_MAPO_CORE_RELAYOUT_CLOSURE_2026-11-14_R1.json</li><li>EDF41_R1D_ACTIVE_BUILDER_FRONTIER_2026-11-14_R19.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-two-layers-that-must-not-be-confused">The two layers that must not be confused</a><a href="#why-the-final-mapo-is-much-larger">Why the final MAPO is much larger</a><a href="#how-to-validate-a-converter">How to validate a converter</a><a href="#do-not-mix-mapo-table-families">　Do not mix MAPO table families</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-edf41-mapo-core-relayout-vs-whole-mac-size"};</script><script src="../assets/site.js" defer></script></body></html>

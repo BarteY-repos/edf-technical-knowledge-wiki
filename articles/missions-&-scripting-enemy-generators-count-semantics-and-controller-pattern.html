@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Enemy generators: count semantics, lifecycle and controller pattern Evidence: shipping MISSION.AC call corpus and source-level API interpretation. Unknown nativ"><title>Enemy generators: count semantics, lifecycle and controller pattern | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Enemy generators: count semantics, lifecycle and controller pattern</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p><strong>Evidence:</strong> shipping <code>MISSION.AC</code> call corpus and source-level API interpretation. Unknown native caps and exact E505 landing-completion signal remain unresolved.</p>
+<p>EDF6 exposes several generator-related concepts that must not be collapsed into one generic “spawn limit”. The shipping mission corpus supports a more specific model.</p>
+<h2 id="generator-api-families">Generator API families</h2>
+<h3 id="setenemygenerator"><code>SetEnemyGenerator</code></h3>
+<p>Periodic producer:</p>
+<pre><code class="language-text">SetEnemyGenerator(
+    slot,
+    resource,
+    count,
+    level,
+    unit_interval,
+    wave_interval,
+    encountered
+)
+</code></pre>
+<p>The strongest shipping-AC interpretation is:</p>
+<ol>
+<li>emit <code>count</code> units in one group/cycle;</li>
+<li>space individual units by <code>unit_interval</code>;</li>
+<li>wait for the next group according to <code>wave_interval</code>;</li>
+<li>repeat until cancelled/host lifecycle ends.</li>
+</ol>
+<p>Shipping comments describe <code>count</code> as the number generated, <code>unit_interval</code> as the interval per unit, and <code>wave_interval</code> as the interval until the next group generation. There is no established explicit <code>total_limit</code> parameter in this call.</p>
+<h3 id="setinstantenemygenerator"><code>SetInstantEnemyGenerator</code></h3>
+<p>Finite producer:</p>
+<pre><code class="language-text">SetInstantEnemyGenerator(
+    slot,
+    resource,
+    count,
+    level,
+    unit_interval,
+    encountered
+)
+</code></pre>
+<p>The corpus pairs this call with <code>Factor_WaitGeneratorEnd(host, slot)</code>, including missions that start one or multiple finite batches and wait for their completion. This is the strongest evidence that the instant form has a natural finite end after the requested batch is emitted.</p>
+<h3 id="cancelenemygenerator"><code>CancelEnemyGenerator</code></h3>
+<p>Cancels one generator slot on the receiver/host. A historical script/helper addresses slots <code>0..7</code>; this is evidence for that helper only, <strong>not</strong> proof that every EDF6 object type implements eight functional slots.</p>
+<h2 id="factor-generatorenemycount-is-not-live-child-count"><code>Factor_GeneratorEnemyCount</code> is not live child count</h2>
+<p>This is the highest-value semantic correction.</p>
+<p><code>Factor_GeneratorEnemyCount(N)</code> tracks a generator-object/host population threshold rather than the number of living children emitted by one pylon.</p>
+<p>Corpus evidence distinguishes it from live-object counters:</p>
+<ul>
+<li>missions use <code>Factor_GeneratorEnemyCount</code> while operating multiple nest/carrier/generator hosts;</li>
+<li>a retained source comment explicitly distinguishes whether a Mother object is counted as a generator;</li>
+<li>missions may combine <code>Factor_TeamObjectCount(TEAM_ID_ENEMY, N)</code> and <code>Factor_GeneratorEnemyCount(M)</code> in the same logic, showing that the two predicates observe different state.</li>
+</ul>
+<p><strong>Do not use <code>Factor_GeneratorEnemyCount</code> to answer “how many spawned spiders are alive?”</strong></p>
+<h2 id="live-object-counters">Live-object counters</h2>
+<p>Use the factor whose ownership matches the desired population:</p>
+<table>
+<thead>
+<tr>
+  <th>Need</th>
+  <th>Appropriate factor family</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>all live enemy-team objects</td>
+  <td><code>Factor_TeamObjectCount(TEAM_ID_ENEMY, N)</code></td>
+</tr>
+<tr>
+  <td>live objects in an area</td>
+  <td><code>Factor_AreaTeamObjectCount(...)</code></td>
+</tr>
+<tr>
+  <td>live objects in a controlled group</td>
+  <td><code>Factor_GroupObjectCount(group, N)</code></td>
+</tr>
+<tr>
+  <td>active generator/host population</td>
+  <td><code>Factor_GeneratorEnemyCount(N)</code></td>
+</tr>
+<tr>
+  <td>finite producer slot completion</td>
+  <td><code>Factor_WaitGeneratorEnd(host, slot)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Do not substitute one family for another because the names all contain “count”.</p>
+<h2 id="no-proven-native-active-limit-total-limit-parameters">No proven native <code>active_limit</code> / <code>total_limit</code> parameters</h2>
+<p>The recovered mission-script call signatures expose:</p>
+<pre><code class="language-text">slot
+resource
+count
+level
+unit_interval
+wave_interval (periodic only)
+encountered
+</code></pre>
+<p>No evidence-backed generator signature adds native <code>active_limit</code> or <code>total_limit</code> arguments.</p>
+<p>This does <strong>not</strong> prove the EDF runtime has no hidden global/per-host/per-slot population cap. It means such a cap has not been recovered as an exposed mission API parameter and cannot be treated as an established native mission argument.</p>
+<h2 id="deterministic-total-spawn-limit">Deterministic total-spawn limit</h2>
+<p>When an authored mission needs a real total production cap, use finite batches plus author-owned state rather than pretending the periodic call has a total-limit argument.</p>
+<p>Example requirement:</p>
+<pre><code class="language-text">20 enemies per wave
+0.5 s per enemy
+30 s between waves
+100 total emitted
+</code></pre>
+<p>Robust pattern:</p>
+<pre><code class="language-text">spawned_total = 0
+
+repeat:
+    current_batch = min(20, 100 - spawned_total)
+    SetInstantEnemyGenerator(slot=0, count=current_batch, unit_interval=0.5)
+    arm next event with Factor_WaitGeneratorEnd(host, 0)
+
+on finite batch end:
+    spawned_total += current_batch
+    if spawned_total &gt;= 100:
+        CancelEnemyGenerator(0)
+        stop
+    Wait(30)
+    start next finite batch
+</code></pre>
+<p>In EDF6 mission-event terms, <code>Factor_WaitGeneratorEnd</code> is an event factor, not a synchronous/blocking function call.</p>
+<h2 id="incoming-anchor-e505-timing-boundary">Incoming Anchor / E505 timing boundary</h2>
+<p>A retained Incoming Anchor script sequence creates/configures the producer and then triggers <code>E505_GENERATOR_ACTION_FALL</code>. Therefore it does <strong>not</strong> establish the semantic guarantee “begin producing exactly 20 seconds after landing”.</p>
+<p>The corpus did not establish a first-class factor such as:</p>
+<pre><code class="language-text">Factor_E505Landed
+Factor_ObjectActionEnd
+WaitAnchorLanding
+</code></pre>
+<p>An arbitrary <code>Wait()</code> after <code>Action(FALL)</code> is therefore not exact “time after landing” semantics.</p>
+<p>Without a proven landing-completion factor, an action-relative <code>Wait()</code> is only an approximation. Exact timing needs the actual native landing-completion signal.</p>
+<h2 id="runtime-questions-still-open">Runtime questions still open</h2>
+<p>The retained source/API evidence does not yet settle:</p>
+<ul>
+<li>whether the native periodic generator has a hidden live-child/global-team/per-host/per-slot cap;</li>
+<li>whether exceeding such a cap delays, skips or queues a spawn;</li>
+<li>whether <code>wave_interval</code> is measured from cycle start or from completion of the prior batch in every native path;</li>
+<li>the exact E505 pylon landing/action-completion signal.</li>
+</ul>
+<p>A minimal runtime discriminator should compare periodic batches with survivors left alive, partial kills, global enemy pressure, two slots on one host, two hosts, mid-batch cancellation and host destruction. The native interpretation remains unknown without such observations.</p>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="edf5-bvm-setgenerator-20100-message-owners-waves.html">Native EDF5 generator 0x20100 fields and wave loop</a></li>
+</ul>
+<h2 id="r174-source-call-count-versus-producer-capacity-a-141-mission-counterexample">R174 source-call count versus producer capacity: a 141-mission counterexample</h2>
+<p>An independent audit of 141 original EDF5 BVM mission scripts found <strong>571 <code>cuscall0 2100</code> and 270 <code>cuscall0 2101</code> sites</strong>, alongside 664 <code>2000</code> and 722 <code>2001</code> sites. These are <strong>distinct source API transactions</strong>, not 841 produced waves plus 1,386 living enemies. For example, <code>M004</code> contains <strong>162</strong> source-side enemy/generator/drop-boat transactions in the historical corpus, but neither that figure nor its breakdown fixes how many actors exist at once.</p>
+<p>The different identifiers and per-mission counts are catalogued in <code>data/R174_EDF5_ORIGINAL_141_MISSION_SPAWN_SOURCE_CALL_CENSUS.csv</code>. Source-site totals must not be substituted for <code>Factor_GeneratorEnemyCount</code>, <code>Factor_TeamObjectCount</code> or <code>Factor_GroupObjectCount</code>: those factors inspect <strong>game state</strong>, whereas the atlas counts <strong>authored instructions</strong>. No new first-class active/total limit API, native generator cap, or runtime scheduling rule was proven by this census. The source corpus is EDF5, not the six-file EDF4.1 script subset used in R172/R173.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6 — generator enemy spawn limits, Mission Studio i wzorzec kontrolera</li><li>R14H1_CORPUS_FEATURE_PARITY_AUDIT_2026-10-15.md</li><li>R15_P0_PRODUCT_RECONCILIATION_2026-10-15.md</li><li>Mission Studio HF5.34 current authority</li><li>Original EDF5 shipping MISSION.BVM, R42 source-side audit (independent BVM ASM capture, 141 missions); 2026-09-05 Exact44 cue-bearing source/reference event-domain census; R174 tables and source-hash ledger</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#generator-api-families">Generator API families</a><a href="#setenemygenerator">　SetEnemyGenerator</a><a href="#setinstantenemygenerator">　SetInstantEnemyGenerator</a><a href="#cancelenemygenerator">　CancelEnemyGenerator</a><a href="#factor-generatorenemycount-is-not-live-child-count">Factor_GeneratorEnemyCount is not live child count</a><a href="#live-object-counters">Live-object counters</a><a href="#no-proven-native-active-limit-total-limit-parameters">No proven native active_limit / total_limit parameters</a><a href="#deterministic-total-spawn-limit">Deterministic total-spawn limit</a><a href="#incoming-anchor-e505-timing-boundary">Incoming Anchor / E505 timing boundary</a><a href="#runtime-questions-still-open">Runtime questions still open</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#r174-source-call-count-versus-producer-capacity-a-141-mission-counterexample">R174 source-call count versus producer capacity: a 141-mission counterexample</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-enemy-generators-count-semantics-and-controller-pattern"};</script><script src="../assets/site.js" defer></script></body></html>

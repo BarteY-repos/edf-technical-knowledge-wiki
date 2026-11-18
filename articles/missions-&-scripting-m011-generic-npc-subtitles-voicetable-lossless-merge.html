@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Generic-NPC subtitles — lossless VOICETABLE compatibility and pacing boundary The EDF5-port generic-NPC subtitle problem contains two different layers that must"><title>Generic-NPC subtitles — lossless VOICETABLE compatibility and pacing boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Generic-NPC subtitles — lossless VOICETABLE compatibility and pacing boundary</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime-proven content path; presentation separated</div><div id="articleBody"><p>The EDF5-port generic-NPC subtitle problem contains <strong>two different layers</strong> that must not be conflated:</p>
+<ol>
+<li>missing playback-key/caption records in the target VOICETABLE;</li>
+<li>presentation timing/scroll behavior for long captions.</li>
+</ol>
+<p>The first is a content-composition problem. The second is a separate presentation/runtime concern.</p>
+<h2 id="m011-missing-key-mechanism-runtime-proven">M011 missing-key mechanism — runtime proven</h2>
+<p>In <code>MissionPack03/M011</code> (<em>Isolation</em>), three generic-NPC voice lines played from the correct actor at the correct time, but target EN lacked the playback-key rows and displayed the unknown-key fallback.</p>
+<p>Runtime-qualified M011 additions are:</p>
+<pre><code class="language-text">AM029BE -&gt; Got it.
+AM031BE -&gt; Yes sir!
+AM138BE -&gt; That is also possible.
+</code></pre>
+<p>A target-locale <code>EDF6_VOICETABLE.EN.SGO</code> compatibility addition resolves the captions. No M011 AC rewrite and no renderer hook are required to solve the missing-key defect.</p>
+<h2 id="six-key-compatibility-set">Six-key compatibility set</h2>
+<p>The retained direct-talk set is:</p>
+<pre><code class="language-text">M011: AM029BE, AM031BE, AM138BE
+M028: AM027W
+M055: AT111DB, AT112DB
+</code></pre>
+<p>R67 records runtime-positive subtitle checks for <strong>M028 and M055</strong> with the lossless R3 payload. M011's caption content is correct as well, but its long-caption pacing/scrolling remained visibly late at that point. Thus the six-key lookup/content architecture is supported without pretending that caption presentation timing was already solved by the table alone.</p>
+<p>R3 payload SHA-256:</p>
+<pre><code class="language-text">93720e17b44cb913c54787560a3337b072403def1856314bb05a18d4ba0ed73a
+</code></pre>
+<h2 id="why-the-first-all-six-build-was-quarantined">Why the first all-six build was quarantined</h2>
+<p>The early R1 all-six table used an ordinary SGOTT JSON decompile/recompile path that trimmed leading/trailing whitespace. Native EDF6 EN contains <strong>54 whitespace-bearing string blocks referenced by 71 cue records</strong>. Rewriting those existing strings changed native caption timing/progression semantics.</p>
+<p>The key mappings were not disproven; the full-table rebuild method was lossy.</p>
+<h2 id="canonical-lossless-composer-contract">Canonical lossless composer contract</h2>
+<p>Production composition therefore works against the user's/local target baseline and is addition-only:</p>
+<ul>
+<li>preserve all existing cue payloads, table indices, node identities and timing metrics;</li>
+<li>restore/preserve exact raw UTF-16 string blocks where necessary;</li>
+<li>add only absent compatibility keys;</li>
+<li>deduplicate semantically identical provider claims;</li>
+<li>fail closed on conflicting claims or attempts to mutate existing target rows;</li>
+<li>run a preservation gate before commit.</li>
+</ul>
+<p>The preservation gate retained all 13,869 native baseline cues unchanged while adding the expected EDF5 compatibility rows.</p>
+<h2 id="presentation-timing-is-a-separate-product-boundary">Presentation timing is a separate product boundary</h2>
+<p>R67 still observed M011 long-caption pacing/scrolling lag despite correct content lookup. That does <strong>not</strong> invalidate VOICETABLE composition. A separate project, <strong>EDF6 Subtitle Scroll Fix v1.0.0</strong>, was later released and runtime-confirmed for late long-caption scroll windows. It operates in the presentation path and must not be confused with missing-key compatibility.</p>
+<p>Consequently:</p>
+<ul>
+<li>do not undo the lossless VOICETABLE architecture to chase scroll timing;</li>
+<li>do not apply a blanket mission timing multiplier;</li>
+<li>do not use the old lossy R1 provider;</li>
+<li>do not assume a subtitle presentation plugin can replace missing VOICETABLE rows.</li>
+</ul>
+<h2 id="redistribution-boundary">Redistribution boundary</h2>
+<p>The production composer should operate locally against the user's own target table. The existence of a known merge law is not a reason to redistribute a native EDF6 VOICETABLE donor.</p>
+<h2 id="exact-original-mission-title-and-speaking-object-crosswalk">Exact original mission/title and speaking-object crosswalk</h2>
+<p>Original EDF5 offline <code>MISSIONLIST</code>/localized TXT ordinal joins correct two older mistaken title associations:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">EDF5 menu mission</th>
+  <th>Technical ID</th>
+  <th>Source mission title</th>
+  <th>Missing direct-talk keys</th>
+  <th>Verified speaker type in converted script</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">16</td>
+  <td><code>M011</code></td>
+  <td><em>Isolation</em></td>
+  <td><code>AM029BE</code>, <code>AM031BE</code>, <code>AM138BE</code></td>
+  <td><code>squad02_follower</code>, generic Ranger (<code>AiArmySoldier_AF.sgo</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right">33</td>
+  <td><code>M028</code></td>
+  <td><em>Cave Invasion Stage 2</em></td>
+  <td><code>AM027W</code></td>
+  <td><code>g_sergent_follower1</code>, Ranger sergeant</td>
+</tr>
+<tr>
+  <td style="text-align:right">93</td>
+  <td><code>M055</code></td>
+  <td><em>Mountain Traps</em></td>
+  <td><code>AT111DB</code>, <code>AT112DB</code></td>
+  <td><code>soldier09</code>, Wing Diver (<code>AiPaleWing_LR.sgo</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Earlier session labels <em>Berth</em> for M028 and <em>Aircrafts</em> for M055 were <strong>incorrect</strong>; the ID/title association in this table comes from original list index plus EN TXT, not a guess based on mission number. The six-key content findings still hold. Evidence: <code>GENERIC_NPC_SUBTITLE_MISSION_ID_TITLE_CORRECTION_2026-09-04.md</code> and <code>GENERIC_NPC_SUBTITLE_STATIC_MAP_AND_TRANSCRIPT_PROVENANCE_AUDIT_2026-09-04.md</code>.</p>
+<p>The six candidate English lines originally came from a <strong>community-generated subtitle transcription source</strong>, not an official EDF5 English subtitle table. The earlier Chinese <code>subtitles.dll</code> static mapping supports the <em>key associations</em>, not independent official English wording. M011 text received later direct modified-runtime confirmation; the later R67 M028/M055 tests support their displayed captions in the tested game, without converting the entire community transcript into an authoritative native EDF5 text source. This matters when comparing text provenance against <strong>native audio</strong> and should not be hidden behind the correct six-key lookup mechanism.</p>
+<p>The whitespace failure has a precise source-data cause: SGOTT 2.1.5's <code>.trim()</code> on decoded/compiled DSGO strings changed <strong>54 distinct raw string blocks referenced by 71 pre-existing cue records</strong>. A JSON-to-JSON equality check could pass after both sides had already been trimmed, while original SGO string bytes were not preserved. The corrected local byte-preserving block roundtrip matched the original baseline SHA-256 (<code>4989a0ff873b072c346b822e01f3c5db3104c37c3c89f2133d3b91fde5d01700</code>), and the final addition-only candidate retained 13,869 baseline records with exactly six new entries. See <code>VOICETABLE_SGOTT_WHITESPACE_TIMING_REGRESSION_AUDIT_2026-09-04.md</code> and <code>VOICETABLE_LOSSLESS_COMPOSER_INTEGRATION_AND_RUNTIME_GATE_2026-09-04.md</code>. These are <strong>target binary/layout preservation facts</strong>, not proof that SGOTT trimming alone explains every delayed caption in stock EDF6.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: M011_GENERIC_NPC_SUBTITLE_PLAYBACK_KEY_LEDGER_2026-09-04.md</li><li>Library: VOICETABLE_LOSSLESS_COMPOSER_INTEGRATION_AND_RUNTIME_GATE_2026-09-04.md</li><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_R67_WEATHER_BRIDGE_FRONTIER_2026-09-05.md</li><li>Library: EDF_MASTER_PROJECT_STATUS_LEDGER_2026-09-06.md</li><li>data/R166_TARGETED_SOURCE_CLAIM_DISPOSITIONS.csv</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#m011-missing-key-mechanism-runtime-proven">M011 missing-key mechanism — runtime proven</a><a href="#six-key-compatibility-set">Six-key compatibility set</a><a href="#why-the-first-all-six-build-was-quarantined">Why the first all-six build was quarantined</a><a href="#canonical-lossless-composer-contract">Canonical lossless composer contract</a><a href="#presentation-timing-is-a-separate-product-boundary">Presentation timing is a separate product boundary</a><a href="#redistribution-boundary">Redistribution boundary</a><a href="#exact-original-mission-title-and-speaking-object-crosswalk">Exact original mission/title and speaking-object crosswalk</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-m011-generic-npc-subtitles-voicetable-lossless-merge"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 drones and Deroys: SGO attack records, level curves and volleys Evidence: Static, build-specific analysis of EDF6 steam-678ccb46, contributed to the EDF Kn"><title>EDF6 gold drones, Imperial drones and Deroys: shots and level curves | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 gold drones, Imperial drones and Deroys: shots and level curves</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> Static, build-specific analysis of EDF6 <code>steam-678ccb46</code>, contributed to the <em>EDF Knowledge Hub</em> (14 November 2026, revision <code>54f89cd</code>). The data below is sourced from native enemy level-setup routines and named SGO rows. It does not certify in-game DPS or online damage for every scenario.</p>
+<h2 id="gold-drones-ufosmall507-bullet-info-is-a-mini-expression-language">Gold drones (<code>UfoSmall507</code>): <code>bullet_info</code> is a mini expression language</h2>
+<p>The gold drone's <code>bullet_info</code> is not a fixed damage scalar. Each entry can be a literal or a sequence of operations on raw level <code>L</code>. The native evaluator supports addition, multiplication, bounded minimum/maximum, reciprocal, interpolation and other operators. The resolved values determine burst count, spacing, bullets per shot, damage, speed, size, lifetime and (for bomber variants) explosion size/gravity.</p>
+<table>
+<thead>
+<tr>
+  <th>Variant and projectile</th>
+  <th>Shot pattern</th>
+  <th>Damage per bullet</th>
+  <th>Other properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>e507_goldufo</code>, <code>_hi</code>: <code>BeamBullet01</code></td>
+  <td>Five shots per burst, spaced five frames; five bullets in a line per shot</td>
+  <td><code>0.07L + 1</code></td>
+  <td>Speed <code>0.015L + 0.5</code>; size <code>min(0.003L + 0.3,0.6)</code>; life 300 frames</td>
+</tr>
+<tr>
+  <td><code>_ace</code>: <code>LaserBullet01</code></td>
+  <td>30 single shots, spaced one frame</td>
+  <td><code>max(0.0476 × (0.6L+4),0.1)</code></td>
+  <td>Speed 30; size 0.4; life 15 frames</td>
+</tr>
+<tr>
+  <td><code>_charge</code>: <code>LaserBullet01</code></td>
+  <td>Unlimited burst; one shot every <code>max(10/(0.02L+0.8)+1,2)</code> frames</td>
+  <td><code>max(0.0714L,1)</code></td>
+  <td>Speed 30; size 0.4; life 30 frames</td>
+</tr>
+<tr>
+  <td><code>_big</code>: <code>PlasmaBullet01</code></td>
+  <td>Three bombs in a line per shot, 45 frames apart</td>
+  <td><code>4.5L</code> per bomb</td>
+  <td>Life 2000 frames; interpolated size, gravity, radius and speed</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>_big</code>, let <code>t = clamp((L-10)/150,0,1)</code>. The source interpolation uses radius <code>lerp(15,25.5,t)</code>, size <code>lerp(8,13.6,t)</code>, speed <code>lerp(0.45,0.5625,t)</code> and gravity <code>lerp(0.8,1.6,t)</code>. These fields should not be mistaken for a single explosive damage number.</p>
+<p><strong>Interpretation limit:</strong> A burst's number of bullets is not the number that hit the player. The drone AI's choice to begin a burst was outside the cited trace.</p>
+<h2 id="imperial-drones-ufosmall515-battery-rows-and-difficulty-sensitive-damage">Imperial drones (<code>UfoSmall515</code>): battery rows and difficulty-sensitive damage</h2>
+<p>Imperial drones instead read <code>battery_config</code>: per-muzzle rows with a bullet key, shot count, interval, damage source and sound information. The observed level factor for their bullet damage is:</p>
+<p><code>F(v) = 1 + (v - 1) × 0.5</code>, where <code>v=L/10</code>.</p>
+<p>The source can select a <em>difficulty-indexed base-damage row</em> before applying <code>F(v)</code>, so level and difficulty are different inputs.</p>
+<table>
+<thead>
+<tr>
+  <th>Variant</th>
+  <th style="text-align:right">Base damage before <code>F(v)</code></th>
+  <th>Pattern / important distinction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>e515_imperialufo</code></td>
+  <td style="text-align:right">5.5</td>
+  <td>Six shots 12 frames apart; interval can shorten with level, bounded below by three frames; one projectile per shot</td>
+</tr>
+<tr>
+  <td><code>_ace</code></td>
+  <td style="text-align:right">2.0</td>
+  <td>128 shots 30 frames apart; 16 bullets per shot, spread 0.1; right battery delayed 15 frames; interval remains fixed in observed row</td>
+</tr>
+<tr>
+  <td><code>_prototype</code></td>
+  <td style="text-align:right"><code>[5.5,5.5,11,16.5]</code> by difficulty</td>
+  <td>Six shots three frames apart; speed 2; life 120; blast radius 2.25</td>
+</tr>
+</tbody>
+</table>
+<p>For the prototype, the source's difficulty lookup is not interchangeable with <code>L</code>: Easy and Normal use the first damage value in the cited selection rule, while Hard/Hardest/Inferno use the corresponding later values. The exact row-index logic is explained in the <a href="kh-edf6-enemy-attacks.html">source appendix</a>.</p>
+<h2 id="deroys-deiroi-the-hull-and-legs-use-different-curves">Deroys (<code>Deiroi</code>): the hull and legs use different curves</h2>
+<p>The main body and its leg batteries are separate consumers of the SGO attack configuration:</p>
+<table>
+<thead>
+<tr>
+  <th>Weapon</th>
+  <th>Derived per-bullet / per-missile damage</th>
+  <th>Evidence boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Main-body <code>PlasmaBullet01</code></td>
+  <td><code>1.5L + 20</code></td>
+  <td>Body's <code>deiroi_battery_config</code>; base SGO item 3 = 20 in examined variants</td>
+</tr>
+<tr>
+  <td>Leg beam (<code>PulseBullet01</code>)</td>
+  <td><code>1.4 × v</code>, where <code>v=L/10</code></td>
+  <td>Leg-part row, static inference from level setup</td>
+</tr>
+<tr>
+  <td>Leg missile (<code>EntityMissileBody</code>)</td>
+  <td><code>10 × v</code></td>
+  <td>Leg-part row, with missile durability also <code>10 × v</code> through a separate native scaling function</td>
+</tr>
+</tbody>
+</table>
+<p>At <code>L=10</code>, these raw formulas yield 35 for the main plasma shot, 1.4 for a leg beam bullet and 10 for a leg missile. <strong>These numbers are not necessarily observed HP loss</strong> after game-mode and collision/damage routing.</p>
+<p>The binary also reads <code>deiroi_fire_config</code> to determine level-sensitive leg fire timing. That timer path was <strong>not fully traced</strong>, so no definitive Deroy attacks-per-second curve is claimed here.</p>
+<h2 id="model-for-interpreting-enemy-configs">Model for interpreting enemy configs</h2>
+<ol>
+<li>Identify the actual native enemy class and SGO row; a shared visible mesh does not guarantee shared attack code.</li>
+<li>Distinguish raw level <code>L</code> from normalized <code>v=L/10</code> and from the difficulty-selected table value.</li>
+<li>Resolve how many projectiles a fire call creates and how they spread.</li>
+<li>Only then consider online damage and collision filters.</li>
+</ol>
+<h2 id="source-and-related-pages">Source and related pages</h2>
+<p>See <a href="kh-edf6-enemy-attacks.html">EDF6 enemy attacks — original evidence appendix</a>, particularly <code>drone-bullet-info-items</code>, <code>drone-level-expressions</code>, <code>drone-attack-values</code>, <code>imperial-drone-fire-rows</code>, <code>imperial-drone-attack-values</code>, <code>deroy-battery-damage</code> and <code>deroy-attack-values</code>. Related explanations: <a href="edf6-enemy-attacks-insects-ants-bees-spiders-tadpoles.html">insect attack scaling</a> and <a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">physical hit filters</a>.</p>
+<p><strong>Attribution:</strong> novae (ajane), <em>EDF Knowledge Hub</em> (2026-11-14) and original contributors documented in the appendix; static-only interpretation.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#gold-drones-ufosmall507-bullet-info-is-a-mini-expression-language">Gold drones (UfoSmall507): bullet_info is a mini expression language</a><a href="#imperial-drones-ufosmall515-battery-rows-and-difficulty-sensitive-damage">Imperial drones (UfoSmall515): battery rows and difficulty-sensitive damage</a><a href="#deroys-deiroi-the-hull-and-legs-use-different-curves">Deroys (Deiroi): the hull and legs use different curves</a><a href="#model-for-interpreting-enemy-configs">Model for interpreting enemy configs</a><a href="#source-and-related-pages">Source and related pages</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-enemy-attacks-drones-and-deroys"};</script><script src="../assets/site.js" defer></script></body></html>

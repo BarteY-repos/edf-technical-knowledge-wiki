@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 navigation: geometry, collision binding and open reconstruction Current evidence: exact source count, HKT still not byte-exact The natural reconstructed"><title>EDF 4.1 navigation: geometry, collision binding and open reconstruction | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>EDF 4.1 navigation: geometry, collision binding and open reconstruction</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Exact native</div><div id="articleBody"><h2 id="current-evidence-exact-source-count-hkt-still-not-byte-exact">Current evidence: exact source count, HKT still not byte-exact</h2>
+<p>The natural reconstructed R32 source-semantic selection <strong>does</strong> achieve the exact historical 65 group / 1,405 placement / 251 exact-zero / 1,153 yaw / 1 mixed / 4,971 final footprint census. It uses source group-union XZ area, source raw cached-AABB <code>max_xz &gt;= 5.75</code>, 4,994 pre-dedupe instances and 23 naturally scoped FixB semantic removals. This is a <strong>reconstructed candidate</strong>, not recovered historical executable code.</p>
+<p>The historical R1D LOW HKT target remains <strong>381,512 bytes</strong>, SHA-256 <code>87f8b3594f081c9dc758e41a7149971061d0bf6dad41867a6d342507507fc5fb</code>; no currently documented R32 natural carve output matches it. The retained R75 best natural candidate is <strong>381,544 bytes (+32)</strong>; matching face counts and NVMD is insufficient. The older <strong>381,528-byte (+16)</strong> candidate uses a non-natural group swap and is only a forensic control.</p>
+<p>The selected MAPO rows' quaternion/translation source fields were independently enumerated; eight complete component-transform carving variants preserved 4,971 body instances but yielded <strong>no</strong> natural 277-face set under the retained R58 predicate family. Audits through R100 excluded placement aliases, shared Havok shape-object aliases, <strong>multiple base/collision signatures among 63 MAPO-resolved selected groups</strong>, and body-role metadata as alternative 4,971 selectors in the selected corpus. <strong>Two of the 65 selected groups had no captured R100 MAPO signature</strong>, so the audit cannot assert unique source-pair identity for those two; see the <a href="nav-edf41-selected-body-identity-audits.html">65-group source census</a>. These are <strong>offline negative bounds</strong>, not evidence that every possible source-semantic mechanism has been exhausted.</p>
+<p>Read the current <a href="docs-edf41-nav-current.html">NAV technical entry point</a>, <a href="nav-edf41-r1d-source-authority.html">source selection and exact-oracle rules</a>, <a href="nav-edf41-mapo-component-transform-evidence.html">MAPO component semantics</a> and <a href="nav-edf41-selected-body-identity-audits.html">identity/deduplication audits</a>. The detailed earlier R19 experiments below remain as <em>historical diagnostics</em> and should not be presented as the current frontier.</p>
+<h2 id="current-authority-boundary">Current authority boundary</h2>
+<p><strong>Evidence level:</strong> Exact byte oracles + offline reconstruction evidence. EDF6 runtime qualification for the current R1D reconstruction remains pending.</p>
+<p><strong>Implementation rule:</strong> Keep four states separate:</p>
+<ol>
+<li><strong>R1C baseline</strong> — byte-exact and revalidated.</li>
+<li><strong>Historical R1D oracle</strong> — exact target bytes, hashes and classifier census are known.</li>
+<li><strong>R1D resolver/classifier reconstruction</strong> — source binding and the 65-group placement/rotation census are now naturally reproduced, but a compatible candidate body population is reconstructed to exact count, but original historical executable eligibility source and exact final carve remain unrecovered.</li>
+<li><strong>Current carve candidate</strong> — topology and NVMD can match while HKT bytes remain non-exact; it is not authority.</li>
+</ol>
+<p>Do not promote a candidate merely because its triangle count, group count or placement count matches the historical target.</p>
+<h2 id="r1c-is-byte-exact-closed-and-revalidated">R1C is byte-exact closed and revalidated</h2>
+<p><strong>Observed native behavior:</strong> <code>NW_HILLYCITY_LIGHT</code> R1C consists of four NAV tiles with 1,562 vertices and 2,928 triangles.</p>
+<p>The retained exact R1C oracles are:</p>
+<table>
+<thead>
+<tr>
+  <th>Artifact</th>
+  <th>Exact value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>LOW HKT size</td>
+  <td>421,684 B</td>
+</tr>
+<tr>
+  <td>LOW HKT SHA-256</td>
+  <td><code>aabcc26f982c4d9d78697ebc0bb32ab239366cdeeadedf362f748cbeb9842bd2</code></td>
+</tr>
+<tr>
+  <td>HIGH HKT SHA-256</td>
+  <td><code>e144ff813c965b4477001d552390c6b656d16a2fa0228731a749ff66b2422326</code></td>
+</tr>
+<tr>
+  <td>LOW/HIGH NVMD SHA-256</td>
+  <td><code>9285880fbece6169120e6559f84a21439eeeb88b2796f728d18f7194e6b3b2c6</code></td>
+</tr>
+</tbody>
+</table>
+<p>The semantic raster/front-end was independently re-derived from the exact final HKT: all 1,562 grid vertices, 1,464 active cells, 737 AC diagonals and 727 BD diagonals were recovered.</p>
+<p>A retained historical R1C source checkpoint was later recovered and the exact LOW bake was rerun with the optimized backend/recovered schema. It reproduced the historical LOW SHA again.</p>
+<p><strong>Implementation rule:</strong> Treat the R1C bake environment/backend as historical-compatible. The remaining R1D mismatch is not evidence that the backend itself is wrong.</p>
+<h2 id="mapo-binding-resolver-is-closed-to-historical-counts">MAPO binding resolver is closed to historical counts</h2>
+<p><strong>Observed native behavior:</strong> The relevant collision-reference universe contains 40,920 non-empty collision references. The resolver now closes naturally to:</p>
+<ul>
+<li>strict normal dual base + collision identity: <strong>27,018</strong> references;</li>
+<li>literal <code>.hkt</code> / base-only recovery: <strong>+420</strong>;</li>
+<li>StationWindow fallback: <strong>+12</strong>;</li>
+<li>Fix A structural recovery: <strong>+1,945 references / 24 groups</strong>;</li>
+<li>Fix B structural recovery: <strong>+3,988 references / 16 groups / 26 source bodies</strong>;</li>
+<li>final: <strong>33,383 resolved / 7,537 unresolved</strong>.</li>
+</ul>
+<h3 id="fix-a">Fix A</h3>
+<p>Fix A covers source collision groups represented by direct <code>hkpListShape</code> or <code>hkpMoppBvTreeShape -&gt; hkpListShape</code> outside the compact-list path.</p>
+<h3 id="fix-b">Fix B</h3>
+<p>Fix B is no longer a count-fit rule. Source body pair identity <code>base.hkt</code> + <code>base_hk.hkt</code> aligns with MAPO base/collision identities:</p>
+<ul>
+<li>natural dual matching exposes <strong>25 groups / 5,846 references</strong>;</li>
+<li><strong>9 MOPP -&gt; StorageExtendedMesh residual aliases / 1,858 references</strong> remain fail-closed;</li>
+<li>the remaining <strong>16 groups / 3,988 references / 26 source bodies</strong> are the historical Fix B set.</li>
+</ul>
+<p>StationWindow fallback is exactly 12 <code>nw_hct_stationwindow1_hk</code> slots under the monorail-station source relation.</p>
+<p><strong>Implementation rule:</strong> Do not reopen Fix A/Fix B count hunting unless contradictory source evidence appears. Do not approximate the fail-closed MOPP/StorageExtendedMesh residual aliases.</p>
+<h2 id="historical-r1d-oracle">Historical R1D oracle</h2>
+<p>The exact historical target is:</p>
+<table>
+<thead>
+<tr>
+  <th>Property</th>
+  <th>Oracle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Vertices</td>
+  <td>1,562</td>
+</tr>
+<tr>
+  <td>Triangles</td>
+  <td>2,651</td>
+</tr>
+<tr>
+  <td>Removed triangles</td>
+  <td>277</td>
+</tr>
+<tr>
+  <td>LOW HKT size</td>
+  <td>381,512 B</td>
+</tr>
+<tr>
+  <td>LOW HKT SHA-256</td>
+  <td><code>87f8b3594f081c9dc758e41a7149971061d0bf6dad41867a6d342507507fc5fb</code></td>
+</tr>
+<tr>
+  <td>HIGH HKT SHA-256</td>
+  <td><code>c4878388bca0f41555762667e4eb7c10a5f4d9fa1f9a08b7200001e9f8d206f0</code></td>
+</tr>
+<tr>
+  <td>NVMD SHA-256</td>
+  <td><code>9285880fbece6169120e6559f84a21439eeeb88b2796f728d18f7194e6b3b2c6</code></td>
+</tr>
+</tbody>
+</table>
+<p>Historical classifier/census constraints are:</p>
+<ul>
+<li><strong>65</strong> source-static groups;</li>
+<li><strong>1,405</strong> selected placements;</li>
+<li><strong>251</strong> exact-zero rotations;</li>
+<li><strong>1,153</strong> yaw-only rotations;</li>
+<li><strong>1</strong> mixed-XZ rotation;</li>
+<li><strong>4,971</strong> active body-level footprints;</li>
+<li>retained body-classifier condition: <code>max_xz &gt;= 5.75</code>.</li>
+</ul>
+<h2 id="archived-pre-r32-classifier-diagnostics-superseded-by-current-r32-reconstruction">Archived pre-R32 classifier diagnostics (superseded by current R32 reconstruction)</h2>
+<p>The next paragraphs describe an earlier source recovery phase. R75/R100 evidence at the top of this article supersedes their <em>current blocker</em> wording; retained numerical counterexamples remain useful.</p>
+<p><strong>Observed reconstruction behavior:</strong> Build each group union AABB after transforming source rigid-body geometry by the body <code>motionState</code>, then rank the groups by XZ area. The natural top-65 selection reproduces the historical placement/rotation census exactly:</p>
+<table>
+<thead>
+<tr>
+  <th>Census</th>
+  <th style="text-align:right">Historical target</th>
+  <th style="text-align:right">Natural reconstruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>groups</td>
+  <td style="text-align:right">65</td>
+  <td style="text-align:right">65</td>
+</tr>
+<tr>
+  <td>placements</td>
+  <td style="text-align:right">1,405</td>
+  <td style="text-align:right">1,405</td>
+</tr>
+<tr>
+  <td>exact-zero</td>
+  <td style="text-align:right">251</td>
+  <td style="text-align:right">251</td>
+</tr>
+<tr>
+  <td>yaw-only</td>
+  <td style="text-align:right">1,153</td>
+  <td style="text-align:right">1,153</td>
+</tr>
+<tr>
+  <td>mixed-XZ</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+</tbody>
+</table>
+<p>Therefore the current blocker is <strong>not</strong> MAPO resolution, group count, placement binding or rotation classification.</p>
+<p>The remaining blocker is the historical pre-classifier construction of <code>GroupGeometry.pieces</code>: the active body-level subset that existed before R3 <code>classification_candidates()</code> / <code>evaluate()</code>.</p>
+<h3 id="recovered-r3-evaluation-semantics">Recovered R3 evaluation semantics</h3>
+<p>The retained R3 logic behaves as follows:</p>
+<ol>
+<li>select source-static group candidates;</li>
+<li>create rows from placements intersecting selected groups;</li>
+<li>activate footprint accounting only for <code>exact_zero</code> placements;</li>
+<li>for each selected group present in such a placement, accumulate <code>len(group_geometries[g].pieces)</code>.</li>
+</ol>
+<p>The current full geometry is too broad. The historical <code>pieces</code> population must already have been reduced to an eligible active-body subset before this evaluation stage.</p>
+<h2 id="body-classifier-diagnostics-already-closed">Body-classifier diagnostics already closed</h2>
+<p>The following discriminators have already been tested. Do not repeat them as blind sweeps:</p>
+<ul>
+<li>compatibility/body-local <code>max_xz &gt;= 5.75</code> over the natural selected population: <strong>4,913 footprints</strong>;</li>
+<li>raw <code>hkpListShape.aabbHalfExtents</code> equivalent: <strong>4,916</strong>;</li>
+<li>body-filter -&gt; motion-state group build -&gt; natural top-65: <strong>4,944</strong> while preserving the exact placement/rotation census;</li>
+<li>manually adding one convex radius: <strong>4,955</strong> — invalid;</li>
+<li>manually adding two convex radii: <strong>4,992</strong> — invalid;</li>
+<li>threshold-change enumeration around <code>5.75</code>: <strong>no 4,971 hit</strong>;</li>
+<li>simple <code>width X &gt;= 5.75 &amp;&amp; width Z &gt;= 5.75</code>: recreates the older near-state <strong>59 groups / 1,361 placements / 246 zero / 1,114 yaw / 1 mixed</strong>, not the historical classifier;</li>
+<li><code>nw_hct_monorailpole1_hk</code> explains +44 placements (+5 zero / +39 yaw) relative to that near-state, but does not recover the complete historical active-body builder;</li>
+<li>a sparse MILP can force the numerical 65/1,405/251/1,153/1/4,971 target, but requires about 22 group swaps versus the natural top-65 and is <strong>diagnostic only</strong>, not historical evidence;</li>
+<li><code>sk_car_bus01_hk.polymsh3</code>, the remaining parser/body failure, has zero exact-zero placements and sits outside the natural top-65, so it cannot explain the missing footprints.</li>
+</ul>
+<p><strong>Known exception:</strong> <code>hkpListShape.aabbHalfExtents</code> already includes child convex radius. Adding radius again double-counts geometry and is not a valid reconstruction path.</p>
+<h2 id="earlier-inferred-two-stage-model-not-recovered-source-code">Earlier inferred two-stage model (not recovered source code)</h2>
+<p>An earlier evidence-consistent interpretation was a two-stage classifier; <strong>R19 found that the executable body-filter builder is not preserved</strong>, so this remains a model rather than a recovered algorithm:</p>
+<ol>
+<li>a historical <strong>pre-classifier active-body builder</strong> constructs the eligible <code>GroupGeometry.pieces</code> subset using body-level semantics, with <code>max_xz &gt;= 5.75</code> retained as fixed historical evidence;</li>
+<li>R3-style group metrics/ranking and <code>evaluate()</code> operate on that already-filtered piece population.</li>
+</ol>
+<p>This reconciles the retained <code>max_xz &gt;= 5.75</code> “body classifier” note with the later R3 code, which computes group metrics over whatever <code>pieces</code> population it receives.</p>
+<p><strong>Implementation rule:</strong> Recover the builder semantics. Do not tune <code>5.75</code>, substitute MILP-selected groups or redesign the downstream R3 evaluator without source evidence.</p>
+<h2 id="earlier-carve-candidates-historical-forensic-controls">Earlier carve candidates (historical forensic controls)</h2>
+<p>Current R32/R75 natural carve results and the non-natural +16-byte group-swap control are distinguished above. The older paths below are not current authority.</p>
+<p>The historically closest non-exact carve remains:</p>
+<ul>
+<li>277 removed;</li>
+<li>1,562 vertices / 2,651 triangles;</li>
+<li>tile face counts 747 / 709 / 715 / 604;</li>
+<li>2,775 clipped tile faces;</li>
+<li>1,818 clipped vertices;</li>
+<li>exact NVMD;</li>
+<li>LOW HKT <strong>381,528 B</strong>, i.e. <strong>+16 B</strong> against the historical 381,512 B oracle;</li>
+<li>wrong LOW SHA.</li>
+</ul>
+<p>Previously falsified families remain closed:</p>
+<ul>
+<li>early AABB candidate: 381,700 B, wrong;</li>
+<li>full source SAT +0.05 m clearance: 380,892 B, wrong;</li>
+<li>six immediate LOCAL277 boundary subsets: no exact LOW hit.</li>
+</ul>
+<p><strong>Do not assume:</strong> The 16-byte size delta permits deleting a seam record manually. Correct byte identity must emerge from correct source geometry and carve semantics.</p>
+<h2 id="reconstruction-rule-from-the-retained-source-semantic-evidence">Reconstruction rule from the retained source-semantic evidence</h2>
+<p>Use the R32 reconstructed candidate for comparison, not arbitrary group swaps or thresholds. Preserve raw cached-AABB boundary behavior, 23 FixB deduplication removals, source-identity links and the body-local R58 predicate family. The historical R1D original body filter and exact HKT remain open, so additional probes require a <strong>new source-backed discriminator</strong> and should first preserve the complete census before any LOW bake. Do not manually delete seam records or infer HKT byte identity from equal topology.</p>
+<h2 id="runtime-boundary">Runtime boundary</h2>
+<p><strong>Unresolved:</strong> Current R1D reconstruction has no Windows/MSVC, EDF6 runtime, mission-restart, full-138-mission or two-PC PASS. Offline/static equality on counts, group census or NVMD is not runtime parity and is not byte-exact R1D authority.</p>
+<h2 id="newer-functional-hillycity-pilot-is-not-a-historical-r1d-oracle">Newer functional HillyCity pilot is not a historical R1D oracle</h2>
+<p>The separate EDF4.1→EDF6 <em>functionality</em> branch selected a source-derived <code>NW_HILLYCITY_LIGHT</code> NAV candidate (<strong>LOW 381,544 bytes / HIGH 381,544 bytes, NVMD 18,040 bytes</strong>), instead of geometrically unrelated EDF6 donor navigation. That candidate follows the 1,562-vertex / 2,928-face R1C raster and a 277-face body-local carve to 2,651 faces. It is <strong>not byte-identical</strong> to the recovered historical <strong>381,512-byte R1D LOW oracle</strong>. These two statements are not contradictory: one is a historical exact-output reconstruction target; the other is a game-functionality experiment with known, structurally consistent source geometry.</p>
+<p>A later R12 source audit retained the HillyCity pilot but left <strong>Windows compilation and real EDF6 pathing tests pending</strong>. Neither the R1D comparison nor pilot's offline output hashes prove the 16-map navigation problem has been fixed. Read <a href="maps-%26-navigation-edf-4-1-donor-nav-and-sk-collision-boundary.html">donor-vs-source NAV boundary and pilot output identity</a>.</p>
+<h2 id="further-original-geometry-evidence">Further original geometry evidence</h2>
+<p>The bounded original MAD survey of 16 EDF4.1 map families is reported separately at <a href="edf41-original-mad-static-geometry-16-map-3d-surface-survey.html">16-map static-mesh geometry and 3D connectivity</a>. Its 31-body sample and diagnostic component counts do <strong>not</strong> qualify NPC paths or replace R1D HKT/NVMD authority.</p>
+<h2 id="independent-original-source-4-m-grid-and-obstacle-contact-research">Independent original-source 4 m grid and obstacle-contact research</h2>
+<p>There is <strong>no justified arithmetic shortcut</strong> between the HillyCity historical R1D <strong>4,971-footprint oracle</strong> and the original <code>SK_HEIGEN02</code> <strong>265 static-MAD placements</strong> in the separate 4 m SHFB terrain study. The former reconstructs a particular historical carving/identity pipeline and tests byte-level HKT equivalence; the latter asks whether raw source terrain cells are geometrically close to map objects under an illustrative capsule. They use different maps, predicates, resource scopes and outputs.</p>
+<p>The seven original SK map source domains have <strong>2 m raw SHFB spacing</strong> and experimental <strong>4 m HKT/NVMD tile feasibility</strong>, but no full native NAV policy is recovered for all 16 map families. In the one-map <code>SK_HEIGEN02</code> R35 survey, 166 source instances were treated as closed geometric solids and 99 as open, with proximity counts varying strongly across a <strong>0.25 / 0.45 / 0.65 m</strong> test radius. These are <strong>sample agent shapes, not EDF6 Ranger/Fencer/Hector dimensions</strong>. In particular, using a closed-mesh proximity mask in place of qualified game collision classification could <em>introduce</em> new stuck-NPC errors.</p>
+<p>The bounded 4-tile result demonstrates that existing HKT/NVMD machinery can serialize two different source occupancy hypotheses while keeping tile seams and NVMD structure consistent. It does not justify deploying either hypothesis as a correct source-native navigation mesh. See <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">seven SK contact detail</a> and <a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">HKT/NVMD binary compatibility</a>.</p>
+<h2 id="separate-source-collision-survey-through-r45-is-not-an-r1d-byte-exact-fix">Separate source-collision survey through R45 is not an R1D byte-exact fix</h2>
+<p>The original EDF4.1 non-SK source-geometry series R36–R45 examines collision-body shape categories, MAPB group links, placed-geometry hypotheses and bounded 4 m spatial windows. It is <strong>not the same validation target</strong> as the historical R1D 381,512-byte LOW HKT oracle above. The survey's <strong>145 originally unmatched explicit MAPO <code>.hkt</code> records were resolved to source compact rigid bodies</strong> rather than missing files, and its nine-map group graph contains <strong>17 owners / 169 children</strong>. Neither fact recovers R1D's exact historical carve predicate or native EDF6 agent behavior.</p>
+<p>The six non-SK city surveys cover only <strong>768 of 8,402</strong> planned 64 m geometry windows. There is no source-backed reason to substitute those survey percentages, the 39,252 MAPB record population or the R1D 4,971 body-level footprints for one another: their denominators and tests are different. The resolved resources are especially valuable when assessing missing collision vs wrong navigation diagnoses, but actual NPC pathfinding remains untested. See <a href="edf41-original-mad-static-geometry-16-map-3d-surface-survey.html">source geometry and multilayer columns</a>, <a href="maps-%26-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure.html">MAPB/MAPO named collisions</a> and <a href="maps-%26-navigation-edf-4-1-donor-nav-and-sk-collision-boundary.html">donor NAV versus source evidence</a>.</p>
+
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>SESSION_CLOSE_2026-11-14_R1D_CLASSIFIER_FRONTIER/START_HERE_EDF41_SESSION_CLOSE_2026-11-14.md</li><li>SESSION_CLOSE_2026-11-14_R1D_CLASSIFIER_FRONTIER/EDF41_R1D_CLASSIFIER_FRONTIER_2026-11-14.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_NAV_INTEGRATION_DECISIONS.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_BAKE_COMPARE.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_AGENT_CAPSULE_ALL_265.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R33_PARALLEL_NATIVE_GRID/R33_REAL_SK_HEIGEN02_64TILE_LOW_HIGH.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R42_MAPO_HKT_COLLISION_ROUTING/EDF41_R42_DELTA_ON_R41_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R45_GROUP_COMPACT_HKT_RESOLUTION/EDF41_R45_DELTA_ON_R44_2026-11-16.zip</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#current-evidence-exact-source-count-hkt-still-not-byte-exact">Current evidence: exact source count, HKT still not byte-exact</a><a href="#current-authority-boundary">Current authority boundary</a><a href="#r1c-is-byte-exact-closed-and-revalidated">R1C is byte-exact closed and revalidated</a><a href="#mapo-binding-resolver-is-closed-to-historical-counts">MAPO binding resolver is closed to historical counts</a><a href="#fix-a">　Fix A</a><a href="#fix-b">　Fix B</a><a href="#historical-r1d-oracle">Historical R1D oracle</a><a href="#archived-pre-r32-classifier-diagnostics-superseded-by-current-r32-reconstruction">Archived pre-R32 classifier diagnostics (superseded by current R32 reconstruction)</a><a href="#recovered-r3-evaluation-semantics">　Recovered R3 evaluation semantics</a><a href="#body-classifier-diagnostics-already-closed">Body-classifier diagnostics already closed</a><a href="#earlier-inferred-two-stage-model-not-recovered-source-code">Earlier inferred two-stage model (not recovered source code)</a><a href="#earlier-carve-candidates-historical-forensic-controls">Earlier carve candidates (historical forensic controls)</a><a href="#reconstruction-rule-from-the-retained-source-semantic-evidence">Reconstruction rule from the retained source-semantic evidence</a><a href="#runtime-boundary">Runtime boundary</a><a href="#newer-functional-hillycity-pilot-is-not-a-historical-r1d-oracle">Newer functional HillyCity pilot is not a historical R1D oracle</a><a href="#further-original-geometry-evidence">Further original geometry evidence</a><a href="#independent-original-source-4-m-grid-and-obstacle-contact-research">Independent original-source 4 m grid and obstacle-contact research</a><a href="#separate-source-collision-survey-through-r45-is-not-an-r1d-byte-exact-fix">Separate source-collision survey through R45 is not an R1D byte-exact fix</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d"};</script><script src="../assets/site.js" defer></script></body></html>

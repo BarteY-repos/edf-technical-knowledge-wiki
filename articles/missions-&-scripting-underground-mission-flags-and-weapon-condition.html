@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 underground mission flags, Air Raider support and runtime conditions A red weapon in the mission menu is not equivalent to blocking its use in the mission."><title>EDF6 underground mission flags, Air Raider support and runtime conditions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 underground mission flags, Air Raider support and runtime conditions</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Native binary and three direct runtime observations; scope-bound</div><div id="articleBody"><p><strong>A red weapon in the mission menu is not equivalent to blocking its use in the mission.</strong> The EDF5→EDF6 underground mission-port research identified separate mechanisms for list metadata, loadout presentation and the weapon-condition state used by the game during actual support/vehicle activation.</p>
+<p>This article reports native binary and in-game observations. The bit-field meanings below are scoped to the examined EDF6 mission-list profile, not an assertion that every possible mission flag is decoded identically in all contexts.</p>
+<h2 id="two-paths-from-mission-flags-to-no-support">Two paths from mission flags to <code>NO_SUPPORT</code></h2>
+<p>In the analyzed <code>MissionScriptASImplement</code> metadata application logic (near <code>EDF+0x1DDF50</code> and <code>EDF+0x1DE770</code> in the qualified DLL), both of these conditions set raw <code>WeaponCondition=1</code>:</p>
+<ul>
+<li><code>flags &amp; 0x20</code>: ordinary underground-profile route. It also performs additional <code>0x20</code>-specific side effects.</li>
+<li><code>flags &amp; 0x200</code>: an independent route from bit 9 that selects the same no-support condition <strong>without</strong> that <code>0x20</code> side-effect block.</li>
+</ul>
+<p>The corresponding observed state values are <code>0</code> (normal), <code>1</code> (no-support) and <code>2</code> (force-enable/override family). EDF6 exposes the native AngelScript API <code>SetWeaponCondition(::WeaponCondition)</code>. Compatibility checks also consume a weapon's <code>use_underground</code> property, observed at weapon object <code>+0x228</code> in the examined build.</p>
+<h2 id="why-values-8-9-40-and-520-are-not-interchangeable">Why values 8, 9, 40 and 520 are not interchangeable</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Decimal flags</th>
+  <th>Hex</th>
+  <th>Menu restriction mask <code>0x227</code></th>
+  <th>Raw gameplay <code>WeaponCondition</code> in the examined apply path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>8</code></td>
+  <td><code>0x008</code></td>
+  <td>Clear</td>
+  <td><code>0</code> — normal</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9</code></td>
+  <td><code>0x009</code></td>
+  <td>Hit via bit 0</td>
+  <td><code>0</code> — normal</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>40</code></td>
+  <td><code>0x028</code></td>
+  <td>Hit via bit <code>0x20</code></td>
+  <td><code>1</code> — no support</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>520</code></td>
+  <td><code>0x208</code></td>
+  <td>Hit via bit <code>0x200</code></td>
+  <td><code>1</code> — no support</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>552</code></td>
+  <td><code>0x228</code></td>
+  <td>Hit via both higher bits</td>
+  <td><code>1</code> — no support</td>
+</tr>
+</tbody>
+</table>
+<p><code>flags=9</code> is an especially useful discriminator: it can produce an apparently restricted loadout menu without enforcing the <strong>gameplay</strong> no-support condition. The UI state alone must not be used as a pass/fail test for an underground port.</p>
+<p>Native EDF6 cave missions were observed using <strong><code>flags=40</code></strong>, including the M050 comparison mission. A separate vanilla row <code>RM000</code> (&quot;Today's Plans&quot;, using <code>EDFRoom601</code>) uses <strong><code>flags=520</code></strong> in both OFFLINE and ONLINE lists. This proves <code>0x200</code> is a real game-used condition bit, not a user-created magic constant; its broader symbolic name remains unresolved.</p>
+<h2 id="what-an-underground-mission-should-actually-do">What an underground mission should actually do</h2>
+<p>In native EDF6, incompatible Air Raider equipment <strong>may still be selected/equipped before starting the mission</strong> and displayed in red. The decisive test is whether the incompatible conventional air raid or vehicle/support request <strong>functions during gameplay</strong>.</p>
+<p>Three custom EDF5-content missions were later retested with the ordinary native-like flag value <code>40</code>:</p>
+<table>
+<thead>
+<tr>
+  <th>Tested custom mission</th>
+  <th style="text-align:right">List flags</th>
+  <th>In-mission restriction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MissionPack03 <code>M000</code></td>
+  <td style="text-align:right">40</td>
+  <td><strong>Runtime PASS</strong> in the reported test</td>
+</tr>
+<tr>
+  <td>MissionPack03 <code>M001</code></td>
+  <td style="text-align:right">40</td>
+  <td><strong>Runtime PASS</strong> in the reported test</td>
+</tr>
+<tr>
+  <td>MissionPack04 <code>DM019</code></td>
+  <td style="text-align:right">40</td>
+  <td><strong>Runtime PASS</strong> in the reported test</td>
+</tr>
+</tbody>
+</table>
+<p>These later tests <strong>supersede</strong> the older interpretation that M000/M001 were inherently broken or that custom MissionPacks could not apply <code>0x20</code>. The original diagnosis confused menu restrictions, temporary deployment mismatches and the actual activation criterion.</p>
+<h2 id="conversion-and-authoring-rules">Conversion and authoring rules</h2>
+<p>The audited EDF5-derived MissionPack corpus classified <strong>15 underground missions</strong>:</p>
+<ul>
+<li>MP03: <code>M000</code>, <code>M001</code>, <code>M014</code>, <code>M027</code>, <code>M028</code>, <code>M029</code>, <code>M056</code>, <code>M057</code>, <code>M062</code>, <code>M072_2</code>, <code>M204</code>;</li>
+<li>MP04: <code>DM001</code>, <code>DM007</code>, <code>DM019</code>;</li>
+<li>MP05: <code>DM007_2</code>.</li>
+</ul>
+<p>The documented production metadata policy uses <strong><code>flags=40</code></strong> on those 15 rows, with standard surface rows using <code>8</code>. Keep this target list aligned with the correct OFFLINE/ONLINE mission ordinals and companion TXT/image resources; a repair to a stale LIST can affect save identity and presentation independently of weapon restrictions.</p>
+<p><strong>Do not replace every underground <code>40</code> with <code>520</code> or <code>552</code>.</strong> Bit <code>0x20</code> has additional native mission-profile effects absent from <code>0x200</code>; there is no evidence that such a wholesale replacement is safe or necessary. Likewise, adding <code>SetWeaponCondition(NO_SUPPORT)</code> to every mission script was an experimental diagnostic, not a required production architecture.</p>
+<h2 id="what-remains-uncertain">What remains uncertain</h2>
+<p>The three tested missions establish correctness <strong>for those tested runtime cases</strong>. They do not certify every underground mission, DLC combination, game build or custom loader. A fresh case should be investigated by comparing the deployed LIST row, selected mode/mission record, global WeaponCondition during mission setup, and the actual support activation result — not by judging the equipment's color alone.</p>
+<p>For the wider metadata rules see <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">shared progression and mission LIST schema</a> and <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">LIST, text and preview images</a>.</p>
+<h2 id="older-candidate-diagnostics-not-current-production-rules">Older candidate diagnostics (not current production rules)</h2>
+<p>The initial M000/M001 investigations also examined a shared <code>OnlineLimitsDisabled</code> UI setter patch, host-side <code>ApplyModeNo</code> refresh and an experimental per-mission <code>SetWeaponCondition</code> insertion. These did <strong>not</strong> establish a mandatory new mission-authoring policy; the later in-game <code>flags=40</code> positives above supersede early assumptions about red loadout entries. See <a href="missions-edf5-underground-ui-diagnostics.html">scoped diagnostic history</a>.</p>
+<h2 id="historical-29-row-diagnostic-is-not-the-final-two-mode-census">Historical 29-row diagnostic is not the final two-mode census</h2>
+<p>The first underground-only list repair changed <code>field10</code> from <code>8</code> to <code>40</code> for <strong>15 unique missions but only 29 row instances</strong>, because the older MP03 ONLINE list still omitted <code>M000</code> (112 OFFLINE / 111 ONLINE). The subsequent EDF6 shared-progress correction placed M000 in <em>both</em> 112-row mode lists. Therefore <strong>29 is a historical delta count</strong>, not the intended final underground-entry total across all six LIST files; there are 30 mode-scoped occurrences after the unified list correction.</p>
+<p>A nearby but unrelated native helper named <code>SetUndergroundSoundReverve()</code> was examined: it supplies <code>0.25</code> to <code>SetMapEnvironment_SoundReverve(float)</code>. This is an <strong>audio reverb adjustment</strong>, not a replacement for the mission metadata <code>0x20</code> underground condition or a way to enforce support restrictions.</p>
+<p><strong>Source:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R2_UNDERGROUND/EDF5_MISSIONPACK03_04_05_UNDERGROUND_PARITY_AUDIT_2026-09-02.json</code> and later R3 shared-progress audit.</p>
+<h2 id="exact-map-uri-and-mode-ordinal-table">Exact map URI and mode-ordinal table</h2>
+<p>The separate <a href="missions-edf5-derived-underground-map-uri-and-list-flag-census.html">15-mission underground map-reference census</a> gives the original-case <code>Map()</code> URI for every source-derived underground mission and the zero-based OFFLINE/ONLINE indices in the later shared-progress converted LISTs. Its 30 rows are <strong>static LIST evidence</strong>, not 30 runtime passes.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_MISSIONPACK_UNDERGROUND_WEAPON_RESTRICTION_LEDGER_2026-09-03.md (sections 17–19 final supersession)</li><li>R7_M000_M001_NO_SUPPORT_AUDIT.json (diagnostic only, superseded as production proposal)</li><li>ONLINE_HOST_MODE_REFRESH_AUDIT_R5_2026-09-03.json (obsolete diagnosis)</li><li>FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-paths-from-mission-flags-to-no-support">Two paths from mission flags to NO_SUPPORT</a><a href="#why-values-8-9-40-and-520-are-not-interchangeable">Why values 8, 9, 40 and 520 are not interchangeable</a><a href="#what-an-underground-mission-should-actually-do">What an underground mission should actually do</a><a href="#conversion-and-authoring-rules">Conversion and authoring rules</a><a href="#what-remains-uncertain">What remains uncertain</a><a href="#older-candidate-diagnostics-not-current-production-rules">Older candidate diagnostics (not current production rules)</a><a href="#historical-29-row-diagnostic-is-not-the-final-two-mode-census">Historical 29-row diagnostic is not the final two-mode census</a><a href="#exact-map-uri-and-mode-ordinal-table">Exact map URI and mode-ordinal table</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-underground-mission-flags-and-weapon-condition"};</script><script src="../assets/site.js" defer></script></body></html>

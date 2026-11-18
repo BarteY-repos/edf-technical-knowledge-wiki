@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 — damage numbers have their own native layout and animation Damage values are not displayed by a generic floating text routine alone. EDF6&#39;s LYT_HUDDAMAGE."><title>EDF6 damage-number HUD: seven native styles, SGO timing, positions and digit formatting | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / HUD and rendering</div><h1>EDF6 damage-number HUD: seven native styles, SGO timing, positions and digit formatting</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">HUD and rendering</span></div><div class="referencebadge">Technical reference · Build-scoped static analysis; original contributor evidence grades cited; no new R126 gameplay runtime</div><div id="articleBody"><p>Damage values are not displayed by a generic floating text routine alone. EDF6's <code>LYT_HUDDAMAGE.SGO</code> describes seven drawing styles and layout modes; the game projects world anchors into UI space, animates position/color/scale, formats decimal text and queues digit sprites. <strong>The original configuration file, not an external editor, owns these defaults.</strong></p>
+<h2 id="seven-named-sgo-styles">Seven named SGO styles</h2>
+<table>
+<thead>
+<tr>
+  <th>Named style</th>
+  <th>Typical native behavior</th>
+  <th>Lifetime in source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>hit_every</code></td>
+  <td>Every hit; a moving per-hit number</td>
+  <td>0.8 s</td>
+</tr>
+<tr>
+  <td><code>AboveIconHistory</code></td>
+  <td>Fixed recent-number history list</td>
+  <td>3.0 s</td>
+</tr>
+<tr>
+  <td><code>hit</code></td>
+  <td>Per-target placement</td>
+  <td>0.8 s</td>
+</tr>
+<tr>
+  <td><code>AboveIcon</code></td>
+  <td>One total over its icon</td>
+  <td>0.8 s</td>
+</tr>
+<tr>
+  <td><code>ReticleSideHistory</code></td>
+  <td>Recent history beside reticle</td>
+  <td>0.8 s</td>
+</tr>
+<tr>
+  <td><code>ReticleSide</code></td>
+  <td>One total beside reticle</td>
+  <td>0.8 s</td>
+</tr>
+<tr>
+  <td><code>aim_stack</code></td>
+  <td>Stack beneath a target</td>
+  <td>0.8 s</td>
+</tr>
+</tbody>
+</table>
+<p>The source identifies these as <code>DamageDispParam_&lt;style&gt;</code> rows. Each row has lifetime, pop fraction and pop size, display rules, spacing and font parameters. Keyframe records are <code>(frame, value, ease)</code>; the <code>AboveIconHistory</code> opacity, for example, remains at one through frame 160 then falls to zero by frame 180 during its three-second lifetime.</p>
+<h2 id="projecting-world-positions">Projecting world positions</h2>
+<p>For on-target placement, the game projects both the contact position and that position with a defined world offset. It chooses a minimum <strong>90-pixel</strong> vertical gap or the projected <strong>1.25-meter</strong> offset, whichever produces the larger displacement. This means the text location depends on camera projection and is not simply a fixed world-space billboard.</p>
+<p>Fixed list styles place more recent results first and space each line by a configured count; vehicle display mode additionally scales its displayed numbers. Native default fixed positions differ for Wing Diver, other soldier classes and vehicle mode.</p>
+<h2 id="pop-and-numeric-text">Pop and numeric text</h2>
+<p>The original pop-size animation uses a cosine ease to shrink an initially enlarged number to normal scale. Its digit formatter has thresholds for two, one or zero decimals rather than a uniform integer rounding rule: under 10, fractions of at least <code>0.01</code> use two decimals; under 100, fractions of at least <code>0.1</code> can use one. The number texture routine also accounts for a trailing fixed-width sequence when calculating visual alignment.</p>
+<p>A rendering quirk noted in source research is that the original digit material constants are applied <strong>before</strong> the per-number drawing loop. Although each record has its own color values, the shared material can show only one of those colors at a time. The contributor identified this statically and separately tested a modified color-upload path; do not call that behavior a new R126 runtime observation.</p>
+<p><strong>Evidence and credit:</strong> <code>kh-edf6-damage-numbers</code>: <code>damage-style-rows-vanilla</code>, <code>damage-keyframes</code>, <code>damage-placement</code>, <code>damage-fixed-list-layout</code>, <code>damage-pop-curve</code>, <code>digit-text-format</code>, <code>digit-color-upload</code>; novae (ajane), build <code>steam-678ccb46</code>. Source-file values and static reverse engineering; no new R126 game test.</p>
+<h2 id="additional-native-game-references">Additional native-game references</h2>
+<ul>
+<li><a href="edf6-hud-follower-bars-font-fallback-and-spot-marker.html">EDF6 follower health bars and text rendering</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 — kh-edf6-damage-numbers (fact IDs retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#seven-named-sgo-styles">Seven named SGO styles</a><a href="#projecting-world-positions">Projecting world positions</a><a href="#pop-and-numeric-text">Pop and numeric text</a><a href="#additional-native-game-references">Additional native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-damage-number-ui-native-sgo-styles-projection-and-digit-color"};</script><script src="../assets/site.js" defer></script></body></html>

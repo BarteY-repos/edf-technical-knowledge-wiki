@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Metadata descriptors and object values use different encodings The Havok TNA1 and TBDY streams use variable-length packed integers. Ordinary leading patterns ar"><title>EDF6 Havok tagfile internals: packed integers, TBDY schema and ITEM references | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / File formats / Havok</div><h1>EDF6 Havok tagfile internals: packed integers, TBDY schema and ITEM references</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">File formats / Havok</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>The Havok <code>TNA1</code> and <code>TBDY</code> streams use variable-length packed integers. Ordinary leading patterns are <code>0xxxxxxx</code> (1 byte, 7 bits), <code>10xxxxxx</code> (2 bytes, 14 bits), <code>110xxxxx</code> (3 bytes, 21 bits) and <code>111xxxxx</code> (4 bytes). <code>TNA1</code> additionally recognizes <strong><code>0xE8</code> followed by a big-endian u32</strong>, used for large numeric values. Type and member names are referred to by an indexed string table padded with <code>0xFF</code>.</p>
+<p><code>TBDY</code> is not a stream of ordinary C structs. It specifies a packed type index, parent, flag mask and optional sub-type flags, version, serialized size/alignment, member descriptors and interfaces. The known sub-type families distinguish bool, integer, float, pointer, class, array and tuple. For example the source identifies type flag <strong>0x05</strong> for floating point, <strong>0x06</strong> for pointer, <strong>0x07</strong> for class and <strong>0x08</strong> for array. These describe the <strong>serialized DATA</strong> layout, which need not equal x64 runtime class memory offsets.</p>
+<h2 id="item-references">ITEM references</h2>
+<p><code>INDX/ITEM</code> contains <strong>12-byte records</strong>. Record zero is null. Each record stores the item flags/type index, <strong>offset from DATA's start</strong> and element count. Pointer, array and string fields inside DATA store <strong>u32 item indices</strong> rather than native memory pointers.</p>
+<table>
+<thead>
+<tr>
+  <th>Value concept</th>
+  <th>Native tagfile representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>hkRefPtr&lt;T&gt;</code> and <code>T*</code></td>
+  <td>u32 index into ITEM</td>
+</tr>
+<tr>
+  <td><code>hkArray&lt;T&gt;</code></td>
+  <td>u32 item index; length obtained from ITEM</td>
+</tr>
+<tr>
+  <td><code>hkStringPtr</code></td>
+  <td>u32 index to a NUL-terminated char item</td>
+</tr>
+<tr>
+  <td><code>hkReal</code></td>
+  <td>little-endian IEEE float32</td>
+</tr>
+<tr>
+  <td><code>hkHalf16</code></td>
+  <td><strong>upper 16 bits of float32 (bfloat16)</strong>, not IEEE binary16</td>
+</tr>
+<tr>
+  <td>Tuple</td>
+  <td>Fixed-size type-defined sequence</td>
+</tr>
+</tbody>
+</table>
+<p>The source has <strong>not decoded <code>hkUFloat8</code></strong> in this corpus. It would be incorrect to describe it using a guessed IEEE half/byte mapping. Likewise an unused type declaration in TNA1 may have no corresponding TBDY object entry when no instance requires it.</p>
+<p><strong>Source:</strong> <code>edf6/havok-format.md</code>, <code>tagfile-packed-ints</code>, <code>tagfile-tbdy</code>, <code>tagfile-items-values</code>. Static tagfile format analysis.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf6/havok-format.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#item-references">ITEM references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-havok-tna1-tbdy-packed-integer-item-pointer-layout"};</script><script src="../assets/site.js" defer></script></body></html>

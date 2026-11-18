@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 mission thumbnail identity: LIST field2 is the key The September 2026 uncertainty over whether mission preview images were selected by name or a row ordina"><title>EDF6 mission thumbnails: LIST field2 → base IMAGE.RAB named DDS entry | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 mission thumbnails: LIST field2 → base IMAGE.RAB named DDS entry</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 6</span><span class="chip">EDF 4.1</span></div><div class="referencebadge">Technical reference · Prior Procmon/runtime-positive archive routing + R29 named-entry source contract; R29 authored deploy offline-only</div><div id="articleBody"><p><strong>The September 2026 uncertainty over whether mission preview images were selected by name or a row ordinal was resolved for the studied EDF6 mission LIST/RAB format.</strong> Later R29 source authority and prior runtime file-access evidence establish a named DDS entry derived from <strong>LIST <code>field2</code></strong>, rather than an anonymous <code>image_at_row_index</code> relationship.</p>
+<h2 id="the-actual-runtime-archive-path">The actual runtime archive path</h2>
+<p>The observed target game requests these <strong>base-level archives</strong>:</p>
+<pre><code class="language-text">Mods/MISSION/MISSIONLIST.OFFLINE.IMAGE.RAB
+Mods/MISSION/MISSIONLIST.ONLINE.IMAGE.RAB
+</code></pre>
+<p>A custom <code>MISSIONLIST_MISSIONPACKNN.IMAGE.RAB</code> can be well-formed and still <strong>not</strong> be the archive the observed loader requests. This is why earlier custom packs with correct local images showed missing or repeated previews. The base-archive lookup is backed by retained file-access / prior mission-port runtime evidence; the September 18 <strong>R29 editor authoring build itself was not yet game-runtime qualified</strong>.</p>
+<h2 id="stable-entry-identity">Stable entry identity</h2>
+<p>For the studied mission-LIST profile, the entry name is derived from the <strong>exact field2 display key</strong>, using the path-token normalization:</p>
+<pre><code class="language-python">entry_name = LIST_field2.strip().replace('\\','/').replace('/','_') + '.dds'
+</code></pre>
+<p>For example, <code>MISSION/EXAMPLE_A</code> becomes <code>MISSION_EXAMPLE_A.dds</code>. This is an illustrative synthetic key, <strong>not</strong> a claim about a shipping mission's literal name. The maintained writer rejects empty keys, absolute paths, path traversal <code>..</code>, an already-suffixed <code>.dds</code>, and trailing separators. It also case-fold-checks duplicate archive entry names.</p>
+<p><strong>Consequences:</strong> reordering LIST rows does not in itself change the key for an unchanged <code>field2</code>. Conversely, <strong>copying one donor row into every new slot without updating field2</strong> makes distinct missions resolve to the same donor preview identity. A converter must populate field2 consistently with its own thumbnails and verify ONLINE and OFFLINE references rather than assuming correct images will follow from row ordering.</p>
+<h2 id="exact-archive-and-payload-contract">Exact archive and payload contract</h2>
+<p>The retained R29 serializer accepts a <strong>raw DDS</strong>, not a PNG or a filename disguised as DDS:</p>
+<ul>
+<li>bytes <code>DDS </code> at offset 0;</li>
+<li>DDS header size <strong>124</strong> at <code>+0x04</code>;</li>
+<li>validated width and height (source validator bounds 1–16,384);</li>
+<li>deterministic <strong>literal CMPL</strong> wrapper and independent decompress-to-original round-trip;</li>
+<li>SSA image RAB <strong>version <code>0x110</code></strong> with exactly one <code>TEXTURE</code> type family;</li>
+<li>existing named entry <strong>replaced in place</strong>, otherwise appended;</li>
+<li>all non-target compressed payload bytes preserved exactly.</li>
+</ul>
+<p>The source stores per-slot thumbnail DDS/hash/dimensions in a portable workspace. It requires an existing legitimate EDF6 base image archive; it does not build an empty alternate image namespace and pretend the runtime will load it.</p>
+<h2 id="the-actual-evidence-hierarchy">The actual evidence hierarchy</h2>
+<table>
+<thead>
+<tr>
+  <th>Statement</th>
+  <th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Game requests the two base mission IMAGE.RAB resources</td>
+  <td>Prior Procmon and mission-port runtime observation retained in R29 authority</td>
+</tr>
+<tr>
+  <td>LIST <code>field2</code> derives the named DDS entry</td>
+  <td>R29 schema contract, retained packer code and EDF4.1 product reconciliation</td>
+</tr>
+<tr>
+  <td>R29 authoring can replace/append without touching stock payloads</td>
+  <td>Offline test/build gates; 25/25 tests and synthetic deployment reported</td>
+</tr>
+<tr>
+  <td>New R29 editor build works in the EDF6 retail runtime</td>
+  <td><strong>Not proven in the R29 checkpoint</strong></td>
+</tr>
+<tr>
+  <td>All future/unknown mission formats use exactly this rule</td>
+  <td><strong>Not claimed</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The reconciling November 2026 investigation additionally ran the retained packer on synthetic data: four valid name conversions, seven unsafe-key rejections, one replacement plus one append, and verified preservation of the one untouched payload. That is <strong>tool logic only</strong>, not a new game test.</p>
+<p>See <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">LIST/TXT/thumbnail deployment</a>, <a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">SSA RAB binary records</a> and <a href="formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">RAB multi-provider entry merge</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_MISSION_STUDIO_R29_MISSION_THUMBNAIL_AUTHORITY_2026-09-18.json</li><li>Library: EDF6_MISSION_STUDIO_GODOT_FORK_R29_MISSION_THUMBNAILS_BUILD_READY_CHECKPOINT_2026-09-18.md</li><li>Library: EDF41_R10_HF1_PRODUCT_RECONCILIATION_2026-11-01.md</li><li>EDF41 R9: components/metadata/r29/mission_thumbnail_rab.py (exact retained source)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-actual-runtime-archive-path">The actual runtime archive path</a><a href="#stable-entry-identity">Stable entry identity</a><a href="#exact-archive-and-payload-contract">Exact archive and payload contract</a><a href="#the-actual-evidence-hierarchy">The actual evidence hierarchy</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry"};</script><script src="../assets/site.js" defer></script></body></html>

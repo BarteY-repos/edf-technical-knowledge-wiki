@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MDB loader dispatch and CMPL — valid models that still crash A model can have a valid MDB0 header, survive an elementary parser check, and still crash the targe"><title>MDB loader dispatch and CMPL — valid models that still crash | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-conversion.html">Conversion</a></div><h1>MDB loader dispatch and CMPL — valid models that still crash</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact inspected crash buffer, verified-offline archive rebuild; historical case studies, not universal format rules</div><div id="articleBody"><p>A model can have a valid <code>MDB0</code> header, survive an elementary parser check, and still crash the target game for <strong>two independent reasons</strong>: the game selects the wrong <em>resource loader</em>, or the archive decompressor supplies a corrupted model body. Both failures were isolated in an EDF5 → EDF6 desert-map port. They illustrate useful diagnostic methods, not universal conversion rules.</p>
+<h2 id="1-resource-registration-selects-a-typed-consumer">1. Resource registration selects a typed consumer</h2>
+<p>The map's registration table is not merely a list of filenames. Its resource names and suffixes participate in type selection. In the studied desert map, <code>MAPB</code>/<code>MAC</code> T1 registration indexed one object under <strong><code>.trb</code></strong>, while the actual decompressed resource was an ordinary <strong><code>.mdb</code></strong> model.</p>
+<p>The observed chain was:</p>
+<pre><code class="language-text">Map T1 entry 37 → sk_ptree007_11m_shuro.trb
+RAB archive payload → sk_ptree007_11m_shuro.mdb
+Actual payload → MDB model bytes, 53,806 bytes
+Target consumer → TRB/tree header parser, not MDB parser
+</code></pre>
+<p>A crash dump showed the in-memory resource buffer was <strong>byte-for-byte identical</strong> to the deployed MDB (53,806 bytes). The normal EDF6 model validation path accepted that MDB. The faulty path instead treated <code>base+0x28</code> as the TRB entry count and <code>base+0x2C</code> as a TRB table offset. In this model the value at <code>+0x28</code> was <code>0x300000</code>, which led to nonsensical tree-table traversal.</p>
+<p>The useful rule is <strong>match the requested resource type to the actual resource</strong>; do not conclude that the model payload is malformed merely because the crash occurs during resource loading. A second T1 entry used a <code>.mosb</code> suffix; it too required separate role checking. Other entries used <code>.mdx</code> and <code>.fmep</code> roles. <strong>Do not globally rename every <code>.trb</code> to <code>.mdx</code></strong>—this source-specific mismatch is not a generic conversion law, and valid TRB resources must retain their real type.</p>
+<h2 id="2-a-valid-mdb-header-is-not-evidence-that-the-whole-body-survived-decompression">2. A valid MDB header is not evidence that the whole body survived decompression</h2>
+<p>A separate error occurred when the historical <code>cmpl_compress_lz</code> encoder in <code>rab_mdb_upgrade2.py</code> rebuilt compressed RAB entries. An independent strict decoder confirmed that <strong>45 of 76 MDBs failed round-trip</strong>: their first eight bytes, including the <code>MDB0</code> version marker, remained readable, but their remaining model bodies were corrupted.</p>
+<p>An MDB version/dispatch check could therefore pass while later vertex, mesh, material or offset reads were using garbage. The offending historical encoder was withdrawn; that failure must not be attributed to the MDB ABI itself.</p>
+<p>For the checked desert RAB, a <strong>literal-only CMPL stream</strong> was used as a safety workaround. Each group of up to eight literal bytes was preceded by a flag byte <code>0xFF</code>, consistent with the decoder's bit-0-as-literal convention. After rebuilding from pristine source, verification reported:</p>
+<table>
+<thead>
+<tr>
+  <th>Post-rebuild content</th>
+  <th>Measured result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MDB entries</td>
+  <td><strong>76/76</strong> recognized as <code>MDB0</code> version <code>0x20</code></td>
+</tr>
+<tr>
+  <td>MDB bodies</td>
+  <td>Byte-identical to pristine source except the sanctioned version edit</td>
+</tr>
+<tr>
+  <td>DDS textures</td>
+  <td><strong>348/348</strong> byte-identical</td>
+</tr>
+<tr>
+  <td>Reported remaining problems</td>
+  <td><strong>0</strong> in the offline file audit</td>
+</tr>
+</tbody>
+</table>
+<p>The literal-only encoding was a <strong>tested historical fallback</strong>, not a recommendation that all EDF archives should permanently abandon LZ compression. A correctly specified, separately round-trip-tested exact encoder is preferable when available.</p>
+<h2 id="3-a-converter-s-validation-checklist">3. A converter's validation checklist</h2>
+<p>For every transformed archive entry, check each layer independently:</p>
+<ol>
+<li><strong>Entry identity:</strong> exact resource name, type, expected role, and registration reference.</li>
+<li><strong>Decompression correctness:</strong> a strict independent decoder must reproduce the full expected payload, not just its magic/version bytes.</li>
+<li><strong>Payload ABI:</strong> validate every offset, length, record count and expected semantic field after decompression.</li>
+<li><strong>Container consistency:</strong> rebuild entry tables, offsets and cross-file references without moving unrelated resources unexpectedly.</li>
+<li><strong>Runtime scope:</strong> a reproducible offline round-trip is stronger than a parser smoke, but cannot by itself prove all rendering or gameplay paths in the game.</li>
+</ol>
+<p>The two cases explain why a crash labelled “MDB loading” can have a <strong>typed-dispatch cause</strong> or a <strong>compression-payload cause</strong>. They also explain why extension-wide replacement, changing only <code>MDB0</code> version bytes, or checking only the archive header are unsafe repair strategies.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>These are recovered observations from one historical EDF5 desert-map port and its archived source handoff. The 45/76 and 76/76 counts refer to <strong>that RAB content set</strong>, not all MDB assets or all CMPL encoders. Later production versions may use different encoders and resource tables. The general lessons are type-matched dispatch and full-body round-trip verification.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md — 2026-08-10 source handoff, sections on T1 resource dispatch and CMPL LZ corruption</li><li>R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json (finding only, reconciled with primary handoff)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#1-resource-registration-selects-a-typed-consumer">1. Resource registration selects a typed consumer</a><a href="#2-a-valid-mdb-header-is-not-evidence-that-the-whole-body-survived-decompression">2. A valid MDB header is not evidence that the whole body survived decompression</a><a href="#3-a-converter-s-validation-checklist">3. A converter&#39;s validation checklist</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-why-a-parseable-mdb-can-still-crash"};</script><script src="../assets/site.js" defer></script></body></html>

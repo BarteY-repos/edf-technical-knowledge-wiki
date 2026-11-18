@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Render phase 0 is a depth pre-pass, not the shadow pass EDF5&#39;s scene traversal combines Umbra visibility callbacks with per-object model drawing. The names of r"><title>EDF5 Umbra and AnimationModel: depth, opaque, translucent and shadow phases | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Rendering / scene phases</div><h1>EDF5 Umbra and AnimationModel: depth, opaque, translucent and shadow phases</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Rendering / scene phases</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5's scene traversal combines Umbra visibility callbacks with per-object model drawing. The names of render phases cannot be assigned by guessing their index: a contributor specifically verified that <strong>phase 0 is the picture's depth pre-pass</strong>. When a model was skipped in phases 1 and 2 but still drawn in phase 0, its remaining on-screen appearance was a <strong>flat white silhouette</strong>. Skipping all phases 0–2 removed the model cleanly in that experiment. This corrects older descriptions that grouped phase 0 with the shadow pass.</p>
+<h2 id="animationmodel-phase-behavior">AnimationModel phase behavior</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Native phase</th>
+  <th>Effect observed in code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Opaque-list depth pre-pass</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Main opaque / G-buffer pass</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Translucent-list draw via second model callback</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Draw only materials marked to cast shadows (material flag <code>+0x21</code> bit 0)</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td>No AnimationModel draw</td>
+</tr>
+</tbody>
+</table>
+<p>For <strong>phase 2</strong>, a source researcher inferred the use of the forward technique because a one-color-plus-depth render target is selected immediately beforehand. That <strong>technique mapping is unverified</strong> from a runtime shader capture, although the translucent callback is identified statically.</p>
+<p>The game routes animated characters, soldiers, enemies and vehicles through <code>AnimationModel</code> slot 1 (<code>0x3AEF60</code>) and translucent drawing through slot 2 (<code>0x3AE990</code>) in the studied build. Rigid <code>sgmUmbraObject</code> renderables follow another callback. The renderer also updates last-drawn bookkeeping after phases 1/2; that should be distinguished from whether an object actually appeared as a visible pixel.</p>
+<p><strong>Evidence:</strong> EDF Knowledge Hub <code>edf5/models.md</code>, <code>render-phase-0-depth-prepass</code> (contributor-verified), <code>models-animationmodel-phases</code> (static), <code>animationmodel-draw-callback</code> (verified), <code>render-phase-2-forward</code> (unverified inference). Build <code>steam-5d11de53</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/models.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#animationmodel-phase-behavior">AnimationModel phase behavior</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-umbra-render-phases-depth-opaque-translucency-shadow"};</script><script src="../assets/site.js" defer></script></body></html>

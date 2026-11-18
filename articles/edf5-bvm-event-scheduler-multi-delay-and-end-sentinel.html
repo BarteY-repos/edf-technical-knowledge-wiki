@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="The multi byte changes which ready events execute The inspected EDF5 BVM runtime stores a registration&#39;s delay at record offset +0x18, and its multi flag at +0x"><title>EDF5 BVM event scheduler: multi=1, delay selection and end-event sentinel | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Missions / scheduling</div><h1>EDF5 BVM event scheduler: multi=1, delay selection and end-event sentinel</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Missions / scheduling</span></div><div class="referencebadge">Technical reference · EDF5 source static analysis; no new runtime qualification</div><div id="articleBody"><p>The inspected EDF5 BVM runtime stores a registration's <strong>delay</strong> at record offset <strong><code>+0x18</code></strong>, and its <strong>multi flag</strong> at <strong><code>+0x20</code></strong>. The scheduler's native comparison is exact: <code>multi == 1</code> means append <strong>all</strong> ready registrations; otherwise choose <strong>one</strong> eligible registration with the greatest delay. This is not a generic nonzero/truthy bit interpretation.</p>
+<table>
+<thead>
+<tr>
+  <th>Observed registration population</th>
+  <th style="text-align:right"><code>multi=0</code></th>
+  <th style="text-align:right"><code>multi=1</code></th>
+  <th style="text-align:right">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>141 shipping BVM scripts, raw</td>
+  <td style="text-align:right">4,619</td>
+  <td style="text-align:right">574</td>
+  <td style="text-align:right"><strong>5,193</strong></td>
+</tr>
+<tr>
+  <td>141 shipping BVM scripts, reachable</td>
+  <td style="text-align:right">4,540</td>
+  <td style="text-align:right">572</td>
+  <td style="text-align:right"><strong>5,112</strong></td>
+</tr>
+<tr>
+  <td>Exact44 matched source set, reachable</td>
+  <td style="text-align:right">1,993</td>
+  <td style="text-align:right">221</td>
+  <td style="text-align:right"><strong>2,214</strong></td>
+</tr>
+</tbody>
+</table>
+<p>No other <code>multi</code> values appeared in the shipping census. The corresponding EDF6 AngelScript scheduler uses <code>EVENT_TYPE_SYNC=0</code> (one best ready event) and <code>EVENT_TYPE_ASYNC=1</code> (all ready events). Thus the appropriate <em>source behavior comparison</em> is <code>multi == 1</code> versus any other value, not <code>multi != 0</code>. Four official EDF6 source ports—<code>M015</code>, <code>M016</code>, <code>M024</code>, <code>M035</code>—have event-type totals that differ from the EDF5 source; these are observed <strong>port authoring deviations</strong>, not a discovered extra bit in the original EDF5 flag.</p>
+<h2 id="end-event-time-sentinel">End-event time sentinel</h2>
+<p>Across the 44 exact original/official mission pairs, a special <strong>source end registration</strong> whose delay is exactly <strong><code>100.0f</code></strong> becomes <strong><code>100000000.00</code></strong> in the official target representation. Do not apply a blanket time unit multiplication to ordinary delays, and do not equate this special case with all references to <code>100</code> in arbitrary scripts.</p>
+<h2 id="distinct-factor-operations">Distinct factor operations</h2>
+<p>The mapped factors include <code>9201</code> object destroyed, <code>9202</code> object encountered, <code>9300</code> AI movement end, <code>9301</code> movement end <strong>or death</strong>, <code>9116</code> group member count, <code>9117</code> group encounter, and <code>9205</code> ride vehicle. <code>9201</code> and <code>9202</code> are distinct registered conditions. The exact44 reachable factor census achieved <strong>2,147/2,147</strong> source/reference sites; it is bounded, not proof of all conceivable mission factors.</p>
+<p><strong>Evidence:</strong> static comparison and EDF5/EDF6 native scheduler reverse engineering, source facts <code>bvm-multi-flag</code>, <code>bvm-multi-to-event-type</code>, <code>bvm-multi-census</code>, <code>bvm-end-event-sentinel</code>, <code>official-port-eventtype-deviations</code>, <code>bvm-factor-map</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14, edf5/mission-vm.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#end-event-time-sentinel">End-event time sentinel</a><a href="#distinct-factor-operations">Distinct factor operations</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-bvm-event-scheduler-multi-delay-and-end-sentinel"};</script><script src="../assets/site.js" defer></script></body></html>

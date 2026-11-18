@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 distinguishes ownership, use, newness and upgrades The examined EDF6 weapon system keeps a per-row state in its game-save context. Possessing a weapon is n"><title>EDF6 weapon ownership flags: starting equipment, DLC grants and mission rewards | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Weapon progression</div><h1>EDF6 weapon ownership flags: starting equipment, DLC grants and mission rewards</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Weapon progression</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>The examined EDF6 weapon system keeps a per-row state in its game-save context. Possessing a weapon is not the same as having equipped it, having seen it since acquisition, or having improved its stars.</p>
+<h2 id="four-observed-flag-bits">Four observed flag bits</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Bit</th>
+  <th>Meaning in the cited state updater</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Owned</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Used / equipped on a sortie</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Newly obtained, not yet cleared by the normal sortie transition</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Upgraded</td>
+</tr>
+</tbody>
+</table>
+<p>A normal new-game reset grants acquisition-class <strong>1</strong> weapons as owned/new and seeds their star fields from the defined starting policy. Download-content refresh separately checks installed content packs, grants acquisition-class <strong>3</strong> items from eligible packs, and removes ownership for uninstalled pack-specific items. An equipped weapon that is no longer owned is replaced by a <code>SoldierInit</code> default.</p>
+<h2 id="mission-rewards-and-stars">Mission rewards and stars</h2>
+<p>A mission result passes crate acquisitions through the game-data reward handler. The cited route marks a newly granted item owned/new, initializes its star data and may subsequently upgrade it. <strong>Zero stars is a valid state</strong>. The weapon stat evaluator clamps each stat to its table-defined cap; the weapon display and actual firing state are calculated from the same star inputs but can format them differently.</p>
+<p>At the start of a sortie, <code>SetUsedWeapon()</code> marks equipped items as used and clears the <strong>new</strong> and <strong>upgraded</strong> presentation flags from the rows it visits. Thus the NEW indicator is a short-lived presentation state; it does not constitute a separate permanent acquisition list.</p>
+<h2 id="what-installed-dlc-and-the-current-mode-change">What installed DLC and the current mode change</h2>
+<p>The game reads content entitlement separately from table acquisition class. Weapon rows have a <strong>physical index in the currently loaded WEAPONTABLE</strong>, and the active mode supplies the table context. The mode transition and save-load sequence therefore matter when interpreting ownership, displaying weapons, or applying localized weapon text. A save holding an old row number must not be assumed to map to the same item if the table order changed.</p>
+<p>The user interface's weapon count and weapon-acquisition percentage are based on owned records and use their own DLC exclusion rules; those numbers are <strong>not</strong> identical to the number of rows in the WEAPONTABLE.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf6-weapons</code>, <code>weapon-grant-paths</code>, <code>weapon-table-access</code>, <code>weapon-table-entry</code>; source build <code>steam-678ccb46</code>. This article describes game behavior inferred from code and game data, not instructions for changing a save file.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf6-weapons</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#four-observed-flag-bits">Four observed flag bits</a><a href="#mission-rewards-and-stars">Mission rewards and stars</a><a href="#what-installed-dlc-and-the-current-mode-change">What installed DLC and the current mode change</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-weapon-ownership-flags-starting-dlc-result-and-sorting"};</script><script src="../assets/site.js" defer></script></body></html>

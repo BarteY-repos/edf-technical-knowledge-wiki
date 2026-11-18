@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Map resource architecture An Earth Defense Force map is not one mesh file. The studied EDF5/EDF6 map packages contain multiple resources with different consumer"><title>Map resource architecture | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>Map resource architecture</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled sampled binary and runtime research</div><div id="articleBody"><p>An Earth Defense Force map is not one mesh file. The studied EDF5/EDF6 map packages contain multiple resources with <strong>different consumers</strong>: registrations and resource identities, placed objects, field/terrain rendering, physical collision and navigation. A map can render while its collision is wrong; a table can parse while the game's object references still point to the wrong resource.</p>
+<h2 id="the-relevant-formats">The relevant formats</h2>
+<table>
+<thead>
+<tr>
+  <th>Format or subsystem</th>
+  <th>Known role / practical question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MAC</code></td>
+  <td>Map container/identity and related map resource structure</td>
+</tr>
+<tr>
+  <td><code>MAPB</code></td>
+  <td>Map registration and references to resource roles, including model, object and field resources</td>
+</tr>
+<tr>
+  <td><code>MAPO</code></td>
+  <td>Object/placement tables and relationships to map/collision content</td>
+</tr>
+<tr>
+  <td>Ordinary <code>MDB</code> model</td>
+  <td>Individually referenced props, buildings, objects and their model materials</td>
+</tr>
+<tr>
+  <td><code>FMB</code> / <code>FMEP</code> / <code>FieldRender</code></td>
+  <td>Terrain/field and its specialized rendering/material transport</td>
+</tr>
+<tr>
+  <td><code>MAD</code> / <code>SHKT</code> / <code>HKT</code></td>
+  <td>Distinct physical/collision and Havok-related data paths, depending on profile</td>
+</tr>
+<tr>
+  <td><code>NVMD</code>, NAV and map <code>RMPA</code></td>
+  <td>Navigation/road/area/portal/related map semantics; not mission-owned route/spawn RMPA</td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>roles observed in the studied assets</strong>, not a promise that every map contains every file or that one rule works across all generations.</p>
+<h2 id="map-registration-and-object-placement-mapb-mapo">Map registration and object placement: MAPB / MAPO</h2>
+<p>Observed paired EDF5 → EDF6 <code>MAPB</code> conversion includes structural record changes:</p>
+<table>
+<thead>
+<tr>
+  <th>Record family</th>
+  <th style="text-align:right">EDF5 stride</th>
+  <th style="text-align:right">EDF6 stride</th>
+  <th>Specific observed edit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>T1</td>
+  <td style="text-align:right">56 bytes</td>
+  <td style="text-align:right">60 bytes</td>
+  <td>Insert zero dword at entry <code>+0x20</code>; old <code>+0x20</code> moves to <code>+0x24</code></td>
+</tr>
+<tr>
+  <td>T2</td>
+  <td style="text-align:right">68 bytes</td>
+  <td style="text-align:right">72 bytes</td>
+  <td>Add four zero bytes at the end; rebase relative references</td>
+</tr>
+</tbody>
+</table>
+<p><code>MAPB</code> registration suffixes such as <code>.mdx</code>, <code>.trb</code>, <code>.mosb</code> and <code>.fmep</code> identify different <strong>resource roles</strong>. Globally changing suffixes is not a conversion strategy.</p>
+<p>The corrected <code>MAPO</code> object-table element at the studied <code>+0x08</code> table has a <strong>0x1C (28-byte)</strong> stride, not eight bytes. Placement/object identity and associated collision bindings remain separate validation tasks.</p>
+<h2 id="terrain-is-not-an-ordinary-mdb-material">Terrain is not an ordinary MDB material</h2>
+<p><code>FMB</code>/<code>FMEP</code> field content uses <code>FieldRender</code>; it should not be treated as a large ordinary MDB model. In a recovered FieldRender material bridge:</p>
+<ul>
+<li>A cell has <strong>12 local material slots</strong>.</li>
+<li>Three RGBA8 ID textures carry four slot IDs each; three RGBA8 weight textures carry matching corner weights.</li>
+<li><code>0xFF</code> (255) is the invalid material-slot sentinel.</li>
+<li>Material colors come from texture arrays, not the simple ordinary-MDB sampler layout.</li>
+<li>The sampled terrain normal decoder differs from the Common/Water MDB <code>R×A</code> convention.</li>
+</ul>
+<p>See <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender local slots and texture arrays</a> for the exact division dimensions, record strides and normalization behavior.</p>
+<h2 id="collision-and-navigation-are-independent-proof-obligations">Collision and navigation are independent proof obligations</h2>
+<p>A successful FieldRender initialization does <strong>not</strong> demonstrate correct floor collision. Likewise, correct-looking static geometry does not prove Havok shapes or navigation route/portal semantics. EDF4.1 → EDF6 work illustrates why donor navigation can load and still be a fidelity compromise, and why unknown road/portal reconstruction details must remain unresolved.</p>
+<p>For collision structures read <a href="maps-%26-navigation-havok-mad-shkt-collision-contracts.html">MAD/SHKT contracts</a>; for NAV geometry and <code>MAPO</code> binding see <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">EDF4.1 navigation research</a>. For mission-owned RMPA, see the separate <a href="missions-%26-scripting-how-missions-events-and-rmpa-work.html">mission scripting and RMPA guide</a>.</p>
+<h2 id="if-you-are-writing-an-importer-or-converter">If you are writing an importer or converter</h2>
+<p>Follow the relationships instead of rewriting one file type in isolation:</p>
+<pre><code class="language-text">map identity / MAC
+  → MAPB resource registrations
+  → MAPO placements and references
+  → ordinary-model or field-render payloads
+  → collision and navigation consumers
+</code></pre>
+<p>Keep file-local/profile-specific rules explicit. A version bump or a parse-only PASS cannot establish identical in-game map behavior.</p>
+<h2 id="why-file-suffixes-can-crash-an-otherwise-valid-map">Why file suffixes can crash an otherwise valid map</h2>
+<p>A real EDF5→EDF6 port showed a <code>MAPB</code>/T1 reference to an ordinary model under a <code>.trb</code> resource role. The target game chose the <strong>tree/TRB header parser</strong>, but the decompressed payload was actually a <strong>53,806-byte MDB</strong>; the in-memory MDB buffer itself was correct. Reading the MDB's <code>+0x28</code> field as a TRB entry count produced <code>0x300000</code>, leading to invalid tree-table traversal.</p>
+<p>For a converter, this means <strong>resource identity, suffix/type registration and payload ABI must agree</strong>. The fix is not a global <code>.trb</code>→<code>.mdx</code> replacement: some <code>.trb</code> entries are genuinely typed TRB resources. See <a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Typed dispatch and CMPL failures</a>.</p>
+<h2 id="a-visual-object-and-its-physical-body-need-not-share-a-registry">A visual object and its physical body need not share a registry</h2>
+<p>Source visual objects are discoverable through RAB/MDB and MAPB/MACO-style resource references, whereas physical collision can be represented by separately named bodies in MAD and the map's collision ownership graph. Missing a model name in one resource list does <strong>not</strong> establish that the physical shape is absent. This is important for destructible props, gates and map-specific foliage. See <a href="maps-%26-navigation-map-prop-sgo-crashtype-compatibility.html">map prop SGO, CrashType and resource ownership</a>.</p>
+<h2 id="collapse-connectivity-is-authored-map-data-not-inferred-at-load">Collapse connectivity is authored map data, not inferred at load</h2>
+<p>EDF6 MAPO contains <code>T50</code> connectivity and <code>p58</code> piece/support tables. Static engine analysis shows the map loader parses these <strong>already-authored</strong> tables and passes T50 entries through <code>MapObject_CrashModel</code> to a body-relationship builder. Merely copying visual building meshes, collision bodies or MAPB placement rows does not preserve their collapse graph. The complete bounded observations are in <a href="maps-%26-navigation-mapo-t50-crashmodel-collapse-graph-explained.html">T50 / CrashModel</a>.</p>
+<p>When multiple placements are cloned, matching MAPB/MAPO counts, fresh GUIDs, rebased pointers and parent-child closure are independent from physical MAD/HKT update. See <a href="maps-%26-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure.html">MAPB/MAPO placement duplication</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Paired EDF5/EDF6 map converter audits</li><li>R47 MAC/MAPB/MAPO/FMB/FMEP and FieldRender articles</li><li>EDF41 R1D navigation and collision research</li><li>R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md — 2026-08-10 source handoff, sections on T1 resource dispatch and CMPL LZ corruption</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-relevant-formats">The relevant formats</a><a href="#map-registration-and-object-placement-mapb-mapo">Map registration and object placement: MAPB / MAPO</a><a href="#terrain-is-not-an-ordinary-mdb-material">Terrain is not an ordinary MDB material</a><a href="#collision-and-navigation-are-independent-proof-obligations">Collision and navigation are independent proof obligations</a><a href="#if-you-are-writing-an-importer-or-converter">If you are writing an importer or converter</a><a href="#why-file-suffixes-can-crash-an-otherwise-valid-map">Why file suffixes can crash an otherwise valid map</a><a href="#a-visual-object-and-its-physical-body-need-not-share-a-registry">A visual object and its physical body need not share a registry</a><a href="#collapse-connectivity-is-authored-map-data-not-inferred-at-load">Collapse connectivity is authored map data, not inferred at load</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-map-formats-and-runtime-consumers-explained"};</script><script src="../assets/site.js" defer></script></body></html>

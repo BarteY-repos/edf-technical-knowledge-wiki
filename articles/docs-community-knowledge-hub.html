@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Community Research: EDF Knowledge Hub What this source adds This section incorporates public-reuse-authorized technical research, mainly from novae (ajane)&#39;s ED"><title>Community Research — Knowledge Hub | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / Index</div><h1>Community Research — Knowledge Hub</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Start</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Editorial index, detailed per-claim source grades</div><div id="articleBody"><h2 id="what-this-source-adds">What this source adds</h2>
+<p>This section incorporates public-reuse-authorized <strong>technical research</strong>, mainly from novae (ajane)'s <em>EDF Knowledge Hub</em> snapshot dated <strong>14 November 2026</strong>, source revision <code>54f89cd</code>. It is integrated into the larger EDF4.1/5/6 documentation rather than treated as a replacement for the existing wiki. Original contributors beyond novae are attributed on individual findings.</p>
+<p><strong>Research source ≠ freshly verified engine behavior.</strong> The contributor defined <code>[verified]</code> as reported in-game observation, <code>[static]</code> as binary/source analysis, and <code>[unverified]</code> as a hypothesis. Those grades remain intact. Addresses require the matching binary build.</p>
+<h2 id="publication-provenance-and-permission-boundaries">Publication provenance and permission boundaries</h2>
+<p>The project owner relayed publication permission for both the <strong>EDF Knowledge Hub</strong> material and the Japanese <code>mod製作メモ.xlsx</code> workbook on <strong>15 November 2026</strong>. The reported permission concerns incorporating research into a larger shared technical knowledge base; the source author quotations include “permission granted if you want to incorporate the unique parts of it into a larger, shared knowledge base” and “It’s fine to publish this.” The quotations were reported by the user; no signed license or independently verified author identity for the workbook is held in this reader.</p>
+<p>The Knowledge Hub snapshot is attributed to <strong>novae (ajane)</strong>. Its individual notes frequently credit other people, community tools and code. These third-party references should be read as <em>technical evidence with attribution</em>, not as automatic permission to redistribute a separate person's original prose, code or media. The original Knowledge Hub ZIP, original workbook and their embedded images are <strong>not</strong> included in the public standalone reader. A public full research archive requires its own rights decision.</p>
+<h2 id="research-coverage">Research coverage</h2>
+<ul>
+<li><strong>2,572</strong> technical facts: <strong>153</strong> verified according to the contributor, <strong>2,278</strong> static, <strong>141</strong> unverified.</li>
+<li><strong>32</strong> unsuccessful approaches with reasons and alternatives.</li>
+<li><strong>149</strong> cross-game crosswalk statements.</li>
+<li>Detailed evidence by game: <strong>292 EDF4.1</strong>, <strong>876 EDF5</strong>, <strong>1404 EDF6</strong> fact records.</li>
+</ul>
+<h2 id="start-with-the-topic-references">Start with the topic references</h2>
+<ul>
+<li>
+<p><a href="kh-guide-edf5-camera.html">EDF5 Camera Modes, Vehicle Ride and First-Person Hooks</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-input.html">EDF5 Input, Keyboard Snapshot and IME Integration</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-radar.html">EDF5 Radar Projection, Colors and Marker Scaling</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-pickups-online.html">EDF5 Item Drops, Collection Limits and Online Authority</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-shaders.html">EDF5 Deferred Lighting, Reflections, Water and Window Materials</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-decals-destruction.html">EDF5 Decals, Destructible Map Objects and Debris</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-mission-ui.html">EDF5 Mission VM, Script States and ShowLayout</a></p>
+</li>
+<li>
+<p><a href="docs-file-formats.html">EDF5 Plugin Loading and Patcher Grammar</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-damage-numbers.html">EDF6 Damage Event Pipeline and On-Screen Numbers</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-weapon-ui.html">EDF6 Weapon Selection UI Layout and Callback Ownership</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-frame-pacing.html">EDF6 Fixed Simulation Step, Presentation and High Refresh Rates</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-teams.html">EDF6 Team Identity, Damage Filters and Player Update</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-network-packets.html">EDF6 EOS Datagram Framing, Reliability and State Flush</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf41-lod.html">EDF4.1 Deferred Lighting, Cubemap Reflection and Character LOD</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf41-globals-weapons.html">EDF4.1 Engine Singletons, Weapon Fire and Bullet Objects</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf6-camera.html">EDF6 Camera View Matrix and Ride Mode</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-settings.html">EDF5 Menu Layouts, Settings Callbacks and UI Notices</a></p>
+</li>
+<li>
+<p><a href="kh-guide-edf5-havok.html">EDF5 Havok Body Properties and Motion Operations</a></p>
+</li>
+</ul>
+<h2 id="cross-game-crosswalks">Cross-game crosswalks</h2>
+<ul>
+<li>
+<p><a href="kh-crosswalk-animation-cas-canm.html">Crosswalk: animation files CAS / CANM (key: CAS wrapper and CANM versions) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-camera-ghost-camera.html">camera-ghost-camera — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-damage-numbers.html">Crosswalk: damage numbers (key: RTTI <code>HUiHudDamage</code>, <code>DamageNumberDrawTexture</code>) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-deferred-lighting-reflections.html">Crosswalk: deferred-lighting compute shader and reflections — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-gameobjectbase.html">Crosswalk: GameObjectBase, the common base of game objects (key: GameObjectBase) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-havok-versions.html">Crosswalk: Havok physics across the games (key: Havok SDK version) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-hud-power-gauge.html">Crosswalk: armor gauge, aim line, FOV, mission clear marks (key: HUiHudPowerGuage) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-lod-distance-animation.html">lod-distance-animation — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-mission-script-api.html">Crosswalk: mission scripting, EDF5 BVM -&gt; EDF6 AngelScript (key: MISSION.BVM custom calls) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-models-mdb.html">Crosswalk: model files MDB (key: MDB version) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-multi-weapon-enemies.html">Crosswalk: enemies with several independent weapons (key: Hector / Humanoid weapon_ex) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-player-combat-fields.html">Crosswalk: player, team and damage plumbing (key: SoldierBase, TeamManager, WeaponBase, PaleWing) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-ported-objects-weapons.html">Crosswalk: EDF 4.1 and EDF5 objects and weapons run on EDF6 (key: object SGO family / weapon table category) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-radar-and-map-bounds.html">Crosswalk: radar and map bounds (key: HUiHudRader, MoveAreaManager) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-save-data.html">Crosswalk: save data (key: GameDataMgr, JobSaveDataSave / JobSaveDataLoad) — community crosswalk</a></p>
+</li>
+<li>
+<p><a href="kh-crosswalk-ui-settings-menus.html">Crosswalk: settings menus (key: HUiHQGameSetting) — community crosswalk</a></p>
+</li>
+</ul>
+<h2 id="full-source-evidence-organized-by-game">Full source evidence, organized by game</h2>
+<p>These pages retain individual source fact IDs and methodological notes so that the condensed guides remain independently auditable. They are listed as <strong>Research and case studies</strong> in the sidebar and hidden there by default; searching the wiki still indexes them.</p>
+<h3 id="edf-4-1">EDF 4.1</h3>
+<ul>
+<li>
+<p><a href="kh-edf41-builds.html">EDF 4.1 — Builds</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-effects.html">EDF 4.1 — Effects</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-enemies.html">EDF 4.1 — Enemies</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-file-formats.html">EDF 4.1 — File Formats</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-globals.html">EDF 4.1 — Globals</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-hud.html">EDF 4.1 — Hud</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-map-lod.html">EDF 4.1 — Map Lod</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-map-objects.html">EDF 4.1 — Map Objects</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-missions.html">EDF 4.1 — Missions</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-motherships.html">EDF 4.1 — Motherships</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-online-caps.html">EDF 4.1 — Online Caps</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-pickups.html">EDF 4.1 — Pickups</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-rendering.html">EDF 4.1 — Rendering</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-soldier-ai.html">EDF 4.1 — Soldier Ai</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-sound.html">EDF 4.1 — Sound</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-squad-follow.html">EDF 4.1 — Squad Follow</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-system.html">EDF 4.1 — System</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-ui.html">EDF 4.1 — Ui</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-vehicles.html">EDF 4.1 — Vehicles</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-weapons.html">EDF 4.1 — Weapons</a></p>
+</li>
+<li>
+<p><a href="kh-edf41-wiki-checks.html">EDF 4.1 — Wiki Checks</a></p>
+</li>
+</ul>
+<h3 id="edf-5">EDF 5</h3>
+<ul>
+<li>
+<p><a href="kh-edf5-builds.html">EDF 5 — Builds</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-camera.html">EDF 5 — Camera</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-character-control.html">EDF 5 — Character Control</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-combat.html">EDF 5 — Combat</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-dead-ends.html">EDF 5 — Dead Ends</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-decals.html">EDF 5 — Decals</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-drop-items.html">EDF 5 — Drop Items</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-effects.html">EDF 5 — Effects</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-file-formats.html">EDF 5 — File Formats</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-globals.html">EDF 5 — Globals</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-hud.html">EDF 5 — Hud</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-input.html">EDF 5 — Input</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-map-lod.html">EDF 5 — Map Lod</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-map-objects.html">EDF 5 — Map Objects</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-map-placement.html">EDF 5 — Map Placement</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-mission-flow.html">EDF 5 — Mission Flow</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-mission-vm.html">EDF 5 — Mission Vm</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-mod-loading.html">EDF 5 — Mod Loading</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-models.html">EDF 5 — Models</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-object-classes.html">EDF 5 — Object Classes</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-online-caps.html">EDF 5 — Online Caps</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-online.html">EDF 5 — Online</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-photo-mode.html">EDF 5 — Debug camera and pause (source heading: Photo Mode)</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-physics-havok.html">EDF 5 — Physics Havok</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-player.html">EDF 5 — Player</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-radar.html">EDF 5 — Radar</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-rendering.html">EDF 5 — Rendering</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-run-over.html">EDF 5 — Run Over</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-shaders.html">EDF 5 — Shaders</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-soldier-ai.html">EDF 5 — Soldier Ai</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-sound.html">EDF 5 — Sound</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-squad-follow.html">EDF 5 — Squad Follow</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-stingers-webs.html">EDF 5 — Stingers Webs</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-system.html">EDF 5 — System</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-talk-subtitles.html">EDF 5 — Talk Subtitles</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-ui-menus.html">EDF 5 — Ui Menus</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-ui-notices.html">EDF 5 — Ui Notices</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-vehicles.html">EDF 5 — Vehicles</a></p>
+</li>
+<li>
+<p><a href="kh-edf5-weapons.html">EDF 5 — Weapons</a></p>
+</li>
+</ul>
+<h3 id="edf-6">EDF 6</h3>
+<ul>
+<li>
+<p><a href="kh-edf6-animation-cas.html">EDF 6 — Animation Cas</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-battle-record.html">EDF 6 — Battle Record</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-builds.html">EDF 6 — Builds</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-bullet-collision.html">EDF 6 — Bullet Collision</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-camera.html">EDF 6 — Camera</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-character-control.html">EDF 6 — Character Control</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-classes.html">EDF 6 — Classes</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-combat.html">EDF 6 — Combat</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-corpses.html">EDF 6 — Corpses</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-damage-model.html">EDF 6 — Damage Model</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-damage-numbers.html">EDF 6 — Damage Numbers</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-dead-ends.html">EDF 6 — Dead Ends</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-effects.html">EDF 6 — Effects</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-enemies.html">EDF 6 — Enemies</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-enemy-attacks.html">EDF 6 — Enemy Attacks</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-file-formats.html">EDF 6 — File Formats</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-frame-pacing.html">EDF 6 — Frame Pacing</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-globals.html">EDF 6 — Globals</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-havok-format.html">EDF 6 — Havok Format</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-havok-runtime.html">EDF 6 — Havok Runtime</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-hud.html">EDF 6 — Hud</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-insect-contacts.html">EDF 6 — Insect Contacts</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-map-collision.html">EDF 6 — Map Collision</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-map-lod.html">EDF 6 — Map Lod</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-menu-script.html">EDF 6 — Menu Script</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-mission-packs.html">EDF 6 — Mission Packs</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-mission-spawns.html">EDF 6 — Mission Spawns</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-missions.html">EDF 6 — Missions</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-mod-loading.html">EDF 6 — Mod Loading</a></p>
+</li>
+<li>
+<p><a href="edf6-native-missionpack-mode-and-lobby-identity.html">EDF 6 — MissionPack identity and native mode semantics</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-netcode.html">EDF 6 — Netcode</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-npc-data.html">EDF 6 — Npc Data</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-objects.html">EDF 6 — Objects</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-online-caps.html">EDF 6 — Online Caps</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-photo-mode.html">EDF 6 — Debug camera and pause (source heading: Photo Mode)</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-physics-shkt.html">EDF 6 — Physics Shkt</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-pickups.html">EDF 6 — Pickups</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-player-outfits.html">EDF 6 — Player Outfits</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-player.html">EDF 6 — Player</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-radar.html">EDF 6 — Radar</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-rendering.html">EDF 6 — Rendering</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-run-over.html">EDF 6 — Run Over</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-soldier-ai.html">EDF 6 — Soldier Ai</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-sound.html">EDF 6 — Sound</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-spawning.html">EDF 6 — Spawning</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-squad-follow.html">EDF 6 — Squad Follow</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-system.html">EDF 6 — System</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-talk-subtitles.html">EDF 6 — Talk Subtitles</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-ui-weapon-select.html">EDF 6 — Ui Weapon Select</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-ui.html">EDF 6 — Ui</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-vehicles.html">EDF 6 — Vehicles</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-weapons.html">EDF 6 — Weapons</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-webs.html">EDF 6 — Webs</a></p>
+</li>
+<li>
+<p><a href="kh-edf6-wiki-checks.html">EDF 6 — Wiki Checks</a></p>
+</li>
+</ul>
+<h2 id="publication-and-attribution">Publication and attribution</h2>
+<p>The submitter provided the following permission from the author of this export: <strong>“here's a current export. permission granted if you want to incorporate the unique parts of it into a larger, shared knowledge base”</strong>. The submitter also provided <strong>“It's fine to publish this.”</strong> for the Japanese community spreadsheet research integrated earlier. These permissions cover research reuse into the shared knowledge base; they do not imply an official Sandlot endorsement or any license for unrelated third-party binaries, unreleased screenshots or source code.</p>
+<p><strong>Credit:</strong> novae (ajane) — compiler and substantial original researcher. External authors cited by the source are retained by name at fact level: KittopiaCreator, ktaro, Bartey, FevGrave, BlueAmulet, metoxys, angel13th, EPIC1DEFENSEF1ORCE, Eiton, MoistGoat, Souzooka, Quarri6343, redone, DonPardon42, Kemui52, Nynapi, demonized and ItsKaceyTime. The Japanese memo contributor's preferred name was not supplied; credit is therefore <strong>Japanese community contributor (mod製作メモ.xlsx)</strong>, not an invented identity.</p>
+<p>No original game binary, private SDK implementation, Japanese workbook, or embedded workbook screenshot is republished in this archive. This wiki is not a new runtime validation of these source statements.</p>
+<h2 id="exact-source-coverage-reconciliation-r153">Exact source-coverage reconciliation (R153)</h2>
+<p>The original, re-opened <em>EDF Knowledge Hub export 14-Nov-2026.zip</em> was checked byte-for-byte against its previously recorded SHA-256. Its machine-readable source comprises <strong>2,753 records</strong>: 2,572 fact IDs, 149 crosswalk statements, and 32 negative/dead-end records. The current public wiki contains <strong>2,556 of the 2,572 exact fact IDs in their mapped source appendix articles</strong>, <strong>all 149 crosswalk texts</strong>, and <strong>all 32 reported failed approaches and their reasons</strong>.</p>
+<p>The remaining <strong>16 fact IDs</strong> belong to the retired <code>kh-edf6-mod-platform</code> appendix. They document the independent platform's patch parser, package ownership, loader behavior, modified-game qualification, and compatibility scope. These are <strong>extension implementation claims, not original Sandlot EDF behavior</strong>; their exact source text is preserved in the original community ZIP and a <strong>separate maintainer-only historical archive</strong>, rather than restored to the public game-centric reader. The source IDs are retained in <code>reference/R153_KNOWLEDGE_HUB_ALL_2753_SOURCE_LINE_DISPOSITION.csv</code> as explicitly excluded records.</p>
+<p><strong>Important limitation:</strong> source ID/text retention is an exact preservation check, not an independent re-validation of all 2,572 claims or a claim that every topic has been semantically reconciled against the latest native binaries. The contributor evidence grades and build boundaries remain in effect.</p>
+<h2 id="r179-contributor-level-publication-review">R179: contributor-level publication review</h2>
+<p>The publication audit now separates <strong>2,556</strong> source-linked research assertions from the article-level source count. Of these, <strong>791</strong> credit the Knowledge Hub compiler, <strong>650</strong> name internal curation or automated research references, and <strong>1115</strong> cite named outside contributors or separate source projects. The categories describe the <strong>first-listed source credit</strong>, not authorship, originality or legal ownership.</p>
+<p>In <strong>92</strong> Knowledge Hub pages, at least one attribution is not compiler-only. The structural scan found no fenced code blocks or embedded images in those pages; nevertheless <strong>203</strong> longer descriptions (over 1,500 characters) that credit outside sources require a focused wording check. A credit to a third-party patch or project does <strong>not</strong> itself prove that the patch author's expression was copied. Conversely, a source citation or permission to incorporate research does not authorize unlicensed reproduction of a third party's original prose.</p>
+<p>The full project preserves technical claims, build IDs, source-basis fields and authors' names. The automated scan does not prove the originality of particular passages. We subsequently located and pinned 20 original documents by hajisensai, providing source paths for 85 of the 203 high-priority explanations. A full literal-text or translation-expression comparison remains not performed. The priority register is a <strong>maintainer audit</strong>, not a separate publicly hosted source dump.</p>
+<h2 id="r180-public-source-links-and-expression-review-boundary-2026-11-17">R180 public-source links and expression-review boundary (2026-11-17)</h2>
+<p>The public <strong>hajisensai / EDF6 All Forces</strong> research repository has now been checked at commit <a href="https://github.com/hajisensai/edf6-all-forces/tree/60ee06f1d7f75356191c98e58d8b932731dc26a8"><code>60ee06f1d7f75356191c98e58d8b932731dc26a8</code></a>. The present source-research appendix links <strong>366 individual facts across 38 articles</strong> to <strong>93 exact original document paths</strong> at that pinned revision, with file-level Git blob IDs in the private provenance register. The linked subset includes <strong>188 of 203</strong> long explanations that require focused third-party-expression review; <strong>15</strong> still lack such a verified matching original in this audit. This is research provenance, <strong>not a license or permission to republish the author's text or source code</strong>.</p>
+<p>An initial sample of <strong>10</strong> fact-to-document pairs compared short English word sequences and selected technical address identifiers against the original document text. Nine samples contained no matching six-word sequence, and one contained two; 39 of 41 probed address identifiers occurred in the proposed source documents. This is a <strong>limited spot check</strong>, especially where the source is Chinese and this wiki is English. It does <strong>not</strong> clear all 188 longer descriptions for copyright or prove their independent wording. It is also not new EDF6 runtime evidence.</p>
+<p>The archival release contains the exact source-link ledger and the 10-check sample report. The public site contains direct links for readers, not copies of those outside-author original documents.</p>
+<h2 id="source-id-coverage-rechecked-against-the-current-reader-r185">Source-ID coverage rechecked against the current reader (R185)</h2>
+<p>A source-to-article recheck read the <strong>2,753 entries</strong> from the retained 14 November Knowledge Hub snapshot's R153 disposition register against the present reader, rather than trusting a count of wiki pages. Results:</p>
+<table>
+<thead>
+<tr>
+<th>Original record type</th>
+<th style="text-align:right">Independently checked in this reader</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Technical facts with source fact ID in the intended page</td>
+<td style="text-align:right"><strong>2,556 / 2,556</strong></td>
+<td>Literal <code>Fact ID</code> markers verified against the exact original register entries</td>
+</tr>
+<tr>
+<td>Cross-game comparison statements</td>
+<td style="text-align:right"><strong>149 / 149 pages present</strong></td>
+<td>Target-page existence rechecked; exact sentence wording was audited previously at R153, <strong>not re-compared to originals</strong> in R185</td>
+</tr>
+<tr>
+<td>Recorded dead ends / negative tests</td>
+<td style="text-align:right"><strong>32 / 32 pages present</strong></td>
+<td>Target-page existence rechecked; previous R153 expression audit remains the source-text authority</td>
+</tr>
+<tr>
+<td>Extension-platform-only facts excluded from the reader</td>
+<td style="text-align:right"><strong>16</strong></td>
+<td>All on the <code>edf6/mod-platform.md</code> source page, intentionally excluded from original-game documentation; their original research is preserved in the archival evidence history</td>
+</tr>
+</tbody>
+</table>
+<p>Thus <strong>2,737 source records have represented destinations</strong>, with <strong>16 explicitly out of this game's knowledge scope</strong>. This is a check of a <strong>fixed 14 November 2026 snapshot</strong>, not evidence that every later contributor addition, every historic chat, all Library files, or the native games' complete behavior is documented. An attribution or exact ID does not by itself prove a technical claim or grant a copyright license. The machine-readable independent recheck is <code>data/R185_KH_2753_RECORD_ID_PAGE_RECHECK.csv</code> in the full archive.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026.zip, source revision 54f89cd</li><li>Japanese contributor workbook research, cited in R84 pages</li><li>2026-11-15 user-relayed source-author permissions; R178 scoped source rights matrix</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-this-source-adds">What this source adds</a><a href="#publication-provenance-and-permission-boundaries">Publication provenance and permission boundaries</a><a href="#research-coverage">Research coverage</a><a href="#start-with-the-topic-references">Start with the topic references</a><a href="#cross-game-crosswalks">Cross-game crosswalks</a><a href="#full-source-evidence-organized-by-game">Full source evidence, organized by game</a><a href="#edf-4-1">　EDF 4.1</a><a href="#edf-5">　EDF 5</a><a href="#edf-6">　EDF 6</a><a href="#publication-and-attribution">Publication and attribution</a><a href="#exact-source-coverage-reconciliation-r153">Exact source-coverage reconciliation (R153)</a><a href="#r179-contributor-level-publication-review">R179: contributor-level publication review</a><a href="#r180-public-source-links-and-expression-review-boundary-2026-11-17">R180 public-source links and expression-review boundary (2026-11-17)</a><a href="#source-id-coverage-rechecked-against-the-current-reader-r185">Source-ID coverage rechecked against the current reader (R185)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-community-knowledge-hub"};</script><script src="../assets/site.js" defer></script></body></html>

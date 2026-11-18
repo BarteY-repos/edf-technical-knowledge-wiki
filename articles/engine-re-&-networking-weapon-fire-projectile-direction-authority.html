@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Weapon fire and projectile direction authority Subsequent RNG and class-internal trajectory evolution The common final transform is only the beginning of a proj"><title>Weapon fire and projectile direction authority | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Weapon fire and projectile direction authority</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Source-backed research / case study · Exact binary RE through R17; repair/runtime parity still open for class-internal state</div><div id="articleBody"><h2 id="subsequent-rng-and-class-internal-trajectory-evolution">Subsequent RNG and class-internal trajectory evolution</h2>
+<p>The common final transform is only the beginning of a projectile's lifecycle. Some Bullet implementations derive ongoing motion or detonation state from their constructor RNG seed. Read <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG, subtype1 reconstruction and per-class effects</a> for the exact LCG, creation-state offsets, Charge/PreCharge counters, and class-specific loss of parity. <a href="engine-re-%26-networking-vehicle-swing-shoot-dynamic-direction-mode.html">Dynamic VehicleSwingShoot direction</a> explains why the vehicle's effective per-shot basis can differ from its static config.</p>
+<p>EDF6 projectile direction is not governed solely by the networked Soldier facing/orientation fields. The binary exposes a separate <strong>weapon-fire → spread → projectile-construction</strong> authority chain.</p>
+<h2 id="per-shot-fire-transform">Per-shot fire transform</h2>
+<p>Weapon fire has its own synchronized transform sourced from the weapon muzzle node.</p>
+<ul>
+<li>sender <code>0x694910</code> carries per-shot <code>entry+0x50</code>;</li>
+<li>receiver <code>0x692540</code> restores the same transform before projectile creation;</li>
+<li><code>Weapon+0xBC8</code> RNG state is conditionally transmitted/restored before spread;</li>
+<li>common spread builder <code>0x691560</code> constructs the final per-projectile transform on both local and remote paths.</li>
+</ul>
+<p>Therefore a stale or divergent Soldier presentation orientation is not automatically the cause of a divergent shot. The fire path can carry more specific authority.</p>
+<h2 id="bullet-replicated-state-handoff">Bullet replicated-state handoff</h2>
+<p>The recovered construction chain:</p>
+<pre><code class="language-text">0x696FD0
+ -&gt; 0x181194280
+ -&gt; 0x181189C00
+ -&gt; 0x22E9C0
+ -&gt; 0x231CC0
+</code></pre>
+<p>seeds the Bullet replicated-state subobject at complete-object <code>+0x140</code>.</p>
+<p>Inside that subobject:</p>
+<ul>
+<li><code>+0xB80</code> is the projectile position/state-position lane;</li>
+<li><code>+0xB90</code> is the motion/direction state;</li>
+<li><code>0x233450</code> serializes the same subobject;</li>
+<li><code>0x233400</code> restores it on receive.</li>
+</ul>
+<p>The practical consequence is explicit: <strong>Soldier ordinary orientation is not the sole/final authority for actual projectile direction.</strong></p>
+<h2 id="layer-identity">Layer identity</h2>
+<p>Weapon-fire TX is proven as NetworkObject logical type <strong>6</strong>. Do not collapse that logical layer into an outer <code>0x3300/class3</code> label unless the framing edge is separately proven.</p>
+<p>This matters when instrumenting or repairing aim/shot desync: capture the weapon/fire and projectile-creation layers rather than repeatedly forcing a generic Soldier orientation field.</p>
+<h2 id="reliability-does-not-recreate-omitted-state">Reliability does not recreate omitted state</h2>
+<p>Later R17 Engine RE proves NetworkBullet selector0/1/2 normal shipping traffic uses Sandlot retained reliability above EOS. Transient physical packet loss can therefore be recovered for bytes that were actually serialized.</p>
+<p>That mechanism cannot restore class-internal state that never enters the selector payload. Current concrete examples are:</p>
+<ul>
+<li><code>FlameBullet02</code> motion scalars;</li>
+<li><code>LightningBullet01</code> per-projectile RNG/path state;</li>
+<li><code>SolidExpBullet01</code> detonation countdown.</li>
+</ul>
+<p>This is why a reliable selector can arrive correctly while the reconstructed remote projectile still evolves differently.</p>
+<h2 id="repair-principle">Repair principle</h2>
+<p>The preferred next repair surface is <strong>minimal initial seed/state parity at projectile creation</strong>, if that proves sufficient. Broad per-frame replication should be a later fallback, not the first assumption.</p>
+<p>A valid repair must establish, per affected projectile class:</p>
+<ol>
+<li>the minimal sender state/seed required for deterministic local behavior;</li>
+<li>whether existing weapon-fire/projectile identity can carry or derive it;</li>
+<li>the narrow receiver injection point before class construction/update diverges;</li>
+<li>whether one-time creation parity closes the divergence.</li>
+</ol>
+<p><strong>Unresolved:</strong> exact minimal state for the three named projectile classes and the final runtime outcome of such a narrow repair.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_ENGINE_RE_R8_HIGH_VALUE_SUMMARY_2026-09-25.md</li><li>Library: EDF6_ENGINE_RE_R17_DELIVERY_LOSS_RECOVERY_CHECKPOINT_2026-09-29.md</li><li>Library: ENGINE_RE/CURRENT_AUTHORITY.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#subsequent-rng-and-class-internal-trajectory-evolution">Subsequent RNG and class-internal trajectory evolution</a><a href="#per-shot-fire-transform">Per-shot fire transform</a><a href="#bullet-replicated-state-handoff">Bullet replicated-state handoff</a><a href="#layer-identity">Layer identity</a><a href="#reliability-does-not-recreate-omitted-state">Reliability does not recreate omitted state</a><a href="#repair-principle">Repair principle</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-weapon-fire-projectile-direction-authority"};</script><script src="../assets/site.js" defer></script></body></html>

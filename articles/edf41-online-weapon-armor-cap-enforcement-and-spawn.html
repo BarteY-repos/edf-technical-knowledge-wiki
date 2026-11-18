@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 — online caps are separate checks, not one generic setting EDF4.1&#39;s weapon-level restriction and armor limit travel through different code paths. The res"><title>EDF4.1 online weapon limits: selection refusal and armor at mission start | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Online caps</div><h1>EDF4.1 online weapon limits: selection refusal and armor at mission start</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Game technical references</span><span class="chip">Online caps</span></div><div class="referencebadge">Technical reference · Build-scoped static analysis; original contributor evidence grades cited; no new R126 gameplay runtime</div><div id="articleBody"><p>EDF4.1's <strong>weapon-level restriction</strong> and <strong>armor limit</strong> travel through different code paths. The restriction shown in the HQ weapon list is not identical to the armor value applied when the host starts an online mission. Neither should be inferred from offline mission settings.</p>
+<h2 id="modelist-and-cap-state-ownership">ModeList and cap-state ownership</h2>
+<p>The original <code>config.sgo</code> ModeList main offline scenario carries zero for per-difficulty entries 6 and 7; its online-mode flag at node <code>+0x5C</code> is zero. The cap getters therefore return a no-cap condition. The cap tables for every separate offline DLC mode were <strong>not</strong> independently re-read in the source note.</p>
+<p>For the examined Steam build, the session update at <code>0x377CD0</code> derives a weapon-cap-enabled byte from the room's weapon-limit switch and the current cap. The saved state flag is <code>save+0xA7D5</code>; the room's weapon and armor switches occupy distinct fields. Game notices <code>OnlineSys_WeaponCapLock/Unlock</code> and <code>OnlineSys_ArmorCapLock/Unlock</code> mirror these changes. The armor notice converts the room's armor-box limit into a displayed class-dependent HP value.</p>
+<h2 id="above-cap-weapons-cannot-be-confirmed-in-edf4-1">Above-cap weapons cannot be confirmed in EDF4.1</h2>
+<p>A weapon beyond the cap is marked in the equipment screen and its text is rendered <strong>red</strong>. The <code>UiHQEquipment_SelectWeapon</code> confirm handler checks the over-cap marker and <strong>skips the selection</strong>. This is an important cross-generation difference: EDF5 and EDF6 also color above-cap levels red, but their equipment confirmation handlers do not reject on that marker alone.</p>
+<table>
+<thead>
+<tr>
+  <th>Stage</th>
+  <th>Original EDF4.1 behavior in the studied build</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Display weapon above cap</td>
+  <td>Red text, flagged cell</td>
+</tr>
+<tr>
+  <td>Confirm that weapon</td>
+  <td>Rejected by selection-handler check</td>
+</tr>
+<tr>
+  <td>Host prepares online start</td>
+  <td>Serializes a per-player equipment record with a capped armor-box value</td>
+</tr>
+<tr>
+  <td>Spawn in online mode</td>
+  <td>Uses the received armor count and the class's per-box coefficient</td>
+</tr>
+<tr>
+  <td>Spawn in offline mode</td>
+  <td>Uses the local save's armor boxes, without online cap</td>
+</tr>
+</tbody>
+</table>
+<p>The host's start-message writer chooses <code>min(cap, boxes)</code> if the armor cap is active. The resulting HP follows <strong>base HP + capped boxes × class HP-per-box coefficient</strong>. The offline branch reads the saved armor count instead. This confirms the cap is enforced in the launch/spawn path, not simply by changing a menu label.</p>
+<h2 id="what-is-not-established">What is not established</h2>
+<p>This analysis does not prove a safe general method to activate online restrictions offline, nor does it test any patch. It is specific to <code>steam-57aab039</code>. The underlying room-message receive code was not fully read for one record-layout inference.</p>
+<p><strong>Primary evidence and credit:</strong> EDF Knowledge Hub <code>kh-edf41-online-caps</code>, facts <code>edf41-offline-modes-no-caps</code>, <code>edf41-cap-flag</code>, <code>edf41-weaponselect-cap-refusal</code>, <code>edf41-online-armor-cut</code>, <code>edf41-spawn-armor-paths</code>; novae (ajane) / KH contributor research. Static analysis, not a new gameplay test.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 — kh-edf41-online-caps (fact IDs retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#modelist-and-cap-state-ownership">ModeList and cap-state ownership</a><a href="#above-cap-weapons-cannot-be-confirmed-in-edf4-1">Above-cap weapons cannot be confirmed in EDF4.1</a><a href="#what-is-not-established">What is not established</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-online-weapon-armor-cap-enforcement-and-spawn"};</script><script src="../assets/site.js" defer></script></body></html>

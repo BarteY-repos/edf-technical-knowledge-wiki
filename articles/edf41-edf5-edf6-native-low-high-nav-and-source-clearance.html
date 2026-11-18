@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Original navigation and collision: LOW/HIGH, source layers and passage clearance Evidence: selected original EDF5/EDF6 HKT files, bounded original EDF4.1 MAC/MA"><title>Original NAV LOW/HIGH and EDF4.1 collision clearance — evidence and limits | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>Original NAV LOW/HIGH and EDF4.1 collision clearance — evidence and limits</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Original source-file static research; bounded offline geometry; no live NPC runtime proof</div><div id="articleBody"><p><strong>Evidence:</strong> selected original EDF5/EDF6 HKT files, bounded original EDF4.1 MAC/MAD geometry, and offline static analysis (17 November 2026). <strong>Not evidence of correct NPC pathfinding in a live EDF6 mission.</strong> This article concerns game-engine data and measured original-source geometry; the research tools used to inspect them are not part of the game's file format.</p>
+<h2 id="two-native-nav-resolutions-are-materially-different">Two native NAV resolutions are materially different</h2>
+<p>The original <strong><code>NW_EUROPE01</code></strong> pair of maps in EDF5 and EDF6 each contains separate low- and high-detail Havok <code>hkaiNavMesh</code> files. Their native topology is <strong>not</strong> one shared mesh with different bounds:</p>
+<table>
+<thead>
+<tr>
+<th>Original-file measurement</th>
+<th style="text-align:right">EDF5 LOW</th>
+<th style="text-align:right">EDF6 LOW</th>
+<th style="text-align:right">EDF5 HIGH</th>
+<th style="text-align:right">EDF6 HIGH</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NavMesh tiles</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">16</td>
+</tr>
+<tr>
+<td>Faces</td>
+<td style="text-align:right">4,419</td>
+<td style="text-align:right">4,059</td>
+<td style="text-align:right">32,787</td>
+<td style="text-align:right">30,216</td>
+</tr>
+<tr>
+<td>Edges</td>
+<td style="text-align:right">21,858</td>
+<td style="text-align:right">20,329</td>
+<td style="text-align:right">122,457</td>
+<td style="text-align:right">114,551</td>
+</tr>
+<tr>
+<td>Hierarchy nodes</td>
+<td style="text-align:right">218</td>
+<td style="text-align:right">205</td>
+<td style="text-align:right">1,665</td>
+<td style="text-align:right">1,543</td>
+</tr>
+</tbody>
+</table>
+<p>Both variants contain native clearance-cache data. A root <code>erosionRadius</code> of zero in this example <strong>does not prove</strong> that NPCs have a zero physical radius. The counts describe one matched map and game builds, not universal LOW/HIGH file sizes or an algorithm that can be copied to another map.</p>
+<p>EDF4.1 original map sources in the examined corpus do <strong>not</strong> supply a transferable <code>NAVMESH.HKT</code> file. Thus source terrain and collision geometry must first be identified and qualified before target-style NAV can be generated. A structurally valid HKT/NVMD pair does not prove agent clearance, active-body semantics or gameplay behavior. See <a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">HKT/NVMD compatibility versus rebake</a> and <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">EDF4.1 4 m source terrain</a>.</p>
+<h2 id="original-edf4-1-source-body-attribution-a-floor-is-not-automatically-walkable">Original EDF4.1 source-body attribution: a floor is not automatically walkable</h2>
+<p>The source-backed 4 m layer studies in two small map windows separated candidate height/surface samples by whether their original MAPB/MAD body owner was classified as a field source. A nonfield-only layer might represent a platform, bridge, roof, staircase or another meaningful surface; classifying it as nonfield is <strong>not</strong> grounds to delete it from navigation.</p>
+<table>
+<thead>
+<tr>
+<th>Bounded map/source window</th>
+<th style="text-align:right">Candidate upward sheet nodes</th>
+<th style="text-align:right">Field-candidate</th>
+<th style="text-align:right">Nonfield-only</th>
+<th style="text-align:right">Unresolved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NW_HILLYCITY_LIGHT</code></td>
+<td style="text-align:right">568</td>
+<td style="text-align:right">503</td>
+<td style="text-align:right">65</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">226</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">26</td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>The numbers apply to the studied two ROIs, not the complete city maps. Field source is a <strong>selected source-object anchor</strong>, not proof of native walkability or real contact activation. The initial step-only graph already missed obstacles at some connecting edges.</p>
+<h2 id="centerline-side-and-radius-experiments-on-original-source-triangles">Centerline, side and radius experiments on original source triangles</h2>
+<p>A four-neighbor grid can make a plausible NAV connection even when real collision triangles intersect that path. Direct original-source tests distinguish <strong>observed contacts</strong> from <strong>candidate edges with no sampled contact</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Map window and NAV profile</th>
+<th style="text-align:right">Candidate edges</th>
+<th style="text-align:right">Centerline contacts</th>
+<th style="text-align:right">Additional side-ray contacts</th>
+<th style="text-align:right">Remaining edges without sampled contact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HillyCity LOW</td>
+<td style="text-align:right">1,216</td>
+<td style="text-align:right">93</td>
+<td style="text-align:right">47</td>
+<td style="text-align:right">1,076</td>
+</tr>
+<tr>
+<td>HillyCity HIGH</td>
+<td style="text-align:right">1,154</td>
+<td style="text-align:right">56</td>
+<td style="text-align:right">41</td>
+<td style="text-align:right">1,057</td>
+</tr>
+<tr>
+<td>Soukogai LOW</td>
+<td style="text-align:right">419</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">411</td>
+</tr>
+<tr>
+<td>Soukogai HIGH</td>
+<td style="text-align:right">401</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">396</td>
+</tr>
+</tbody>
+</table>
+<p>The original geometric source windows contained <strong>2,035</strong> clipped facets in HillyCity and <strong>724</strong> in Soukogai. Centerline tests sampled three heights (<strong>0.25, 0.9 and 1.7 m</strong>); side tests added lateral offsets of <strong>±0.75 m</strong>. Contacts are source-triangle intersections <strong>conditional on actual actor/rigid-body activation and placement</strong>. In particular, 0 intersected centerline rays in Soukogai did not prove that the crossing corridor was free.</p>
+<p>Separate sparse source-geometric sphere-distance samples at radii <strong>0.25, 0.50 and 0.75 m</strong> found further contacts <strong>beyond those point-ray samples</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Radius</th>
+<th style="text-align:right">HillyCity new LOW / HIGH</th>
+<th style="text-align:right">Soukogai new LOW / HIGH</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.25 m</td>
+<td style="text-align:right">1 / 0</td>
+<td style="text-align:right">0 / 0</td>
+</tr>
+<tr>
+<td>0.50 m</td>
+<td style="text-align:right">4 / 2</td>
+<td style="text-align:right">7 / 5</td>
+</tr>
+<tr>
+<td>0.75 m</td>
+<td style="text-align:right">18 / 16</td>
+<td style="text-align:right">19 / 11</td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>chosen diagnostic radii, not the measured dimensions of Ranger, Fencer, Hector or any EDF6 navigation agent</strong>. The sphere tests use sparse segment axes, <strong>not</strong> a full upright swept capsule or verified native Havok clearance. Nor should the per-radius counts be added to infer a total number of distinct NPC failures.</p>
+<h2 id="mapb-group-placement-changes-the-collision-interpretation">MAPB group placement changes the collision interpretation</h2>
+<p>The bounded HillyCity native-source index showed <strong>five group-owner records with 40 child links</strong>. Of those linked children, only <strong>one</strong> resolved to the selected static MAD collision-source route; the other <strong>39</strong> remain <strong>unresolved</strong>, not nonexistent or non-colliding. For that one child, using its stored pose independently placed its conservative collision candidate inside the selected window, while hypothetically composing its parent group's pose moved its conservative candidate elsewhere. Soukogai had no group links in this control.</p>
+<p>This shows <strong>sensitivity to transform interpretation</strong>; it does <strong>not</strong> establish whether original EDF4.1 actually applies parent-composed transforms at runtime. Applying parent composition blindly, or discarding 39 unresolved child links, could corrupt NAV exclusions. The source's candidate <code>Rz*Ry*Rx</code> actor pose and activation/layer rules are still not native-runtime verified.</p>
+<h2 id="what-remains-unproven">What remains unproven</h2>
+<p>These measurements do <strong>not</strong> close full-map coverage, native collision-body activation, actor/group world transforms, layered roofs and caves, agent capsule size/height, ledges, erosion, bridge semantics or native LOW/HIGH polygonization. In-game NPC behavior for Ranger/Fencer/Hector, vehicle movement and the 16-map-family scope remain unqualified. No result here establishes a playable NPC-pathfinding fix.</p>
+<p><strong>Source provenance:</strong> original retail HKT measurement and 147-mission scope in <code>R49_NAV_AND_ONLINE_DECISIONS.md</code>; original MAC/MAD source-facet crossings in <code>R52_NAV_FACET_CROSSING_DECISIONS.md</code>; body/field-layer attribution in <code>R53_NAV_BODY_SOURCE_LEVEL_DECISIONS.md</code>; positive-upward source-facet checks in <code>R54_MAP_STUDIO_REUSE_FINDINGS.md</code>; lateral source contacts in <code>R55_NAV_SEMANTIC_PORTAL_INTEGRATION_DECISIONS.md</code>; sparse radius measurements in <code>R56_SWEPT_SPHERE_DECISIONS.md</code>; group-parent-pose sensitivity in <code>R57_GROUP_POSE_ORIGINAL_SOURCE_DECISIONS.md</code> (all 17 November 2026). These are bounded findings from the original-source research checkpoints; private original map geometry, game assets and source-derived edge coordinate lists are not included in the public article.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R49_NATIVE_NAV_ORACLE_147_SCOPE/EDF41_R49_DELTA_ON_R48_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R52_SOURCE_FACET_EDGE_CROSSING/EDF41_R52_DELTA_ON_R51_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R53_ORIGINAL_BODY_LEVEL_PROVENANCE/EDF41_R53_DELTA_ON_R52_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R54_MAP_STUDIO_SEMANTIC_REUSE/EDF41_R54_DELTA_ON_R53_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R55_MAPSTUDIO_SEMANTIC_PORTAL_CLEARANCE_PROBES/EDF41_R55_DELTA_ON_R54_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R56_SOURCE_SWEPT_SPHERE_CLEARANCE/EDF41_R56_DELTA_ON_R55_2026-11-17.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R57_MAPB_GROUP_POSE_SENSITIVITY/EDF41_R57_DELTA_ON_R56_2026-11-17.zip</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-native-nav-resolutions-are-materially-different">Two native NAV resolutions are materially different</a><a href="#original-edf4-1-source-body-attribution-a-floor-is-not-automatically-walkable">Original EDF4.1 source-body attribution: a floor is not automatically walkable</a><a href="#centerline-side-and-radius-experiments-on-original-source-triangles">Centerline, side and radius experiments on original source triangles</a><a href="#mapb-group-placement-changes-the-collision-interpretation">MAPB group placement changes the collision interpretation</a><a href="#what-remains-unproven">What remains unproven</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-native-low-high-nav-and-source-clearance"};</script><script src="../assets/site.js" defer></script></body></html>

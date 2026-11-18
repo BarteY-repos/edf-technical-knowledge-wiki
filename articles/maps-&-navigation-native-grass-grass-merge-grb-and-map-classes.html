@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 vegetation: native species registries and port-derived regional grass Critical provenance distinction: The commonly cited IG_DESERT508 / sk_grassleaf504a /"><title>EDF6 vegetation: native grass registries versus EDF5-derived region GRB | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF6 vegetation: native grass registries versus EDF5-derived region GRB</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Technical reference · Three native MAC samples; source-only region authoring not runtime qualified</div><div id="articleBody"><p><strong>Critical provenance distinction:</strong> The commonly cited <code>IG_DESERT508</code> / <code>sk_grassleaf504a</code> / <code>ig_grassdens2small.grb</code> sample is <strong>EDF5-source-derived content ported into EDF6</strong>, not an original shipping EDF6 map. The later direct source-provenance review explicitly corrected the earlier claim that its fixed <code>GrassDens2Small</code> rule graph was an <em>exact native EDF6 oracle</em>. It is still useful as <strong>source-authored data that has been observed working in an EDF6 port</strong>, but it cannot alone define Sandlot's original EDF6 region-density format.</p>
+<p>By contrast, <code>IG_HEIGEN507</code> and <code>NW_EUROPE01</code> in the retained reference set are <strong>native EDF6 controls</strong>. Their directly observed vegetation data must be kept separate from the ported Desert example.</p>
+<h2 id="three-distinct-concepts">Three distinct concepts</h2>
+<table>
+<thead>
+<tr>
+  <th>Data</th>
+  <th>Observed semantics</th>
+  <th>What it does <strong>not</strong> establish</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>grass.merge.sgo</code></td>
+  <td>Named grass/flower species-to-slot registry</td>
+  <td>Existence of any regional <code>.grb</code> density block</td>
+</tr>
+<tr>
+  <td>Regional <code>ig_grassdens2small.grb</code> and associated route geometry in the ported Desert</td>
+  <td>One bounded region-density representation accepted by the ported EDF6 runtime</td>
+  <td>Sandlot's original EDF6 GRB generation algorithm or a native multi-species region format</td>
+</tr>
+<tr>
+  <td>MAPB T1 object class</td>
+  <td>Classification/role of map objects</td>
+  <td>A universal Boolean “grass allowed” bit</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source-corpus-inventory-with-corrected-provenance">Source-corpus inventory (with corrected provenance)</h2>
+<table>
+<thead>
+<tr>
+  <th>Inspected map</th>
+  <th>Evidence origin</th>
+  <th>T1 class histogram</th>
+  <th>Grass registry</th>
+  <th>Explicit <code>.grb</code> block</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>IG_DESERT508</code></td>
+  <td><strong>EDF5-derived port to EDF6</strong></td>
+  <td>3:9, 5:3, 4:3, 6:24, 2:1</td>
+  <td><code>sk_grassleaf504a → 0</code></td>
+  <td><code>ig_grassdens2small.grb</code></td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507</code></td>
+  <td><strong>Native EDF6 control</strong></td>
+  <td>3:7, 11:14, 6:1</td>
+  <td>Five named species / slots 0–4</td>
+  <td><strong>None</strong> in retained MAC</td>
+</tr>
+<tr>
+  <td><code>NW_EUROPE01</code></td>
+  <td><strong>Native EDF6 control</strong></td>
+  <td>3:4, 10:1, 1:9, 6:10, 5:3, 2:6</td>
+  <td>No <code>grass.merge</code> in audited MAC</td>
+  <td>None</td>
+</tr>
+</tbody>
+</table>
+<p>The original EDF6 <code>HEIGEN507</code> species registry was:</p>
+<table>
+<thead>
+<tr>
+  <th>Species</th>
+  <th style="text-align:right">Slot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>sk_grassleaf501a</code></td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>sk_flower501</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>sk_grassleaf502a</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>sk_grassleaf503a</code></td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>sk_flower502</code></td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<p>The five-entry native registry is <strong>not evidence</strong> that a five-species <code>GrassDens2Small</code> regional <code>.grb</code> exists: the inspected HEIGEN MAC has <strong>no explicit <code>.grb</code> block</strong>, and the corresponding MAPB/RMPA comparison did not establish a Desert-style density consumer. Native registry membership, a source port's regional GRB and engine-managed grass distribution are <strong>different evidence classes</strong>.</p>
+<h2 id="what-the-edf5-derived-desert-experiment-actually-proved">What the EDF5-derived Desert experiment actually proved</h2>
+<p>The recovered fixed <code>GrassDens2Small</code> source tree associates <strong>one <code>sk_grassleaf504a</code> species at slot 0</strong> with explicit polygon boundaries. An EDF5-derived Desert build carrying that structure was reported to run with the grass behavior working inside EDF6. This is a positive <em>compatibility</em> observation, not an original-native authoring specification.</p>
+<p>Reusing the same regional rule tree with another species such as native-HEIGEN <code>sk_grassleaf501a</code> was tested in a controlled source-only build but remained an <strong>unconfirmed substitution</strong>. Nor does the native HEIGEN registry prove a multi-species regional GRB. Hole polygons, branching/ambiguous loops, arbitrary numeric GRB parameters and generic multi-species GRB synthesis remain outside the established format semantics.</p>
+<h2 id="why-object-class-6-is-not-a-global-grass-exclusion-flag">Why object Class 6 is not a global grass-exclusion flag</h2>
+<p>A specific ported Desert map experiment changed <code>sk_base508exit01</code> from T1 Class 3 to Class 6. In that map the unwanted grass disappeared near the exit while other Class-3 base terrain retained vegetation. That isolated runtime outcome is valid for this <strong>specific ported asset and context</strong>.</p>
+<p>It does <strong>not</strong> justify <code>Class 6 = no grass</code> globally. Native EDF6 <code>NW_EUROPE01</code> uses Class 6 for streetlights, signs, benches, props and other objects; the class/role assignment is not a universal grass mask. Direct region inclusion geometry and engine vegetation behavior must be investigated separately from MAPB resource classes.</p>
+<h2 id="evidence-status-and-open-questions">Evidence status and open questions</h2>
+<ul>
+<li><strong>Established:</strong> source-ported Desert regional rule structure, EDF6 runtime compatibility observation, native HEIGEN five-entry registry, native class distributions, absence of an explicit HEIGEN GRB block.</li>
+<li><strong>Not established:</strong> Sandlot's native EDF6 generic region-density <code>.grb</code> generator, HEIGEN's exact grass consumer, arbitrary replacement species, or newly authored region runtime/culling behavior.</li>
+<li><strong>Do not infer:</strong> source-exact Desert port bytes = byte-exact original EDF6 native vegetation pipeline.</li>
+</ul>
+<p>Sources: <code>MAP_STUDIO_GRASS_PROVENANCE_CORRECTION_2026-10-17.md</code> and <code>GRASS_PROVENANCE_CORRECTION_2026-10-17.json</code> (later provenance authority), supported by the direct native/control inventory <code>R45_NATIVE_GRASS_SEMANTICS_CENSUS.json</code>. Those materials are archived under <code>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/</code>. The later correction <strong>supersedes the earlier R45/R55 use of the word “native-exact” for the Desert profile</strong>; this page records knowledge of EDF, not the development of any editor.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R45_NATIVE_GRASS_SEMANTICS_RECONCILIATION_2026-10-16.md</li><li>R45_NATIVE_GRASS_SEMANTICS_CENSUS.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#three-distinct-concepts">Three distinct concepts</a><a href="#source-corpus-inventory-with-corrected-provenance">Source-corpus inventory (with corrected provenance)</a><a href="#what-the-edf5-derived-desert-experiment-actually-proved">What the EDF5-derived Desert experiment actually proved</a><a href="#why-object-class-6-is-not-a-global-grass-exclusion-flag">Why object Class 6 is not a global grass-exclusion flag</a><a href="#evidence-status-and-open-questions">Evidence status and open questions</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-native-grass-grass-merge-grb-and-map-classes"};</script><script src="../assets/site.js" defer></script></body></html>

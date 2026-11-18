@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 and EDF6 mouse input: cursor recentering and downstream aim shaping The native PC game input pipeline uses several distinct stages: Windows mouse movement,"><title>EDF5/EDF6 relative mouse acquisition and native aim shaping | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-performance.html">Performance</a></div><h1>EDF5/EDF6 relative mouse acquisition and native aim shaping</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Performance &amp; 120 FPS</span><span class="chip">Performance</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Exact binary/static contract; complete perceptual runtime parity not globally claimed</div><div id="articleBody"><p>The native PC game input pipeline uses several distinct stages: Windows mouse movement, a game-owned relative-motion sample and downstream class/weapon-specific aim handling. A modern raw-device event is <strong>not</strong> the same kind of measurement as the stock cursor-centered sample.</p>
+<h2 id="original-relative-mouse-acquisition">Original relative mouse acquisition</h2>
+<p>The examined EDF5/EDF6 gameplay path uses the classic <strong>cursor position → delta from the window's center → recenter the pointer</strong> approach. It reads integer screen coordinates; the relative delta is therefore quantized by desktop-pixel movement and cursor handling. This is different from receiving native Windows <code>WM_INPUT</code> relative device counts directly.</p>
+<p>For the examined EDF6 build, source study identified the gameplay relative-motion provider at <code>EDF+0x11831F0</code> and the direct consumer at <code>EDF+0x1188479</code>. These are build-specific offsets. The menu's absolute pointer and text-entry/IME routes are separate and should not be described as gameplay-relative input.</p>
+<h2 id="two-action-data-families">Two action-data families</h2>
+<p>The engine exposes different fields for continuous and subsequently filtered mouse actions:</p>
+<table>
+<thead>
+<tr>
+  <th>Family</th>
+  <th>Source-observed fields</th>
+  <th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Continuous <code>MouseMoveX/Y</code></td>
+  <td><code>+0xE8 / +0xF0</code></td>
+  <td>Fresh movement deltas</td>
+</tr>
+<tr>
+  <td><code>MouseX/Y/ReverseX/ReverseY</code></td>
+  <td><code>+0x108 / +0x110 / +0x118 / +0x120</code></td>
+  <td>Downstream filtered or discrete actions</td>
+</tr>
+</tbody>
+</table>
+<p>A discrepancy in one family is not proof of an acquisition defect in the other. <strong>Cursor quantization</strong>, <strong>game sensitivity scaling</strong>, <strong>Fencer heavy-weapon response</strong> and <strong>vehicle-turret inertia</strong> are separable phenomena.</p>
+<h2 id="native-aiming-remains-intentional-game-logic">Native aiming remains intentional game logic</h2>
+<p>The original downstream route includes scaling, rate limits, saturation/carry behavior and specialized responses for weapons and vehicles. Observed code includes a <code>/24</code> factor and <code>set_limit_rate</code>. Bypassing these steps changes native gameplay even if it makes cursor motion feel different. The source does not establish that every disliked aim response is a bug in the mouse sampler.</p>
+<p>Some input and filtering paths are also tied to frame cadence, including wheel consume/reset, action-suppression countdowns and filters normalized to a 1/60 interval. A higher display frame rate therefore does not imply that all input transitions should update at the same frequency.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>The acquisition/provider mapping is grounded in exact binary/static analysis; the retained modified-input experiment was not a universal runtime confirmation of improved aiming. This article describes the <strong>game's input stages</strong>, not instructions for implementing an external input hook.</p>
+<p>See also <a href="edf5-native-input-pump-keyboard-snapshot-xinput-and-focus.html">EDF5 keyboard and XInput</a> and <a href="input-edf5-edf6-reconciliation.html">input reconciliation</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/modernization/EDF6_MODERNIZATION_FULL_SESSION_HANDOFF_R6_2026-09-01.md</li><li>/EDF5_EDF6_RESEARCH/research/modernization/EDF6_MODERNIZATION_EVIDENCE_LEDGER_R6_2026-09-01.json</li><li>/EDF5_EDF6_RESEARCH/research/modernization/README.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#original-relative-mouse-acquisition">Original relative mouse acquisition</a><a href="#two-action-data-families">Two action-data families</a><a href="#native-aiming-remains-intentional-game-logic">Native aiming remains intentional game logic</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"performance-edf6-raw-input-acquisition-only-replacement-contract"};</script><script src="../assets/site.js" defer></script></body></html>

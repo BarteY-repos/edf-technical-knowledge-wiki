@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 M210 Starship object-action boundary Exact failure mode in the weak-point collision gate The later R8 static audit establishes the required UfoMother301"><title>EDF 4.1 M210 Starship object-action boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF 4.1 M210 Starship object-action boundary</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Static source/object contract; runtime progression pending</div><div id="articleBody"><h2 id="exact-failure-mode-in-the-weak-point-collision-gate">Exact failure mode in the weak-point collision gate</h2>
+<p>The later R8 static audit establishes the required <code>UfoMother301::HullAccept</code> sequence:</p>
+<ol>
+<li>While the live <code>BigCannon</code> part exists, hull damage is disallowed.</li>
+<li>After that gate, resolve the <strong>canonical EDF6 rigid-body name <code>RagDollProxys.weak</code></strong>.</li>
+<li>If lazy lookup fails, <strong>reject the current hit</strong>, clear the failed-lookup sentinel and allow a later hit to retry resolution.</li>
+<li>Only <strong>exact identity with the weak rigid body</strong> permits post-gate hull damage. A generic hit on the visually exposed hull is not equivalent.</li>
+</ol>
+<p>The former fail-open behavior accepted arbitrary shell hits after an unsuccessful weak-body lookup, potentially reducing hull HP and advancing the mission's scripted phases prematurely. The source-level fix was subjected to nine focused static checks, <strong>not</strong> an EDF6 runtime retest. This mechanism is a useful general lesson for ported multipart bosses: a missing collision-body reference must not turn a source weak-point requirement into global vulnerability.</p>
+<h2 id="identity-must-be-established-before-debugging">Identity must be established before debugging</h2>
+<p>A tester's visible “Mission 40” label must not be mapped to an internal EDF4.1 mission ID by position alone. The pinned campaign source order's slot 40 is <code>M501</code>, not the Mothership/Starship case under investigation.</p>
+<p>The later audit identified the relevant internal Starship mission as <strong><code>M210</code></strong>.</p>
+<p>This is an important conversion rule: use the built MissionPack metadata/output identity, not displayed numbering assumptions, before patching a mission state machine.</p>
+<h2 id="current-object-action-contract">Current object-action contract</h2>
+<p>The <code>UfoMother301</code> bridge already exposes the source-expected parts/action sequence:</p>
+<table>
+<thead>
+<tr>
+  <th>Part family</th>
+  <th style="text-align:right">Enable action</th>
+  <th style="text-align:right">Attack-on action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>BigCannon</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td>Cannon</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td>Panel</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">15</td>
+</tr>
+</tbody>
+</table>
+<p>The retained M210 BVM action sequence is statically consistent with this <code>ObjectAction</code> / <code>GetPartsObject</code> contract.</p>
+<h2 id="two-historical-failure-candidates-already-addressed">Two historical failure candidates already addressed</h2>
+<h3 id="parts-availability-on-creation-frame">Parts availability on creation frame</h3>
+<p><code>CreateHull()</code> calls <code>SpawnParts()</code> before returning from the factory because source mission logic can issue creation-frame <code>ObjectAction</code> / <code>GetPartsObject</code> operations.</p>
+<p>A bridge that deferred parts creation would change the mission's state-machine semantics even if all parts appeared one frame later.</p>
+<h3 id="hull-damage-acceptance">Hull damage acceptance</h3>
+<p><code>HullAccept()</code> is fail-closed while <code>RagDollProxys.weak</code> cannot be resolved. It retries later rather than accepting arbitrary hits during incomplete object setup.</p>
+<p>This prevents initialization timing from silently turning into a damage-state change.</p>
+<h2 id="current-conclusion">Current conclusion</h2>
+<p>There is no current source/static evidence for another M210 transpiler patch.</p>
+<p>The previously reported skipped turret-activation / directly destructible cannon/weakpoint behavior is still a <strong>runtime progression gate</strong>. If it reproduces, the correct next step is a source-BVM versus generated-AC event/factor/object-state trace using the confirmed M210 identity.</p>
+<h2 id="do-not-do">Do not do</h2>
+<ul>
+<li>do not assume visible mission number equals internal mission ID;</li>
+<li>do not patch generic ObjectAction numbering without a source mismatch;</li>
+<li>do not defer <code>SpawnParts()</code> past creation-frame source calls;</li>
+<li>do not make <code>HullAccept()</code> permissive to hide incomplete initialization;</li>
+<li>do not call a static action-table match a runtime progression PASS.</li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF41_RUNTIME_FEEDBACK_MISSION40_TRIAGE_2026-11-05.md</li><li>Library: EDF41_R12_POST_AUDIT_FRONTIER_2026-11-06.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#exact-failure-mode-in-the-weak-point-collision-gate">Exact failure mode in the weak-point collision gate</a><a href="#identity-must-be-established-before-debugging">Identity must be established before debugging</a><a href="#current-object-action-contract">Current object-action contract</a><a href="#two-historical-failure-candidates-already-addressed">Two historical failure candidates already addressed</a><a href="#parts-availability-on-creation-frame">　Parts availability on creation frame</a><a href="#hull-damage-acceptance">　Hull damage acceptance</a><a href="#current-conclusion">Current conclusion</a><a href="#do-not-do">Do not do</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-edf-4-1-m210-starship-object-action-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

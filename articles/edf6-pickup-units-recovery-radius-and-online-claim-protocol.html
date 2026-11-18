@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 — pickups, healing, physics and online claims An EDF6 pickup box is a DropItemManager::Unit stored in a manager-owned linked list, not a general enemy Game"><title>EDF6 pickup manager: health recovery, physical boxes and host arbitration online | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Pickups and rewards</div><h1>EDF6 pickup manager: health recovery, physical boxes and host arbitration online</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Pickups and rewards</span></div><div class="referencebadge">Technical reference · Source-declared grades; this edition does not add native game runtime testing</div><div id="articleBody"><p>An EDF6 pickup box is a <code>DropItemManager::Unit</code> stored in a manager-owned linked list, <strong>not</strong> a general enemy <code>GameObjectBase</code> and not a hidden extra kind of hostile object. The manager owns the physical box instances, their category, their online IDs, pickup counters and the running drop accumulator.</p>
+<h2 id="four-item-models-and-their-behavior">Four item models and their behavior</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Type</th>
+  <th>Native model from <code>app:/object/ItemModel.mrab</code></th>
+  <th>When effect is applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td><code>Weapon.mdb</code></td>
+  <td>Counts a weapon crate for end-of-mission result</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>Armor.mdb</code></td>
+  <td>Counts an armor crate for end-of-mission result</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>Healingsmall.mdb</code></td>
+  <td>Immediately heals the picker: <strong>15% max HP</strong></td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>Healingbig.mdb</code></td>
+  <td>Immediately heals the picker: <strong>30% max HP</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The item manager in the studied EDF6 build has a list head at <code>+0xDE0</code>, item count at <code>+0xDE8</code>, a drop accumulator at <code>+0xDF0</code> and a next-box ID at <code>+0xE00</code>. Individual <code>Unit</code> objects hold category at <code>+0xC0</code>, picked flag at <code>+0xC4</code>, box ID at <code>+0xC8</code> and a physical transform. These are <strong>version-specific field locations</strong>, not a general EDF engine ABI.</p>
+<h2 id="who-can-collect">Who can collect?</h2>
+<p>The soldier update calls the pickup manager once per update for an eligible local player. The pickup is tested against a point roughly <strong>one metre above the soldier position</strong>, using squared distance and a radius assembled from the soldier's class/state, certain accessories and the vehicle seat while mounted. A default base radius of <strong>3.0 metres</strong> appears in the examined constructor; other states can increase it.</p>
+<p>The actor must be alive and have the local player-controller field set. NPC allies walking through a pickup <strong>do not collect it</strong>. Recovery items can propagate healing to living recruited followers using a separate recursion and ratio rule. In the source's ordinary player configuration that follower ratio is <strong>0.35</strong>; an equipment-derived factor may alter it. This does not imply an identical ally-healing rule for EDF4.1 or EDF5.</p>
+<h2 id="pickups-persist-until-a-cleanup-condition">Pickups persist until a cleanup condition</h2>
+<p><code>DropItemManager</code> maintains a physical box list, clamps horizontal positions into the map area, removes boxes after pickup or when their height falls below <strong>−1000</strong>, and clears the list on mission change. The source did <strong>not</strong> find a universal short crate timeout or an automatic map-wide magnet in the ordinary native path. The on-field limit is 128 crates and the collected-crate limit is 1024 for this build.</p>
+<h2 id="online-protocol-and-ownership">Online protocol and ownership</h2>
+<p>The source distinguishes <strong>four message kinds</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Message</th>
+  <th>Native meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>Replicate a newly spawned crate, using an agreed seed/ID</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>Guest requests the host to claim a particular box</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>Host publishes the confirmed pickup to participants</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3</code></td>
+  <td>Request that an enemy death create dropped items</td>
+</tr>
+</tbody>
+</table>
+<p>The picker applies the pickup locally, then communicates with the host. The <strong>host arbitrates</strong> which player first claims an unpicked ID and prevents duplicated weapon/armor counts. The source has no rollback if a guest applied an immediate local pickup that the host rejects. Box IDs can be negative; they are not equivalent to an enemy owner ID.</p>
+<p><strong>Evidence boundary:</strong> The state and message flow are static analysis of <code>steam-678ccb46</code>. An offline invocation of the game's own functions (83 checks) confirmed some radius and serialization behavior, but that is <strong>not</strong> a live multiplayer or complete game-run test. The original appendix labels those facts accordingly.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf6-pickups</code> facts <code>dropitem-manager-layout</code>, <code>dropitem-life</code>, <code>pickup-update</code>, <code>pickup-update-caller</code>, <code>pickup-gates-effects</code>, <code>pickup-award-dispatch</code>, <code>pickup-online</code>, <code>pickup-limits</code>; novae (ajane). See <a href="edf41-edf5-edf6-item-crate-accumulator-and-category-probabilities.html">crate generation</a> and <a href="edf5-weapon-armor-end-mission-reward-roll-class-weights-and-level-window.html">end-of-mission rewards in EDF5</a>.</p>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf6-healing-revive-support-buffs-and-heal-credit.html">Native healing and ally credit</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf6-pickups and kh-edf6-effects (steam-678ccb46), curator novae/ajane and credited contributors</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#four-item-models-and-their-behavior">Four item models and their behavior</a><a href="#who-can-collect">Who can collect?</a><a href="#pickups-persist-until-a-cleanup-condition">Pickups persist until a cleanup condition</a><a href="#online-protocol-and-ownership">Online protocol and ownership</a><a href="#further-native-game-references">Further native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-pickup-units-recovery-radius-and-online-claim-protocol"};</script><script src="../assets/site.js" defer></script></body></html>

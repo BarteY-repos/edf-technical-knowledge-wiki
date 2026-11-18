@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 → EDF6 mission conversion: backward-layout BVM difficulty switches Scope: EDF5 mission BVM → EDF6 MISSION.AC conversion. Evidence: original EDF5 BVM corpus"><title>EDF5 → EDF6 backward BVM difficulty-switch reconstruction | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-scripting.html">Scripting</a></div><h1>EDF5 → EDF6 backward BVM difficulty-switch reconstruction</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Historical exact source and offline static audit; runtime correction specifically noted</div><div id="articleBody"><p><strong>Scope:</strong> EDF5 mission BVM → EDF6 <code>MISSION.AC</code> conversion. <strong>Evidence:</strong> original EDF5 BVM corpus and regenerated AngelScript/static comparison; no new runtime qualification in this documentation pass. This is a reusable compiler/verification rule, not an assertion that the latest shipped patch still contains the historical defect.</p>
+<h2 id="why-an-apparently-valid-switch-can-run-the-wrong-branch">Why an apparently valid switch can run the wrong branch</h2>
+<p>Some EDF5-compiled switches serialize the <strong>case bodies before their comparison/dispatch ladder</strong>. A converter that assumes the dispatch precedes the case bodies can emit those physical bodies in sequence. The subsequent comparison ladder may then reduce to useless constant branches such as <code>if (0 == 3)</code>; the <strong>last emitted case</strong> wins on every difficulty. Syntax validation and successful mission load do not catch this class of semantic error.</p>
+<p>Three observed backwards-layout forms must be recognized:</p>
+<ol>
+<li>The earlier strict backward-layout case that the converter already understood.</li>
+<li>An empty-default final dispatch ending in <code>pop</code>, then <strong>falling directly through</strong> to the merge label.</li>
+<li>An empty-default final dispatch ending in <code>pop; jmp MERGE</code>.</li>
+</ol>
+<p><strong>Implementation rule:</strong> recognize these precise control-flow forms, construct the semantic switch from the source dispatch graph, preserve merge boundaries and operand typing, and <strong>fail closed</strong> on other non-canonical patterns. Do not flatten physical bytecode order into AngelScript statement order.</p>
+<h2 id="exact-historical-mission-regressions">Exact historical mission regressions</h2>
+<p>The following values come from <code>EDF5_EDF6_DIFFICULTY_SWITCH_SCALAR_CLOSURE_R8_2026-09-27.md</code>. Values are mission-specific source behavior, not global difficulty coefficients.</p>
+<table>
+<thead>
+<tr>
+  <th>Mission</th>
+  <th>Affected logic</th>
+  <th>EDF5 source behavior</th>
+  <th>Historical broken output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>M015</code></td>
+  <td>Generator-count multiplier</td>
+  <td>Default <code>1.0</code>; Hard <code>0.8</code>; Hardest <code>0.7</code>; Inferno <code>0.6</code></td>
+  <td>Applied <code>0.6</code> regardless of difficulty</td>
+</tr>
+<tr>
+  <td><code>M034</code></td>
+  <td>Allied heavy tank level</td>
+  <td>Default <code>1.0</code>; Normal <code>0.8</code>; Hard <code>0.875</code></td>
+  <td>Applied <code>0.875</code> universally</td>
+</tr>
+<tr>
+  <td><code>M034_5</code></td>
+  <td>Sergeant/friendly squad level</td>
+  <td>Default <code>1.5</code>; Hard <code>1.75</code>; Hardest <code>2.0</code>; Inferno <code>2.5</code></td>
+  <td>Applied <code>2.5</code> universally</td>
+</tr>
+<tr>
+  <td><code>M037</code></td>
+  <td>Allied level and later bee level</td>
+  <td>Allies default <code>1.0</code>, Hard <code>1.5</code>, Hardest+ <code>2.0</code>; bees default <code>1.0</code>, Hard <code>0.8</code>, Hardest <code>0.7</code>, Inferno <code>0.85</code></td>
+  <td>Last cases leaked; <strong>two</strong> switches affected</td>
+</tr>
+<tr>
+  <td><code>M039</code></td>
+  <td>Allied Begaruta, tank and soldier levels</td>
+  <td>Default <code>0.8/0.8/0.9</code>; Hard <code>0.8/0.85/0.9</code>; Hardest+ <code>1/1/1</code></td>
+  <td><code>1/1/1</code> on all difficulties</td>
+</tr>
+<tr>
+  <td><code>M051</code></td>
+  <td>Generator spawn timing</td>
+  <td>Default <code>1.5</code>; Hard <code>2.0</code>; Hardest+ <code>3.0</code></td>
+  <td><code>3.0</code> universally</td>
+</tr>
+<tr>
+  <td><code>M059</code></td>
+  <td>RedSmallDragon group count</td>
+  <td>Normal <code>1</code>; Hard <code>2</code>; Hardest <code>3</code>; Inferno <code>4</code></td>
+  <td><code>4</code> whenever group was enabled</td>
+</tr>
+<tr>
+  <td><code>M065</code></td>
+  <td>Generator level/interval and mission level</td>
+  <td>Default <code>1.25/90</code>; Hard <code>1.25/90</code> + mission-level <code>0.9</code>; Hardest <code>0.9/90</code> + <code>0.8</code>; Inferno <code>0.9/105</code> + <code>0.75</code></td>
+  <td>Inferno values leaked to every difficulty; separate scalar type bug compounded the error</td>
+</tr>
+<tr>
+  <td><code>M069</code></td>
+  <td>Mission level</td>
+  <td>Default no override; Hardest <code>0.8</code>; Inferno <code>0.7</code></td>
+  <td>Inferno <code>0.7</code> universally; scalar typing also corrected</td>
+</tr>
+<tr>
+  <td><code>M081</code></td>
+  <td>Offline mission level</td>
+  <td>Default <code>1.0</code>; offline Hard/Hardest <code>0.9</code>; offline Inferno <code>0.8</code></td>
+  <td><code>0.8</code> universally, with malformed offline/online branch</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-was-verified-and-what-was-not">What was verified and what was not</h2>
+<p>The R8 source-only closure reports <strong>141/141</strong> regenerated source BVMs, zero remaining signatures for the missed constant-comparison shape, and <strong>10/10</strong> switch-patched AC validators PASS. The broader R8 Core reported <strong>17/17</strong> validator PASS, including independent scalar/Desert508 work. The batch was <strong>140 clean plus <code>DM006_2</code></strong> with its unchanged six <code>cuscall0 3450</code> diagnostic issues; it was byte-identical before and after the switch repair.</p>
+<p>These are <strong>offline/structural results</strong>. R8's suggested runtime checks include <code>M034_5</code> at Easy/Normal, <code>M065</code> across levels, <code>M059</code> at Normal/Hard and <code>M081</code> offline Hard/Inferno. The later <strong>1.0.6 BVM parity audit</strong> fixes additional mission behaviors; do not interpret R8 as replacing the later shipping/release authority. See <a href="missions-%26-scripting-1-0-6-bvm-parity-repairs.html">1.0.6 BVM parity repairs</a> and <a href="missions-%26-scripting-r37-control-flow-dataflow-api-parity.html">control-flow/dataflow translation</a>.</p>
+<p><strong>Primary source:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_DIFFICULTY_SWITCH_SCALAR_CLOSURE_R8_2026-09-27.md</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_DIFFICULTY_SWITCH_SCALAR_CLOSURE_R8_2026-09-27.md</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R5_FULL_INDEXED_RESOURCE_PARITY/FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R6_ONLINE_UNDERGROUND_RESTRICTION/R6_ONLINE_UNDERGROUND_RESTRICTION_DIAGNOSTIC.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-an-apparently-valid-switch-can-run-the-wrong-branch">Why an apparently valid switch can run the wrong branch</a><a href="#exact-historical-mission-regressions">Exact historical mission regressions</a><a href="#what-was-verified-and-what-was-not">What was verified and what was not</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-bvm-backward-switch-parity"};</script><script src="../assets/site.js" defer></script></body></html>

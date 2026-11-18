@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 — weapon/armor limits and loot-window hints are different numbers EDF6 has a per-mode, per-difficulty online weapon limit, an armor-box limit, and a separa"><title>EDF6 online difficulty caps: ModeList interpolation, red versus yellow levels, armor launch | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Online caps</div><h1>EDF6 online difficulty caps: ModeList interpolation, red versus yellow levels, armor launch</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Online caps</span></div><div class="referencebadge">Technical reference · Build-scoped static analysis; original contributor evidence grades cited; no new R126 gameplay runtime</div><div id="articleBody"><p>EDF6 has a per-mode, per-difficulty online <strong>weapon limit</strong>, an <strong>armor-box limit</strong>, and a separate <strong>loot-level window</strong>. The equipment screen presents two visually different comparisons. A red weapon level means it exceeds the active online restriction; a yellow one can mean it sits outside an expected drop-level window. <strong>Yellow is not another way to display the online restriction</strong>, and the two thresholds do not always align.</p>
+<h2 id="source-of-the-caps">Source of the caps</h2>
+<p>Each ModeList difficulty entry contains indexed weapon- and armor-knot lists. The native getters interpolate between adjacent values using the selected mission's normalized position <code>t</code> (clamped to 0–1):</p>
+<ol>
+<li>Let <code>x = (number_of_knots − 1) × t</code>; let <code>i = floor(x)</code>.</li>
+<li>For an interior segment, interpolate between knot <code>i</code> and knot <code>i+1</code> if both are nonnegative; a negative knot denotes no applicable cap.</li>
+<li>Weapon output converts the interpolated unit through <code>trunc(value × 0.25 × 100)</code> to the displayed weapon-level ceiling. Armor output is an integer <strong>box</strong> count, not final HP.</li>
+</ol>
+<p>The main campaign's Inferno weapon curve, for example, is the source sequence <code>[2.4, 3.2, 3.999, 3.999]</code>; the DLC1 and DLC2 Inferno curves use <code>[-1, -1]</code> (no positive cap). These are values observed in the cited <code>CONFIG.SGO</code> corpus, not newly measured in game.</p>
+<h2 id="what-red-and-yellow-actually-mean">What red and yellow actually mean</h2>
+<table>
+<thead>
+<tr>
+  <th>UI indicator</th>
+  <th>Native basis</th>
+  <th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Red level</td>
+  <td>Current online cap predicate and room flag</td>
+  <td>Marks an above-cap weapon; menu selection is <strong>still possible</strong></td>
+</tr>
+<tr>
+  <td>Yellow level</td>
+  <td>Loot/drop-window range from other ModeList fields</td>
+  <td>Can appear even offline; not an online-cap refusal</td>
+</tr>
+<tr>
+  <td>Normal color</td>
+  <td>Neither visual predicate applies</td>
+  <td>Does not by itself prove a weapon will drop or pass every room rule</td>
+</tr>
+</tbody>
+</table>
+<p>The red predicate is installed on the weapon-selection screen <strong>only for online mode</strong> and compares the cell's level to the computed cap. The confirm handler ignores the over-cap bit 0 and refuses the separate disabled bits 1/2. Thus the highlighted red entry can remain selectable; the launch/runtime constraints are separate.</p>
+<p>As a concrete illustration from the static corpus, the original campaign Hard range has a yellow boundary around <strong>3.75</strong> at its beginning while the online cap is <strong>5</strong>. The exact placement depends on progress through the difficulty's knot curve. These values should not be extrapolated as a universal fixed maximum for every mission.</p>
+<h2 id="armor-is-processed-when-the-mission-starts">Armor is processed when the mission starts</h2>
+<p>Session room switches for weapons and armor are distinct. The live cap-state flag resides at <code>GameState+0x14FC8</code> in the examined build. Its update path combines the room's weapon-limit switch with whether the computed limit is positive. When a mission starts, the departure serializer transmits the equipped weapon IDs as they stand, but <strong>clamps the armor-box count</strong> if the current armor cap is active. The spawn path converts armor count into class HP using the native armor formula.</p>
+<p>The examined native offline-mode entries do not carry a positive online limit. An external offline-limit modification that compares a cap in boxes directly to HP would conflate units; its behavior cannot be described as stock EDF6.</p>
+<p><strong>Evidence and credit:</strong> <code>kh-edf6-online-caps</code>: <code>online-level-cap-enforcement</code>, <code>edf6-online-caps-code</code>, <code>edf6-online-caps-knots</code>, <code>edf6-yellow-vs-online-cap</code>, <code>edf6-red-level-online-predicate</code>, <code>edf6-offline-armor-spawn</code>; build <code>steam-678ccb46</code>. The source's yellow-boundary arithmetic was not independently checked in-game for this revision.</p>
+<h2 id="additional-native-game-references">Additional native-game references</h2>
+<ul>
+<li><a href="edf6-weapon-select-layout-shared-scroll-cell-state-and-ownership.html">EDF6 equipment cell bits and selection UI</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 — kh-edf6-online-caps (fact IDs retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#source-of-the-caps">Source of the caps</a><a href="#what-red-and-yellow-actually-mean">What red and yellow actually mean</a><a href="#armor-is-processed-when-the-mission-starts">Armor is processed when the mission starts</a><a href="#additional-native-game-references">Additional native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-online-caps-interpolation-yellow-red-and-armor-start"};</script><script src="../assets/site.js" defer></script></body></html>

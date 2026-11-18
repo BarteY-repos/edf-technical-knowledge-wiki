@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 native mode lookup, MissionMgr state and active Package This reference separates three different native operations in a studied EDF6 executable: loading th"><title>EDF6 native ModeList lookup, SetGameMode and active Package | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Mission mode and save</div><h1>EDF6 native ModeList lookup, SetGameMode and active Package</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Mission mode and save</span></div><div class="referencebadge">Technical reference · EDF6 build-specific static disassembly; one separate bounded negative modified-runtime observation</div><div id="articleBody"><p>This reference separates <strong>three different native operations</strong> in a studied EDF6 executable: loading the game-mode definitions, choosing an active mode, and materializing the package that supplies mission/character/weapon resources. Treating these as one interchangeable setter is unsafe, particularly in reverse-engineered compatibility work.</p>
+<h2 id="binary-build-scope">Binary/build scope</h2>
+<p>The specific <code>EDF.dll</code> used for this study had SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>, image timestamp <code>0x678CCB46</code>, and PE <code>SizeOfImage=0x022CE000</code>. All addresses below are <strong>offsets relative to this EDF.dll image</strong>, not portable signatures, game-version-independent API declarations or absolute addresses.</p>
+<p>Two research names, <code>MissionMgr</code> and <code>GameDataMgr</code>, are sometimes applied to the same central manager. This article therefore uses the neutral term <strong>manager</strong> where the exact RTTI class name is not independently proven.</p>
+<h2 id="native-entry-points-and-state">Native entry points and state</h2>
+<table>
+<thead>
+<tr>
+  <th>Image-relative entry point</th>
+  <th>Observed purpose</th>
+  <th>Evidence classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>EDF+0xDA8E0</code></td>
+  <td><code>LoadConfig</code>-style loading/registration of a <code>CONFIG.SGO</code> source and its <code>ModeList</code> entries</td>
+  <td>Static call-flow reconstruction</td>
+</tr>
+<tr>
+  <td><code>EDF+0xDBD00</code></td>
+  <td><code>FindOuterMode(manager, modeType, MissionPack)</code>; looks up the outer-mode index</td>
+  <td>Static signature/caller analysis</td>
+</tr>
+<tr>
+  <td><code>EDF+0xDC460</code></td>
+  <td>Mode transition (<code>SetGameMode</code> / <code>SetMode</code> in the research notes)</td>
+  <td>Static disassembly plus negative modded-runtime evidence for misuse</td>
+</tr>
+<tr>
+  <td><code>EDF+0xE2AD0</code></td>
+  <td><code>LoadPackage</code>-style materialization of the active package for the selected mode</td>
+  <td>Static call-chain reconstruction</td>
+</tr>
+<tr>
+  <td><code>EDF+0x20B2890</code></td>
+  <td>Global manager-pointer reference</td>
+  <td>Static binary reference</td>
+</tr>
+</tbody>
+</table>
+<p>The manager also stores the <strong>active physical MissionPack</strong> at <code>manager+0x14FD0</code>. This is not the outer-mode index and may be republished by a later response callback; see the separate lobby-lifecycle article.</p>
+<p>These names are <strong>semantic labels inferred from the investigated native code</strong>, not claimed exported SDK symbols.</p>
+<h3 id="lookup-layout-source-backed-offsets">Lookup layout — source-backed offsets</h3>
+<p><code>FindOuterMode</code> was reconstructed with the following logical signature:</p>
+<pre><code class="language-cpp">int FindOuterMode(Manager* manager, int modeType, int missionPack);
+</code></pre>
+<p>Its observed traversal is:</p>
+<ol>
+<li>Read the outer collection from <code>manager+0x20</code> and its count from <code>manager+0x30</code>.</li>
+<li>For each outer item, follow its <code>+0x10</code> ModeList-like pointer.</li>
+<li>Read the selected row offset/index from that ModeList-like object at <code>+0x08</code>.</li>
+<li>Compare the selected row's MissionPack at <code>+0x74</code> and mode type at <code>+0x80</code> against the requested pair.</li>
+<li>Return the matching <strong>outer index</strong>, or <code>-1</code> when there is no match.</li>
+</ol>
+<p>The native direct-call census for the lookup named four call sites: <code>EDF+0x70E704</code>, <code>+0x70E74C</code>, <code>+0x8EFEF1</code>, and <code>+0x954333</code>. This is a build-local call census, not a promise that indirect calls or later builds cannot introduce other paths.</p>
+<p>The <strong>outer index</strong> returned by this function, the <strong>MissionPack numeric ID</strong> stored in a selected record, and the <strong>active physical MissionPack</strong> are distinct fields. A value read from one cannot be substituted for another without a lookup.</p>
+<h2 id="active-mode-transition">Active-mode transition</h2>
+<p>The native transition at <code>EDF+0xDC460</code> expects <code>RCX=manager</code> and <code>EDX=requested outer-mode index</code> at the observed entry point. In the examined control flow it selects the outer record and invokes the package-building path at <code>EDF+0xE2AD0</code> (call observed around <code>+0xDC4B3</code>). Later, it publishes the selected outer index to <code>manager+0x38</code> (around <code>+0xDC4C5</code>) and emits an event identified as <code>0xE</code> in the retained reconstruction.</p>
+<p>The direct native call-site census for this transition found <code>+0xAC21A</code>, <code>+0xD6722</code>, <code>+0xDB6BF</code> and <code>+0x70FAC9</code> in the audited <code>.text</code>. A function that changes the active mode is consequently not equivalent to setting a menu selection integer or appending an extra ModeList row.</p>
+<h2 id="active-package-and-mission-save-resources">Active <code>Package</code> and mission/save resources</h2>
+<p>The <code>LoadPackage</code> path materializes the active Package at <strong>manager <code>+0x130</code></strong>. The following child fields were identified in the studied layout:</p>
+<table>
+<thead>
+<tr>
+  <th>Active Package field</th>
+  <th>Supported interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x20</code></td>
+  <td><code>SoldierInit</code>-related node</td>
+</tr>
+<tr>
+  <td><code>+0x28</code></td>
+  <td>Weapon-category/map-related data</td>
+</tr>
+<tr>
+  <td><code>+0x68</code></td>
+  <td>MSVC <code>std::wstring</code>-style package / MissionPack MST namespace</td>
+</tr>
+<tr>
+  <td><code>+0xF0</code></td>
+  <td>DSGO/node reference to the mission <code>table</code></td>
+</tr>
+</tbody>
+</table>
+<p>This explains why a valid <em>ModeList row alone</em> is not sufficient to establish a playable/complete game mode: later package materialization can still require related <code>PackageName</code>, <code>SoldierInit</code>, <code>SoldierWeaponCategory</code>, <code>WeaponTable</code> and <code>WeaponText</code> roots from the selected config source. These are observations from a <strong>tested extension/reconstruction context</strong>, not a claim that every native official pack loads from separate CONFIG files.</p>
+<p>For the on-disk MST layout and class difficulty bits, see <a href="formats-%26-containers-gst-mst-save-progress-table-boundaries.html">GST/MST save and progress tables</a>. For the cross-file <code>LIST</code>/<code>TXT</code>/image requirements, see <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">EDF5-derived MissionPack metadata</a>.</p>
+<h2 id="why-save-safety-matters">Why save safety matters</h2>
+<p>One historical <strong>modified-runtime</strong> test inserted an extra <code>SetGameMode</code> invocation in a user-interface callback where the original game would not have made that call. The user observed armor and collected weapons reset, and the damaged state was written on game exit. Later analysis found the high-level call also enters <code>LoadPackage</code> and rebuilds the active package. <strong>The exact downstream instruction chain from this call to the save writer was not completely demonstrated.</strong> Therefore this is direct evidence that that injected transition can be destructive in the tested modded configuration, not evidence of spontaneous save loss in unmodified EDF6.</p>
+<p>The native takeaway is narrow but important: <strong>configuration registration, mode selection, package rebuilding and persistent progress are related, but distinct state transitions</strong>. For delayed pack-ID publication, see <a href="edf6-native-lobby-async-pack-publication-hui-lifecycle.html">asynchronous lobby/mode lifecycle</a>.</p>
+<h2 id="source-provenance-and-limits">Source provenance and limits</h2>
+<p>These are exact-source static observations and a separately identified negative runtime result from the retained EDF6 native mode/room analysis. The technical source documents are preserved under <code>/EDF5_EDF6_RESEARCH/research/active/MPPP_BUNDLE_RUNTIME/</code>, including the 2026-09-22 final handoff and the earlier native <code>SetMode</code> call-census checkpoint. No fresh disassembly or EDF6 runtime test was performed for this article. Some semantic names and package fields remain bounded interpretations rather than official documentation.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MPPP_BUNDLE_RUNTIME/EDF6_MPPP_BUNDLE_RUNTIME_FULL_SESSION_HANDOFF_FIX19_M2_V1_OFFLINE_CLOSEOUT_2026-09-22.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#binary-build-scope">Binary/build scope</a><a href="#native-entry-points-and-state">Native entry points and state</a><a href="#lookup-layout-source-backed-offsets">　Lookup layout — source-backed offsets</a><a href="#active-mode-transition">Active-mode transition</a><a href="#active-package-and-mission-save-resources">Active Package and mission/save resources</a><a href="#why-save-safety-matters">Why save safety matters</a><a href="#source-provenance-and-limits">Source provenance and limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-missionmgr-mode-lookup-package-memory"};</script><script src="../assets/site.js" defer></script></body></html>

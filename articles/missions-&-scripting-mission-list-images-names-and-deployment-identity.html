@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission LIST — previews and resource identity Reference overview An EDF6 mission preview has three separate identities: the mission LIST.SGO row, its localized "><title>Mission LIST — previews and resource identity | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Mission LIST — previews and resource identity</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Runtime-observed and case-scoped</div><div id="articleBody"><h2 id="reference-overview">Reference overview</h2>
+<p>An EDF6 mission preview has three separate identities: the mission <strong>LIST.SGO row</strong>, its localized title/brief, and the <strong>named DDS</strong> selected from the correct runtime image archive. Correcting one does not automatically correct the others.</p>
+<table>
+<thead>
+<tr>
+  <th>Contract</th>
+  <th>Studied EDF6 target profile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Mission rows</td>
+  <td>OFFLINE/ONLINE target order must remain compatible with save/progression identity</td>
+</tr>
+<tr>
+  <td>Thumbnail key</td>
+  <td>LIST field 2; replace <code>/</code> with <code>_</code>, append <code>.dds</code></td>
+</tr>
+<tr>
+  <td>Runtime images</td>
+  <td>Base <code>MISSIONLIST.OFFLINE.IMAGE.RAB</code> and <code>MISSIONLIST.ONLINE.IMAGE.RAB</code></td>
+</tr>
+<tr>
+  <td>Pack-local IMAGE.RAB</td>
+  <td>Not authoritative for the audited runtime loader</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="docs-missions.html">Missions</a> and <a href="missions-%26-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry.html">Mission thumbnails</a>. The historical mismatch below is a case study, <strong>not</strong> the current desired metadata arrangement.</p>
+<hr />
+<h2 id="historical-offline-online-list-mismatches">Historical OFFLINE/ONLINE list mismatches</h2>
+<p>The 139-unique-mission OFFLINE/ONLINE mismatch above is a <strong>historical deployment observation</strong>, not the corrected target schema. The later maintained MissionPack03 resource has 112 rows on <strong>both</strong> OFFLINE and ONLINE, with a shared ordinal sequence and matching companion TXT/image resources. For the ordinary underground <code>flags=40</code> behavior and the different special <code>0x200</code> condition bit, see <a href="missions-%26-scripting-underground-mission-flags-and-weapon-condition.html">Underground mission flags and WeaponCondition</a>.</p>
+<p>A custom MissionPack may contain a valid <code>LIST.SGO</code> and still show missing thumbnails or incorrect localized titles. <strong>Mission ordering, images, text, and gameplay logic are separate resources that must agree.</strong></p>
+<h2 id="a-shared-name-image-archive-can-be-authoritative">A shared-name image archive can be authoritative</h2>
+<p>In one runtime-traced EDF5-content deployment on EDF6, the game requested <strong><code>MISSIONLIST.OFFLINE.IMAGE.RAB</code></strong>, not each pack's separately named <code>IMAGE.RAB</code>. Correct per-pack image payloads alone did not supply the resource the game requested.</p>
+<p>The successful historical override used the shared-name path:</p>
+<pre><code class="language-text">Mods/MISSION/MISSIONLIST.OFFLINE.IMAGE.RAB
+</code></pre>
+<p>The tested additive archive retained <strong>147 native entries</strong> and added <strong>139 EDF5-related entries</strong>, with a corresponding ONLINE resource. That is <strong>one observed loader/configuration</strong>; it is not proof that every mod loader or game revision uses the same lookup precedence.</p>
+<h2 id="three-linked-tables-three-different-concerns">Three linked tables, three different concerns</h2>
+<table>
+<thead>
+<tr>
+  <th>Resource</th>
+  <th>What it provides</th>
+  <th>Why archive integrity is not enough</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>LIST.SGO</code></td>
+  <td>Order, progression and metadata for missions</td>
+  <td>An inserted/reordered row can change display associations</td>
+</tr>
+<tr>
+  <td>Localized <code>TXT</code> (SGO or DSGO by profile)</td>
+  <td>Titles and descriptions</td>
+  <td>TXT's serialized form is not universal across deployment roles</td>
+</tr>
+<tr>
+  <td><code>MISSIONLIST.*.IMAGE.RAB</code></td>
+  <td>Preview-image payloads</td>
+  <td>The loader may request a shared name rather than a pack-local one</td>
+</tr>
+<tr>
+  <td><code>MISSION.AC</code> / BVM</td>
+  <td>Mission actions and events</td>
+  <td>Menu success does not imply the script will execute</td>
+</tr>
+<tr>
+  <td>CONFIG / pack registration</td>
+  <td>Namespacing and selection</td>
+  <td>An archive can exist yet never be selected</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Later R29 evidence settles the studied EDF6 mission-list association:</strong> derive the named archive entry from <strong>LIST <code>field2</code></strong>, replacing <code>/</code> with <code>_</code> and appending <code>.dds</code>. This supersedes the older unresolved name-versus-ordinal hypothesis for that profile. It remains necessary to update field2 when constructing new missions and to audit actual ONLINE/OFFLINE base IMAGE.RAB lookup; see <a href="missions-%26-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry.html">the exact format and tested scope</a>.</p>
+<h3 id="historical-112-111-list-ordering-is-not-the-later-112-112-save-contract">Historical 112/111 list ordering is not the later 112/112 save contract</h3>
+<p>An exact R41 audit of an <strong>EDF5-content converted</strong> MissionPack03 recorded <strong>112 OFFLINE rows</strong> (<code>M000</code> plus the studied ONLINE sequence) and <strong>111 ONLINE rows</strong> (<code>M000</code> omitted, <code>M082/M083</code> retained). That describes <strong>the audited converted LISTs</strong>, not an independently proven native EDF5 OFFLINE binary layout. A later EDF6-compatible metadata scheme deliberately uses <strong>112/112 shared ordinal rows</strong> to keep progress/save identity consistent. See <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">source-vs-converted list contract</a>.</p>
+<h2 id="online-and-offline-lists-are-not-interchangeable">Online and offline lists are not interchangeable</h2>
+<p>A separate observed deployment had the <code>MISSIONPACK03</code> ONLINE <code>LIST.SGO</code> <strong>byte-identical</strong> to its OFFLINE version. This exposed only <strong>139 unique shipping missions</strong>, omitted <strong>M082 and M083</strong> from the online list and exposed tutorial <strong>M000</strong> online. The mistake was in <strong>list generation/deployment</strong>, not in what the mission transpiler should support. Companion JSON lists were stale; the loaded binary LIST was the evidence.</p>
+<h2 id="how-to-diagnose-a-missing-or-wrong-image">How to diagnose a missing or wrong image</h2>
+<ol>
+<li>Identify the <strong>actual archive filename opened by the running game</strong> using file-access evidence where needed.</li>
+<li>Verify the selected archive has the right named entry and decoded image payload.</li>
+<li>Check LIST order, TXT titles/descriptions and thumbnail relationship together.</li>
+<li>Compare ONLINE and OFFLINE binary LISTs intentionally rather than assuming they match.</li>
+<li>Check script/mission startup separately from menu display.</li>
+</ol>
+<p>Related: <a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">RAB/MRAB named-entry layout</a>, <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">mission metadata and shared progress</a>.</p>
+<p><strong>Evidence:</strong> recorded runtime file-access observation and subsequent mission-list binary comparison in the retained R6 corpus. Statements are case-scoped, not general assertions about all installations.</p>
+<p>For the distinction between mission-list row visibility and saved progress, and between weapon ownership and star bytes, see <a href="missions-%26-scripting-edf6-mission-selection-row-state-and-weapon-ownership-records.html">mission selection and weapon-record states</a>.</p>
+<p>When two mods change the same mission-image archive, entry-wise SSA merging can retain both named payloads. <strong>LIST-to-image association is cross-file-coupled</strong>, but the R29-supported profile now has an explicit <code>field2</code> name rule; archive-level merging must check that each changed LIST field2 resolves to the correct named entry. See <a href="formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">RAB/MRAB entry merging</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R6 mission-image runtime trace and mission LIST comparison</li><li>/EDF5_EDF6_RESEARCH/research/knowledge/EDF5_EDF6_KNOWLEDGE_BASE.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#reference-overview">Reference overview</a><a href="#historical-offline-online-list-mismatches">Historical OFFLINE/ONLINE list mismatches</a><a href="#a-shared-name-image-archive-can-be-authoritative">A shared-name image archive can be authoritative</a><a href="#three-linked-tables-three-different-concerns">Three linked tables, three different concerns</a><a href="#historical-112-111-list-ordering-is-not-the-later-112-112-save-contract">　Historical 112/111 list ordering is not the later 112/112 save contract</a><a href="#online-and-offline-lists-are-not-interchangeable">Online and offline lists are not interchangeable</a><a href="#how-to-diagnose-a-missing-or-wrong-image">How to diagnose a missing or wrong image</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-mission-list-images-names-and-deployment-identity"};</script><script src="../assets/site.js" defer></script></body></html>

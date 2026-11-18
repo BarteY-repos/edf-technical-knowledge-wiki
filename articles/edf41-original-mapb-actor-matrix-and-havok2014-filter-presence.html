@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 native MAPB actor transforms and Havok 2014 body/filter evidence Evidence: November 17, 2026, read-only original EDF4.1/EDF6 binary checks and an 18-map "><title>EDF4.1 native MAPB actor transforms and Havok 2014 body/filter evidence | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Collision &amp; NAV</div><h1>EDF4.1 native MAPB actor transforms and Havok 2014 body/filter evidence</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; NAV</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Original EDF4.1/EDF6 static R58-R62; 18520 source bodies, 15 source cohorts, native target RTTI/vtables and group32 code; live NPC filter matrix UNKNOWN</div><div id="articleBody"><p><strong>Evidence:</strong> November 17, 2026, read-only original EDF4.1/EDF6 binary checks and an 18-map original EDF4.1 <code>MAD</code> corpus. Native parsing and algebraic verification are <strong>not</strong> evidence of successful EDF6 NPC navigation. The original game executables and private physics payloads are <strong>not</strong> included in this reference.</p>
+<h2 id="two-separate-systems-placed-actors-and-registered-collision-bodies">Two separate systems: placed actors and registered collision bodies</h2>
+<p>A map object's placement is not synonymous with a Havok body being active or blocking an NPC. The original <code>map.mapb</code> <strong>T2 placement record</strong> supplies a position and Euler rotation; the native actor loader constructs a <strong>base world matrix</strong> for that placement. The physics scene and collision/query filters then determine which serialized shapes actually participate in movement and hits. Navigation HKT/NVMD is yet another representation. A geometrically correct box or mesh does not automatically qualify as a pathfinding obstacle.</p>
+<h2 id="native-mapb-matrix-construction-edf4-1-and-edf6">Native MAPB matrix construction: EDF4.1 and EDF6</h2>
+<p>A read-only comparison of the original game routines established the per-record base actor matrix in <strong>both</strong> pinned executables:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>EDF4.1 original</th>
+<th>EDF6 target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T2 record stride</td>
+<td><code>0x44</code> (68 bytes)</td>
+<td><code>0x48</code> (72 bytes)</td>
+</tr>
+<tr>
+<td>Translation</td>
+<td>three floats at record <code>+0x04/+0x08/+0x0C</code></td>
+<td>same offsets</td>
+</tr>
+<tr>
+<td>Euler angles, degrees</td>
+<td>three floats at <code>+0x10/+0x14/+0x18</code></td>
+<td>same offsets</td>
+</tr>
+<tr>
+<td>Base actor matrix construction</td>
+<td>uses the record's own pose</td>
+<td>uses the record's own pose</td>
+</tr>
+<tr>
+<td>Canonical routine RVA</td>
+<td><code>0xFF420</code></td>
+<td><code>0x1169B0</code></td>
+</tr>
+</tbody>
+</table>
+<p>The independent relayout audit compared <strong>42,388 / 42,388 placements across 18 original MAC files</strong> and found all six source translation/rotation floats <strong>byte-identical</strong> after the <code>0x44</code> → <code>0x48</code> relayout (the extra four bytes are appended). This confirms preservation of the <em>stored pose</em>, not proof that every physics body ultimately uses that pose unchanged.</p>
+<p>The native routine arithmetic supports row-vector <strong><code>Rx × Ry × Rz</code></strong> rotation order, whose transposed column-vector convention is <strong><code>Rz × Ry × Rx</code></strong>. The conventional R23 column-vector placement formula is thus <strong>algebraically consistent</strong> with the two observed native routines. Both use degree-to-radian conversion. These are static instruction and mathematical equivalence results, <strong>not bit-exact SSE/libm <code>float32</code> output comparisons</strong>. Differences in operation order and rounding can remain important to exact contact geometry.</p>
+<p><strong>Correction to older NAV research:</strong> An R57 experiment applying a parent's transform to an indexed child was only a sensitivity hypothesis. The base actor matrix itself is computed from each actor's <strong>own</strong> T2 record in the verified routines. This does <strong>not</strong> rule out later group attachment transformations, <code>MAPB +0x2C</code> child handling, Havok body-local motionState transforms, or alternative engine consumers. See <a href="maps-%26-navigation-edf-4-1-donor-nav-and-sk-collision-boundary.html">EDF4.1 donor NAV and collision boundaries</a> and <a href="maps-%26-navigation-mapb-binary-header-records-and-cross-game-rebasing.html">MAPB cross-generation layout</a>.</p>
+<h2 id="original-havok-2014-map-collision-corpus-18-mad-files">Original Havok 2014 map collision corpus: 18 MAD files</h2>
+<p>A separate read-only Binary Tagfile census of <strong>18 original EDF4.1 <code>.MAD</code> files</strong> found exactly <strong>18,520 serialized <code>hkpRigidBody</code> objects</strong> and one examined <code>hkpPhysicsSystem</code> per map. All 18 systems serialized <strong><code>active=1</code></strong>, but this is a source-file field; it is <strong>not</strong> a gameplay observation that every body was registered in the running Havok world.</p>
+<p>The original body roots were classified as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Top-level shape class</th>
+<th style="text-align:right">Original bodies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hkpListShape</code></td>
+<td style="text-align:right">16,301</td>
+</tr>
+<tr>
+<td><code>hkpMoppBvTreeShape</code></td>
+<td style="text-align:right">1,608</td>
+</tr>
+<tr>
+<td><code>hkpConvexTranslateShape</code></td>
+<td style="text-align:right">168</td>
+</tr>
+<tr>
+<td><code>hkpConvexVerticesShape</code></td>
+<td style="text-align:right">164</td>
+</tr>
+<tr>
+<td><code>hkpConvexTransformShape</code></td>
+<td style="text-align:right">156</td>
+</tr>
+<tr>
+<td><code>hkpBoxShape</code></td>
+<td style="text-align:right">90</td>
+</tr>
+<tr>
+<td><code>hkpCylinderShape</code></td>
+<td style="text-align:right">32</td>
+</tr>
+<tr>
+<td><code>hkpSphereShape</code></td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>18,520</strong></td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>root-shape identities</strong>, not a flat list of all child shapes or triangles. They must not be confused with the earlier <strong>21-file</strong> study of five MAD maps and 16 object <code>.SHKT</code> resources, whose scope is explained in <a href="edf41-havok2014-native-mad-shkt-21-source-corpus-and-convex-limits.html">the original EDF4.1 Havok/SHKT study</a>.</p>
+<h3 id="motion-types-are-not-automatic-nav-eligibility">Motion types are not automatic NAV eligibility</h3>
+<p>The <code>hkpMotion.type</code> values actually serialized in these 18,520 bodies were:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">Serialized <code>hkpMotion.type</code> value</th>
+<th style="text-align:right">Bodies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td style="text-align:right">17,660</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td style="text-align:right">849</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>2</code></td>
+<td style="text-align:right">11</td>
+</tr>
+</tbody>
+</table>
+<p>The counts total 18,520. The audit deliberately does <strong>not</strong> assign undocumented names such as “static NAV blocker” or “dynamic obstacle” to these raw values. In particular, all <strong>860</strong> records with type 2 or 3 require separate eligibility/activation treatment before their geometry is baked as an impassable NPC obstacle.</p>
+<h3 id="the-omitted-collisionfilterinfo-field">The omitted <code>collisionFilterInfo</code> field</h3>
+<p>The original Havok type registry declares <code>hkpTypedBroadPhaseHandle.collisionFilterInfo</code>, yet <strong>none of the 18,520 serialized rigid-body instances contains the field as an explicit value</strong>. The audit distinguishes a field's <strong>absence</strong> from an actual serialized zero. Similarly, <code>broadPhaseHandle.type=1</code> on these objects is a handle-type observation, <strong>not</strong> a demonstrated collision-layer number.</p>
+<p>It follows that a file reader cannot recover the original runtime NPC-contact layer matrix simply by using zero as the missing value, by treating every shape as collidable, or by transplanting EDF5's inferred layer table into EDF4.1 or EDF6. EDF6's later <code>hknp</code> collision filters and NPC query layers have to be established independently.</p>
+<h2 id="r60-full-original-game-havok-motion-shape-cohorts">R60: full original-game Havok motion × shape cohorts</h2>
+<p>The later <strong>R60 original-source census</strong> cross-tabulated the complete 18-map corpus above rather than treating the separate shape and motion totals as independent. Across all <strong>18,520 original <code>hkpRigidBody</code> instances</strong>, there are <strong>15 actually observed joint cohorts</strong> of <code>(serialized motion enum, top-level shape class, explicit filter presence)</code>. This is a census of <strong>serialized source categories</strong>, not a table of how EDF6 NPCs resolve contacts.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right"><code>hkpMotion.type</code></th>
+<th>Top-level shape class</th>
+<th style="text-align:right">Source rigid bodies</th>
+<th>Filter field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right"><code>2</code></td>
+<td><code>hkpListShape</code></td>
+<td style="text-align:right">11</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpConvexTransformShape</code></td>
+<td style="text-align:right">31</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpConvexTranslateShape</code></td>
+<td style="text-align:right">4</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpConvexVerticesShape</code></td>
+<td style="text-align:right">17</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpCylinderShape</code></td>
+<td style="text-align:right">6</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpListShape</code></td>
+<td style="text-align:right">790</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>3</code></td>
+<td><code>hkpMoppBvTreeShape</code></td>
+<td style="text-align:right">1</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpBoxShape</code></td>
+<td style="text-align:right">90</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpConvexTransformShape</code></td>
+<td style="text-align:right">125</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpConvexTranslateShape</code></td>
+<td style="text-align:right">164</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpConvexVerticesShape</code></td>
+<td style="text-align:right">147</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpCylinderShape</code></td>
+<td style="text-align:right">26</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpListShape</code></td>
+<td style="text-align:right">15,500</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpMoppBvTreeShape</code></td>
+<td style="text-align:right">1,607</td>
+<td>omitted</td>
+</tr>
+<tr>
+<td style="text-align:right"><code>5</code></td>
+<td><code>hkpSphereShape</code></td>
+<td style="text-align:right">1</td>
+<td>omitted</td>
+</tr>
+</tbody>
+</table>
+<p>The table reconciles exactly to the earlier marginal totals: motion types <code>2</code> / <code>3</code> / <code>5</code> have <strong>11 / 849 / 17,660</strong> bodies respectively, and the shape-class sums match the original 18,520-body table above. <strong>All 15 categories have <code>collisionFilterInfo</code> absent from the source serialization</strong>, rather than an observed value of zero. The largest single class is <code>(motion 5, hkpListShape)</code> with <strong>15,500</strong> source bodies; the next largest is <code>(motion 5, hkpMoppBvTreeShape)</code> with <strong>1,607</strong>. These joint counts mean an automated map-level audit can group most cases without manually inspecting every shape, while preserving anomalous families for later direct testing.</p>
+<p>A member's group label is <strong>not an NPC blocking rule</strong>. In particular, it cannot establish that any given Ranger/Fencer/Hector capsule should collide, that <code>motion.type=5</code> always means an active static obstacle, or that an absent filter field defaults to any particular bit mask. Motion enum names, activation, query filter masks and later child/compound ownership remain separate unknowns.</p>
+<h3 id="edf6-havok-2020-filter-types-native-reflection-not-runtime-contacts">EDF6 Havok 2020 filter types: native reflection, not runtime contacts</h3>
+<p>Read-only inspection of the exact target <code>EDF.dll</code> (SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>) found these <strong>Havok 2020 type/reflection registry identifiers</strong> in its data region:</p>
+<table>
+<thead>
+<tr>
+<th>Exact target reflection/type name</th>
+<th>RVA in pinned <code>EDF.dll</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hknpCharacterRigidBodyCinfo</code></td>
+<td><code>0x18B8850</code></td>
+</tr>
+<tr>
+<td><code>hknpCollisionFilter</code></td>
+<td><code>0x18B6E00</code></td>
+</tr>
+<tr>
+<td><code>hknpDisableCollisionFilter</code></td>
+<td><code>0x18B1B90</code></td>
+</tr>
+<tr>
+<td><code>hknpGroupCollisionFilter</code></td>
+<td><code>0x18B3970</code></td>
+</tr>
+<tr>
+<td><code>hknpPairCollisionFilter</code></td>
+<td><code>0x18B4310</code></td>
+</tr>
+<tr>
+<td><code>hknpQueryFilterData</code></td>
+<td><code>0x18BB410</code></td>
+</tr>
+<tr>
+<td><code>hknpSetBodyCollisionFilterInfoCommand</code></td>
+<td><code>0x18B6E60</code></td>
+</tr>
+<tr>
+<td><code>hknpSetWorldCollisionFilterCommand</code></td>
+<td><code>0x18AD3C0</code></td>
+</tr>
+</tbody>
+</table>
+<p>Additional reflected field-name markers:</p>
+<table>
+<thead>
+<tr>
+<th>Target reflection field name</th>
+<th>RVA / registry marker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>collisionFilterInfoPalette</code></td>
+<td><code>0x1855300</code></td>
+</tr>
+<tr>
+<td><code>collisionQueryFilter</code></td>
+<td><code>0x1B1EFD0</code></td>
+</tr>
+<tr>
+<td><code>defaultCollisionFilterInfo</code></td>
+<td><code>0x1838EE8</code></td>
+</tr>
+</tbody>
+</table>
+<p>The registry demonstrates that these interfaces/structures are represented in the target binary, including the group/pair/disable filter family and a character rigid-body configuration type. <strong>It does not prove that the game instantiates every type, executes a matching function, or uses a particular filter configuration for an NPC.</strong> The original EDF4.1 <code>hkp*</code> serialization and target <code>hknp*</code> runtime layer/query policy cannot be equated by string similarity or class naming.</p>
+<p><strong>Evidence status and provenance:</strong> original-source aggregated counts were checked against all previous 18-map/18,520-body source marginals, and the target's pinned DLL SHA / PE witness passed the R60 exact-build test. However, rebuilding an <strong>exact full R59 parent source tree</strong> from the available published deltas failed an unrelated strict SHA gate at the R49→R50 boundary. R60 therefore provides a <strong>bounded, validated source census and reflection witness</strong>, not a verified exact lineage replay and <strong>not</strong> an EDF6 gameplay/NAV qualification. Private source geometry and native game assets are excluded here. Primary derived sources: <code>R60_COLLISION_COHORT_NATIVE_FILTER_FINDINGS.md</code>, <code>reports/R60_PUBLIC_HAVOK_COHORT_API_WITNESS.json</code> and <code>R60_OFFLINE_QUALIFICATION.json</code> (17 November 2026).</p>
+<h2 id="edf6-havok-2020-collision-filter-dispatch-executable-evidence-beyond-the-type-registry">EDF6 Havok 2020 collision-filter dispatch: executable evidence beyond the type registry</h2>
+<p>Two later bounded examinations of the <strong>same pinned EDF6 DLL</strong> establish a stronger chain than type-name reflection alone. They found executable references and C++ virtual-method tables, and inspected a candidate group-filter decision function. This still concerns <strong>static binary behavior</strong>: no unmodified or modded EDF6 runtime call, in-world filter assignment or NPC collision result was observed.</p>
+<h3 id="what-is-directly-present-in-the-target-binary">What is directly present in the target binary</h3>
+<p>An x64 <code>.text</code> scan found three guarded references to native filter metadata: <code>0x135D34E</code> and <code>0x135D402</code> refer to <code>hknpGroupCollisionFilter</code>; <code>0x1394F98</code> refers to <code>hknpSetBodyCollisionFilterInfoCommand</code>. The surrounding code resembles repeated type-descriptor registration and dispatch, so these references do <strong>not</strong> establish that the running game assigns any collision mask to an NPC or obstacle.</p>
+<p>A separate native Microsoft x64 RTTI walk follows the verified <strong>TypeDescriptor → CompleteObjectLocator → vftable → executable code</strong> chain. The exact-build virtual tables resolved include:</p>
+<table>
+<thead>
+<tr>
+<th>Target native class</th>
+<th>Virtual-method table RVA</th>
+<th align="right">Bounded executable entries</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hknpCollisionFilter</code></td>
+<td><code>0x1761B58</code></td>
+<td align="right">9</td>
+</tr>
+<tr>
+<td><code>hknpGroupCollisionFilter</code></td>
+<td><code>0x18BBFC0</code></td>
+<td align="right">9</td>
+</tr>
+<tr>
+<td><code>hknpPairCollisionFilter</code></td>
+<td><code>0x18BBAB0</code></td>
+<td align="right">9</td>
+</tr>
+<tr>
+<td><code>hknpDisableCollisionFilter</code></td>
+<td><code>0x18B0A90</code></td>
+<td align="right">9</td>
+</tr>
+<tr>
+<td><code>hkaiNavigator</code></td>
+<td><code>0x187B548</code></td>
+<td align="right">3</td>
+</tr>
+<tr>
+<td><code>hkaiNavMeshInstance</code></td>
+<td><code>0x187B4E8</code></td>
+<td align="right">3</td>
+</tr>
+</tbody></table>
+<p>The last two classes belong to the <strong>navigation</strong> side of Havok AI. Their coexistence with <code>hknp*</code> physics filter classes does not prove that a physics filter decides path graph connectivity; these remain different stages of movement.</p>
+<h3 id="observed-group-filter-code-branch">Observed group-filter code branch</h3>
+<p>For the registered <code>hknpGroupCollisionFilter</code> table, <strong>zero-based virtual slot 6</strong> points to executable RVA <strong><code>0xD93700</code></strong> in the exact DLL. This native method reads 32-bit values at <code>[r9+0x8c]</code> and <code>[r8+4]</code>. The examined instructions have a special comparison branch involving mask <strong><code>0x7fff8000</code></strong> and otherwise consult a <strong>32-row table of 32-bit group masks at <code>this+0x24</code></strong>. In that ordinary table path, one low-five-bit group value selects the row and another low-five-bit value selects its bit. The result is a <em>candidate low-level allow/deny predicate for the examined branch</em>, not a measured gameplay policy.</p>
+<p>A second executable witness at <strong><code>0xD93800</code></strong> contains a <strong>64-row, 64-bit</strong> branch. Its specific active world owner is unverified; the presence of that code is not evidence that EDF6 uses 64 groups for Rangers or any other actor. Neither function reveals the <strong>actual matrix contents</strong> in the running game. An absent native matrix row must be recorded as <strong>unknown</strong>, never synthesized as zero or treated as a rejected contact.</p>
+<h3 id="what-an-npc-contact-assertion-would-additionally-require">What an NPC-contact assertion would additionally require</h3>
+<p>An individual engine decision would need its real instantiated filter object, actual filterInfo pair, callback entry/return, actor identity, query context, map and a defensible MAPB/MAD body-to-source-cohort relationship. The source research&#39;s 15 cohorts across <strong>18,520</strong> original EDF4.1 rigid bodies can make this qualification class-based; it cannot supply the missing runtime values. The first evidence-gate inventory contained <strong>zero</strong> native callback events and thus <strong>45/45</strong> actor/cohort combinations (15 cohorts × three provisional actor profiles) remained <code>UNKNOWN</code>. None was accepted as a verified in-game collision pair.</p>
+<p>Most importantly, a collision-filter return does not itself establish an NPC route: bad NAV connectivity, absent HKT polygons, low/high agent-profile mismatch, local avoidance, physical clearance and actual contact responses can each stop movement separately. The retained evidence therefore <strong>does not fix or validate Ranger, Fencer or Hector pathfinding</strong> on original EDF4.1 maps in EDF6.</p>
+<p><strong>Evidence and limits:</strong> primary read-only source reports <code>R61_NATIVE_FILTER_RUNTIME_GATE_DECISIONS.md</code>, <code>R61_OFFLINE_QUALIFICATION.json</code>, <code>R62_NATIVE_VTABLE_STATIC_FILTER_DECISIONS.md</code> and <code>R62_OFFLINE_QUALIFICATION.json</code> (17 November 2026), under <code>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R61_NATIVE_HKNP_FILTER_XREF_RUNTIME_EVIDENCE_GATE/</code> and <code>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R62_NATIVE_HKNP_VTABLE_FILTER_CODE_ORACLE/</code>. All described target-code witnesses are guarded by the pinned DLL build identity. R62 passed <strong>485 offline regression tests</strong>, but no DLL hook, original game payload or live NPC collision observation was produced. The historical R49→R50 parent-tree hash mismatch remains unresolved; these bounded PE findings do not repair the project source-lineage proof.</p>
+<h2 id="what-this-resolves-and-what-stays-open">What this resolves and what stays open</h2>
+<p><strong>Resolved by read-only evidence:</strong> the original MAPB and EDF6 target record strides and pose-field offsets, original source-pose byte preservation in 42,388 placements, per-record base actor-matrix construction in both pinned native binaries, algebraic rotation order, original 18-map root-shape/motion-type counts, 15 observed joint cohorts and explicit-versus-absent filter-field status, target-filter reflection type presence, six bounded C++ vtables, and a verified native 32-group filter-code branch.</p>
+<p><strong>Not resolved:</strong> bit-exact runtime matrix rounding, secondary group/child transforms, original-world contact activation, Havok 2014-to-2020 filter mapping, actual instantiated group/pair filter and its matrix values, NPC controller query pair rules, native LOW/HIGH agent profiles, or improved EDF6 Ranger/Fencer/Hector navigation. <strong>No new HKT/NVMD was installed or gameplay-tested</strong> by R58–R62. These are constraints on future NAV analysis, not a declaration that the AI problem has been fixed.</p>
+<p><strong>Primary bounded evidence:</strong> <code>R58_NATIVE_MAPB_ENGINE_FINDINGS.md</code>, <code>reports/R58_EDF41_EDF6_NATIVE_MAPB_PE_WITNESS.json</code>, <code>R59_HAVOK_ORACLE_AND_NATIVE_ROTATION_DECISIONS.md</code>, and <code>reports/R59_PUBLIC_HAVOK_AND_MATRIX_ORACLE.json</code> in the original November 17 R58/R59 research checkpoints. Binary identities: original <code>EDF41.exe</code> SHA-256 <code>39b4abf7fe722175741a5e0a154063b27ef8c589a1aa5f86c84853571ac7bda8</code>, target <code>EDF.dll</code> SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>. The evidence files summarize <strong>static original-game research</strong>, not original proprietary SDK source.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R58: native MAPB PE binary witness, pinned original EDF41.exe + EDF6 EDF.dll</li><li>EDF41 R59: original 18-map Havok 2014 source-body/filter census and matrix oracle</li><li>R60_COLLISION_COHORT_NATIVE_FILTER_FINDINGS.md</li><li>reports/R60_PUBLIC_HAVOK_COHORT_API_WITNESS.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R61_NATIVE_HKNP_FILTER_XREF_RUNTIME_EVIDENCE_GATE/R61_NATIVE_FILTER_RUNTIME_GATE_DECISIONS.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-17_R13_FUNCTIONALITY_WIP_R62_NATIVE_HKNP_VTABLE_FILTER_CODE_ORACLE/R62_NATIVE_VTABLE_STATIC_FILTER_DECISIONS.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-separate-systems-placed-actors-and-registered-collision-bodies">Two separate systems: placed actors and registered collision bodies</a><a href="#native-mapb-matrix-construction-edf4-1-and-edf6">Native MAPB matrix construction: EDF4.1 and EDF6</a><a href="#original-havok-2014-map-collision-corpus-18-mad-files">Original Havok 2014 map collision corpus: 18 MAD files</a><a href="#motion-types-are-not-automatic-nav-eligibility">　Motion types are not automatic NAV eligibility</a><a href="#the-omitted-collisionfilterinfo-field">　The omitted collisionFilterInfo field</a><a href="#r60-full-original-game-havok-motion-shape-cohorts">R60: full original-game Havok motion × shape cohorts</a><a href="#edf6-havok-2020-filter-types-native-reflection-not-runtime-contacts">　EDF6 Havok 2020 filter types: native reflection, not runtime contacts</a><a href="#edf6-havok-2020-collision-filter-dispatch-executable-evidence-beyond-the-type-registry">EDF6 Havok 2020 collision-filter dispatch: executable evidence beyond the type registry</a><a href="#what-is-directly-present-in-the-target-binary">　What is directly present in the target binary</a><a href="#observed-group-filter-code-branch">　Observed group-filter code branch</a><a href="#what-an-npc-contact-assertion-would-additionally-require">　What an NPC-contact assertion would additionally require</a><a href="#what-this-resolves-and-what-stays-open">What this resolves and what stays open</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-original-mapb-actor-matrix-and-havok2014-filter-presence"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 and EDF6 radar: rendering scale, team colors and player slots Evidence: Build-specific native HUD research in the EDF Knowledge Hub (EDF5 steam-5d11de53, E"><title>EDF5 vs EDF6 radar: scale, player colors and native HUD layers | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF5 vs EDF6 radar: scale, player colors and native HUD layers</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> Build-specific native HUD research in the <em>EDF Knowledge Hub</em> (EDF5 <code>steam-5d11de53</code>, EDF6 <code>steam-678ccb46</code>, snapshot 2026-11-14). This article separates the <strong>game's observed drawing logic</strong> from third-party changes to HUD palettes. No new runtime validation was performed.</p>
+<h2 id="edf5-world-position-radar-position">EDF5 world position → radar position</h2>
+<p>The studied EDF5 <code>HUiHudRader</code> stores these defaults:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th style="text-align:right">Native value</th>
+  <th>Interpreted function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Position scale</td>
+  <td style="text-align:right"><strong>0.6</strong></td>
+  <td>Multiplies planar displacement from the player before drawing</td>
+</tr>
+<tr>
+  <td>Marker-size scale</td>
+  <td style="text-align:right"><strong>1.2</strong></td>
+  <td>Normal dot/icon size multiplier</td>
+</tr>
+<tr>
+  <td>World-distance limit</td>
+  <td style="text-align:right"><strong>200 m</strong></td>
+  <td>Planar range comparison and rim clamp</td>
+</tr>
+<tr>
+  <td>Nominal resulting rim radius</td>
+  <td style="text-align:right"><strong>120 radar units</strong></td>
+  <td><code>200 × 0.6</code>; not a claim that all modes share the same HUD pixel dimension</td>
+</tr>
+</tbody>
+</table>
+<p>The native position helper rotates relative positions with the player's heading. It returns planar x/y, a separate relative-height quantity, and an inside-range flag. A point outside 200 m is clamped to the rim rather than simply disappearing in the examined helper. Height is calculated separately and clamped to approximately ±80 in the source rule.</p>
+<p>EDF5 reads these sprite resources from <code>app:/Effect/Hud.rab</code>: <code>Radar_item.dds</code>, <code>HudRaderPoint.dds</code>, <code>HudRaderArea.dds</code>. HUD layout is <code>app:/ui/lyt_HudRader01.sgo</code>. Sprite identity and position conversion are <strong>different</strong> components.</p>
+<h2 id="edf5-team-colors-and-drawing-order">EDF5 team colors and drawing order</h2>
+<p>The native dispatcher creates per-category lists and renders them in an observed order: team 4, item crates, team 2, hostiles, team 5, teammate icons, team-0 entities, mission points and area circles. Because the source pathway has <strong>no depth test</strong> for these markers, later categories may visually cover earlier ones.</p>
+<p>The examined native palette includes red hostiles, green crates, cyan team 2 and yellow team 5; teams 0/4 have white entries. The color associated with one game team is not necessarily a unique player slot color.</p>
+<h2 id="edf6-hud-colors-are-a-different-table">EDF6 HUD colors are a different table</h2>
+<p>EDF6 has a set of native RGBA float constants for neutral, allied, item, enemy and vehicle categories. The community's patch research found the color table and the item-class loop, but <strong>the colors written by those patches are custom choices</strong>, not evidence of EDF6's original defaults.</p>
+<p>The EDF6 player-icon path selects from four <strong>player-id</strong> entries, independent of the player's soldier class:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Player id in the studied icon path</th>
+  <th>Native icon RGBA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Yellow <code>(1,1,0,1)</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Green <code>(0,1,0,1)</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Blue <code>(0,0,1,1)</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Red <code>(1,0,0,1)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The class can affect the icon's rotation/shape path, but <strong>color selection is by ID</strong>. It is not proven that IDs always equal lobby list order or that the host always occupies a specific id.</p>
+<p>EDF6 distinguishes item categories in the HUD loop: category 0 weapon, 1 armor, 2/3 health. The exact native drawing and optional per-category color override belong to separate stages.</p>
+<h2 id="what-the-radar-cannot-tell-you-alone">What the radar cannot tell you alone</h2>
+<p>A changed dot color does not establish a changed game-object team relation, and a radar bearing does not guarantee AI line of sight. HUD projection, TeamManager relations, physics collision and target visibility use different source systems. Do not merge their ownership logic simply because all can refer to the same object.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><a href="kh-edf5-radar.html">EDF5 radar source appendix</a>: <code>radar-hud-class</code>, <code>radar-scales</code>, <code>radar-dispatcher</code>, <code>radar-position-helper</code>, <code>radar-colors</code>.</li>
+<li><a href="kh-edf6-radar.html">EDF6 radar source appendix</a>: <code>radar-color-constants</code>, <code>radar-item-loop</code>, <code>radar-player-slot-colors</code>.</li>
+<li><a href="engine-re-%26-networking-edf6-native-team-manager-relation-matrix-and-reset.html">EDF6 team relation matrix</a>.</li>
+</ul>
+<p><strong>Attribution:</strong> novae (ajane), <em>EDF Knowledge Hub</em> revision <code>54f89cd</code>, KittopiaCreator and other cited contributors where noted in the original appendix. Static and reported game tests are not conflated.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#edf5-world-position-radar-position">EDF5 world position → radar position</a><a href="#edf5-team-colors-and-drawing-order">EDF5 team colors and drawing order</a><a href="#edf6-hud-colors-are-a-different-table">EDF6 HUD colors are a different table</a><a href="#what-the-radar-cannot-tell-you-alone">What the radar cannot tell you alone</a><a href="#sources">Sources</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-radar-render-scale-and-player-color-rules"};</script><script src="../assets/site.js" defer></script></body></html>

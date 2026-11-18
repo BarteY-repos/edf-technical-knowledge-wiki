@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Reading and writing EDF6 MDB materials: native parameters, textures and shader reflection An MDB model contains geometry and a serialized material. The material"><title>Reading and writing EDF6 MDB materials: native parameters, textures and shader reflection | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>Reading and writing EDF6 MDB materials: native parameters, textures and shader reflection</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Technical reference · Observed native EDF6 MDB material profile versus shader reflection; shader-guide models scoped</div><div id="articleBody"><p>An MDB model contains geometry <strong>and a serialized material</strong>. The material identifies a shader, stores typed parameter values and refers to texture samplers. A shader disassembly or reflection database tells you what the shader <em>can accept</em>; it does <strong>not</strong> necessarily tell you which fields a real MDB material contains, in what order, or what the default values are.</p>
+<p>This guide answers the practical question: <strong>how do you reconstruct a native-looking EDF6 MDB material without silently changing its meaning?</strong> All examples below come from sampled native EDF6 map-model MDB files; they should not be generalized to all character or terrain renderers.</p>
+<h2 id="a-concrete-brdf-example">A concrete BRDF example</h2>
+<p>For the observed <code>snd_BRDF_Map_Common</code> material family, the <strong>native parameter sequence</strong> is:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Position</th>
+  <th>Material parameter</th>
+  <th>Observed TypeByte/SizeByte</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>diffuse</code></td>
+  <td><code>2/3</code></td>
+  <td>RGB material colour multiplier</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>metallic</code></td>
+  <td><code>0/1</code></td>
+  <td>Multiplier for packed metallic</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>normal_amount</code></td>
+  <td><code>0/1</code></td>
+  <td>Normal-map tangent-plane perturbation</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>roughness</code></td>
+  <td><code>0/1</code></td>
+  <td>Multiplier for packed roughness</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>specular_color</code></td>
+  <td><code>2/3</code></td>
+  <td>Specular path colour</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>specular_diffuse_blend</code></td>
+  <td><code>0/1</code></td>
+  <td>Metallic-dependent specular mixing</td>
+</tr>
+</tbody>
+</table>
+<p>Observed native <strong>sampler sequence</strong>: <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code>.</p>
+<p>The reflected parameter sequence for this shader is approximately <code>diffuse</code>, <code>specular_diffuse_blend</code>, <code>specular_color</code>, <code>normal_amount</code>, <code>metallic</code>, <code>roughness</code>—<strong>different from the native list</strong>. <code>m_instancing_array_stride</code> may also appear in reflection, despite being absent from examined native MDB per-material lists. That makes the reflection data a capability map, not a ready-to-serialize material template.</p>
+<h3 id="what-metallic-and-roughness-do">What metallic and roughness do</h3>
+<p>For the studied ordinary Common/BRDF packed <code>param_r_m_*</code> path:</p>
+<pre><code class="language-hlsl">float metallic  = saturate(packed.g * material.metallic);
+float roughness = saturate(packed.r * material.roughness);
+// For the studied _hr packed map:
+roughness = saturate(packed.r * packed.a * material.roughness);
+</code></pre>
+<p>The shader’s <code>metallic=1.0</code> is <strong>not sufficient to make the entire object metallic</strong> if the packed texture has a dark green channel. Likewise, setting a single Blender roughness slider ignores the R and sometimes A channel contributions. These rules are <strong>family-specific</strong>: the legacy <code>snd_Map_*</code> reflect/spec texture system is not interchangeable with BRDF R/M.</p>
+<p>For other equations including normal decode, cutout alpha and emissive masks, see <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB shading parameters</a>.</p>
+<h2 id="native-vector-size-is-not-just-a-shader-reflection-width">Native vector size is not just a shader reflection width</h2>
+<p>The shader parameter record carries a type and a size in its native material ABI. A generic reflection-driven model tool may know that a shader variable is a <code>float3</code> yet choose <strong>size 4</strong>. In observed EDF6 BRDF map profiles, these vectors commonly have <strong>type=2, size=3</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Shader</th>
+  <th>Sampled native field</th>
+  <th>Type/size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_Common</code></td>
+  <td><code>diffuse</code>, <code>specular_color</code></td>
+  <td><code>2/3</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Common_Light</code></td>
+  <td><code>light_color</code></td>
+  <td><code>2/3</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Window</code></td>
+  <td><code>diffuse</code>, <code>interior</code>, <code>specular_color</code></td>
+  <td><code>2/3</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Signboard_Pattern</code></td>
+  <td><code>diffuse</code>, <code>light_color</code>, <code>specular_color</code></td>
+  <td><code>2/3</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is an <strong>observed profile rule</strong>, not a claim that every native EDF6 <code>float3</code> has size 3. Older shaders also exhibit <code>2/4</code> variants. In an importer/exporter, retain imported <code>(name, type, size, order, raw value)</code> metadata when possible rather than regenerating it from a guessed generic table.</p>
+<h2 id="texture-registers-are-not-the-same-as-mdb-sampler-order">Texture registers are not the same as MDB sampler order</h2>
+<p>An EDF6 shader may bind texture registers in one order, while the native MDB material serializes its sampler names in another. In the sampled native data:</p>
+<table>
+<thead>
+<tr>
+  <th>Shader</th>
+  <th>Observed MDB sampler order</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Basic_NC</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Window</code></td>
+  <td><code>interior_texture</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code>, <code>window_frame_texture</code>, <code>window_normal</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Para_NC</code></td>
+  <td><code>param_r_m_h</code>, <code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_DirtScroll</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_cm0_hr</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Signboard_Pattern</code></td>
+  <td><code>switching_mask</code>, <code>param_r_m_occ_light</code>, <code>albedo</code>, <code>normal</code></td>
+</tr>
+</tbody>
+</table>
+<p>These are real serialized orders and are not generally alphabetical or register-sorted. <strong>Whether the game strictly requires native ordering in every case is not proven.</strong> The safe practice when rebuilding a <em>known</em> native profile is to preserve the observed order.</p>
+<p>See <a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">the full native shader-family reference</a> for multiple sample profiles and their typed fields.</p>
+<h2 id="not-every-reflected-parameter-belongs-in-the-mdb">Not every reflected parameter belongs in the MDB</h2>
+<p>The reflection catalog exposes variables like <code>m_instancing_array_stride</code> and some <code>sys_*</code> values, but they were absent from the examined native per-material lists. Legacy shaders also have real MDB instances where <code>metallic</code> or <code>roughness</code> are <strong>omitted</strong> although reflection contains those names. Do not invent an entry merely because the shader is capable of consuming it. A native material may deliberately instantiate a subset.</p>
+<h2 id="raw-integer-parameters-the-type-4-trap">Raw integer parameters: the <code>type=4</code> trap</h2>
+<p>Some MDB fields have <strong>4-byte integer bit patterns inside float-sized storage lanes</strong>. For example:</p>
+<table>
+<thead>
+<tr>
+  <th>Native shader/parameter</th>
+  <th style="text-align:right">Semantic value</th>
+  <th>Four bytes (little endian)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_Signboard_Pattern.image_split</code></td>
+  <td style="text-align:right">u32 <code>2</code></td>
+  <td><code>02 00 00 00</code></td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Window.interior_wrap_count</code></td>
+  <td style="text-align:right">u32 <code>4</code></td>
+  <td><code>04 00 00 00</code></td>
+</tr>
+</tbody>
+</table>
+<p>Do <strong>not</strong> write numeric <code>2.0f</code> as <code>00 00 00 40</code> or <code>4.0f</code> as <code>00 00 80 40</code>. A float-only editor can sometimes round-trip untouched bits accidentally, but editing/recreating those values as floats destroys the intended integer meaning. Preserve the raw u32 and declared type. See <a href="materials-%26-shaders-material-parameter-type-4-raw-integer-bits-in-float-sized-lanes-blender-addon.html">type-4 raw integer details</a>.</p>
+<h2 id="defaults-clipping-and-transparent-surfaces">Defaults, clipping and transparent surfaces</h2>
+<p>Generic “new material: every parameter = 1” is not a native profile rule:</p>
+<ul>
+<li>In a 44-material observed <code>snd_BRDF_Map_Common_Clip</code> sample, <code>alpha_clip=0.5</code> in <strong>42</strong> instances and <code>0.3435</code> in <strong>2</strong>. This is a sampled distribution, not a universal default.</li>
+<li><code>Signboard.image_split</code> has raw u32 <code>2</code> in the studied profile; <code>Build_Window.interior_wrap_count</code> has raw u32 <code>4</code>.</li>
+<li><code>snd_BRDF_Map_Common_Light.light_color</code> is intentionally HDR and can exceed 1.</li>
+<li>Transparent classification cannot be based only on names ending in <code>_Alpha</code>, <code>_Clip</code> or <code>translucent_*</code>: legacy <code>snd_Map_Object_Glass</code> can be transparent with its own render layer/priority/flags.</li>
+</ul>
+<p>A native <code>Common_Clip</code> foliage texture <code>sk_pShrub003-df.dds</code> demonstrates actual one-bit-alpha BC1/DXT1 cutout usage. This is a useful <strong>known-good example</strong>, not a requirement that every cutout use BC1.</p>
+<h2 id="constructing-a-material-safely">Constructing a material safely</h2>
+<ol>
+<li><strong>Identify the exact shader and observed native profile</strong>, not simply the shader name prefix.</li>
+<li><strong>Retain existing native fields</strong> when doing a round-trip: same names, order, type, size and raw bits.</li>
+<li><strong>Retain the observed sampler slots</strong> and texture identities in MDB order, not just GPU register order.</li>
+<li><strong>Use observed defaults</strong> for known fields and real material examples; do not fill everything with 1.</li>
+<li><strong>Check the vertex declaration/UV channels</strong> demanded by the material. A different shader may require tangent/binormal, additional UV streams and split vertices; a name change alone is not a valid cross-game conversion.</li>
+<li><strong>Handle opacity, priority/layer/flags, LOD and cutout families explicitly.</strong> An LOD companion can retain the same original shader rather than switching to a universal LOD shader.</li>
+<li><strong>Classify the evidence:</strong> a byte-consistent writer, a native paired file and an EDF6 runtime-positive result are different degrees of confidence.</li>
+</ol>
+<p>For unknown profiles, prefer <strong>preserving</strong> an imported structure over synthesizing a guessed native structure. Reflection is useful for discovery and editor controls; exact native examples are the stronger source for serialization. A generic Blender PBR preview is useful, but not a byte- or rendering-fidelity oracle.</p>
+<h2 id="scope-and-evidence">Scope and evidence</h2>
+<p>These observations are drawn from existing native EDF6 MDB map-model samples and the independently analyzed rendering/material sources; no new EDF6 executable or game-runtime test was performed for this article. They establish <em>observed</em> profile structures and known mistakes in generic reflection-driven preset creation. They do <strong>not</strong> prove that reordering any parameter or texture slot always crashes the game, nor that every EDF5/EDF6 material shares the Common shader conventions.</p>
+<h2 id="concrete-common-material-family-example">Concrete common material family example</h2>
+<ul>
+<li><a href="edf6-native-brdf-common-clip-light-mdb-abi.html">Common Clip and Common Light profiles</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>02_NATIVE_MDB_PROFILES.md</li><li>03_RENDERING_SEMANTICS.md</li><li>05_TYPE4_RAW_U32.md</li><li>10_PRESET_DATABASE_CROSSCHECK.md</li><li>11_EDF5_EDF6_MDB_MIGRATION.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#a-concrete-brdf-example">A concrete BRDF example</a><a href="#what-metallic-and-roughness-do">　What metallic and roughness do</a><a href="#native-vector-size-is-not-just-a-shader-reflection-width">Native vector size is not just a shader reflection width</a><a href="#texture-registers-are-not-the-same-as-mdb-sampler-order">Texture registers are not the same as MDB sampler order</a><a href="#not-every-reflected-parameter-belongs-in-the-mdb">Not every reflected parameter belongs in the MDB</a><a href="#raw-integer-parameters-the-type-4-trap">Raw integer parameters: the type=4 trap</a><a href="#defaults-clipping-and-transparent-surfaces">Defaults, clipping and transparent surfaces</a><a href="#constructing-a-material-safely">Constructing a material safely</a><a href="#scope-and-evidence">Scope and evidence</a><a href="#concrete-common-material-family-example">Concrete common material family example</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-reading-writing-native-mdb-material-profiles"};</script><script src="../assets/site.js" defer></script></body></html>

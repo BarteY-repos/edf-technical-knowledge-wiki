@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 navigation source-body identity: which alias hypotheses have been eliminated Scope: the frozen R32-selected NW_HILLYCITY_LIGHT source group/placement co"><title>EDF 4.1 R1D: identity and semantic dedupe rules | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF 4.1 R1D: identity and semantic dedupe rules</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; Physics</span></div><div class="referencebadge">Technical reference · Native source-corpus and exact oracle, offline reconstruction only; no EDF6 in-game runtime tests</div><div id="articleBody"><p><strong>Scope:</strong> the frozen R32-selected <code>NW_HILLYCITY_LIGHT</code> source group/placement corpus. <strong>Evidence:</strong> exact parsed source records and offline negative audits. The absence of an alias in this corpus is <strong>not</strong> a universal claim about Havok across all EDF assets.</p>
+<h2 id="why-identity-checks-matter">Why identity checks matter</h2>
+<p>An apparently equivalent collision shape may not be an equivalent <strong>placement</strong>, <strong>source asset</strong>, <strong>MAD body</strong>, <strong>MAPO component</strong> or <strong>carve footprint</strong>. Historically, a reconstruction of the 4,971 footprint target might have included some source-backed alias or deduplication rule. The latest exact audits rule out several simple explanations.</p>
+<table>
+<thead>
+<tr>
+  <th>Hypothesis</th>
+  <th>Direct finding</th>
+  <th>Practical conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Alternate base/collision source per selected group</td>
+  <td><strong>63/65</strong> selected groups have exactly <strong>one observed</strong> normalized <code>(base_ref, collision_ref)</code> signature; <strong>2/65</strong> have <strong>no recorded signature</strong> among the resolved MAPO slots; <strong>0</strong> have multiple signatures</td>
+  <td>No competing source identity was detected among the 63 resolved groups; the other two remain <strong>unresolved</strong>, not verified as unique</td>
+</tr>
+<tr>
+  <td>Duplicate MAPB placement identity</td>
+  <td><strong>1,405</strong> selected placements; <strong>0</strong> duplicate GUID, GUID-excluded raw-core, or classifier-semantic <code>(parent, transform, group set)</code> classes</td>
+  <td>All <strong>251</strong> exact-zero placements are source-distinct; no natural placement-survivor ordering</td>
+</tr>
+<tr>
+  <td>Shared Havok shape object between bodies</td>
+  <td><strong>479</strong> active body IDs; <strong>0</strong> shared root shape IDs and <strong>0</strong> shared nested shape object IDs</td>
+  <td>No hidden pointer-sharing alias across distinct active bodies</td>
+</tr>
+<tr>
+  <td>Excluded body category hidden in group membership</td>
+  <td><strong>65/65</strong> selected groups have identical all-prefix and qualified frontend body sets</td>
+  <td>No alternate population emerges from applying the existing T58 frontend qualifications</td>
+</tr>
+<tr>
+  <td>Body-role metadata distinguishes a collision subset</td>
+  <td><strong>479/479</strong> active identities share the same inspected non-name role fields</td>
+  <td>Name-only <code>.lod</code>/<code>.polymsh</code> filtering is not justified</td>
+</tr>
+</tbody>
+</table>
+<p>The body-role audit covered <strong>1,795</strong> source body rows in selected groups and <strong>710</strong> passing <code>max_xz &gt;= 5.75</code>. Among the 479 active body names, all inspected non-name Havok role fields were uniform (including motion type, broadphase metadata and collision response defaults); therefore this class of metadata is not a useful discriminator in the audited population.</p>
+<h3 id="exact-source-havok-role-field-profile-of-the-selected-bodies">Exact source Havok role-field profile of the selected bodies</h3>
+<p>In this <strong>specific</strong> NW_HILLYCITY_LIGHT source-corpus slice, the same field values occur in all <strong>479/479</strong> active MAD body identities. The broader selected group census contains 1,795 body rows, of which 710 pass the retained size threshold and 231 of those do not occur in the active 479-name population. The profile below describes source file fields; it is <strong>not</strong> a generic specification for every EDF4.1 Havok body.</p>
+<table>
+<thead>
+<tr>
+  <th>Inspected source field</th>
+  <th>Value across the 479 active bodies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Motion type / deactivation class</td>
+  <td><code>5</code> / <code>1</code></td>
+</tr>
+<tr>
+  <td>Broadphase handle type</td>
+  <td><code>1</code></td>
+</tr>
+<tr>
+  <td>Shape key</td>
+  <td><code>0xFFFFFFFF</code></td>
+</tr>
+<tr>
+  <td><code>forceCollideOntoPpu</code></td>
+  <td><code>8</code></td>
+</tr>
+<tr>
+  <td>Material response / friction / restitution</td>
+  <td><code>1</code> / <code>0.5</code> / <code>0.4</code></td>
+</tr>
+<tr>
+  <td>Damage multiplier</td>
+  <td><code>1.0</code></td>
+</tr>
+<tr>
+  <td>Storage index / contact delay</td>
+  <td><code>0xFFFF</code> / <code>0xFFFF</code></td>
+</tr>
+<tr>
+  <td>UID / <code>npData</code></td>
+  <td><code>0xFFFFFFFF</code> / <code>0xFFFFFFFF</code></td>
+</tr>
+<tr>
+  <td>SPU event / user filters</td>
+  <td><code>3</code> / <code>1</code></td>
+</tr>
+<tr>
+  <td>Top-level shape user data</td>
+  <td>absent/null</td>
+</tr>
+</tbody>
+</table>
+<p>These uniform source fields do <strong>not</strong> encode an extra body-eligibility distinction. Differences in <code>.lod</code>/<code>.polymsh</code> naming are insufficient by themselves to assign different physical roles; any such interpretation needs independent engine or runtime evidence.</p>
+<h2 id="original-r100-selected-group-identity-census-65-group-source-table">Original R100 selected-group identity census — 65-group source table</h2>
+<p>A direct recount of the preserved <strong>R100 machine-readable JSON</strong> (<code>EDF41_R1D_SELECTED_GROUP_MULTIBASE_PROVENANCE_2026-11-15_R100.json</code>) reveals a qualification missing from the accompanying short R100 <code>START_HERE</code> description: the text says every selected group has one signature, but the <strong>actual 65 <code>all_groups</code> rows contain 63 one-signature records and two zero-signature records</strong>. The source audit script uses <code>by.get(g,{})</code> for a group without an observed resolved MAPO slot, explaining how a zero-length signature list can appear without creating a multi-signature group.</p>
+<ul>
+<li><strong>63</strong> distinct selected groups have <strong>one captured</strong> <code>(base_ref, collision_ref)</code> pair each. Every observed pair has exactly one candidate MAD prefix in this retained dataset.</li>
+<li><strong>2</strong> groups have <strong>zero captured</strong> pairs: <code>sk_bd3020_a01_hk</code> and <code>sk_bd3020_zparts01_hk</code>. They were ranked into the selected group set, but this R100 record cannot establish their placement-local base/collision signature. Do not infer that they lack assets or physical geometry in the game.</li>
+<li><strong>0</strong> groups show more than one captured pair. This is evidence against placement-local alternate signatures <strong>where a signature was actually captured</strong>; it is not a 65/65 uniqueness proof.</li>
+<li>The <code>slot_occurrences</code> field sums to <strong>11,988 across the 63 resolved group records</strong>. It counts sampled resolved MAPO slot occurrences, <strong>not</strong> distinct MAPB placements, active rigid bodies, or the 4,971 carved footprints; these denominators must not be mixed.</li>
+</ul>
+<p>Below is the complete source-record table, not a second general explanation of R1D. Empty cells mark <strong>unknown in this capture</strong>, not absent in EDF4.1. The identical CSV is retained as <code>data/EDF41_R100_SELECTED_GROUP_65_SOURCE_SIGNATURES_2026-11-16.csv</code> for external searching and auditing.</p>
+<table>
+<thead>
+<tr>
+  <th>Selected source group</th>
+  <th>Base HKT reference</th>
+  <th>Collision HKT reference</th>
+  <th style="text-align:right">Resolved MAPO slot occurrences</th>
+  <th>Provenance status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>nw_enkeibld2020_01_hk</code></td>
+  <td><code>_enkeibld2020_01.hkt</code></td>
+  <td><code>020_01_hk.hkt</code></td>
+  <td style="text-align:right">686</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_enkeibld2020_02_hk</code></td>
+  <td><code>_enkeibld2020_02.hkt</code></td>
+  <td><code>020_02_hk.hkt</code></td>
+  <td style="text-align:right">728</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_enkeibld2020_03_hk</code></td>
+  <td><code>_enkeibld2020_03.hkt</code></td>
+  <td><code>020_03_hk.hkt</code></td>
+  <td style="text-align:right">647</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_enkeibld2020_04_hk</code></td>
+  <td><code>_enkeibld2020_04.hkt</code></td>
+  <td><code>020_04_hk.hkt</code></td>
+  <td style="text-align:right">673</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_enkeibld2020_05_hk</code></td>
+  <td><code>_enkeibld2020_05.hkt</code></td>
+  <td><code>020_05_hk.hkt</code></td>
+  <td style="text-align:right">630</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_hotel1f_hk</code></td>
+  <td><code>_hct_hotel1f.hkt</code></td>
+  <td><code>1f_hk.hkt</code></td>
+  <td style="text-align:right">1</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujibld1f1_hk</code></td>
+  <td><code>_hct_koujibld1f1.hkt</code></td>
+  <td><code>bld1f1_hk.hkt</code></td>
+  <td style="text-align:right">37</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujiblddodai1_hk</code></td>
+  <td><code>_hct_koujiblddodai1.hkt</code></td>
+  <td><code>blddodai1_hk.hkt</code></td>
+  <td style="text-align:right">5</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujibldrf1_hk</code></td>
+  <td><code>_hct_koujibldrf1.hkt</code></td>
+  <td><code>bldrf1_hk.hkt</code></td>
+  <td style="text-align:right">29</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujicranerf1_hk</code></td>
+  <td><code>_hct_koujicranerf1.hkt</code></td>
+  <td><code>cranerf1_hk.hkt</code></td>
+  <td style="text-align:right">7</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujihanba1f1_hk</code></td>
+  <td><code>_hct_koujihanba1f1.hkt</code></td>
+  <td><code>hanba1f1_hk.hkt</code></td>
+  <td style="text-align:right">4</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujihanba2f1_hk</code></td>
+  <td><code>_hct_koujihanba2f1.hkt</code></td>
+  <td><code>hanba2f1_hk.hkt</code></td>
+  <td style="text-align:right">7</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_koujihanbarf1_hk</code></td>
+  <td><code>_hct_koujihanbarf1.hkt</code></td>
+  <td><code>hanbarf1_hk.hkt</code></td>
+  <td style="text-align:right">4</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_monodeck01_hk</code></td>
+  <td><code>_hct_monodeck01.hkt</code></td>
+  <td><code>eck01_hk.hkt</code></td>
+  <td style="text-align:right">1</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_monodeck02_hk</code></td>
+  <td><code>_hct_monodeck02.hkt</code></td>
+  <td><code>eck02_hk.hkt</code></td>
+  <td style="text-align:right">1</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_monorailcv1_hk</code></td>
+  <td><code>_hct_monorailcv1.hkt</code></td>
+  <td><code>ailcv1_hk.hkt</code></td>
+  <td style="text-align:right">4</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_monorailkb1_hk</code></td>
+  <td><code>_hct_monorailkb1.hkt</code></td>
+  <td><code>ailkb1_hk.hkt</code></td>
+  <td style="text-align:right">3</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_monorailstr1_hk</code></td>
+  <td><code>_hct_monorailstr1.hkt</code></td>
+  <td><code>ailstr1_hk.hkt</code></td>
+  <td style="text-align:right">42</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_sityousya1f_hk</code></td>
+  <td><code>_hct_sityousya1f.hkt</code></td>
+  <td><code>usya1f_hk.hkt</code></td>
+  <td style="text-align:right">1</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_stationcentor1_hk</code></td>
+  <td><code>_hct_stationcentor1.hkt</code></td>
+  <td><code>oncentor1_hk.hkt</code></td>
+  <td style="text-align:right">1</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_twintower2fx_hk</code></td>
+  <td><code>_hct_twintower2fx.hkt</code></td>
+  <td><code>ower2fx_hk.hkt</code></td>
+  <td style="text-align:right">36</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>nw_hct_twintowerrf_hk</code></td>
+  <td><code>_hct_twintowerrf.hkt</code></td>
+  <td><code>owerrf_hk.hkt</code></td>
+  <td style="text-align:right">2</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_1f01_hk</code></td>
+  <td><code>_bd1020_1f01.hkt</code></td>
+  <td><code>01_hk.hkt</code></td>
+  <td style="text-align:right">158</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_1f02_hk</code></td>
+  <td><code>_bd1020_1f02.hkt</code></td>
+  <td><code>02_hk.hkt</code></td>
+  <td style="text-align:right">164</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_1f03_hk</code></td>
+  <td><code>_bd1020_1f03.hkt</code></td>
+  <td><code>03_hk.hkt</code></td>
+  <td style="text-align:right">128</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_1f04_hk</code></td>
+  <td><code>_bd1020_1f04.hkt</code></td>
+  <td><code>04_hk.hkt</code></td>
+  <td style="text-align:right">152</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_a01_hk</code></td>
+  <td><code>_bd1020_a01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">314</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_a02_hk</code></td>
+  <td><code>_bd1020_a02.hkt</code></td>
+  <td><code>2_hk.hkt</code></td>
+  <td style="text-align:right">607</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_b01_hk</code></td>
+  <td><code>_bd1020_b01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">575</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_b02_hk</code></td>
+  <td><code>_bd1020_b02.hkt</code></td>
+  <td><code>2_hk.hkt</code></td>
+  <td style="text-align:right">292</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_c01_hk</code></td>
+  <td><code>_bd1020_c01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">464</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_c02_hk</code></td>
+  <td><code>_bd1020_c02.hkt</code></td>
+  <td><code>2_hk.hkt</code></td>
+  <td style="text-align:right">303</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_d01_hk</code></td>
+  <td><code>_bd1020_d01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">408</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_e01_hk</code></td>
+  <td><code>_bd1020_e01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">408</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_top01_hk</code></td>
+  <td><code>_bd1020_top01.hkt</code></td>
+  <td><code>p01_hk.hkt</code></td>
+  <td style="text-align:right">304</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_top02_hk</code></td>
+  <td><code>_bd1020_top02.hkt</code></td>
+  <td><code>p02_hk.hkt</code></td>
+  <td style="text-align:right">195</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1020_top03_hk</code></td>
+  <td><code>_bd1020_top03.hkt</code></td>
+  <td><code>p03_hk.hkt</code></td>
+  <td style="text-align:right">103</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1515t_1f01_hk</code></td>
+  <td><code>_bd1515t_1f01.hkt</code></td>
+  <td><code>f01_hk.hkt</code></td>
+  <td style="text-align:right">45</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1515t_1f02_hk</code></td>
+  <td><code>_bd1515t_1f02.hkt</code></td>
+  <td><code>f02_hk.hkt</code></td>
+  <td style="text-align:right">51</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1515t_1f03_hk</code></td>
+  <td><code>_bd1515t_1f03.hkt</code></td>
+  <td><code>f03_hk.hkt</code></td>
+  <td style="text-align:right">59</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd1515t_top01_hk</code></td>
+  <td><code>_bd1515t_top01.hkt</code></td>
+  <td><code>op01_hk.hkt</code></td>
+  <td style="text-align:right">155</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_1f01_hk</code></td>
+  <td><code>_bd2020_1f01.hkt</code></td>
+  <td><code>01_hk.hkt</code></td>
+  <td style="text-align:right">78</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_1f02_hk</code></td>
+  <td><code>_bd2020_1f02.hkt</code></td>
+  <td><code>02_hk.hkt</code></td>
+  <td style="text-align:right">87</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_1f03_hk</code></td>
+  <td><code>_bd2020_1f03.hkt</code></td>
+  <td><code>03_hk.hkt</code></td>
+  <td style="text-align:right">72</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_1f04_hk</code></td>
+  <td><code>_bd2020_1f04.hkt</code></td>
+  <td><code>04_hk.hkt</code></td>
+  <td style="text-align:right">77</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_a01_hk</code></td>
+  <td><code>_bd2020_a01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">545</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_b01_hk</code></td>
+  <td><code>_bd2020_b01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">387</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_c01_hk</code></td>
+  <td><code>_bd2020_c01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">634</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_d01_hk</code></td>
+  <td><code>_bd2020_d01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">413</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_e01_hk</code></td>
+  <td><code>_bd2020_e01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">593</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_top01_hk</code></td>
+  <td><code>_bd2020_top01.hkt</code></td>
+  <td><code>p01_hk.hkt</code></td>
+  <td style="text-align:right">152</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_top02_hk</code></td>
+  <td><code>_bd2020_top02.hkt</code></td>
+  <td><code>p02_hk.hkt</code></td>
+  <td style="text-align:right">90</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020_top03_hk</code></td>
+  <td><code>_bd2020_top03.hkt</code></td>
+  <td><code>p03_hk.hkt</code></td>
+  <td style="text-align:right">88</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020l_1f01_hk</code></td>
+  <td><code>_bd2020l_1f01.hkt</code></td>
+  <td><code>f01_hk.hkt</code></td>
+  <td style="text-align:right">38</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020l_a01_hk</code></td>
+  <td><code>_bd2020l_a01.hkt</code></td>
+  <td><code>01_hk.hkt</code></td>
+  <td style="text-align:right">228</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020l_top01_hk</code></td>
+  <td><code>_bd2020l_top01.hkt</code></td>
+  <td><code>op01_hk.hkt</code></td>
+  <td style="text-align:right">21</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd2020l_top02_hk</code></td>
+  <td><code>_bd2020l_top02.hkt</code></td>
+  <td><code>op02_hk.hkt</code></td>
+  <td style="text-align:right">17</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_1f01_hk</code></td>
+  <td><code>_bd3020_1f01.hkt</code></td>
+  <td><code>01_hk.hkt</code></td>
+  <td style="text-align:right">10</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_a01_hk</code></td>
+  <td>—</td>
+  <td>—</td>
+  <td style="text-align:right">—</td>
+  <td><strong>unresolved</strong></td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_z01_hk</code></td>
+  <td><code>_bd3020_z01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">8</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_z02_hk</code></td>
+  <td><code>_bd3020_z02.hkt</code></td>
+  <td><code>2_hk.hkt</code></td>
+  <td style="text-align:right">2</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_zparts01_hk</code></td>
+  <td>—</td>
+  <td>—</td>
+  <td style="text-align:right">—</td>
+  <td><strong>unresolved</strong></td>
+</tr>
+<tr>
+  <td><code>sk_bd3020_zparts03_hk</code></td>
+  <td><code>_bd3020_zparts03.hkt</code></td>
+  <td><code>arts03_hk.hkt</code></td>
+  <td style="text-align:right">2</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd4030_1f02_hk</code></td>
+  <td><code>_bd4030_1f02.hkt</code></td>
+  <td><code>02_hk.hkt</code></td>
+  <td style="text-align:right">6</td>
+  <td>one pair</td>
+</tr>
+<tr>
+  <td><code>sk_bd4030_z01_hk</code></td>
+  <td><code>_bd4030_z01.hkt</code></td>
+  <td><code>1_hk.hkt</code></td>
+  <td style="text-align:right">6</td>
+  <td>one pair</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Provenance and authority:</strong> <code>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R100_SELECTED_GROUP_MULTIBASE_PROVENANCE/EDF41_R1D_R100_SELECTED_GROUP_MULTIBASE_PROVENANCE_DELTA.zip</code>: machine JSON <strong>and</strong> original <code>probe_selected_group_multibase_provenance_r100.py</code> were compared. The human-readable <code>START_HERE_EDF41_R1D_R100.md</code> overstates the 65/65 result. This correction concerns a <strong>static/source-only</strong> R32-selected slice, and does not establish exact R1D LOW HKT reconstruction or successful in-game navigation. See <a href="nav-edf41-r1d-source-authority.html">R1D authority and HKT differences</a>.</p>
+<p><strong>Cross-check against earlier R80:</strong> the original R80 MAPO component audit explicitly lists these same two as <code>unreferenced_selected_groups</code> (63 groups referenced, 2 unreferenced), while R100 records the same pair as zero captured base/collision signatures. This agreement narrows the discrepancy to selected-group-to-resolved-MAPO coverage, <strong>not</strong> proven missing HKT assets, absent collision geometry, or a new gameplay fault. The current sources do not establish their exact missing slot bindings.</p>
+<h2 id="semantic-duplicate-classes-the-strict-versus-fixb-boundary">Semantic duplicate classes: the strict versus FixB boundary</h2>
+<p><strong>47</strong> source-semantic duplicate-shape excess instances decompose into two concrete families:</p>
+<ol>
+<li><strong>Strict resolver family:</strong> <code>nw_hct_koujihanba1f1_hk</code> ↔ <code>nw_hct_koujihanbarf1_hk</code>; <strong>24</strong> excess instances from <strong>8</strong> distinct semantic shapes over T2 placements 189/190/191.</li>
+<li><strong>FixB resolver family:</strong> <code>nw_enkeibld2020_01_hk</code> ↔ <code>nw_enkeibld2020_05_hk</code>; <strong>23</strong> excess instances from <strong>one</strong> semantic shape class.</li>
+</ol>
+<p>The R32 reconstructed <strong>4,994 → 4,971</strong> population uses only the naturally scoped <strong>23</strong> FixB removals. Extending deduplication globally to include strict groups would remove another 24 and change the observed population; removing only 23 of those 24 is a count-fit rather than a source-derived rule.</p>
+<p>A pre-ranking deduplication of the FixB class can choose either Enkei 01 or 05 as the owner and still preserve <strong>65 groups / 1,405 placements / 4,971 footprints</strong>. But both possible owners produce <strong>identical complete footprint geometry</strong>, SHA-256 <code>315f4be8d53b90bc2d7237755d296a163e50a14e17178b0122d4b30f152b373c</code>. Thus source-body naming/ownership changes do <strong>not</strong> create an alternate R1D carve geometry through this mechanism.</p>
+<h2 id="source-qualified-group-membership-base-identity-and-placement-identity">Source-qualified group membership, base identity and placement identity</h2>
+<p>An identity-preserving conversion should track group prefix, MAPO base/collision pair, MAPB parent and exact transform, MAD body identity, and source shape semantics <strong>separately</strong>. Never alias across two different types of identity just because strings or geometry appear similar. The current negative audits significantly narrow the search for a historically compatible 4,971-footprint geometry, but do not recover the original historical filter or HKT bytes.</p>
+<h2 id="provenance">Provenance</h2>
+<p><code>EDF41_R1D_R88_FIXB_PRERANKING_DEDUPE_ORDER_DELTA.zip</code>, <code>EDF41_R1D_R94_SEMANTIC_SHAPE_DUPLICATE_CLASSES_DELTA.zip</code>, <code>EDF41_R1D_R95_BODY_ROLE_METADATA_DELTA.zip</code>, <code>EDF41_R1D_R97_T58_QUALIFIED_BODY_OWNERSHIP_DELTA.zip</code>, <code>EDF41_R1D_R98_SHARED_HAVOK_SHAPE_OBJECTS_DELTA.zip</code>, <code>EDF41_R1D_R99_MAPB_PLACEMENT_IDENTITY_DELTA.zip</code>, <code>EDF41_R1D_R100_SELECTED_GROUP_MULTIBASE_PROVENANCE_DELTA.zip</code>. All are offline evidence from <code>/EDF41_EDF6_RESEARCH/</code>; none is a product/runtime authority update.</p>
+<p>Related: <a href="nav-edf41-r1d-source-authority.html">R1D reconstruction boundaries</a>, <a href="nav-edf41-mapo-component-transform-evidence.html">MAPO transform evidence</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">native Havok architecture</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_SESSION_CLOSE_2026-11-15_R75.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R88..R100 source-provenance deltas</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R100_SELECTED_GROUP_MULTIBASE_PROVENANCE/EDF41_R1D_R100_SELECTED_GROUP_MULTIBASE_PROVENANCE_DELTA.zip</li><li>EDF41_R1D_R32_MAPO_COMPONENT_PROVENANCE_AUDIT_2026-11-15_R80.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-identity-checks-matter">Why identity checks matter</a><a href="#exact-source-havok-role-field-profile-of-the-selected-bodies">　Exact source Havok role-field profile of the selected bodies</a><a href="#original-r100-selected-group-identity-census-65-group-source-table">Original R100 selected-group identity census — 65-group source table</a><a href="#semantic-duplicate-classes-the-strict-versus-fixb-boundary">Semantic duplicate classes: the strict versus FixB boundary</a><a href="#source-qualified-group-membership-base-identity-and-placement-identity">Source-qualified group membership, base identity and placement identity</a><a href="#provenance">Provenance</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"nav-edf41-selected-body-identity-audits"};</script><script src="../assets/site.js" defer></script></body></html>

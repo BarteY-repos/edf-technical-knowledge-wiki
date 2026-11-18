@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 mission progression has separate clear flags and difficulty-level state The engine records which difficulties a player/class has completed for each mission"><title>EDF6 mission clear bitmasks, mission-level interpolation and script fixed-level overrides | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Mission progression</div><h1>EDF6 mission clear bitmasks, mission-level interpolation and script fixed-level overrides</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Mission progression</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>The engine records which difficulties a player/class has completed for each mission and separately decides the current <strong>mission level</strong>, which affects scaling. A clear flag, the selected difficulty and a script's <code>SetMissionLevelFix()</code> are three different state variables.</p>
+<h2 id="mission-clear-flags">Mission-clear flags</h2>
+<table>
+<thead>
+<tr>
+  <th>Difficulty</th>
+  <th style="text-align:right">Stored bit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Easy</td>
+  <td style="text-align:right"><code>0x01</code></td>
+</tr>
+<tr>
+  <td>Normal</td>
+  <td style="text-align:right"><code>0x02</code></td>
+</tr>
+<tr>
+  <td>Hard</td>
+  <td style="text-align:right"><code>0x04</code></td>
+</tr>
+<tr>
+  <td>Hardest</td>
+  <td style="text-align:right"><code>0x08</code></td>
+</tr>
+<tr>
+  <td>Inferno</td>
+  <td style="text-align:right"><code>0x10</code></td>
+</tr>
+</tbody>
+</table>
+<p>The native completion function loops from Easy up through the just-cleared difficulty <strong>only when the difficulty is Easy, Normal or Hard</strong>. Clearing Hardest or Inferno marks their own bit, not all lower difficulties. This explains the familiar progression behavior without treating the flags as an ordered numeric level value.</p>
+<h2 id="mission-progress-is-used-to-interpolate-enemy-level">Mission progress is used to interpolate enemy level</h2>
+<p>The selected difficulty comes from GameStatus <code>+0x4C</code> in the studied build. The current mission's row position and total row count yield a progress fraction. The per-difficulty <code>[lvMin, lvMax]</code> bounds in <code>CONFIG.SGO</code> are interpolated using that fraction, with single-precision arithmetic. For the original main campaign the source reports bounds:</p>
+<table>
+<thead>
+<tr>
+  <th>Difficulty</th>
+  <th>Level-factor bounds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Easy</td>
+  <td>5–15</td>
+</tr>
+<tr>
+  <td>Normal</td>
+  <td>10–24</td>
+</tr>
+<tr>
+  <td>Hard</td>
+  <td>20–60</td>
+</tr>
+<tr>
+  <td>Hardest</td>
+  <td>70–150</td>
+</tr>
+<tr>
+  <td>Inferno</td>
+  <td>160–280</td>
+</tr>
+</tbody>
+</table>
+<p>DLC modes may use different bounds; DLC2, for example, has Inferno <strong>310–350</strong>. These are parameters of the game's scaling model, <strong>not</strong> necessarily weapon-drop levels or individual enemy HP values.</p>
+<h2 id="a-script-s-fixed-level-flag-is-independent-of-difficulty">A script's fixed-level flag is independent of difficulty</h2>
+<p>The scripting interfaces <code>GetDifficulty()</code> and <code>SetMissionLevelFix()</code> operate on distinct fields. The latter sets a fixed-level flag at GameStatus <code>+0x44</code> and does not change the selected difficulty at <code>+0x4C</code>. A BVM reset clears the flag on relevant mission lifecycle transitions, so a fixed-level tutorial cannot be assumed to change the following mission.</p>
+<p>EDF6 carries both an older BVM call and native AngelScript routes, but <strong>BVM native 20's shared mission factor is not the same operation as the AngelScript <code>SetMissionLevel(float)</code> enemy-team factor</strong>. These should not be translated by matching only names or arguments.</p>
+<h2 id="modelist-structure-changed-from-edf5">ModeList structure changed from EDF5</h2>
+<p>EDF5 uses a 12-field mode row; EDF6 uses <strong>13 fields</strong>, adding an explicit <code>.MST</code> filename in field 5. As a result, the mission-list triple and the difficulty array move one slot later, with EDF6's per-difficulty values in field 7. A parser that applies EDF5 offsets to an EDF6 configuration would read the wrong data even when the visible mode name is the same.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf6-missions</code>: <code>mission-clear-bits</code>, <code>difficulty-mission-level</code>, <code>difficulty-level-ranges</code>, <code>edf6-modelist-shape</code>. Anchors apply to build <code>steam-678ccb46</code>; prior source includes an instruction-level harness comparison but no R128 in-game validation.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf6-missions</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#mission-clear-flags">Mission-clear flags</a><a href="#mission-progress-is-used-to-interpolate-enemy-level">Mission progress is used to interpolate enemy level</a><a href="#a-script-s-fixed-level-flag-is-independent-of-difficulty">A script&#39;s fixed-level flag is independent of difficulty</a><a href="#modelist-structure-changed-from-edf5">ModeList structure changed from EDF5</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-mission-clear-difficulty-bits-level-fix-script-abi"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="AI-driven vehicles and player-summoned vehicles have different SGO roots Player-summoned forms generally use vehicle_setup. AI-driven forms additionally use a m"><title>EDF5 AI vehicles: weapon loadouts, damage values and firing intervals | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Vehicles / weapons</div><h1>EDF5 AI vehicles: weapon loadouts, damage values and firing intervals</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Vehicles / weapons</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>Player-summoned forms generally use <code>vehicle_setup</code>. AI-driven forms additionally use a <strong><code>mission_setup</code></strong> root that names their mounted weapon SGOs. The native class may be unchanged, but mission ownership, model choice and weapon setups differ.</p>
+<table>
+<thead>
+<tr>
+  <th>AI SGO family</th>
+  <th style="text-align:right">Source durability</th>
+  <th>Weapons and native parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v505_tank_ai</code> (Blacker)</td>
+  <td style="text-align:right">700</td>
+  <td>105mm Howitzer base damage 70, blast 8, reload 180 frames</td>
+</tr>
+<tr>
+  <td><code>vehicle403_tank_ai</code> (Epsilon)</td>
+  <td style="text-align:right">1600</td>
+  <td>Penetrating railgun base damage 300, reload 180 frames</td>
+</tr>
+<tr>
+  <td><code>vehicle404_bigtank_ai</code> (B651 Titan)</td>
+  <td style="text-align:right">2400</td>
+  <td>Requiem Gun 750, blast 30, reload 1200 frames</td>
+</tr>
+<tr>
+  <td><code>v510_maser_ai</code> (EMC)</td>
+  <td style="text-align:right">1000</td>
+  <td>180-shot burst, base damage 10 per shot</td>
+</tr>
+<tr>
+  <td><code>v507_rescuetank_ai</code> (Caliban)</td>
+  <td style="text-align:right">1500</td>
+  <td>Healing total 600 from <code>mission_setup</code></td>
+</tr>
+<tr>
+  <td><code>vehicle402_rocket_ai</code> (Naegling)</td>
+  <td style="text-align:right">550</td>
+  <td>200 homing rockets, 100 base damage, bursts of ten, blast 8</td>
+</tr>
+<tr>
+  <td><code>v504_begaruta_ai</code> (Nix)</td>
+  <td style="text-align:right">1200</td>
+  <td>Arm guns base damage five each six frames; Missile Pods 60, 20 rounds in bursts of four, blast 6</td>
+</tr>
+<tr>
+  <td><code>v515_retrobalam_ai</code> (Barga)</td>
+  <td style="text-align:right">40000</td>
+  <td>No SGO gun-style melee damage table identified</td>
+</tr>
+</tbody>
+</table>
+<p>The source revises community estimates with frame-based settings: <strong>Naegling 240 frames (4 s)</strong> between bursts, <strong>Nix missiles 420 frames (7 s)</strong>, EMC <strong>180-frame burst plus 120-frame reload</strong> (five-second cycle at 60 Hz). These are native parameter timings, not newly measured actual cycles during arbitrary lag or time dilation.</p>
+<p>The Caliban's proposed “0.05 HP per tick” was <strong>not proved</strong>: the matching 0.05 in a weapon SGO is labelled <code>FireAccuracy</code>. The community Barga melee-damage numbers also lack supporting native weapon SGOs in this particular audit and must not be promoted as a confirmed table.</p>
+<p><strong>Sources:</strong> <code>edf5/object-classes.md</code>, facts <code>edf5-npc-vehicles-wiki</code>, <code>edf5-npc-vehicles-wiki-diffs</code>, <code>edf5-npc-vehicle-variants</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-ai-vehicle-weapon-stats-and-firing-intervals"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5-content mission ordering: 141 entries in a historical converted LIST corpus Evidence scope: the exact R41_ORDER_BACKGROUND_FIX_AUDIT.json comparison of a c"><title>EDF5 content: full 141-entry converted mission LIST order | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Mission LIST &amp; metadata</div><h1>EDF5 content: full 141-entry converted mission LIST order</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Mission LIST &amp; metadata</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · R41 exact converted LIST source-order audit; not native EDF5 binary or new runtime</div><div id="articleBody"><p><strong>Evidence scope:</strong> the exact <code>R41_ORDER_BACKGROUND_FIX_AUDIT.json</code> comparison of a converted EDF5-content package. This is a <strong>converted MissionPack LIST order preserving an EDF5 mission sequence</strong>, not an independent binary read of untouched original EDF5 shipping <code>LIST.SGO</code>. EDF6-compatible later shared-progress lists use a different OFFLINE/ONLINE alignment policy.</p>
+<h2 id="three-namespaces-not-one-globally-sorted-mission-list">Three namespaces, not one globally sorted mission list</h2>
+<table>
+<thead>
+<tr>
+  <th>Historical converted pack</th>
+  <th style="text-align:right">OFFLINE rows</th>
+  <th style="text-align:right">ONLINE rows</th>
+  <th>Distinction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MissionPack03 / base</td>
+  <td style="text-align:right">112</td>
+  <td style="text-align:right">111</td>
+  <td>OFFLINE begins with <code>M000</code>; ONLINE omits <code>M000</code>. Both then follow the same 111-row source-derived ordering</td>
+</tr>
+<tr>
+  <td>MissionPack04 / DLC1</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">15</td>
+  <td>Same ordering in both modes</td>
+</tr>
+<tr>
+  <td>MissionPack05 / DLC2</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">14</td>
+  <td>Same ordering in both modes</td>
+</tr>
+</tbody>
+</table>
+<p>Across base OFFLINE, DLC1 and DLC2 there are <strong>141 distinct listed campaign entries</strong> (112 + 15 + 14). Across all six mode-specific historical converted LISTs there are <strong>281 rows</strong> (112 + 111 + 15 + 15 + 14 + 14). The accompanying CSV records every row of each profile with zero-based ordinal and mission ID. These totals must not be confused with the <strong>later 112/112</strong> unified-ordinal EDF6 save contract.</p>
+<h2 id="base-campaign-full-converted-offline-order">Base campaign: full converted OFFLINE order</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Ordinal (zero-based)</th>
+  <th>Mission ID</th>
+  <th style="text-align:right">Converted ONLINE ordinal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td><code>M000</code></td>
+  <td style="text-align:right">—</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>M001</code></td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>M003</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>M004</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>M005</code></td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>M006</code></td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>M006_5</code></td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>M009</code></td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>M013</code></td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>M018</code></td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>M015_2</code></td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>M008</code></td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td style="text-align:right">12</td>
+  <td><code>M015</code></td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td style="text-align:right">13</td>
+  <td><code>M015_3</code></td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td style="text-align:right">14</td>
+  <td><code>M010</code></td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td style="text-align:right">15</td>
+  <td><code>M011</code></td>
+  <td style="text-align:right">14</td>
+</tr>
+<tr>
+  <td style="text-align:right">16</td>
+  <td><code>M012</code></td>
+  <td style="text-align:right">15</td>
+</tr>
+<tr>
+  <td style="text-align:right">17</td>
+  <td><code>M014</code></td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td style="text-align:right">18</td>
+  <td><code>M016</code></td>
+  <td style="text-align:right">17</td>
+</tr>
+<tr>
+  <td style="text-align:right">19</td>
+  <td><code>M017</code></td>
+  <td style="text-align:right">18</td>
+</tr>
+<tr>
+  <td style="text-align:right">20</td>
+  <td><code>M017_5</code></td>
+  <td style="text-align:right">19</td>
+</tr>
+<tr>
+  <td style="text-align:right">21</td>
+  <td><code>M007</code></td>
+  <td style="text-align:right">20</td>
+</tr>
+<tr>
+  <td style="text-align:right">22</td>
+  <td><code>M024</code></td>
+  <td style="text-align:right">21</td>
+</tr>
+<tr>
+  <td style="text-align:right">23</td>
+  <td><code>M019_5</code></td>
+  <td style="text-align:right">22</td>
+</tr>
+<tr>
+  <td style="text-align:right">24</td>
+  <td><code>M022</code></td>
+  <td style="text-align:right">23</td>
+</tr>
+<tr>
+  <td style="text-align:right">25</td>
+  <td><code>M023</code></td>
+  <td style="text-align:right">24</td>
+</tr>
+<tr>
+  <td style="text-align:right">26</td>
+  <td><code>M025</code></td>
+  <td style="text-align:right">25</td>
+</tr>
+<tr>
+  <td style="text-align:right">27</td>
+  <td><code>M019</code></td>
+  <td style="text-align:right">26</td>
+</tr>
+<tr>
+  <td style="text-align:right">28</td>
+  <td><code>M026</code></td>
+  <td style="text-align:right">27</td>
+</tr>
+<tr>
+  <td style="text-align:right">29</td>
+  <td><code>M020_5</code></td>
+  <td style="text-align:right">28</td>
+</tr>
+<tr>
+  <td style="text-align:right">30</td>
+  <td><code>M021</code></td>
+  <td style="text-align:right">29</td>
+</tr>
+<tr>
+  <td style="text-align:right">31</td>
+  <td><code>M027</code></td>
+  <td style="text-align:right">30</td>
+</tr>
+<tr>
+  <td style="text-align:right">32</td>
+  <td><code>M028</code></td>
+  <td style="text-align:right">31</td>
+</tr>
+<tr>
+  <td style="text-align:right">33</td>
+  <td><code>M029</code></td>
+  <td style="text-align:right">32</td>
+</tr>
+<tr>
+  <td style="text-align:right">34</td>
+  <td><code>M020</code></td>
+  <td style="text-align:right">33</td>
+</tr>
+<tr>
+  <td style="text-align:right">35</td>
+  <td><code>M036</code></td>
+  <td style="text-align:right">34</td>
+</tr>
+<tr>
+  <td style="text-align:right">36</td>
+  <td><code>M032_5</code></td>
+  <td style="text-align:right">35</td>
+</tr>
+<tr>
+  <td style="text-align:right">37</td>
+  <td><code>M034</code></td>
+  <td style="text-align:right">36</td>
+</tr>
+<tr>
+  <td style="text-align:right">38</td>
+  <td><code>M034_3</code></td>
+  <td style="text-align:right">37</td>
+</tr>
+<tr>
+  <td style="text-align:right">39</td>
+  <td><code>M034_5</code></td>
+  <td style="text-align:right">38</td>
+</tr>
+<tr>
+  <td style="text-align:right">40</td>
+  <td><code>M035</code></td>
+  <td style="text-align:right">39</td>
+</tr>
+<tr>
+  <td style="text-align:right">41</td>
+  <td><code>M007_5</code></td>
+  <td style="text-align:right">40</td>
+</tr>
+<tr>
+  <td style="text-align:right">42</td>
+  <td><code>M033</code></td>
+  <td style="text-align:right">41</td>
+</tr>
+<tr>
+  <td style="text-align:right">43</td>
+  <td><code>M037</code></td>
+  <td style="text-align:right">42</td>
+</tr>
+<tr>
+  <td style="text-align:right">44</td>
+  <td><code>M031</code></td>
+  <td style="text-align:right">43</td>
+</tr>
+<tr>
+  <td style="text-align:right">45</td>
+  <td><code>M041</code></td>
+  <td style="text-align:right">44</td>
+</tr>
+<tr>
+  <td style="text-align:right">46</td>
+  <td><code>M042</code></td>
+  <td style="text-align:right">45</td>
+</tr>
+<tr>
+  <td style="text-align:right">47</td>
+  <td><code>M046_1</code></td>
+  <td style="text-align:right">46</td>
+</tr>
+<tr>
+  <td style="text-align:right">48</td>
+  <td><code>M047</code></td>
+  <td style="text-align:right">47</td>
+</tr>
+<tr>
+  <td style="text-align:right">49</td>
+  <td><code>M047_2</code></td>
+  <td style="text-align:right">48</td>
+</tr>
+<tr>
+  <td style="text-align:right">50</td>
+  <td><code>M091</code></td>
+  <td style="text-align:right">49</td>
+</tr>
+<tr>
+  <td style="text-align:right">51</td>
+  <td><code>M056</code></td>
+  <td style="text-align:right">50</td>
+</tr>
+<tr>
+  <td style="text-align:right">52</td>
+  <td><code>M042_2</code></td>
+  <td style="text-align:right">51</td>
+</tr>
+<tr>
+  <td style="text-align:right">53</td>
+  <td><code>M030</code></td>
+  <td style="text-align:right">52</td>
+</tr>
+<tr>
+  <td style="text-align:right">54</td>
+  <td><code>M053</code></td>
+  <td style="text-align:right">53</td>
+</tr>
+<tr>
+  <td style="text-align:right">55</td>
+  <td><code>M203</code></td>
+  <td style="text-align:right">54</td>
+</tr>
+<tr>
+  <td style="text-align:right">56</td>
+  <td><code>M042_5</code></td>
+  <td style="text-align:right">55</td>
+</tr>
+<tr>
+  <td style="text-align:right">57</td>
+  <td><code>M200</code></td>
+  <td style="text-align:right">56</td>
+</tr>
+<tr>
+  <td style="text-align:right">58</td>
+  <td><code>M050</code></td>
+  <td style="text-align:right">57</td>
+</tr>
+<tr>
+  <td style="text-align:right">59</td>
+  <td><code>M038</code></td>
+  <td style="text-align:right">58</td>
+</tr>
+<tr>
+  <td style="text-align:right">60</td>
+  <td><code>M091_2</code></td>
+  <td style="text-align:right">59</td>
+</tr>
+<tr>
+  <td style="text-align:right">61</td>
+  <td><code>M061</code></td>
+  <td style="text-align:right">60</td>
+</tr>
+<tr>
+  <td style="text-align:right">62</td>
+  <td><code>M043</code></td>
+  <td style="text-align:right">61</td>
+</tr>
+<tr>
+  <td style="text-align:right">63</td>
+  <td><code>M058</code></td>
+  <td style="text-align:right">62</td>
+</tr>
+<tr>
+  <td style="text-align:right">64</td>
+  <td><code>M045</code></td>
+  <td style="text-align:right">63</td>
+</tr>
+<tr>
+  <td style="text-align:right">65</td>
+  <td><code>M063_5</code></td>
+  <td style="text-align:right">64</td>
+</tr>
+<tr>
+  <td style="text-align:right">66</td>
+  <td><code>M044</code></td>
+  <td style="text-align:right">65</td>
+</tr>
+<tr>
+  <td style="text-align:right">67</td>
+  <td><code>M065</code></td>
+  <td style="text-align:right">66</td>
+</tr>
+<tr>
+  <td style="text-align:right">68</td>
+  <td><code>M076</code></td>
+  <td style="text-align:right">67</td>
+</tr>
+<tr>
+  <td style="text-align:right">69</td>
+  <td><code>M046_3</code></td>
+  <td style="text-align:right">68</td>
+</tr>
+<tr>
+  <td style="text-align:right">70</td>
+  <td><code>M091_3</code></td>
+  <td style="text-align:right">69</td>
+</tr>
+<tr>
+  <td style="text-align:right">71</td>
+  <td><code>M201</code></td>
+  <td style="text-align:right">70</td>
+</tr>
+<tr>
+  <td style="text-align:right">72</td>
+  <td><code>M051</code></td>
+  <td style="text-align:right">71</td>
+</tr>
+<tr>
+  <td style="text-align:right">73</td>
+  <td><code>M068</code></td>
+  <td style="text-align:right">72</td>
+</tr>
+<tr>
+  <td style="text-align:right">74</td>
+  <td><code>M048</code></td>
+  <td style="text-align:right">73</td>
+</tr>
+<tr>
+  <td style="text-align:right">75</td>
+  <td><code>M202</code></td>
+  <td style="text-align:right">74</td>
+</tr>
+<tr>
+  <td style="text-align:right">76</td>
+  <td><code>M074</code></td>
+  <td style="text-align:right">75</td>
+</tr>
+<tr>
+  <td style="text-align:right">77</td>
+  <td><code>M091_4</code></td>
+  <td style="text-align:right">76</td>
+</tr>
+<tr>
+  <td style="text-align:right">78</td>
+  <td><code>M067</code></td>
+  <td style="text-align:right">77</td>
+</tr>
+<tr>
+  <td style="text-align:right">79</td>
+  <td><code>M072_1</code></td>
+  <td style="text-align:right">78</td>
+</tr>
+<tr>
+  <td style="text-align:right">80</td>
+  <td><code>M072_2</code></td>
+  <td style="text-align:right">79</td>
+</tr>
+<tr>
+  <td style="text-align:right">81</td>
+  <td><code>M072_3</code></td>
+  <td style="text-align:right">80</td>
+</tr>
+<tr>
+  <td style="text-align:right">82</td>
+  <td><code>M072_4</code></td>
+  <td style="text-align:right">81</td>
+</tr>
+<tr>
+  <td style="text-align:right">83</td>
+  <td><code>M064</code></td>
+  <td style="text-align:right">82</td>
+</tr>
+<tr>
+  <td style="text-align:right">84</td>
+  <td><code>M059</code></td>
+  <td style="text-align:right">83</td>
+</tr>
+<tr>
+  <td style="text-align:right">85</td>
+  <td><code>M057</code></td>
+  <td style="text-align:right">84</td>
+</tr>
+<tr>
+  <td style="text-align:right">86</td>
+  <td><code>M063</code></td>
+  <td style="text-align:right">85</td>
+</tr>
+<tr>
+  <td style="text-align:right">87</td>
+  <td><code>M054</code></td>
+  <td style="text-align:right">86</td>
+</tr>
+<tr>
+  <td style="text-align:right">88</td>
+  <td><code>M039</code></td>
+  <td style="text-align:right">87</td>
+</tr>
+<tr>
+  <td style="text-align:right">89</td>
+  <td><code>M049</code></td>
+  <td style="text-align:right">88</td>
+</tr>
+<tr>
+  <td style="text-align:right">90</td>
+  <td><code>M062</code></td>
+  <td style="text-align:right">89</td>
+</tr>
+<tr>
+  <td style="text-align:right">91</td>
+  <td><code>M069</code></td>
+  <td style="text-align:right">90</td>
+</tr>
+<tr>
+  <td style="text-align:right">92</td>
+  <td><code>M055</code></td>
+  <td style="text-align:right">91</td>
+</tr>
+<tr>
+  <td style="text-align:right">93</td>
+  <td><code>M075</code></td>
+  <td style="text-align:right">92</td>
+</tr>
+<tr>
+  <td style="text-align:right">94</td>
+  <td><code>M066</code></td>
+  <td style="text-align:right">93</td>
+</tr>
+<tr>
+  <td style="text-align:right">95</td>
+  <td><code>M073_5</code></td>
+  <td style="text-align:right">94</td>
+</tr>
+<tr>
+  <td style="text-align:right">96</td>
+  <td><code>M054_5</code></td>
+  <td style="text-align:right">95</td>
+</tr>
+<tr>
+  <td style="text-align:right">97</td>
+  <td><code>M046_2</code></td>
+  <td style="text-align:right">96</td>
+</tr>
+<tr>
+  <td style="text-align:right">98</td>
+  <td><code>M204</code></td>
+  <td style="text-align:right">97</td>
+</tr>
+<tr>
+  <td style="text-align:right">99</td>
+  <td><code>M079</code></td>
+  <td style="text-align:right">98</td>
+</tr>
+<tr>
+  <td style="text-align:right">100</td>
+  <td><code>M090</code></td>
+  <td style="text-align:right">99</td>
+</tr>
+<tr>
+  <td style="text-align:right">101</td>
+  <td><code>M052</code></td>
+  <td style="text-align:right">100</td>
+</tr>
+<tr>
+  <td style="text-align:right">102</td>
+  <td><code>M060</code></td>
+  <td style="text-align:right">101</td>
+</tr>
+<tr>
+  <td style="text-align:right">103</td>
+  <td><code>M070</code></td>
+  <td style="text-align:right">102</td>
+</tr>
+<tr>
+  <td style="text-align:right">104</td>
+  <td><code>M078</code></td>
+  <td style="text-align:right">103</td>
+</tr>
+<tr>
+  <td style="text-align:right">105</td>
+  <td><code>M071</code></td>
+  <td style="text-align:right">104</td>
+</tr>
+<tr>
+  <td style="text-align:right">106</td>
+  <td><code>M080</code></td>
+  <td style="text-align:right">105</td>
+</tr>
+<tr>
+  <td style="text-align:right">107</td>
+  <td><code>M081</code></td>
+  <td style="text-align:right">106</td>
+</tr>
+<tr>
+  <td style="text-align:right">108</td>
+  <td><code>M082</code></td>
+  <td style="text-align:right">107</td>
+</tr>
+<tr>
+  <td style="text-align:right">109</td>
+  <td><code>M083</code></td>
+  <td style="text-align:right">108</td>
+</tr>
+<tr>
+  <td style="text-align:right">110</td>
+  <td><code>M098</code></td>
+  <td style="text-align:right">109</td>
+</tr>
+<tr>
+  <td style="text-align:right">111</td>
+  <td><code>M099</code></td>
+  <td style="text-align:right">110</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dlc1-full-historical-converted-order">DLC1: full historical converted order</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Ordinal (zero-based)</th>
+  <th>Mission ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td><code>DM011</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>DM013</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>DM005</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>DM018</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>DM019</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>DM020</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>DM008</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>DM003</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>DM014</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>DM003_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>DM001</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>DM007</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">12</td>
+  <td><code>DM003_3</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">13</td>
+  <td><code>DM013_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">14</td>
+  <td><code>DM015</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="dlc2-full-historical-converted-order">DLC2: full historical converted order</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Ordinal (zero-based)</th>
+  <th>Mission ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td><code>DM005_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>DM002</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>DM021</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>DM006_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>DM009</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>DM007_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>DM010</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>DM014_2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td><code>DM012</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>DM022</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>DM023</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>DM024</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">12</td>
+  <td><code>DM017</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">13</td>
+  <td><code>DM016</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="txt-indexing-and-menu-field-evidence">TXT indexing and menu-field evidence</h2>
+<p>The same historical converted package carries SGO v258 localized TXT companion tables for <strong>EN, JA, KR, CN and SC</strong> in <strong>both modes</strong> for all three packs. The recorded TXT row count in each language/mode equals its corresponding LIST row count. Titles and descriptions are indexed by the LIST ordinal; merely possessing the correct mission filename is not enough if the TXT table follows a different order.</p>
+<p>All six audited converted LIST profiles carry <code>flags=8</code> for each row in this R41 snapshot. The menu timeline/style pair (fields 6 and 7 in that historical layout) is <code>0,0</code>; this followed a previous erroneous dystopia-style <code>2,1</code> pairing in the converted package. These are <strong>snapshot facts</strong>, not a universal encoding rule for native EDF5/EDF6 mission types or for a later target LIST schema.</p>
+<h2 id="distinction-from-the-later-edf6-compatible-metadata-contract">Distinction from the later EDF6-compatible metadata contract</h2>
+<p>The later EDF6 target deliberately assigns <strong>112 shared ordinals</strong> to both base OFFLINE and ONLINE. It includes <code>M000</code> and <code>M082</code>/<code>M083</code> on both <em>index axes</em> while keeping separate gameplay mode/difficulty configuration. The original converted R41 reference above is valuable as a <strong>source-order oracle</strong>, not a drop-in modern save-progress schema. The relevant current target fields and underground flags are documented in <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">EDF5-derived MissionPack03–05 shared progress metadata</a>.</p>
+<h2 id="how-to-read-this-reference">How to read this reference</h2>
+<ul>
+<li>Mission IDs are identifiers, <strong>not</strong> numeric-sort keys. The position of <code>M082</code> and <code>M083</code> immediately before <code>M098</code> and <code>M099</code> is observed directly.</li>
+<li>An absent base ONLINE <code>M000</code> does <strong>not</strong> imply the data is missing from the converted OFFLINE LIST.</li>
+<li>Do not infer mission availability, difficulty balance or clear-state semantics solely from an ID-to-ordinal row.</li>
+<li>The companion CSV at <code>data/EDF5_R41_CONVERTED_MISSION_LIST_281_ROWS.csv</code> contains the exact six-profile reference in a form that can be searched or compared without parsing the large table.</li>
+</ul>
+<p><strong>Source:</strong> <code>MISSION/R41/R41_ORDER_BACKGROUND_FIX_AUDIT.json</code> and <code>MISSION/R41/README_R41_ORDER_BACKGROUND_FIX.md</code> (historical converted package; source/oracle comparison; no new EDF runtime test).</p>
+<h2 id="underground-subset-cross-reference">Underground subset cross-reference</h2>
+<p>The <a href="missions-edf5-derived-underground-map-uri-and-list-flag-census.html">source-derived underground map and LIST census</a> records 15 distinct cave/EDFRoom missions and their 30 mode-specific ordinals <strong>in the later R4 shared-progress converted configuration</strong>. This is intentionally not merged into this article’s historical R41 112/111 list: the two configurations differ in whether <code>M000</code> exists in the ONLINE list.</p>
+<h2 id="native-edf5-source-list-counts-are-not-the-r41-converted-counts">Native EDF5 source-list counts are not the R41 converted counts</h2>
+<p>This 112/111 table documents the <strong>historical converted EDF5-content MissionPack</strong>. For untouched native EDF5, the original source census instead recorded <strong>110 OFFLINE / 111 ONLINE</strong>, including offline-only tutorial M000 and online-only M082/M083. An expanded converted OFFLINE list can legitimately include IDs absent from the original OFFLINE mode. The later EDF6 shared-progress system uses 112/112 for a third reason: stable mode ordinals. See <a href="edf5-source-missionlists-versus-converted-111-and-112-ordinal-contracts.html">the exact three-way distinction</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MISSION/R41/R41_ORDER_BACKGROUND_FIX_AUDIT.json</li><li>MISSION/R41/README_R41_ORDER_BACKGROUND_FIX.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#three-namespaces-not-one-globally-sorted-mission-list">Three namespaces, not one globally sorted mission list</a><a href="#base-campaign-full-converted-offline-order">Base campaign: full converted OFFLINE order</a><a href="#dlc1-full-historical-converted-order">DLC1: full historical converted order</a><a href="#dlc2-full-historical-converted-order">DLC2: full historical converted order</a><a href="#txt-indexing-and-menu-field-evidence">TXT indexing and menu-field evidence</a><a href="#distinction-from-the-later-edf6-compatible-metadata-contract">Distinction from the later EDF6-compatible metadata contract</a><a href="#how-to-read-this-reference">How to read this reference</a><a href="#underground-subset-cross-reference">Underground subset cross-reference</a><a href="#native-edf5-source-list-counts-are-not-the-r41-converted-counts">Native EDF5 source-list counts are not the R41 converted counts</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-content-r41-converted-mission-list-order-141-campaign-reference"};</script><script src="../assets/site.js" defer></script></body></html>

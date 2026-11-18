@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission RMPA — source-only EDF5 → EDF6 profile Evidence level: Exact paired native corpus + reconciled source-only tooling; runtime qualification remains pendin"><title>Mission RMPA — source-only EDF5 → EDF6 profile | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-missions.html">Missions</a></div><h1>Mission RMPA — source-only EDF5 → EDF6 profile</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p><strong>Evidence level:</strong> Exact paired native corpus + reconciled source-only tooling; runtime qualification remains pending.</p>
+<h2 id="observed-native-behavior">Observed native behavior</h2>
+<p>Mission RMPA is a mission-owned route/shape/spawn container and is structurally distinct from map RMPA. The shipping141 source/target corpus establishes a dedicated EDF6 target profile rather than a generic version-bump transformation.</p>
+<p>The retained corpus contains <strong>5,103 waypoints, 1,355 shapes and 3,387 spawn records</strong>. AC-to-RMPA closure resolves <strong>6,665 literal references with no missing target</strong> in the source-only gate.</p>
+<p>The EDF6 target form uses <code>\0PMR</code>, version 1. Route, shape, camera and spawn groups are represented independently. Route records use a <code>0x30</code> type header; waypoint records use <code>0x50</code> with a <code>0x30</code> waypoint body. EDF5 route-local waypoint numbering is rebased to a global target index while preserving GIDs and translating <code>next</code> links through the route base. Width values are preserved. Variable next-link regions are followed by 16-byte alignment. Shape and spawn records likewise have their own target headers and payload layouts, with strings published through the shared string table.</p>
+<h3 id="type-header-correction">Type-header correction</h3>
+<p>The reconciled type-header layout uses <strong><code>+0x18</code> as the string pointer</strong>. There is <strong>no type-header field at <code>+0x1C</code></strong>; <code>+0x1C</code> belongs to Enumeration Sub-Headers. Older diagrams/notes that placed an additional type-header member at <code>0x1C</code> are superseded. This distinction matters when writing offsets: a file can remain parseable while silently shifting the wrong record family.</p>
+<h2 id="implementation-rule">Implementation rule</h2>
+<p>Use the dedicated mission-RMPA converter/profile. Preserve the semantic graph, IDs, widths, references, grouping and target alignment rules demonstrated by the paired corpus. Conversion is not complete merely because the file parses or carries the EDF6 version marker.</p>
+<p><code>SetAiPath(obj, &quot;navigationmap&quot;)</code> is <strong>not</strong> evidence for a mission-RMPA route. <code>navigationmap</code> belongs to native NAV/pathing semantics and is intentionally excluded from mission-RMPA route resolution.</p>
+<h2 id="known-exception">Known exception</h2>
+<p>Reference-specific tuning is sparse. A single observed M061 shape-metadata exception is not source-distinguishable enough to become a generic conversion rule. Do not hardcode it across the corpus without a stronger discriminator.</p>
+<h2 id="do-not-assume">Do not assume</h2>
+<ul>
+<li>Mission RMPA is not map RMPA and must not reuse the map-RMPA converter.</li>
+<li>Stress fixtures prove serializer robustness, not release-corpus runtime parity.</li>
+<li>Source-only 141/141 structural, semantic and deterministic closure does not establish in-game acceptance.</li>
+<li>Unknown local tuning values must not be invented merely to resemble one reference file.</li>
+</ul>
+<h2 id="evidence-status">Evidence status</h2>
+<p>The current retained standalone mission-RMPA authority is R1 source-only. Build/parse/semantic/determinism/target-profile gates pass across the 141-mission corpus, but representative runtime qualification is still required before claiming runtime parity.</p>
+<h2 id="binary-record-reference">Binary record reference</h2>
+<p>The retained source writer provides more than a generic format label: the studied EDF6 variant begins with <code>\0PMR</code> version 1, a <code>0x30</code>-byte big-endian header, independent route/shape/camera/spawn groups, <code>0x30</code>-byte waypoint records, and file-global waypoint.no numbering rebased from EDF5 route-group-local indices; MAPB placement count is not involved. There are mixed-endian secondary descriptors and the observed shared UTF-16BE string table with its two-byte zero anchor (no universal eight-byte route prefix). See <a href="missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">Mission RMPA binary records and global identities</a> for the concrete layout and its constraints.</p>
+<p>The converter's profile-specific binary details are not general proof that arbitrary EDF5 route bytes can be copied or that a mission RMPA and a map/weather RMPA share identical semantics.</p>
+<h2 id="reproducible-historical-141-mission-bvm-rmpa-pipeline">Reproducible historical 141-mission BVM + RMPA pipeline</h2>
+<p>A preserved <strong>source-only</strong> converter accepts a mission directory with the original EDF5 <code>MISSION.BVM</code> and <code>MISSION.RMPA</code>. It decompiles BVM to <code>MISSION.asm</code>, transpiles to EDF6-oriented <code>MISSION.AC</code> with the historical R44-era compiler, and separately writes the <strong>mission-specific</strong> EDF6 <code>MISSION.RMPA</code>. The converter checks target RMPA structure and source-semantic equivalence. The output is an AC, mission RMPA, optional source-derived object variants and a per-mission <code>PIPELINE_REPORT.json</code>; <strong>no EDF6 donor mission files are consulted</strong>.</p>
+<p>The original 27 August 2026 audit reported <strong>141/141</strong> shipping missions passing, <strong>141/141</strong> ACs byte-identical to the historical R43 candidate and <strong>141/141</strong> RMPAs identical to R1. A portable recovery on 4 September independently reproduced <strong>141/141</strong> per-mission historical outputs with <strong>zero canonical converter modifications</strong>. The historical checkpoint as a <em>whole</em> was not literally 100% byte-present: the recovery accepted one absent <strong>zero-byte</strong> <code>mission_util/__init__.py</code>; it was declared compatible, with <code>checkpoint_manifest_byte_exact=false</code>. Do not describe that as an entirely byte-exact recovered source tree.</p>
+<p>This is an exact <em>historical artifact reproduction</em> result, not a current-converter promotion or a 141-mission gameplay-runtime PASS. The preserved recovery code must not replace <code>/EDF5_EDF6_RESEARCH/converter/mission/mission_ac_engine.py</code>. The mission counts split across MissionPack03/04/05 are <strong>112 / 15 / 14</strong>. The only audited optional object specialization belongs to <code>DM006_2</code> and <code>cuscall0 3450</code>: one mission, <strong>three original EDF5 frog SGOs</strong> and <strong>four generated variants</strong>. It is important to distinguish that offline-specialization proof from the later <strong>playable compatibility choice to omit six search-radius calls</strong>, discussed in <a href="missions-%26-scripting-canonical-blocker-cuscall0-3450.html">SetAiSearchRadius 3450 compatibility policy</a>.</p>
+<p><strong>Exact retained evidence:</strong> <code>MISSION_SOURCE_ONLY_PIPELINE_R1_SHIPPING141_GATE_2026-08-27.json</code>; <code>MISSION_PIPELINE_R1_PORTABLE_EXACT_RECOVERY_GATE_2026-09-04.json</code>; <code>EDF5_EDF6_MISSION_SOURCE_ONLY_PIPELINE_R1_HANDOFF_2026-08-27.md</code>; <code>MISSION_PIPELINE_R1_RECOVERY_POINTER_2026-09-04.md</code>; <code>mission_source_only_pipeline.py</code>; <code>run_shipping141_gate_portable.py</code> in <code>/EDF5_EDF6_RESEARCH/research/active/MISSION_PIPELINE/</code>. Their reported runs were not independently re-executed as part of this wiki revision.</p>
+<h2 id="reference-port-differences-what-the-source-only-writer-must-not-copy">Reference-port differences: what the source-only writer must not copy</h2>
+<p>The paired target-reference corpus is <strong>not byte-identical to EDF5 source semantics everywhere</strong>, even though the converter can represent the source faithfully. Recorded exact matches versus the independently authored reference port:</p>
+<table>
+<thead>
+<tr>
+  <th>Semantic property</th>
+  <th style="text-align:right">Exact records</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Global waypoint number, GID, next-link topology and width</td>
+  <td style="text-align:right">5,103/5,103 each</td>
+  <td>Strong source-backed profile rules</td>
+</tr>
+<tr>
+  <td>Waypoint kind/name</td>
+  <td style="text-align:right">5,058/5,103</td>
+  <td>Some local reference-side zeroing</td>
+</tr>
+<tr>
+  <td>Waypoint position bits</td>
+  <td style="text-align:right">5,072/5,103</td>
+  <td>Local coordinate tuning exists</td>
+</tr>
+<tr>
+  <td>Shape type/GID</td>
+  <td style="text-align:right">1,355/1,355</td>
+  <td>Strong source-backed identity</td>
+</tr>
+<tr>
+  <td>Shape payload bytes</td>
+  <td style="text-align:right">1,349/1,355</td>
+  <td>Six local payload differences</td>
+</tr>
+<tr>
+  <td>Spawn GID</td>
+  <td style="text-align:right">3,386/3,387</td>
+  <td>One <code>DM018</code> reference-side player ID change</td>
+</tr>
+<tr>
+  <td>Spawn coordinate bits</td>
+  <td style="text-align:right">3,340/3,387</td>
+  <td>Local positional adjustments</td>
+</tr>
+</tbody>
+</table>
+<p>The reference port also contains <strong>21 additional empty route/shape/spawn groups</strong>; none is referenced by the compared R43 AC within the same RMPA namespace. That supports omitting these empty groups in the <em>source-only</em> profile, but <strong>does not prove the coordinate/payload changes are irrelevant at runtime</strong>. Source-preserved names and group membership should not be zeroed merely to reproduce an external reference editor's choices.</p>
+<h3 id="five-prepared-not-executed-runtime-discriminators">Five prepared, not executed, runtime discriminators</h3>
+<p>A source-owned qualification matrix covers <strong>M004</strong> (159 spawn records, 28 waypoints), <strong>M009</strong> (two target-only empty route groups), <strong>M015_3</strong> (542 waypoints and 27 shapes), <strong>M061</strong> (single missing reference shape metadata descriptor) and <strong>DM003_3</strong> (DLC mixed route/shape/spawn case). Its explicit status is <code>PREPARED_NOT_RUNTIME_TESTED</code>. Candidate packages and installation paths are not themselves evidence of successful gameplay; each probe should be isolated from others and restored after testing.</p>
+<p><strong>Sources:</strong> <code>MISSION_RMPA_SHIPPING141_REFERENCE_PAIR_AUDIT_2026-08-27.json</code>; <code>MISSION_RMPA_REFERENCE_TUNING_AC_DEPENDENCY_AUDIT_2026-08-27.json</code>; <code>MISSION_RMPA_R1_RUNTIME_QUALIFICATION_MATRIX_2026-08-27.json</code>.</p>
+
+<h2 id="native-edf6-edf5-old-script-is-a-pre-existing-target-side-rmpa-corpus">Native EDF6 <code>EDF5_OLD_SCRIPT</code> is a pre-existing target-side RMPA corpus</h2>
+<p>The source-vs-native inventory of the two original mission trees contains <strong>146</strong> <code>MISSION.RMPA</code> files in EDF5 and <strong>146</strong> in EDF6's <code>EDF5_OLD_SCRIPT</code>, with <strong>146/146 matching mission identifiers but 0/146 byte-identical files</strong>. It also contains <strong>44</strong> native <code>EDF5_NEW_SCRIPT</code> RMPAs: <strong>all 44/44 are byte-for-byte identical to their corresponding <code>EDF5_OLD_SCRIPT</code> RMPAs</strong>. In this sample, the OLD/NEW split changes script/AC identity, not a second mission-RMPA conversion. This result is about <strong>mission RMPA</strong>, and says nothing about the separate EDF5-versus-EDF6 BVM byte differences.</p>
+<p>Across the <strong>141 active shipping mission</strong> comparison, stock EDF6 OLD_SCRIPT retains the <strong>5,103 route waypoints, 1,355 shapes and 3,387 spawns</strong>, while adding empty target groups: route groups <strong>506→511</strong>, shape groups <strong>300→305</strong>, and spawn groups <strong>674→685</strong>. Five route groups, five shape groups, and eleven spawn groups were target-only empty groups; those empties are not extra enemy waves.</p>
+<p>The stock target files also include selective author-side tuning, rather than only repacking the source bytes:</p>
+<table>
+<thead>
+<tr>
+  <th>Measured source→stock target comparison</th>
+  <th style="text-align:right">Result in the 141-mission sample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Waypoint kind/name locally zeroed</td>
+  <td style="text-align:right">45 of 5,103</td>
+</tr>
+<tr>
+  <td>Waypoint position bit-different</td>
+  <td style="text-align:right">31; 26 have a nonzero numerical displacement</td>
+</tr>
+<tr>
+  <td>Shape payload edits</td>
+  <td style="text-align:right">6 of 1,355</td>
+</tr>
+<tr>
+  <td>Shape-name edits</td>
+  <td style="text-align:right">2 of 1,355</td>
+</tr>
+<tr>
+  <td>Spawn <code>p1</code> bit-different</td>
+  <td style="text-align:right">25; 22 numerically meaningful</td>
+</tr>
+<tr>
+  <td>Spawn <code>p2</code> bit-different</td>
+  <td style="text-align:right">21; 13 numerically meaningful</td>
+</tr>
+<tr>
+  <td>Spawn records with any nonzero positional adjustment</td>
+  <td style="text-align:right">34</td>
+</tr>
+<tr>
+  <td>Missions with meaningful route/spawn coordinate tuning</td>
+  <td style="text-align:right">46 of 141</td>
+</tr>
+</tbody>
+</table>
+<p>These numbers describe <strong>native target-side RMPA samples</strong>, not a universal algorithm or a requirement to modify every converted mission. A faithful <em>source-only</em> serializer built all 146 sampled RMPAs but matched <strong>0/146</strong> stock target files byte-for-byte (even though <strong>123/146</strong> matched target file length). Therefore <em>source semantics preserved</em> and <em>identical to Sandlot's existing target-side data</em> are different success conditions.</p>
+<p>The native stock RMPA provides a stronger target-layout and explicit target-tuning comparison than any speculative source-only default. If using native stock resources is legally/technically permitted in a local analysis, inspect their exact mission identity first; this is not permission to redistribute proprietary mission files or to blindly replace independently runtime-qualified compatibility exceptions. The known earlier <strong>138/141 current-versus-stock</strong> match was a <strong>dated release snapshot</strong>: it listed <code>DM001</code>, <code>DM018</code>, and <code>DM021</code>. Subsequent work corrected <code>DM018</code>; a later DLC-only <strong>27/29</strong> snapshot retains <code>DM001</code> and <code>DM021</code> as deliberate compatibility differences. Do not report the old DM018 discrepancy as an active defect.</p>
+<p><strong>Evidence and limits:</strong> native mission archive pair <code>MISSION_EDF5_NATIVE_FULL_2026-09-06.zip</code> and <code>MISSION_EDF6_NATIVE_FULL_2026-09-06.zip</code>; measured inventory and field deltas in <code>EDF5_EDF6_STOCK_OLD_NEW_RMPA_CENSUS_2026-09-06.json</code> and <code>EDF5_EDF6_STOCK_OLD_NEW_RMPA_AUDIT_2026-09-06.md</code>. This is a source/native binary comparison, not new 141-mission gameplay-runtime qualification.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/START_HERE_CURRENT.md</li><li>EDF5_EDF6_MISSION_RMPA_R1_SOURCE_ONLY_HANDOFF_2026-08-27.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/rmpa/EDF5_EDF6_STOCK_OLD_NEW_RMPA_AUDIT_2026-09-06.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/rmpa/EDF5_EDF6_STOCK_OLD_NEW_RMPA_CENSUS_2026-09-06.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/DLC1_DLC2_CURRENT_KNOWLEDGE_AUDIT_2026-09-21.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#observed-native-behavior">Observed native behavior</a><a href="#type-header-correction">　Type-header correction</a><a href="#implementation-rule">Implementation rule</a><a href="#known-exception">Known exception</a><a href="#do-not-assume">Do not assume</a><a href="#evidence-status">Evidence status</a><a href="#binary-record-reference">Binary record reference</a><a href="#reproducible-historical-141-mission-bvm-rmpa-pipeline">Reproducible historical 141-mission BVM + RMPA pipeline</a><a href="#reference-port-differences-what-the-source-only-writer-must-not-copy">Reference-port differences: what the source-only writer must not copy</a><a href="#five-prepared-not-executed-runtime-discriminators">　Five prepared, not executed, runtime discriminators</a><a href="#native-edf6-edf5-old-script-is-a-pre-existing-target-side-rmpa-corpus">Native EDF6 EDF5_OLD_SCRIPT is a pre-existing target-side RMPA corpus</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-mission-rmpa-source-only-profile"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 native TeamManager — seven stock teams, relation matrix and custom-faction limits A team number is not just a colour or HUD label The investigated EDF6 Tea"><title>EDF6 native TeamManager — seven stock teams, relation matrix and custom-faction limits | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 native TeamManager — seven stock teams, relation matrix and custom-faction limits</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Source-inherited exact-build native TeamManager RE; 16-team overlay is custom/unverified in current runtime</div><div id="articleBody"><h2 id="a-team-number-is-not-just-a-colour-or-hud-label">A team number is not just a colour or HUD label</h2>
+<p>The investigated EDF6 <code>TeamManager</code> stores both <strong>per-object team identity</strong> and a <strong>directional relation matrix</strong> describing how team <code>a</code> sees team <code>b</code>. The native manager in the cited binary uses <strong>seven rows, IDs 0–6</strong>, rather than dynamically discovering unlimited teams. Its constructor reserves each row, its relation vector and its all-teams iteration with fixed numeric assumptions.</p>
+<p>The source research labels the seven native roles in the examined profile:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Team</th>
+  <th>Studied engine role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Basic faction / unspecified player-facing side in the stock matrix</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Enemy</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>EDF/friendly</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Neutral</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td>Enemy-of-1-only role</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td>Empty vehicles / boarding availability</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td>Mission environment</td>
+</tr>
+</tbody>
+</table>
+<p>These numeric categories are <strong>specific native-team semantics from the studied game build</strong>. In particular, teams 5 and 6 are not spare numbers for arbitrary PvP factions: empty vehicles and environmental hazards/interaction paths rely on their stock relations.</p>
+<h2 id="the-relation-values">The relation values</h2>
+<p>A native relation is encoded as one byte in a row, with values:</p>
+<pre><code class="language-text">0 = neutral
+1 = friendly
+2 = enemy
+</code></pre>
+<p>The relation table has a team-to-itself <strong>friendly diagonal</strong>. In the examined stock matrix, enemy pairings include <code>0↔1</code>, <code>1↔2</code>, <code>1↔4</code>; <code>0↔2</code> is friendly; other unequal rows not expressly configured stay neutral. A runtime mod should not assume relation symmetry as a universal law merely because the recorded stock relationships were largely symmetric: the implementation stores <strong><code>relation[a][b]</code> and <code>relation[b][a]</code> separately</strong>.</p>
+<p>An object's current team field and its saved “last team” field have separate lifecycles. In the studied object ABI, <code>+0x314</code> holds current team, and <code>+0x318</code> retains last team. Closing an actor with <code>SetTeam(-1)</code> preserves the last-team information. The value <code>-1</code> is therefore a <strong>closing-state sentinel</strong> in the source research, not an available ninth or sixteenth faction ID.</p>
+<h2 id="why-extending-teams-needs-more-than-one-constant">Why extending teams needs more than one constant</h2>
+<p>The examined custom PvP adaptation expands capacity from <strong>7 to 16</strong>, allocating additional faction IDs <strong>7–15</strong>. That is a <strong>custom patch</strong>, not a native EDF6 capability. A legitimate extension must update every fixed-capacity consumer: row reserve, row creation/fill, nested relation-vector limits, and the all-teams enumeration bound. The source lists <strong>15 separate exact-build patch sites</strong> for those allocations and loops. Merely changing one capacity field leaves native iteration and relation arrays inconsistent and can cause memory errors.</p>
+<p>The game's mission-start and reload paths also <strong>restore stock relation matrices</strong>. The custom overlay is therefore re-applied after those resets, not just once at startup. The demonstrated policy keeps the stock rows/columns for teams <strong>5 and 6</strong>, including their relationships with any new factions, and validates the diagonal and every relation byte.</p>
+<h2 id="portability-and-risk">Portability and risk</h2>
+<p>The table, row stride (<code>0x38</code>) and fixed-capacity sites were reverse engineered for a <strong>single documented EDF6.dll build</strong>. Do not patch another executable at those offsets, assume the game supports 16 factions natively, or claim host/client PvP correctness based on a source patch. A robust implementation must retain exact-build signature checks, preserve original gameplay relations, and qualify damage, AI targeting, vehicle entry and network team synchronization in the actual game.</p>
+<p><strong>Source:</strong> <code>components/compatibility/src/team_native_logic.h</code> from EDF4.1 R10 HF4 R9 source research, with documented source-side native-TeamManager analysis. No new executable/runtime test was performed while writing this article.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/compatibility/src/team_native_logic.h</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#a-team-number-is-not-just-a-colour-or-hud-label">A team number is not just a colour or HUD label</a><a href="#the-relation-values">The relation values</a><a href="#why-extending-teams-needs-more-than-one-constant">Why extending teams needs more than one constant</a><a href="#portability-and-risk">Portability and risk</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf6-native-team-manager-relation-matrix-and-reset"};</script><script src="../assets/site.js" defer></script></body></html>

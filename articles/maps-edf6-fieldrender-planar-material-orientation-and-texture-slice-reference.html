@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 FieldRender planar-material projection: native ENKEIRIGHT reference Evidence: Exact IG_HEIGEN507_ENKEIRIGHT.FMB source material and orientation bytes, chec"><title>EDF6 FieldRender: native planar projections, texture slices and orientation records | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF6 FieldRender: native planar projections, texture slices and orientation records</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Technical reference · Exact retained native EDF6 ENKEIRIGHT FMB material/orientation bytes with read-only semantic round trip; offline comparison with explicitly non-native FIX3</div><div id="articleBody"><p><strong>Evidence:</strong> Exact <code>IG_HEIGEN507_ENKEIRIGHT.FMB</code> source material and orientation bytes, checked by semantic decode and byte-preserving reserialization. The comparison below uses an <strong>experimental, non-native</strong> <code>SS_ISLAND4_FMEP.FMB</code> record only to show which fields differ. It does not imply that the experimental record was authored by Sandlot.</p>
+<h2 id="native-material-0-is-a-pair-of-projections-not-one-universal-uv-scale">Native material 0 is a pair of projections, not one universal UV scale</h2>
+<p>The retained native ENKEIRIGHT material 0 has a bounded, directly observed record:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Native ENKEIRIGHT material 0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Paint mode</td>
+  <td><code>0</code> (planar profile in the studied schema)</td>
+</tr>
+<tr>
+  <td>Correction scalar</td>
+  <td><code>6.0</code></td>
+</tr>
+<tr>
+  <td>First projection-pair indices</td>
+  <td><code>(0, 1)</code></td>
+</tr>
+<tr>
+  <td>Color/base texture slice</td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Detail/multiplier texture slice</td>
+  <td><code>1</code></td>
+</tr>
+<tr>
+  <td>Normal texture slice</td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Two remaining projection pairs</td>
+  <td><code>(-1,-1)</code>, <code>(-1,-1)</code></td>
+</tr>
+<tr>
+  <td>Additional color/detail/normal slots</td>
+  <td><code>-1</code> (unused in the examined material record)</td>
+</tr>
+</tbody>
+</table>
+<p>The first projection pair refers to <strong>two different orientation records</strong>. The native orientation entries are:</p>
+<table>
+<thead>
+<tr>
+  <th>Orientation index</th>
+  <th>Euler XYZ degrees</th>
+  <th>Scale XYZ</th>
+  <th>UV offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code></td>
+  <td><code>(90, 0, 0)</code></td>
+  <td><code>(7, 7, 7)</code></td>
+  <td><code>(0, 0)</code></td>
+</tr>
+<tr>
+  <td><code>1</code></td>
+  <td><code>(90, 0, 0)</code></td>
+  <td><code>(100, 100, 100)</code></td>
+  <td><code>(0, 0)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Consequently a reconstruction that assumes one global orientation per material, or uses the same texture-array slice for base and detail by default, does <strong>not</strong> preserve this native ENKEIRIGHT record. That does not establish which orientation dominates a given output pixel: the complete shader sampling/compositing state still matters.</p>
+<h2 id="what-a-controlled-non-native-comparator-did-and-did-not-match">What a controlled non-native comparator did and did not match</h2>
+<p>A retained FIX3 comparison used a different material 0:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Native ENKEIRIGHT</th>
+  <th>Non-native FIX3 comparator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Planar mode</td>
+  <td><code>0</code></td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Correction scalar</td>
+  <td><code>6.0</code></td>
+  <td><code>6.0</code></td>
+</tr>
+<tr>
+  <td>First projection pair</td>
+  <td><code>(0,1)</code></td>
+  <td><code>(0,0)</code></td>
+</tr>
+<tr>
+  <td>Base slice</td>
+  <td><code>0</code></td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Detail slice</td>
+  <td><code>1</code></td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Normal slice</td>
+  <td><code>0</code></td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Orientation count for this binding</td>
+  <td>2</td>
+  <td>1</td>
+</tr>
+<tr>
+  <td>Orientation 0 Euler/scale</td>
+  <td><code>(90,0,0)</code> / <code>(7,7,7)</code></td>
+  <td><code>(0,0,0)</code> / <code>(20,20,20)</code></td>
+</tr>
+<tr>
+  <td>Orientation 1 Euler/scale</td>
+  <td><code>(90,0,0)</code> / <code>(100,100,100)</code></td>
+  <td>none</td>
+</tr>
+</tbody>
+</table>
+<p>This is a <strong>material projection/orientation difference</strong>, not a different shader name, paint-mode integer or base texture slice. R39 independently had native support for shader selector <code>0x0202</code> with config 4 in the selected FMB family; matching the shader selector alone is insufficient to match these material records.</p>
+<h2 id="round-trip-evidence-and-unknown-fields">Round-trip evidence and unknown fields</h2>
+<p>The exact R40 offline decode→re-encode audit reported <strong>3/3 byte-identical records</strong>: native material 0 and native orientations 0 and 1. It also retained a four-float auxiliary vector on material 0:</p>
+<pre><code class="language-text">(6.0, 0.5019609928131104, 0.5019609928131104, 0.0)
+</code></pre>
+<p>The <code>6.0</code> slot is the studied correction scalar. The downstream meaning of all auxiliary lanes is not fully proven from this isolated record; do not invent gamma, tint or alpha roles merely because two values resemble 128/255.</p>
+<p>The native FMB used in the audit was identified by SHA-256 <code>0027ed493827ccfcdc0906f5efb5714c00b68567400fe505f741df756074dd31</code>. This hash identifies <strong>one retained binary source</strong>, not all EDF6 versions/maps.</p>
+<h2 id="limits-on-interpretation">Limits on interpretation</h2>
+<ul>
+<li>Source bytes establish the field values and serialization identity. They do <strong>not</strong> prove the exact GPU coordinate formula for every FMB shader family.</li>
+<li>A mismatch with an experimental FMB identifies plausible discriminating variables; it does <strong>not</strong> prove the mismatch caused any black-terrain symptom.</li>
+<li>ENKEIRIGHT material 0 is <strong>one native exemplar</strong>. Other HEIGEN FMB leaves and directional variants use different tables and may require config-index remapping.</li>
+<li>Offline parity is not evidence of new EDF6 map rendering success.</li>
+</ul>
+<p><strong>Primary sources:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/R40_NATIVE_PLANAR_PROFILE_PREFLIGHT_2026-10-16/R40_NATIVE_PLANAR_PROFILE_PREFLIGHT_2026-10-16.json</code> and the matching R40 native-planar preflight report. See also <a href="edf6-fmb-leaf-mass-materialidlist-and-secondary-layer.html">native FMB leaf and material-slice semantics</a>, <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender texture-array and slot model</a>, and <a href="maps-%26-navigation-native-fmb-tree-config-variants-and-authoring-boundary.html">native FMB family/config variants</a>.</p>
+<p>The shader's more general <strong>Mode 2</strong> (three projections, including a row1-axis sign-dependent slot 1/2 selection) was established independently by controlled September R4 DXBC comparisons. This one native Mode-0 ENKEIRIGHT record does <strong>not</strong> constrain the complete shader to two modes. See <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender projection and reported G-buffer outputs</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: MAP_AUTHORING/R40_NATIVE_PLANAR_PROFILE_PREFLIGHT_2026-10-16.json</li><li>Library: MAP_AUTHORING/MAP_STUDIO_R40_PLANAR_PROFILE_PREFLIGHT_2026-10-16.md</li><li>Library: /EDF_FULL_KNOWLEDGE_WIKI/incoming/EDF6_FieldRender_Ground_Shader_2026-11-17_WIKI_INTAKE.md</li><li>Library: EDF6 R4/R6 FieldRender exact checkpoints (2026-09-17)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-material-0-is-a-pair-of-projections-not-one-universal-uv-scale">Native material 0 is a pair of projections, not one universal UV scale</a><a href="#what-a-controlled-non-native-comparator-did-and-did-not-match">What a controlled non-native comparator did and did not match</a><a href="#round-trip-evidence-and-unknown-fields">Round-trip evidence and unknown fields</a><a href="#limits-on-interpretation">Limits on interpretation</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-edf6-fieldrender-planar-material-orientation-and-texture-slice-reference"};</script><script src="../assets/site.js" defer></script></body></html>

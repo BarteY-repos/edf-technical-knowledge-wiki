@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 SK terrain–object contacts: original seven-map source census Scope: original EDF 4.1 source SHFB heightfields, static-object MAD triangles and MAPB plac"><title>EDF 4.1 seven SK maps: native terrain–object contact and boundary census | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Collision</div><h1>EDF 4.1 seven SK maps: native terrain–object contact and boundary census</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Seven-map original source-data geometry only (R24–R28), no installed NAV or gameplay</div><div id="articleBody"><p><strong>Scope:</strong> original EDF 4.1 source <code>SHFB</code> heightfields, static-object <code>MAD</code> triangles and <code>MAPB</code> placements across seven <code>SK_*</code> map families. These are <strong>offline observations about geometry and data relationships</strong>, not EDF6 pathfinding, vehicle physics, obstacle avoidance, or in-game collision acceptance. This page reconciles five adjacent source audits (R24–R28, 16 November 2026) rather than listing development steps.</p>
+<h2 id="the-game-data-relationship">The game-data relationship</h2>
+<p>These seven maps carry source height samples in <code>*_fld2mgrid.shfb</code>. Their placed objects and collision triangles are separate sources: the SHFB defines terrain elevation and its cell layout; <code>MAPB</code> establishes object instances/placements; <code>MAD</code> contains physics shape geometry. A meeting point between a terrain triangle and a placed-object triangle is a <strong>geometric contact candidate</strong>. It does <strong>not</strong> say which side of the contact an NPC can enter or whether a Havok pathfinding agent has a passable link.</p>
+<p>For the examined terrain triangulation, the FMB-style cell diagonal is <strong>A–B–D and A–D–C</strong>. Choosing the opposite diagonal changes contact geometry even when the four corner heights agree. This matters especially where roads, bridges or walls intersect slopes. Source actor positions in these reports use a candidate <code>Rz × Ry × Rx</code> placement transform; bit-exact parity with the original engine has <strong>not</strong> been demonstrated.</p>
+<h2 id="seven-map-census-sample-contacts-versus-expanded-placed-geometry">Seven-map census: sample contacts versus expanded placed geometry</h2>
+<p>The following table deliberately separates two different investigation scopes. <strong>R24/R25 inspected only 81 selected placements</strong> and reported edge/contact contours. <strong>R27 examined 1,770 matched placements</strong> of recognized static-mesh models in the same seven map families. R27 did not establish that <em>every obstacle shape, movable body, object or gameplay-affecting collider</em> was covered. Do not add sample counts to expanded counts as though they were disjoint bodies.</p>
+<table>
+<thead>
+<tr>
+  <th>Original map family</th>
+  <th style="text-align:right">R24 sampled instances</th>
+  <th style="text-align:right">R24 edge–terrain intersections</th>
+  <th style="text-align:right">R25 raw contact segments</th>
+  <th style="text-align:right">R27 matched placements</th>
+  <th style="text-align:right">R27 complete</th>
+  <th style="text-align:right">R27 placed triangles</th>
+  <th style="text-align:right">R27 unresolved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>SK_CRATER01</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">579</td>
+  <td style="text-align:right">748</td>
+  <td style="text-align:right">187</td>
+  <td style="text-align:right">185</td>
+  <td style="text-align:right">49,469</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>SK_HEIGEN02</code></td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">359</td>
+  <td style="text-align:right">379</td>
+  <td style="text-align:right">265</td>
+  <td style="text-align:right">265</td>
+  <td style="text-align:right">41,874</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>SK_KAIGAN01</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">1,111</td>
+  <td style="text-align:right">893</td>
+  <td style="text-align:right">182</td>
+  <td style="text-align:right">182</td>
+  <td style="text-align:right">114,220</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>SK_SANGAKU01</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">693</td>
+  <td style="text-align:right">813</td>
+  <td style="text-align:right">207</td>
+  <td style="text-align:right">207</td>
+  <td style="text-align:right">35,433</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>SK_SANGAKU02</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">827</td>
+  <td style="text-align:right">940</td>
+  <td style="text-align:right">311</td>
+  <td style="text-align:right">311</td>
+  <td style="text-align:right">105,184</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>SK_STEPMOUNTAIN01</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">828</td>
+  <td style="text-align:right">923</td>
+  <td style="text-align:right">199</td>
+  <td style="text-align:right">199</td>
+  <td style="text-align:right">48,975</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td><code>SK_VALLEY01</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">276</td>
+  <td style="text-align:right">324</td>
+  <td style="text-align:right">419</td>
+  <td style="text-align:right">417</td>
+  <td style="text-align:right">110,478</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>81</strong></td>
+  <td style="text-align:right"><strong>4,673</strong></td>
+  <td style="text-align:right"><strong>5,020</strong></td>
+  <td style="text-align:right"><strong>1,770</strong></td>
+  <td style="text-align:right"><strong>1,766</strong></td>
+  <td style="text-align:right"><strong>505,633</strong></td>
+  <td style="text-align:right"><strong>4</strong></td>
+</tr>
+</tbody>
+</table>
+<p>R24 tested <strong>28,956 unique sampled edges</strong>, excluding <strong>15,558 shared-triangle edge duplicates</strong> and detecting <strong>4,673 terrain intersections</strong> (none unresolved within its sampled edge scope). R25 tested <strong>14,838 source triangles</strong> against <strong>46,606 terrain facets</strong> and reconstructed <strong>5,020 raw intersection segments</strong>. Those segments yielded <strong>151 closed-loop candidates</strong> and <strong>787 open-chain candidates</strong>, with <strong>zero unresolved source triangles in that sample</strong>. Loops/chains are <strong>contour diagnostics, not navigation regions or edges</strong>.</p>
+<p>R27 recorded <strong>147,094 facet-intersection observations</strong> on <strong>505,633 transformed/placed triangles</strong>, plus <strong>146,989 unique segment observations in its per-instance diagnostic</strong>. These are not all the same thing as the 5,020 sampled R25 contours. Five of seven maps had complete classifications <strong>within the restricted recognized-static-mesh scope</strong>; the crater and valley maps still had boundary exceptions.</p>
+<h2 id="why-the-r26-and-r27-figures-differ">Why the R26 and R27 figures differ</h2>
+<p>The earlier R26 pass matched 1,770 placements but classified <strong>1,765 complete, one rejected and four unresolved</strong>; it processed <strong>502,895 placed triangles</strong>. A child/linked <code>MAPB</code> record for <code>sk_valleybridge1</code> lacked sufficient parentage qualification in that pass. R27 examined the original group relationships and retested the valley map: <strong>1,766 complete, zero rejected and four unresolved</strong>, now <strong>505,633</strong> placed triangles. R27 did <strong>not</strong> fix the remaining four geometry exceptions.</p>
+<p>The R27 group-list evidence across all <strong>16 inspected map families</strong> reported <strong>193 child references in 18 linked groups</strong>. This is a source-data hierarchy observation; a child record cannot safely be treated as a freestanding or nonexistent placement simply because a one-level traversal misses the link. These values describe references and groups, <strong>not a count of 193 distinct colliders</strong>.</p>
+<h2 id="four-source-domain-edge-cases-r28">Four source-domain edge cases (R28)</h2>
+<p>The remaining exceptions arise where source triangles and the finite SHFB terrain domain only partially overlap. R28 subdivided intersecting triangles, kept track of the domain edge and counted diagnostic seam segments. It analyzed <strong>6,040 source triangles</strong> in four affected source instances, producing <strong>10,179 welded contact segments</strong> and <strong>100 seam segments</strong>; one vertical/degenerate water-body case required <strong>293 adaptive splits</strong>. All four remained <strong>partly outside</strong> the source field domain.</p>
+<table>
+<thead>
+<tr>
+  <th>Map</th>
+  <th style="text-align:right">MAPB record</th>
+  <th>Native object</th>
+  <th style="text-align:right">Original triangles</th>
+  <th style="text-align:right">Boundary crossing</th>
+  <th style="text-align:right">Outside</th>
+  <th style="text-align:right">Seam segments</th>
+  <th style="text-align:right">Inside-area fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>SK_CRATER01</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>sk_craterroad01</code></td>
+  <td style="text-align:right">2,430</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">84.2%</td>
+</tr>
+<tr>
+  <td><code>SK_CRATER01</code></td>
+  <td style="text-align:right">2</td>
+  <td><code>sk_craterroad02</code></td>
+  <td style="text-align:right">2,394</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">92.7%</td>
+</tr>
+<tr>
+  <td><code>SK_VALLEY01</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>ig_valley01_water</code></td>
+  <td style="text-align:right">296</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">96.5%</td>
+</tr>
+<tr>
+  <td><code>SK_VALLEY01</code></td>
+  <td style="text-align:right">310</td>
+  <td><code>sk_valleyroad1</code></td>
+  <td style="text-align:right">920</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">95.7%</td>
+</tr>
+</tbody>
+</table>
+<p>The four rows are <em>source-body instances</em>, not four missing maps. In particular, <code>ig_valley01_water</code> should not be assumed to be a traversable floor merely because its geometry crosses the terrain domain. R28 classified <strong>five</strong> water-body triangle cases as vertical/degenerate domain overlaps, and its inside-domain fragment analysis reported no ambiguous facets. That does <strong>not</strong> prove that original EDF 4.1 or target EDF6 applies water, wall or road collision in the same way.</p>
+<h2 id="what-this-evidence-does-not-establish">What this evidence does <strong>not</strong> establish</h2>
+<ul>
+<li>No native EDF4.1 Havok narrow-phase contact outputs or EDF6 installed collision outcomes were collected in these passes.</li>
+<li>No high/low HKT navigation meshes were generated, installed or played through for these seven maps by this research.</li>
+<li>No agent-radius, step-height, walkable-slope, off-mesh connection or dynamic-actor policy was checked in game.</li>
+<li>The placed-body rotation is a source-backed candidate but not bit-exact certified against the original engine; the field-domain seams are not an entire-world completeness proof.</li>
+<li>These seven SK maps are <strong>not</strong> all sixteen original EDF4.1 map families; the other nine have different source geometry profiles.</li>
+<li>The 16-map R1D/HillyCity counts (4,971 footprints, etc.) concern <strong>a different navigation reconstruction</strong> and cannot be combined with this contact census.</li>
+<li>The later R29/R30 MissionBundle packaging/discovery work was <strong>offline source/runtime-code validation only</strong>, not gameplay. It does not promote these source geometric observations to game-proven collisions or fixed NPC pathfinding.</li>
+</ul>
+<h2 id="related-original-game-documentation">Related original-game documentation</h2>
+<ul>
+<li><a href="maps-%26-navigation-edf41-sk-heightfield-shfb-to-edf6-fmb-mad.html">SHFB terrain field and FMB/MAD generation rules</a></li>
+<li><a href="edf41-original-mad-static-geometry-16-map-3d-surface-survey.html">Original 16-family MAD 3D surface survey</a></li>
+<li><a href="maps-%26-navigation-edf-4-1-donor-nav-and-sk-collision-boundary.html">Donor-NAV mismatch and target collision boundaries</a></li>
+<li><a href="maps-%26-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure.html">Source MAPB/MAPO object hierarchy and placement data</a></li>
+<li><a href="docs-edf41-nav-current.html">EDF 4.1 navigation entry point</a></li>
+</ul>
+<h2 id="source-provenance-and-preservation">Source provenance and preservation</h2>
+<p>The five <strong>unaltered</strong> source summary JSONs are included under <code>reference/r150-source-evidence/</code> in this release. Corresponding Library source folders are the original <code>CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R24_…</code> through <code>R28_…</code> trees; exact paths and SHA-256 are recorded in <code>R150_SOURCE_CENSUS_AUDIT.json</code>. The full original expanded source data (including the multi-megabyte R26 census) remain in their Library source folders and were <strong>not</strong> replicated as copyrighted game asset payloads in this public wiki.</p>
+<p>The two accompanying reader datasets are <code>data/EDF41_R150_SEVEN_SK_MAP_CONTACT_SURVEY.csv</code> and <code>data/EDF41_R150_FOUR_BOUNDARY_BODY_CASES.csv</code>. Each uses an explicit source-pass prefix to prevent mixing incomparable metrics. <strong>Evidence grade:</strong> original EDF4.1 asset geometry as parsed in a bounded offline analysis; no runtime navigation or gameplay qualification.</p>
+<h2 id="what-the-later-4-m-nav-source-grid-study-adds">What the later 4 m NAV source-grid study adds</h2>
+<p>A distinct source experiment has now used the same seven SHFB heightfields for an exact 4 m <strong>terrain grid layout</strong> and small structural HKT/NVMD samples: <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">native terrain and navigation file evidence</a>. The <strong>four <code>sk_rockm01</code> candidate cells</strong> from <code>SK_HEIGEN02</code> are a contact/geometry proposal only; they were not promoted into a blocking mask. The earlier 1,770-placement contact census remains unchanged and must not be added to those new terrain cells as if they were the same unit of analysis.</p>
+<h2 id="later-bounded-3d-refinement-only-sk-heigen02-not-all-seven-sk-maps">Later bounded 3D refinement — only <code>SK_HEIGEN02</code>, not all seven SK maps</h2>
+<p>A separate <strong>265/265 recognized static-MAD/MAPB placement</strong> survey for <code>SK_HEIGEN02</code> probes whether an upright hypothetical agent capsule approaches source object surfaces. Its three test profiles (all <strong>1.8 m high</strong>) give:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Illustrative capsule radius</th>
+  <th style="text-align:right">Distinct closed-solid candidate cells</th>
+  <th style="text-align:right">Distinct open-mesh hint cells</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0.25 m</td>
+  <td style="text-align:right">204</td>
+  <td style="text-align:right">455</td>
+</tr>
+<tr>
+  <td style="text-align:right">0.45 m</td>
+  <td style="text-align:right">243</td>
+  <td style="text-align:right">495</td>
+</tr>
+<tr>
+  <td style="text-align:right">0.65 m</td>
+  <td style="text-align:right">277</td>
+  <td style="text-align:right">522</td>
+</tr>
+</tbody>
+</table>
+<p>The <em>closed</em> label requires a welded 2-manifold/orientation check, not just a model name or the existence of a MAD shape. Source terrain is an FMB triangular height surface; a roof/road/river/open object cannot be assigned obstacle or floor status from a single proximity test. The earlier 1,770 placement count in the <strong>seven-SK-map contact</strong> survey is a different corpus and different predicate. <strong>Do not add or equate these denominators.</strong> The 243 cells belong to exactly one original source map and one illustrative agent profile.</p>
+<p>In the limited raw sample rows/columns <code>(272,304,496,528)</code>, the diagnostic original-terrain <strong>4-tile</strong> LOW and HIGH sample had <strong>512 triangles</strong> each. Excluding four unreviewed closed-solid candidate cells yielded <strong>504 triangles</strong> each; all <strong>four</strong> intertile seams remained, <strong>three open-only hint cells were retained</strong>, HKT changed and NVMD stayed identical. This is not a verified walkability policy, not a native EDF4.1 original NAV, and <strong>not an installable EDF6 mission/map fix</strong>.</p>
+<p><strong>Evidence:</strong> original EDF4.1 <code>SK_HEIGEN02</code> MAPB/MAD/SHFB source corpus, bounded R34/R35 contact/capsule diagnostic reports and <code>R35_OFFLINE_QUALIFICATION.json</code> (source-only; <code>runtime_tested=false</code>). The small-contact and full-map contact reports are provided as derived numeric CSVs, not proprietary asset payloads.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R24_FMB_SURFACE_CONTACTS/R24_TERRAIN_CONTACTS_SUMMARY_7_MAPS.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R25_FMB_CONTACT_CONTOURS/R25_REAL_7_MAP_CONTACT_CONTOUR_SUMMARY.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R26_COMPLETE_STATIC_CONTACTS/R26_REAL_7_SK_FULL_PLACED_CONTACT_SUMMARY.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R27_MAPB_LINK_BOUNDARY/R27_STATIC_CONTACT_COVERAGE_RECONCILED.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R28_DOMAIN_ADAPTIVE_CONTACTS/R28_REAL_FOUR_BOUNDARY_SUMMARY.json</li><li>Original EDF41 R31/R32 SHFB 4m grid and bounded HKT/NVMD source evidence, 2026-11-16</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_NAV_INTEGRATION_DECISIONS.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_AGENT_CAPSULE_ALL_265.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_CAPSULE_R025.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_CAPSULE_R065.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_BAKE_COMPARE.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_OFFLINE_QUALIFICATION.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-game-data-relationship">The game-data relationship</a><a href="#seven-map-census-sample-contacts-versus-expanded-placed-geometry">Seven-map census: sample contacts versus expanded placed geometry</a><a href="#why-the-r26-and-r27-figures-differ">Why the R26 and R27 figures differ</a><a href="#four-source-domain-edge-cases-r28">Four source-domain edge cases (R28)</a><a href="#what-this-evidence-does-not-establish">What this evidence does not establish</a><a href="#related-original-game-documentation">Related original-game documentation</a><a href="#source-provenance-and-preservation">Source provenance and preservation</a><a href="#what-the-later-4-m-nav-source-grid-study-adds">What the later 4 m NAV source-grid study adds</a><a href="#later-bounded-3d-refinement-only-sk-heigen02-not-all-seven-sk-maps">Later bounded 3D refinement — only SK_HEIGEN02, not all seven SK maps</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28"};</script><script src="../assets/site.js" defer></script></body></html>

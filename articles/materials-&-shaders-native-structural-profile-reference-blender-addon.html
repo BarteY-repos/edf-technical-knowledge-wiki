@@ -1,0 +1,1872 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Native MDB material profiles: parameter and sampler tables Native structural profile reference This reference lists observed native MDB structural profiles. Cou"><title>EDF6 MDB native structural profiles: parameter, sampler and vertex ABI tables | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF6 MDB native structural profiles: parameter, sampler and vertex ABI tables</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><h1>Native structural profile reference</h1>
+<p>This reference lists <strong>observed native MDB structural profiles</strong>. Counts and field lists refer to the stated model corpora, not an exhaustive catalog of all EDF6 assets.</p>
+<p>Parameter triples are shown as <code>name — type / size</code>. In the audited data, common scalar/vector encodings are <code>0/1</code> (float-like scalar), <code>1/2</code> (float2-like), <code>2/3</code> (float3-like), <code>2/4</code> or <code>3/4</code> for four-component legacy/color cases, and selected <code>4/1</code> fields are raw-u32 integer/boolean-like scalars. Do not infer universal type semantics beyond observed fields without more corpus evidence.</p>
+<h2 id="common-brdf-families">Common BRDF families</h2>
+<table>
+<thead>
+<tr>
+  <th>Shader</th>
+  <th style="text-align:right">Observed count</th>
+  <th>Parameter order</th>
+  <th>Samplers</th>
+  <th style="text-align:right">Known stride</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_Common</code></td>
+  <td style="text-align:right">101 (HEIGEN + Europe)</td>
+  <td><code>diffuse 2/3</code>, <code>metallic 0/1</code>, <code>normal_amount 0/1</code>, <code>roughness 0/1</code>, <code>specular_color 2/3</code>, <code>specular_diffuse_blend 0/1</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td style="text-align:right">—</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Common_Clip</code></td>
+  <td style="text-align:right">44</td>
+  <td><code>alpha_clip 0/1</code>, then Common fields</td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td style="text-align:right">60 B</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Common_Light</code></td>
+  <td style="text-align:right">5</td>
+  <td><code>diffuse 2/3</code>, <code>light_color 2/3</code>, <code>metallic 0/1</code>, <code>normal_amount 0/1</code>, <code>roughness 0/1</code>, <code>specular_color 2/3</code>, <code>specular_diffuse_blend 0/1</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_light_hr</code></td>
+  <td style="text-align:right">60 B</td>
+</tr>
+</tbody>
+</table>
+<p><code>snd_BRDF_Map_Common</code> was the strongest native-map-qualified R/M baseline in the observed native set; its authored Standard PBR path was later runtime-qualified. The exact native stride is deliberately left blank here because the summary used for this reference does not establish one universal declaration for all Common occurrences.</p>
+<h2 id="glass-window">Glass / Window</h2>
+<p>Native material occurrences: <strong>57</strong>; models: <strong>46</strong>; structural ABI profiles: <strong>8</strong>.</p>
+<h3 id="profile-1-snd-brdf-map-build-window-26-occurrence-s">Profile 1: <code>snd_BRDF_Map_Build_Window</code> — 26 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior_wrap_count</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>window_normal_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>window_normal_uv_scale</code> — type <code>1</code>, size <code>2</code></li>
+<li>samplers, in native order:</li>
+<li><code>interior_texture</code></li>
+<li><code>normal</code></li>
+<li><code>param_r_m_xxx_hr</code></li>
+<li><code>window_frame_texture</code></li>
+<li><code>window_normal</code></li>
+<li>mesh signature 1: stride <strong>68 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-2-snd-map-build-window-23-occurrence-s">Profile 2: <code>snd_Map_Build_Window</code> — 23 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_uv_scale</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>window_frame_texture</code></li>
+<li><code>interior_texture</code></li>
+<li><code>normal</code></li>
+<li><code>window_normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>68 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-3-snd-map-build-window-2-occurrence-s">Profile 3: <code>snd_Map_Build_Window</code> — 2 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_uv_scale</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>window_frame_texture</code></li>
+<li><code>interior_texture</code></li>
+<li><code>normal</code></li>
+<li><code>window_normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>84 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">80</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-4-snd-map-build-window-2-occurrence-s">Profile 4: <code>snd_Map_Build_Window</code> — 2 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_uv_scale</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>window_frame_texture</code></li>
+<li><code>interior_texture</code></li>
+<li><code>normal</code></li>
+<li><code>window_normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh declaration: no distinct mesh signature is established for this structural row (do not invent one).</li>
+</ul>
+<h3 id="profile-5-snd-map-object-glass-1-occurrence-s">Profile 5: <code>snd_Map_Object_Glass</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>10</code>; layer: <code>2</code>; flags: <code>2</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>3</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>60 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-6-snd-map-build-window-1-occurrence-s">Profile 6: <code>snd_Map_Build_Window</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>window_normal_uv_scale</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>window_frame_texture</code></li>
+<li><code>interior_texture</code></li>
+<li><code>normal</code></li>
+<li><code>window_normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>68 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-7-snd-map-object-glass-1-occurrence-s">Profile 7: <code>snd_Map_Object_Glass</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>1</code>; layer: <code>2</code>; flags: <code>2</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>3</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>60 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-8-snd-map-object-glass-1-occurrence-s">Profile 8: <code>snd_Map_Object_Glass</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>10</code>; layer: <code>2</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>3</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>translucent_fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>60 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parallax">Parallax</h2>
+<p>Native material occurrences: <strong>14</strong>; models: <strong>12</strong>; structural ABI profiles: <strong>3</strong>.</p>
+<h3 id="profile-1-snd-brdf-map-build-para-nc-9-occurrence-s">Profile 1: <code>snd_BRDF_Map_Build_Para_NC</code> — 9 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_material_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>parallax_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>parallax_dent</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>param_r_m_h</code></li>
+<li><code>param_occlusion</code></li>
+<li><code>dirt</code></li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li>mesh signature 1: stride <strong>76 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">72</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-2-snd-map-build-basic-parallax-nc-3-occurrence-s">Profile 2: <code>snd_Map_Build_Basic_Parallax_NC</code> — 3 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>parallax_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>parallax_dent</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>dirt</code></li>
+<li><code>param_reflect_XXX_height_spec</code></li>
+<li><code>param_occlusion</code></li>
+<li>mesh signature 1: stride <strong>76 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">72</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-3-snd-map-field-parallax-2-occurrence-s">Profile 3: <code>snd_Map_Field_Parallax</code> — 2 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>parallax_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>parallax_dent</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>dirt</code></li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>param_XXX_height_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>72 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">44</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">52</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">68</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dirtscroll">DirtScroll</h2>
+<p>Native material occurrences: <strong>9</strong>; models: <strong>6</strong>; structural ABI profiles: <strong>3</strong>.</p>
+<h3 id="profile-1-snd-brdf-map-build-dirtscroll-7-occurrence-s">Profile 1: <code>snd_BRDF_Map_Build_DirtScroll</code> — 7 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>change_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_material_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>param_occlusion</code></li>
+<li><code>dirt</code></li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>param_r_m_cm0_hr</code></li>
+<li>mesh signature 1: stride <strong>76 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">72</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-2-snd-map-build-dirtscroll-1-occurrence-s">Profile 2: <code>snd_Map_Build_DirtScroll</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>change_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>dirt</code></li>
+<li><code>param_reflect_cm0_spec_hspec</code></li>
+<li><code>param_occlusion</code></li>
+<li>mesh signature 1: stride <strong>76 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">72</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-3-snd-map-build-dirtscroll-1-occurrence-s">Profile 3: <code>snd_Map_Build_DirtScroll</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>change_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>fall_off_offset</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>dirt_adjust</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li><code>dirt</code></li>
+<li><code>param_reflect_cm0_spec_hspec</code></li>
+<li><code>param_occlusion</code></li>
+<li>mesh declaration: no distinct mesh signature is established for this structural row (do not invent one).</li>
+</ul>
+<h2 id="signboard">Signboard</h2>
+<p>Native material occurrences: <strong>1</strong>; models: <strong>1</strong>; structural ABI profiles: <strong>1</strong>.</p>
+<h3 id="profile-1-snd-brdf-map-signboard-pattern-1-occurrence-s">Profile 1: <code>snd_BRDF_Map_Signboard_Pattern</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>animation_speed</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>image_split</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>interior_random_seed</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>light_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>pattern_x_dir</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>pattern_y_dir</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>scroll_curve</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>scroll_step</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>scroll_time</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>switch_interval</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>switch_time</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>switching_mask_split</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>use_scroll</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li><code>use_scroll_time</code> — type <code>4</code>, size <code>1</code> <strong>raw-u32 audited field</strong></li>
+<li>samplers, in native order:</li>
+<li><code>switching_mask</code></li>
+<li><code>param_r_m_occ_light</code></li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li>mesh signature 1: stride <strong>68 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lod-farmap">LOD / FarMap</h2>
+<p>Native material occurrences: <strong>35</strong>; models: <strong>32</strong>; structural ABI profiles: <strong>7</strong>.</p>
+<h3 id="profile-1-snd-map-lod-cc-14-occurrence-s">Profile 1: <code>snd_Map_LOD_CC</code> — 14 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>change_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_reflect_cm0_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>44 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-2-snd-brdf-map-lod-cc-11-occurrence-s">Profile 2: <code>snd_BRDF_Map_LOD_CC</code> — 11 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>change_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_r_m_cm0_hr</code></li>
+<li>mesh signature 1: stride <strong>44 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-3-snd-brdf-map-lod-4-occurrence-s">Profile 3: <code>snd_BRDF_Map_LOD</code> — 4 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_diffuse_blend</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_r_m_xxx_hr</code></li>
+<li>mesh signature 1: stride <strong>44 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-4-snd-farmap-simple-3-occurrence-s">Profile 4: <code>snd_FarMap_Simple</code> — 3 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>normal_amount</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>normal</code></li>
+<li>mesh signature 1: stride <strong>64 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">44</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-5-snd-map-lod-noenv-1-occurrence-s">Profile 5: <code>snd_Map_LOD_NoEnv</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_XXX_XXX_spec_XXX</code></li>
+<li>mesh signature 1: stride <strong>44 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-6-snd-map-lod-cc-1-occurrence-s">Profile 6: <code>snd_Map_LOD_CC</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>change_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_reflect_cm0_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>52 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="profile-7-snd-map-lod-1-occurrence-s">Profile 7: <code>snd_Map_LOD</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>0</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>diffuse</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>specular_pow</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>4</code></li>
+<li><code>light_smooth</code> — type <code>0</code>, size <code>1</code></li>
+<li>samplers, in native order:</li>
+<li><code>albedo</code></li>
+<li><code>param_reflect_XXX_spec_hspec</code></li>
+<li>mesh signature 1: stride <strong>44 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="water">Water</h2>
+<p>Native material occurrences: <strong>1</strong>; models: <strong>1</strong>; structural ABI profiles: <strong>1</strong>.</p>
+<h3 id="profile-1-snd-brdf-map-water-1-occurrence-s">Profile 1: <code>snd_BRDF_Map_Water</code> — 1 occurrence(s)</h3>
+<ul>
+<li>priority: <code>0</code>; layer: <code>2</code>; flags: <code>3</code></li>
+<li>parameters, in native order:</li>
+<li><code>all_scroll_angle</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>all_scroll_speed</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>all_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>blend_curve</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>blend_depth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>bubble1_scroll_speed</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>bubble1_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>bubble2_scroll_speed</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>bubble2_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>bubble_curve</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>bubble_depth</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>bubble_diffuse</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>metallic</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>near_fade</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal1_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal1_scroll_speed</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>normal1_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal2_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal2_scroll_speed</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>normal2_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal3_amount</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>normal3_scroll_speed</code> — type <code>1</code>, size <code>2</code></li>
+<li><code>normal3_uv_scale</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>roughness</code> — type <code>0</code>, size <code>1</code></li>
+<li><code>specular_color</code> — type <code>2</code>, size <code>3</code></li>
+<li><code>water_color</code> — type <code>2</code>, size <code>3</code></li>
+<li>samplers, in native order:</li>
+<li><code>bubble_albedo</code></li>
+<li><code>normal_map1</code></li>
+<li><code>normal_map2</code></li>
+<li><code>normal_map3</code></li>
+<li>mesh signature 1: stride <strong>60 bytes</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+  <th>Semantic</th>
+  <th style="text-align:right">Format code</th>
+  <th style="text-align:right">Byte offset</th>
+  <th style="text-align:right">Channel</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>BINORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TANGENT</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>NORMAL</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>POSITION</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>TEXCOORD</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td><code>BLENDWEIGHT</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">40</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+</tr>
+<tr>
+  <td><code>BLENDINDICES</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="interpreting-these-records">Interpreting these records</h2>
+<ul>
+<li>Every profile represents <strong>an observed serialized instance family</strong>, including the order of material fields and sampler slots, not just reflected shader inputs.</li>
+<li>Unknown shaders and material variations are not ruled out by absence from this bounded corpus.</li>
+<li>Structural identity alone does not prove byte-for-byte runtime acceptance or pixel parity; specialized profiles still require family-specific game-render validation.</li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13.zip::EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13/09_NATIVE_PROFILE_REFERENCE.md</li><li>/EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13.zip::EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13/10_NATIVE_PROFILE_REFERENCE.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#common-brdf-families">Common BRDF families</a><a href="#glass-window">Glass / Window</a><a href="#profile-1-snd-brdf-map-build-window-26-occurrence-s">　Profile 1: snd_BRDF_Map_Build_Window — 26 occurrence(s)</a><a href="#profile-2-snd-map-build-window-23-occurrence-s">　Profile 2: snd_Map_Build_Window — 23 occurrence(s)</a><a href="#profile-3-snd-map-build-window-2-occurrence-s">　Profile 3: snd_Map_Build_Window — 2 occurrence(s)</a><a href="#profile-4-snd-map-build-window-2-occurrence-s">　Profile 4: snd_Map_Build_Window — 2 occurrence(s)</a><a href="#profile-5-snd-map-object-glass-1-occurrence-s">　Profile 5: snd_Map_Object_Glass — 1 occurrence(s)</a><a href="#profile-6-snd-map-build-window-1-occurrence-s">　Profile 6: snd_Map_Build_Window — 1 occurrence(s)</a><a href="#profile-7-snd-map-object-glass-1-occurrence-s">　Profile 7: snd_Map_Object_Glass — 1 occurrence(s)</a><a href="#profile-8-snd-map-object-glass-1-occurrence-s">　Profile 8: snd_Map_Object_Glass — 1 occurrence(s)</a><a href="#parallax">Parallax</a><a href="#profile-1-snd-brdf-map-build-para-nc-9-occurrence-s">　Profile 1: snd_BRDF_Map_Build_Para_NC — 9 occurrence(s)</a><a href="#profile-2-snd-map-build-basic-parallax-nc-3-occurrence-s">　Profile 2: snd_Map_Build_Basic_Parallax_NC — 3 occurrence(s)</a><a href="#profile-3-snd-map-field-parallax-2-occurrence-s">　Profile 3: snd_Map_Field_Parallax — 2 occurrence(s)</a><a href="#dirtscroll">DirtScroll</a><a href="#profile-1-snd-brdf-map-build-dirtscroll-7-occurrence-s">　Profile 1: snd_BRDF_Map_Build_DirtScroll — 7 occurrence(s)</a><a href="#profile-2-snd-map-build-dirtscroll-1-occurrence-s">　Profile 2: snd_Map_Build_DirtScroll — 1 occurrence(s)</a><a href="#profile-3-snd-map-build-dirtscroll-1-occurrence-s">　Profile 3: snd_Map_Build_DirtScroll — 1 occurrence(s)</a><a href="#signboard">Signboard</a><a href="#profile-1-snd-brdf-map-signboard-pattern-1-occurrence-s">　Profile 1: snd_BRDF_Map_Signboard_Pattern — 1 occurrence(s)</a><a href="#lod-farmap">LOD / FarMap</a><a href="#profile-1-snd-map-lod-cc-14-occurrence-s">　Profile 1: snd_Map_LOD_CC — 14 occurrence(s)</a><a href="#profile-2-snd-brdf-map-lod-cc-11-occurrence-s">　Profile 2: snd_BRDF_Map_LOD_CC — 11 occurrence(s)</a><a href="#profile-3-snd-brdf-map-lod-4-occurrence-s">　Profile 3: snd_BRDF_Map_LOD — 4 occurrence(s)</a><a href="#profile-4-snd-farmap-simple-3-occurrence-s">　Profile 4: snd_FarMap_Simple — 3 occurrence(s)</a><a href="#profile-5-snd-map-lod-noenv-1-occurrence-s">　Profile 5: snd_Map_LOD_NoEnv — 1 occurrence(s)</a><a href="#profile-6-snd-map-lod-cc-1-occurrence-s">　Profile 6: snd_Map_LOD_CC — 1 occurrence(s)</a><a href="#profile-7-snd-map-lod-1-occurrence-s">　Profile 7: snd_Map_LOD — 1 occurrence(s)</a><a href="#water">Water</a><a href="#profile-1-snd-brdf-map-water-1-occurrence-s">　Profile 1: snd_BRDF_Map_Water — 1 occurrence(s)</a><a href="#interpreting-these-records">Interpreting these records</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-native-structural-profile-reference-blender-addon"};</script><script src="../assets/site.js" defer></script></body></html>

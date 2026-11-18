@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 UfoMother301 mothership: separate parts, generator hatches and phases The classic EDF4.1 mothership UfoMother301 is not one static mesh with a single mon"><title>EDF4.1 UfoMother301 mothership: separate parts, generator hatches and phases | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Bosses and objects</div><h1>EDF4.1 UfoMother301 mothership: separate parts, generator hatches and phases</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Game technical references</span><span class="chip">Bosses and objects</span></div><div class="referencebadge">Technical reference · Attribution and grade per source fact; this edition adds no game runtime test</div><div id="articleBody"><p>The classic EDF4.1 mothership <code>UfoMother301</code> is not one static mesh with a single monolithic weapon script. Native research identifies a <strong>hull</strong>, a shared parts base and separate <strong>hatch, panel, cannon and BigCannon classes</strong>, all derived from <code>GameObjectBase</code>. Each part is a game object with its own durability, state machine and, where applicable, scripted handle.</p>
+<h2 id="hierarchy-and-source-data">Hierarchy and source data</h2>
+<p>The hull's <code>UfoMother301.sgo</code> references the body MRAB/MDB, a CAS animation, a ragdoll SHKT, damage data, effects and named groups of child SGOs. The observed assembly includes:</p>
+<table>
+<thead>
+<tr>
+  <th>Part group</th>
+  <th style="text-align:right">Source inventory</th>
+  <th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>mp_BigCannon</code></td>
+  <td style="text-align:right">1</td>
+  <td>Primary heavy gun</td>
+</tr>
+<tr>
+  <td><code>mp_Cannon</code></td>
+  <td style="text-align:right">10</td>
+  <td>Secondary gun array</td>
+</tr>
+<tr>
+  <td><code>mp_Panel</code></td>
+  <td style="text-align:right">125, arranged in four groups</td>
+  <td>Shield/armor-panel ring with weapons</td>
+</tr>
+<tr>
+  <td><code>mp_HatchLow</code></td>
+  <td style="text-align:right">4</td>
+  <td>Enemy-generating hatches</td>
+</tr>
+<tr>
+  <td><code>mp_HatchMiddle</code></td>
+  <td style="text-align:right">4 covers</td>
+  <td>Covers sharing the hatch part class</td>
+</tr>
+</tbody>
+</table>
+<p>Part placements use an <strong>SGO-relative Euler rotation plus offset</strong> against the parent <code>waist</code> node. The independent parts lists permit an <code>ObjectAction</code> command to enable, disable or trigger attacks by type without respawning the whole hull. <code>GetPartsObject</code> (mission native 3300) returns a handle to a named main-gun or medium-gun part; it is therefore wrong to model every gun as decorative geometry only.</p>
+<h2 id="state-machines-and-timed-changes">State machines and timed changes</h2>
+<p>Part state updates receive a phase <strong>0 enter, 1 update, 2 exit</strong> and track elapsed time/frames. The source notes distinguish <code>dt</code> in seconds from 60-Hz update-frame counters. Selected sounds are throttled via shared hull counters (approximately 16-frame windows), preventing every panel from playing the same cue on one frame.</p>
+<p>The main <strong>BigCannon</strong> has closed, opening, ready, charging, firing and closing states. Its ordinary direct bullet uses <code>LaserBullet02</code>, with special parameters on every <strong>eighth shot</strong>; the source's recorded direct base damage is <strong>5000</strong>, not a generic value scaled with the mission-level factor. The ten medium cannon objects have a separate rocket/beam cycle and projectiles. Panels are a third family with type-specific laser or plasma fire.</p>
+<p><code>mp_HatchLow</code> is not simply an SGO name for a spawn position. Each real hatch owns an <strong>ObjectGenerator</strong>, and mission messages can configure its resident or one-shot waves. A named MAB locator (<code>発生位置</code>) supplies its actual spawn transform. Enemy creation is under host control in the analyzed network path.</p>
+<h2 id="the-hull-s-exposed-weak-point-and-fall">The hull's exposed weak point and fall</h2>
+<p>The hull has a state machine separate from its parts. Following the opening and loss of the main gun, its weak section can be exposed, then <strong>hide after a delay</strong> and reopen. The source finds a <strong>540-frame</strong> hit-related countdown before a hide and a <strong>30-second</strong> hidden interval in a particular state sequence. These are state-specific timers, not a promise that every scripted mission shows the same choreography.</p>
+<p>On hull death, the code changes glow, stops attacks and produces staged explosions before a falling phase with Havok ground probing. The death choreography can extend well beyond the instant the durability reaches zero.</p>
+<p><strong>Evidence boundary:</strong> This is static analysis of EDF4.1 native code and source SGO/mission data, not a new boss fight. Exact native addresses such as <code>0x24ECE0</code> (hull constructor) and <code>0x250870</code> (hull messages) are tied to the studied EDF4.1 build. Some mission-specific behavior depends on <code>ObjectAction</code>, object durability events and difficulty/level multipliers.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf41-motherships</code>, original facts <code>ufomother301-classes</code>, <code>ufomother301-sgo-parts</code>, <code>ufomother301-state-rng-sound</code>, <code>ufomother301-hatch-generator</code>, <code>ufomother301-hull-states-death</code>, with original community credit retained in the source appendix. See <a href="edf41-earth-eater-panel-base-turret-locators-and-generator-phases.html">Earth Eater's different component model</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14: original EDF4.1/EDF5/EDF6 binary/SGO data and attributed contributor analyses; build-specific findings</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#hierarchy-and-source-data">Hierarchy and source data</a><a href="#state-machines-and-timed-changes">State machines and timed changes</a><a href="#the-hull-s-exposed-weak-point-and-fall">The hull&#39;s exposed weak point and fall</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-ufomother301-part-objects-main-gun-hatches-and-hull-phases"};</script><script src="../assets/site.js" defer></script></body></html>

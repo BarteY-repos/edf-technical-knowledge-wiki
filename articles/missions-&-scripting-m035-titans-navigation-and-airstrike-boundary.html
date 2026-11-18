@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="M035 / displayed Mission 41 — Titans navigation and airstrike boundary M035 contains two distinct problems that must not be merged into one status: the airstrik"><title>M035 / displayed Mission 41 — Titans navigation and airstrike boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>M035 / displayed Mission 41 — Titans navigation and airstrike boundary</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Navigation</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Progression runtime-positive; navigation still open; R157 original runtime report cross-check (source file)</div><div id="articleBody"><p>M035 contains two distinct problems that must not be merged into one status:</p>
+<ol>
+<li>the airstrike/progression counter defect was repaired and runtime-positive;</li>
+<li>Titan physical navigation through target geometry remains <strong>not fully runtime-closed</strong>.</li>
+</ol>
+<h2 id="airstrike-progression-repair-runtime-positive">Airstrike/progression repair — runtime-positive</h2>
+<p>The source-faithful counter root cause was:</p>
+<ul>
+<li>shared wrapper <code>__0014</code> allowed the first invocation into the body with threshold 1;</li>
+<li>a local <code>Func_55___Counter != 2</code> check then returned;</li>
+<li>the second invocation was blocked permanently by the wrapper.</li>
+</ul>
+<p>Correct source parity:</p>
+<ul>
+<li>wrapper threshold becomes <strong>2</strong>;</li>
+<li>remove the redundant local <code>Func_55</code> counter scaffold;</li>
+<li>keep <code>Func_62</code> at threshold <strong>1</strong>.</li>
+</ul>
+<p>R2 runtime artifact:</p>
+<pre><code class="language-text">EDF5_EDF6_PATCH_1_0_4_M41_M035_EDF5_PARITY_R2_RUNTIME_2026-09-26.zip
+SHA-256 5f380c1542e8a102af73ca444cc5cd1e115f94f3d1703dc44ab471045cb7bc20
+</code></pre>
+<p>User runtime: the mission completed, so the progression blocker was fixed.</p>
+<h2 id="titan-navigation-separate-unresolved-layer">Titan navigation — separate unresolved layer</h2>
+<p>EDF5 source applies:</p>
+<pre><code class="language-text">SetAiNavMesh_StraightMode(..., true)
+</code></pre>
+<p>to all three Titans. Source/target RMPA coordinates were already exact, yet on EDF6 target geometry the Titans could hit debris, block, jump or be launched.</p>
+<h3 id="r3a">R3A</h3>
+<p>The discriminator changed only initial navigation mode to <code>StraightMode(false)</code> for all three Titans, with no RMPA, route or factor changes.</p>
+<p>Runtime result:</p>
+<ul>
+<li>the approach route became good;</li>
+<li>the following route4/circling phase still broke.</li>
+</ul>
+<h3 id="r3b-and-later-route-work">R3B and later route work</h3>
+<p>R3B attempted to reapply <code>StraightMode(false)</code> after each route4 assignment. It remained runtime-pending in the September handoff.</p>
+<p>Later experiments established a more nuanced history:</p>
+<ul>
+<li>one route2 configuration achieved <strong>PASS 3/3 Titans</strong>;</li>
+<li>an older route3 variant failed <strong>2/3</strong>;</li>
+<li>the later intended R6 path using <code>P001 -&gt; P002 -&gt; P003</code> and then returning to navmesh has <strong>no complete runtime PASS</strong>.</li>
+</ul>
+<p>The exact M035 AC inherited into 1.0.6 comes from 1.0.5 and has SHA-256:</p>
+<pre><code class="language-text">fc88b3ef6afb160e729b6edddefe1125da55b185925aa70490cb3238f7f9b2eb
+</code></pre>
+<h2 id="why-1-0-6-does-not-close-m035">Why 1.0.6 does not close M035</h2>
+<p>M035 was deliberately <strong>not overwritten by the 1.0.6 overlay</strong>. The BVM-parity work did not qualify the experimental Titan route, so the existing 1.0.5 file was preserved rather than regenerated. Preservation is not a PASS claim.</p>
+<p>The exact-release ledger therefore records:</p>
+<pre><code class="language-text">runtime_inherited = PARTIAL_PASS_ROUTE2_AND_FAIL_ROUTE3
+runtime_exact_release = PENDING
+</code></pre>
+<h2 id="correct-current-status">Correct current status</h2>
+<ul>
+<li>airstrike/progression logic: runtime-positive / closed;</li>
+<li>Titan route approach: partial positive evidence exists;</li>
+<li>final route/circling behavior: still open;</li>
+<li>exact finalized 1.0.6 M035: not runtime-qualified.</li>
+</ul>
+<p>Do not describe M035 simply as &quot;broken&quot; or &quot;fixed.&quot; Its control-flow blocker and its target-geometry/navigation problem have different evidence states.</p>
+<h2 id="4-october-2026-runtime-clarification-rejected-route4-only-theory">4 October 2026 runtime clarification — rejected route4-only theory</h2>
+<p>The later retained observation narrowed the actual compatibility frontier: the <strong>R4</strong> variant, with source-authored <code>StraightMode(true)</code> and an unchanged source-exact RMPA, could already fail at the <strong>first approach</strong> toward the base/mothership. The problem was therefore <strong>not limited to route4/circling</strong>.</p>
+<p>The historical <strong>R3A</strong> candidate used <code>StraightMode(false)</code> for <code>heavytank11/12/13</code> on initial approach; that phase was <strong>runtime-positive</strong>, while the later route4/circling segment still failed. The <strong>R3B</strong> follow-up reapplied <code>false</code> immediately after assigning route4 to all three Titans but <strong>never received a recorded runtime result</strong>. A proposed <strong>R5 route4 outer-arc-only RMPA edit was explicitly withdrawn</strong>, not validated.</p>
+<p>This chronology strengthens the distinction between <strong>source-parity</strong> and <strong>target-engine pathfinding compatibility</strong>. The <code>Func_55</code> count-to-two airstrike fix and the <code>Func_62</code>/<code>Factor_AiMoveEndOrDie</code> state must not be conflated with Titan geometry. No whole-mission Titan route PASS is established by these records.</p>
+<p><strong>Evidence:</strong> <code>EDF5_EDF6_M41_PATHFINDING_CORRECTION_2026-10-04.md</code>; <code>EDF5_EDF6_RUNTIME_RESULTS_M21_PASS_M41_R4_FAIL_2026-10-04.md</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_2026-09-28_2101.md</li><li>Library: EDF5_EDF6_PATCH_1_0_6_RUNTIME_LEDGER_CORRECTED_2026-10-11.md</li><li>Library: R12_RUNTIME_LEDGER_141.csv</li><li>/EDF5_EDF6_RESEARCH/research/runtime_evidence/2026-10-04/EDF5_EDF6_M41_PATHFINDING_CORRECTION_2026-10-04.md</li><li>/EDF5_EDF6_RESEARCH/research/runtime_evidence/2026-10-04/EDF5_EDF6_RUNTIME_RESULTS_M21_PASS_M41_R4_FAIL_2026-10-04.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#airstrike-progression-repair-runtime-positive">Airstrike/progression repair — runtime-positive</a><a href="#titan-navigation-separate-unresolved-layer">Titan navigation — separate unresolved layer</a><a href="#r3a">　R3A</a><a href="#r3b-and-later-route-work">　R3B and later route work</a><a href="#why-1-0-6-does-not-close-m035">Why 1.0.6 does not close M035</a><a href="#correct-current-status">Correct current status</a><a href="#4-october-2026-runtime-clarification-rejected-route4-only-theory">4 October 2026 runtime clarification — rejected route4-only theory</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-m035-titans-navigation-and-airstrike-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Maps, missions and Mission Bundles relate A map describes a reusable world, a mission describes gameplay that runs on one map, and a Mission Bundle groups and p"><title>Maps, missions and Mission Bundles relate | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-missions.html">Missions</a></div><h1>Maps, missions and Mission Bundles relate</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span></div><div class="referencebadge">Technical reference · Reconciled authoring contracts; native format boundaries separate</div><div id="articleBody"><p>A <strong>map</strong> describes a reusable world, a <strong>mission</strong> describes gameplay that runs on one map, and a <strong>Mission Bundle</strong> groups and packages missions plus their required resources. This distinction is useful when inspecting native mission resources or designing an authoring pipeline.</p>
+<p>The detailed ownership below is a <strong>reconciled authoring model</strong>, not a claim that every EDF release exposes a public Mission Bundle file with exactly these editor-side fields.</p>
+<h2 id="the-key-relationships">The key relationships</h2>
+<pre><code class="language-text">Map A  ← Mission 1 ← Bundle X
+       ← Mission 2 ← Bundle X
+       ← Mission 3 ← Bundle Y
+
+Map B  ← Mission 4 ← Bundle X
+</code></pre>
+<p>In the reconciled authoring contract:</p>
+<ul>
+<li>each mission has exactly <strong>one canonical map</strong>;</li>
+<li>a map may be referenced by many missions;</li>
+<li>a mission may be reused by more than one bundle without silently changing its map;</li>
+<li>maps remain independently authored and are <strong>not permanently owned by the bundle</strong>;</li>
+<li>for a complete bundle with <code>Y</code> enabled missions using <code>X</code> unique maps, <code>Y &gt;= X</code>;</li>
+<li>an unused map can exist in the workspace, but an enabled bundle should not publish an unreferenced map as part of its used-map set.</li>
+</ul>
+<p>There is <strong>no bundle-global same-map rule</strong>. An authoring tool must allow different missions in one bundle to select different maps.</p>
+<h2 id="map-editor-versus-mission-editor">Map editor versus mission editor</h2>
+<p><strong>Map-authoritative data:</strong> terrain/topology, geometry, material and texture resources, object placements, foliage, water, collision, navigation, destruction and map builds.</p>
+<p><strong>Mission-authoritative data:</strong> mission ordering/membership, scripts/events, actors and objectives, per-mission map choice, dialogue/audio usage, resource registration and bundle packaging.</p>
+<p>A mission editor should <strong>consume</strong> a published map build rather than becoming another writer of map binary formats. Likewise a map editor should not silently rewrite a mission's game-script semantics just because a map object changed.</p>
+<h2 id="identity-and-freshness">Identity and freshness</h2>
+<p>A custom map in the studied Workspace V1 authoring model is identified by:</p>
+<pre><code class="language-text">project_id + map_family
+</code></pre>
+<p>A build revision is distinguished by the Workspace manifest SHA-256. The representation uses metres and Y-up coordinates. Older workspace data without canonical identity can be previewed read-only, but should not be silently accepted as an authoritative mission map binding.</p>
+<p>A map can change while the mission still references its previous revision. This should produce an explicit <strong>freshness/rebind decision</strong>, not an automatic rewrite of every mission-local object or transform.</p>
+<h2 id="resource-paths-and-packaging">Resource paths and packaging</h2>
+<p>Verified map build resources are projected to bundle asset references with the runtime path:</p>
+<pre><code class="language-text">Map/&lt;resource.path&gt;
+</code></pre>
+<p>The authoring model distinguishes external/global dependencies, bundle overrides and bundle-owned resources. These are <strong>packaging/ownership semantics</strong>; they should not be confused with the game's normal resource lookup or native container structure.</p>
+<p>The mission scene owns its references to placed objects and its gameplay. A map refresh does not justify deleting mission-local authored entities or regenerating gameplay placements without review.</p>
+<h2 id="native-game-format-boundary">Native game-format boundary</h2>
+<p>Mission BVM/AngelScript, mission RMPA, map RMPA, MAPO, MAD and native navigation are distinct layers. For example, a mission call such as <code>SetAiPath(obj, &quot;navigationmap&quot;)</code> should not be treated as a mission-RMPA path reference without evidence: <code>navigationmap</code> refers to the native navigation/pathing semantics in the investigated sources.</p>
+<h2 id="practical-questions-answered">Practical questions answered</h2>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>Answer under the recovered authoring contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Can two missions share one map?</td>
+  <td>Yes</td>
+</tr>
+<tr>
+  <td>Can one bundle contain multiple maps?</td>
+  <td>Yes</td>
+</tr>
+<tr>
+  <td>Does copying a mission into another bundle change its map?</td>
+  <td>No, not implicitly</td>
+</tr>
+<tr>
+  <td>May a mission rebind to a new map revision?</td>
+  <td>Yes, explicitly, with checks</td>
+</tr>
+<tr>
+  <td>Should mission build tools write MAD/FMEP themselves?</td>
+  <td>No; consume authoritative map publication</td>
+</tr>
+<tr>
+  <td>Is mission RMPA interchangeable with map RMPA?</td>
+  <td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Read <a href="missions-%26-scripting-how-missions-events-and-rmpa-work.html">Mission scripting and mission RMPA</a>, <a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">Map format responsibilities</a> and <a href="#article-start">Workspace V1 details</a>.</p>
+<p><strong>Evidence status:</strong> recovered authoring/integration contracts, reconciled map and mission ownership semantics, and sampled native file research. The editor architecture is a tool design boundary, not a native internal game-object layout specification.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R48 Workspace V1, Map Ref and Mission Bundle semantics</li><li>R48 Mission RMPA source-only profile</li><li>EDF6 Authoring Suite current source contracts</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-key-relationships">The key relationships</a><a href="#map-editor-versus-mission-editor">Map editor versus mission editor</a><a href="#identity-and-freshness">Identity and freshness</a><a href="#resource-paths-and-packaging">Resource paths and packaging</a><a href="#native-game-format-boundary">Native game-format boundary</a><a href="#practical-questions-answered">Practical questions answered</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-mission-bundles-maps-and-resources-explained"};</script><script src="../assets/site.js" defer></script></body></html>

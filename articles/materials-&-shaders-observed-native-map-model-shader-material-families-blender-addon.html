@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 map-model shader families: measured native material instances Observed native map-model shader/material families This is a table of ordinary MDB material f"><title>EDF6 map-model shader families: native material instance census | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF6 map-model shader families: native material instance census</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><h1>Observed native map-model shader/material families</h1>
+<p>This is a table of ordinary MDB material families observed in EDF6 model assets stored in map resources. These are <strong>model/material observations</strong>, not FieldRender/FMEP terrain rules. Counts are material occurrences, not unique shader binaries.</p>
+<p>The value of this table is breadth: it shows that EDF6 simultaneously ships newer <code>snd_BRDF_Map_*</code> materials and older <code>snd_Map_*</code> families with <code>specular_pow</code>, <code>light_smooth</code>, reflect/spec packed textures and multiple material ABI variants. It is <strong>not</strong> a claim that these are all EDF6 shaders.</p>
+<h2 id="ig-heigen507-rab">IG_HEIGEN507.RAB</h2>
+<p>Observed entries in this filtered material set: <strong>86</strong> across <strong>6 shader/material signatures</strong>.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Count</th>
+  <th>Shader</th>
+  <th>Samplers, in observed MDB order</th>
+  <th>Material parameters, in observed MDB order (<code>type/size</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">52</td>
+  <td><code>snd_BRDF_Map_Common</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">29</td>
+  <td><code>snd_BRDF_Map_Common_Clip</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>alpha_clip</code> 0/1, <code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>snd_BRDF_Map_Build_Basic</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_cm0_hr</code></td>
+  <td><code>change_color</code> 2/3, <code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 1/2, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_BRDF_Map_LOD_CC</code></td>
+  <td><code>albedo</code>, <code>param_r_m_cm0_hr</code></td>
+  <td><code>change_color</code> 2/3, <code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_BRDF_Map_LOD</code></td>
+  <td><code>albedo</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_BRDF_Map_Build_Basic_NC</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="nw-europe01-rab">NW_EUROPE01.RAB</h2>
+<p>Observed entries in this filtered material set: <strong>403</strong> across <strong>27 shader/material signatures</strong>.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Count</th>
+  <th>Shader</th>
+  <th>Samplers, in observed MDB order</th>
+  <th>Material parameters, in observed MDB order (<code>type/size</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">77</td>
+  <td><code>snd_Map_Build_Basic_NC</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>dirt</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>dirt_adjust</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">49</td>
+  <td><code>snd_BRDF_Map_Common</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">49</td>
+  <td><code>snd_Map_Build_Basic</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>dirt</code>, <code>param_reflect_cm0_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>change_color</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>dirt_adjust</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">44</td>
+  <td><code>snd_BRDF_Map_Build_Basic</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_cm0_hr</code></td>
+  <td><code>change_color</code> 2/3, <code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 1/2, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">31</td>
+  <td><code>snd_Map_Build_Simple_Clip</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>alpha_clip</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">27</td>
+  <td><code>snd_BRDF_Map_Build_Basic_NC</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">26</td>
+  <td><code>snd_BRDF_Map_Build_Window</code></td>
+  <td><code>interior_texture</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code>, <code>window_frame_texture</code>, <code>window_normal</code></td>
+  <td><code>diffuse</code> 2/3, <code>fall_off_amount</code> 0/1, <code>fall_off_offset</code> 0/1, <code>fall_off_scale</code> 0/1, <code>interior</code> 2/3, <code>interior_random_seed</code> 0/1, <code>interior_wrap_count</code> 4/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1, <code>window_normal_amount</code> 0/1, <code>window_normal_uv_scale</code> 1/2</td>
+</tr>
+<tr>
+  <td style="text-align:right">15</td>
+  <td><code>snd_BRDF_Map_Common_Clip</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>alpha_clip</code> 0/1, <code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">11</td>
+  <td><code>snd_BRDF_Map_LOD_CC</code></td>
+  <td><code>albedo</code>, <code>param_r_m_cm0_hr</code></td>
+  <td><code>change_color</code> 2/3, <code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">10</td>
+  <td><code>snd_BRDF_Map_Build_NoOcc</code></td>
+  <td><code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">9</td>
+  <td><code>snd_BRDF_Map_Build_Para_NC</code></td>
+  <td><code>param_r_m_h</code>, <code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code></td>
+  <td><code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>parallax_amount</code> 0/1, <code>parallax_dent</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>snd_BRDF_Map_Build_DirtScroll</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_cm0_hr</code></td>
+  <td><code>change_color</code> 2/3, <code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>dirt_amount</code> 0/1, <code>dirt_material_adjust</code> 0/1, <code>dirt_scale</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>snd_Map_Object_NoAO_Light</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_spec_lightmask_hlightmask</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>light_color</code> 2/4, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td><code>snd_Map_Build_Simple_Clip</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>alpha_clip</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td><code>snd_Map_Build_Simple_Alpha</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 3/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>translucent_fall_off_amount</code> 0/1, <code>translucent_fall_off_scale</code> 0/1, <code>translucent_fall_off_offset</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>snd_BRDF_Map_Common_Alpha</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 3/4, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1, <code>translucent_fall_off_amount</code> 0/1, <code>translucent_fall_off_offset</code> 0/1, <code>translucent_fall_off_scale</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td><code>snd_BRDF_Map_Common_Light</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_r_m_light_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>light_color</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>snd_BRDF_Map_LOD</code></td>
+  <td><code>albedo</code>, <code>param_r_m_xxx_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td><code>snd_Map_Build_Basic_Parallax_NC</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>dirt</code>, <code>param_reflect_XXX_height_spec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>dirt_adjust</code> 0/1, <code>parallax_amount</code> 0/1, <code>parallax_dent</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>snd_Map_Object_NoAO_Light</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_spec_lightmask_hlightmask</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>light_color</code> 2/4, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>snd_Map_Build_DirtScroll</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>dirt</code>, <code>param_reflect_cm0_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>change_color</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>roughness</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>dirt_scale</code> 0/1, <code>dirt_adjust</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>snd_Map_Build_Basic_NC</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>dirt</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 2/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>dirt_adjust</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_Map_Build_Simple_Alpha</code></td>
+  <td><code>param_occlusion</code>, <code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code></td>
+  <td><code>diffuse</code> 3/4, <code>fall_off_amount</code> 0/1, <code>fall_off_offset</code> 0/1, <code>fall_off_scale</code> 0/1, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 1/2, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_pow</code> 0/1, <code>translucent_fall_off_amount</code> 0/1, <code>translucent_fall_off_offset</code> 0/1, <code>translucent_fall_off_scale</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_BRDF_Map_Signboard_Pattern</code></td>
+  <td><code>switching_mask</code>, <code>param_r_m_occ_light</code>, <code>albedo</code>, <code>normal</code></td>
+  <td><code>animation_speed</code> 0/1, <code>diffuse</code> 2/3, <code>image_split</code> 4/1, <code>interior_random_seed</code> 0/1, <code>light_color</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>pattern_x_dir</code> 4/1, <code>pattern_y_dir</code> 4/1, <code>roughness</code> 0/1, <code>scroll_curve</code> 0/1, <code>scroll_step</code> 0/1, <code>scroll_time</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1, <code>switch_interval</code> 0/1, <code>switch_time</code> 0/1, <code>switching_mask_split</code> 4/1, <code>use_scroll</code> 4/1, <code>use_scroll_time</code> 4/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_Map_Build_Basic_NC</code></td>
+  <td><code>param_occlusion</code>, <code>dirt</code>, <code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code></td>
+  <td><code>diffuse</code> 2/3, <code>dirt_adjust</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_offset</code> 0/1, <code>fall_off_scale</code> 0/1, <code>light_smooth</code> 0/1, <code>metallic</code> 0/1, <code>normal_amount</code> 1/2, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_pow</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_BRDF_Map_Common_LightOcc</code></td>
+  <td><code>param_occlusion</code>, <code>albedo</code>, <code>normal</code>, <code>param_r_m_light_hr</code></td>
+  <td><code>diffuse</code> 2/3, <code>light_color</code> 2/3, <code>metallic</code> 0/1, <code>normal_amount</code> 0/1, <code>roughness</code> 0/1, <code>specular_color</code> 2/3, <code>specular_diffuse_blend</code> 0/1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>snd_Map_Build_Simple_Alpha</code></td>
+  <td><code>albedo</code>, <code>normal</code>, <code>param_reflect_XXX_spec_hspec</code>, <code>param_occlusion</code></td>
+  <td><code>diffuse</code> 3/4, <code>normal_amount</code> 1/2, <code>specular_pow</code> 0/1, <code>specular_color</code> 2/4, <code>light_smooth</code> 0/1, <code>fall_off_amount</code> 0/1, <code>fall_off_scale</code> 0/1, <code>fall_off_offset</code> 0/1, <code>translucent_fall_off_amount</code> 0/1, <code>translucent_fall_off_scale</code> 0/1, <code>translucent_fall_off_offset</code> 0/1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="practical-conclusions">Practical conclusions</h2>
+<ul>
+<li><strong>Reflection is a capability description, not necessarily a real-material schema.</strong> A reflected variable can be absent from a native MDB material, and native parameter order does not necessarily match cbuffer declaration order.</li>
+<li><strong>Legacy and BRDF families coexist.</strong> Do not infer that <code>specular_pow</code> is obsolete merely because newer BRDF shaders exist.</li>
+<li><strong>The same shader name can appear with more than one material ABI in legacy content.</strong> Preserve imported material structure unless a profile is specifically known.</li>
+<li><strong>Sampler order in MDB is not always shader-register order.</strong> The selected Build/Window/Parallax/DirtScroll/Signboard families provide direct examples.</li>
+<li><code>SND_CHARA_BASIC</code> itself was <strong>not</strong> part of these map-model corpora. The observed material set supports the general statement that legacy-style material contracts survive in EDF6, but does not answer the character-shader compositor question.</li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13.zip::EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13/10_OBSERVED_SHADER_MATERIAL_FAMILIES.md</li><li>/EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13.zip::EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13/11_OBSERVED_SHADER_MATERIAL_FAMILIES.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#ig-heigen507-rab">IG_HEIGEN507.RAB</a><a href="#nw-europe01-rab">NW_EUROPE01.RAB</a><a href="#practical-conclusions">Practical conclusions</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-observed-native-map-model-shader-material-families-blender-addon"};</script><script src="../assets/site.js" defer></script></body></html>

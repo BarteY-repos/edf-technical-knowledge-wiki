@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 SK heightfields — converting SHFB terrain into EDF6 FMB and MAD What actually differs between these map generations Seven examined EDF4.1 map families — "><title>EDF4.1 SK heightfields — converting SHFB terrain into EDF6 FMB and MAD | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF4.1 SK heightfields — converting SHFB terrain into EDF6 FMB and MAD</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact-source SHFB/FMB/MAD reverse engineering, real-source offline tests; no fresh game runtime</div><div id="articleBody"><h2 id="what-actually-differs-between-these-map-generations">What actually differs between these map generations</h2>
+<p>Seven examined EDF4.1 map families — <code>SK_HEIGEN02</code>, <code>SK_VALLEY01</code>, <code>SK_KAIGAN01</code>, <code>SK_SANGAKU01</code>, <code>SK_SANGAKU02</code>, <code>SK_STEPMOUNTAIN01</code> and <code>SK_CRATER01</code> — use a terrain asset named <code>&lt;model&gt;_fld2mgrid.shfb</code>. The examined EDF6 engine uses mesh-based <strong>FMB terrain</strong>, an associated FieldRender texture-array contract and <strong>hknp compressed-mesh collision</strong>. In that target build, rewrapping the EDF4.1 SHFB header or relying on Havok's old heightfield migration does not supply equivalent terrain.</p>
+<p>The studied source-only converter reconstructs both rendered and collided terrain from SHFB. Its successful real-source <strong>offline tests are not a gameplay/runtime PASS</strong>. The later EDF4.1 SK collision lineage also has its own conservative mesh-shape policies; this article describes the earlier source heightfield generation and its constraints, not a replacement for those later policies.</p>
+<h2 id="shfb-sample-coordinate-and-layer-layout">SHFB sample, coordinate and layer layout</h2>
+<p>The reverse-engineered SHFB reader identified these header fields in the seven sampled maps:</p>
+<table>
+<thead>
+<tr>
+  <th>Offset</th>
+  <th>Interpretation in the examined profile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x08</code>, <code>0x0C</code></td>
+  <td>Sample width and height: <code>1001 × 1001</code></td>
+</tr>
+<tr>
+  <td><code>0x18</code>, <code>0x1C</code></td>
+  <td>Horizontal cell dimensions: <code>2.0 m × 2.0 m</code></td>
+</tr>
+<tr>
+  <td><code>0x20</code></td>
+  <td>Block structure: <code>33</code> blocks of <code>32</code> cells</td>
+</tr>
+<tr>
+  <td><code>0x30</code>, <code>0x34</code></td>
+  <td>Stated lowest and highest elevation</td>
+</tr>
+<tr>
+  <td><code>0x38</code></td>
+  <td>Per-block tables</td>
+</tr>
+<tr>
+  <td><code>0x3C</code>, <code>0x40</code></td>
+  <td>Layer metadata / references</td>
+</tr>
+<tr>
+  <td><code>0x44</code>, <code>0x48</code></td>
+  <td>Material-name index and related table</td>
+</tr>
+<tr>
+  <td><code>0x50</code></td>
+  <td>Packed height/material field</td>
+</tr>
+<tr>
+  <td><code>0x54</code>, <code>0x58</code></td>
+  <td>Per-vertex blend-weight runs</td>
+</tr>
+<tr>
+  <td><code>0x5C</code>, <code>0x60</code></td>
+  <td>UTF-16 name storage</td>
+</tr>
+</tbody>
+</table>
+<p>Each height sample occupies two unsigned 16-bit words. The <strong>low word is the bit representation of an IEEE-754 half-float height in metres</strong>. The high word identifies its strongest material layer. This is a decoded shader and source-data observation, not an integer-centimetre height. The observed SK_HEIGEN02 decoded height range was about <code>−10.2266</code> to <code>47.25</code> m.</p>
+<p>The map's placed SHFB object supplies the world origin. A sample <code>(row, col)</code> becomes approximately:</p>
+<pre><code class="language-text">world.x = origin.x + col * 2 metres
+world.z = origin.z + row * 2 metres
+world.y = decoded_half_float_height
+</code></pre>
+<p><strong>Rows follow Z and columns follow X.</strong> A transpose produces misplaced ground and vegetation. As a cross-check, several maps' pre-existing objects were compared against the decoded field; median vertical differences ranged from <code>0.000 m</code> to <code>0.29 m</code> depending on map. This corroborates placement, not collision or navigation equivalence.</p>
+<p>The field also carries layer names, per-layer colour/multiplier tiling and <strong>runs of half-float blending weights</strong>. An important special case: a source layer with <strong>one colour texture has no multiplier</strong>; it does not mean “sample index −1” in EDF6's unconditional multiplier path.</p>
+<h2 id="fmb-rendering-reconstruction">FMB rendering reconstruction</h2>
+<p>For this particular converter the source <code>1001 × 1001</code> at 2 m was sampled at every second source point: <strong>501 × 501 render vertices spaced 4 m</strong>. Render and collision use the same lattice to reduce visible ground/physics divergence. This is a chosen conversion resolution, not an inherent EDF6 limit.</p>
+<p>The resulting field FMB uses <strong>625 leaves</strong> of <code>20 × 20</code> cells: 21×21 vertices and 800 triangles per leaf. It builds the stock-style spatial AABB tree, mesh records, layer lists and four-corner splat grids. A <code>0x50</code> splat-grid record per 4 m cell stores the four corners' weights, normalized to <code>255</code> per corner. In examined EDF6 FieldRender assets the shader tables cover <strong>1–15 layers</strong> and passes 0–2; source leaves needing more than 15 are rejected rather than silently dropping a painted layer.</p>
+<p>A critical native-profile correction concerns the FMB <strong>mesh-record field at <code>+0x28</code></strong>: it is an <strong>index into that FMB's shader-record table</strong>, not the texture-slice count. Across <strong>46 inspected stock EDF6 FMB files and 9753 meshes</strong>, the index selected a row matching <code>(layer_count, mode=1, pass=0, flag=0)</code>. An older writer treated it as a slice count and selected rows with <code>flag=6</code> or the wrong layer count; this produced the historical <strong>black terrain blocks</strong>. A renderer seeing black blocks should inspect this relation before assuming missing DDS or shader code.</p>
+<p>The source colour DDS array is mapped to EDF6's <code>&lt;map&gt;_color.dds</code>; an existing EDF6 flat normal map is used for <code>&lt;map&gt;_normal.dds</code> in the examined converter. To preserve a layer whose source had no multiplier, the builder appends an <strong>opaque white BC1 identity slice at every mip</strong> rather than writing an invalid negative sample index. The original colour slices and mips remain unchanged. In a D3D11 WARP test, multiplying source colour by that identity slice preserved the sampled RGB.</p>
+<h2 id="mad-collision-reconstruction">MAD collision reconstruction</h2>
+<p>The examined terrain collision builder creates <strong>one target map body</strong> named <code>&lt;piece&gt;.&lt;piece&gt;</code> with <strong>2500 compressed-mesh tiles</strong>, each a 10×10-cell tile of the same 4 m lattice (100 quads / 200 triangles per tile). The output is encoded using an EDF6 donor's Havok-2020 structural schema rather than copying EDF4.1's heightfield shape. Additional placed objects are represented by named collision bodies when corresponding source model collision triangles are available.</p>
+<p>Offline checks decoded the generated triangles back to the lattice within approximately <code>1e−5 m</code>, compared bounds and used independent compressed-mesh readers. The old output still had open questions about <code>triangleIsInterior</code>, material palette and object models missing from a map's RAB. Later SK collision work should be consulted before treating this historical builder as the final target.</p>
+<h2 id="map-level-resource-wiring">Map-level resource wiring</h2>
+<p>A successful export has to update <strong>all linked resources</strong>, not just FMB and MAD:</p>
+<ul>
+<li>MAC: replace the SHFB's definition with an FMEP definition, update the map object / MAPO height linkage, write <code>externals.sgo</code> for the new FMB and remove obsolete source field members.</li>
+<li>RAB: expose the colour array under the expected EDF6 name and supply a normal array and valid multiplier slices.</li>
+<li>MAD: supply target-format named collision bodies for terrain and included map objects.</li>
+<li>Plants: reconstruct FMB table 2/3 and MAPO height data rather than inheriting an empty grass placeholder; see the dedicated vegetation guide.</li>
+<li>Navigation: <strong>donor HKT/NVMD remains geometrically mismatched</strong> unless explicitly rebuilt against this terrain.</li>
+</ul>
+<h2 id="what-was-and-was-not-demonstrated">What was and was not demonstrated</h2>
+<p>The historical report records extensive real-source <strong>offline tests</strong>, serializer round-trips, source-object-to-ground comparisons and a GPU WARP texture test. It explicitly lists <strong>map load, black-block rendering, driveability and real AI pathing as still requiring game tests</strong> in that branch. Do not turn those offline checks into blanket game-runtime claims.</p>
+<p><strong>Sources:</strong> <code>components/maps/evidence/edf41-sk-terrain.md</code>, <code>pylib/sk_terrain.py</code>, <code>pylib/fmb_build.py</code>, <code>pylib/hkcms_build.py</code>, <code>pylib/sk_map.py</code> from the retained EDF4.1 R10 HF4 R9 source package; the 2026-10-17 feedback correction for FMB shader indices.</p>
+<h2 id="subsequent-source-contact-measurements">Subsequent source contact measurements</h2>
+<p>The newer <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">seven-map terrain–object contact census</a> follows the native <code>SHFB</code>, <code>MAPB</code> and <code>MAD</code> geometry relationships beyond bare terrain generation. R24–R28 examine 81 sampled placements and then 1,770 matched static-mesh placements. This demonstrates a source-geometry contact boundary, <strong>not</strong> native collision acceptance, full map coverage or pathfinding parity.</p>
+<h2 id="cross-check-field-lattice-is-not-a-navigation-tile-set-16-november-source-evidence">Cross-check: field lattice is not a navigation tile set (16 November source evidence)</h2>
+<p>The seven original SHFB fields also support a <strong>4 m terrain lattice plan of 250,000 cells/500,000 triangles per map</strong>; this coincides in spatial sample spacing with the earlier 501×501 FMB render lattice, but neither the historical <strong>625 FMB render leaves</strong> nor the <strong>2,500 MAD collision tiles</strong> is the same as the later <strong>256 planned HKT navigation tiles</strong>. The HKT tile grid belongs to a separate streaming/agent representation. Structural HKT/NVMD samples at 4 m have only been generated for bounded windows, while 32/64 m samples span the terrain domain. Read the <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">4 m source-grid/HKT/NVMD evidence atlas</a> before interpreting any of these numbers as gameplay-equivalent navmesh coverage.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/maps/evidence/edf41-sk-terrain.md</li><li>EDF41 R10 HF4 R9: components/maps/pylib/sk_terrain.py</li><li>EDF41 R10 HF4 R9: components/maps/pylib/fmb_build.py</li><li>EDF41 R10 HF4 R9: components/maps/pylib/hkcms_build.py</li><li>Original EDF41 R31/R32 SHFB 4m grid and bounded HKT/NVMD source evidence, 2026-11-16</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-actually-differs-between-these-map-generations">What actually differs between these map generations</a><a href="#shfb-sample-coordinate-and-layer-layout">SHFB sample, coordinate and layer layout</a><a href="#fmb-rendering-reconstruction">FMB rendering reconstruction</a><a href="#mad-collision-reconstruction">MAD collision reconstruction</a><a href="#map-level-resource-wiring">Map-level resource wiring</a><a href="#what-was-and-was-not-demonstrated">What was and was not demonstrated</a><a href="#subsequent-source-contact-measurements">Subsequent source contact measurements</a><a href="#cross-check-field-lattice-is-not-a-navigation-tile-set-16-november-source-evidence">Cross-check: field lattice is not a navigation tile set (16 November source evidence)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-edf41-sk-heightfield-shfb-to-edf6-fmb-mad"};</script><script src="../assets/site.js" defer></script></body></html>

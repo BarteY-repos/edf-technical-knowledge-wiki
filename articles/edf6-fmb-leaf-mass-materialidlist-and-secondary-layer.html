@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 FMB terrain: complete leaf semantics and secondary-layer boundary The .FMB terrain resource is not an ordinary .MDB model. In the examined EDF6 source corp"><title>EDF6 FieldRender FMB: leaf anatomy, mass cells and secondary-layer uncertainty | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / FMB terrain binary structure</div><h1>EDF6 FieldRender FMB: leaf anatomy, mass cells and secondary-layer uncertainty</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">FMB terrain binary structure</span></div><div class="referencebadge">Technical reference · Native source-corpus/static binary evidence, runtime limitations stated explicitly</div><div id="articleBody"><p>The <code>.FMB</code> terrain resource is not an ordinary <code>.MDB</code> model. In the examined EDF6 source corpus it contains a spatial directory of tree records and compressed leaf payloads. A leaf combines triangle/vertex geometry, a <strong>mass cell grid</strong>, local material identifiers, shader selectors and material weights. The correct interpretation depends on each leaf's own descriptor and reference bases; merely unpacking the CMPL wrapper or displaying the triangle mesh does not establish semantic correctness.</p>
+<h2 id="full-native-control-corpus">Full native control corpus</h2>
+<p>An exhaustive read-only census of the <strong>six retained <code>IG_HEIGEN507*.FMB</code> files</strong> decoded and structurally validated all <strong>1,200 leaf records</strong>. The combined directory contained <strong>2,394 records</strong>: 1,194 internal/tree records and 1,200 leaves. The scan evaluated <strong>1,045,523,544 decoded bytes</strong>, <strong>2,058,350 triangles</strong>, <strong>1,085,605 vertices</strong> and <strong>12,582,869 mass cells</strong>. All listed semantic error classes were zero in this bounded corpus. A separately inspected <code>IG_CAVE503.FMB</code> added <strong>102/102</strong> passing leaf controls.</p>
+<p>This does <strong>not</strong> mean all FMB assets in every EDF6 build have identical flags, counts or selector assignments.</p>
+<h3 id="main-ig-heigen507-fmb-example">Main <code>IG_HEIGEN507.FMB</code> example</h3>
+<table>
+<thead>
+<tr>
+  <th>Measured property</th>
+  <th style="text-align:right">Observed value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>FMB version</td>
+  <td style="text-align:right"><code>0x110</code> (decimal 272)</td>
+</tr>
+<tr>
+  <td>Directory</td>
+  <td style="text-align:right">511 records: 255 tree + 256 leaves</td>
+</tr>
+<tr>
+  <td>Material / config tables</td>
+  <td style="text-align:right">6 materials / 27 config rows</td>
+</tr>
+<tr>
+  <td>Main-map triangles</td>
+  <td style="text-align:right">2,040,200</td>
+</tr>
+<tr>
+  <td>Main-map vertices</td>
+  <td style="text-align:right">1,070,192</td>
+</tr>
+<tr>
+  <td>Main-map mass cells</td>
+  <td style="text-align:right">1,620,528</td>
+</tr>
+<tr>
+  <td>Mass cell X/Z dimensions</td>
+  <td style="text-align:right">approximately 77–80 cells per leaf</td>
+</tr>
+<tr>
+  <td>Main mass-cell size</td>
+  <td style="text-align:right">2 m × 2 m</td>
+</tr>
+<tr>
+  <td>Native terrain XZ bounds</td>
+  <td style="text-align:right">approximately −1250 to +1250 on both axes</td>
+</tr>
+</tbody>
+</table>
+<p>Leaf sizes, geometry counts and mass-cell layouts vary within these ranges. A decoder should verify <em>each</em> leaf rather than using main-file averages as constants.</p>
+<h2 id="checks-that-distinguish-a-correct-decoder-from-a-plausible-looking-preview">Checks that distinguish a correct decoder from a plausible-looking preview</h2>
+<p>For each leaf, the recovered structural relations include:</p>
+<ol>
+<li>Exact CMPL decompression and agreement of wrapper versus decoded bounding boxes.</li>
+<li>The index array and triangle count must agree: <code>index_count == triangle_count * 3</code>.</li>
+<li>Index storage must be followed by the properly aligned mass-cell region; <code>mass_count == divideX * divideZ</code>.</li>
+<li>The decoded vertex tail occupies <strong><code>vertex_count * 24</code> bytes</strong> in the audited native layout.</li>
+<li>The material list is a fixed-size sparse list; active material IDs must resolve within native material tables.</li>
+<li>Material weights may reference only active local slots, with valid selector/config-row bounds.</li>
+<li>Reserved fields and weight padding must satisfy observed zeros. A successful render does not excuse inconsistent reserved data.</li>
+</ol>
+<p>The <strong>16-byte <code>MaterialIDList</code> is sparse</strong>. The byte value <code>0xFF</code> means <em>this slot is empty</em>, not <em>stop parsing now</em>. Its actual arity is the <strong>count of non-<code>0xFF</code> slots</strong>, not the index of the first hole. A capacity-like word in the leaf descriptor is a <strong>separate field</strong>; it is not universally identical to the local material-list arity. Merging those concepts would misdecode valid native leaves.</p>
+<h2 id="shader-selectors-are-not-proof-of-finished-rendering">Shader selectors are not proof of finished rendering</h2>
+<p>One flat, experimental FMB record used two triangles, four vertices, two local materials, config index 4 and the shader config row <code>(2,1,0,0,0,0,0)</code>. The associated selector/capacity pair <code>0x0202 + cfg4</code> also occurred in <strong>80 of 118</strong> inspected native HEIGEN ENKEIRIGHT leaves, supporting the established filename resolution <code>MAP_FIELD_RENDER2_1_14_0.SGO</code> for that particular selector.</p>
+<p>That selector match is <strong>structural evidence</strong>. It cannot prove that non-native material/orientation records render correctly. The experimental record's two 80-byte material records did not match any of the retained HEIGEN/CAVE native material records exactly. Orientation and texture-slice bindings also differed. A black terrain surface therefore cannot be diagnosed solely from filename selection without direct rendering evidence.</p>
+<p>For source texture-array and preview-attribution boundaries, see <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender/FMEP records</a>.</p>
+<h2 id="planar-material-orientation-is-a-separate-native-byte-contract">Planar material orientation is a separate native byte contract</h2>
+<p>The native <code>IG_HEIGEN507_ENKEIRIGHT.FMB</code> planar material and orientation records survived an exact parse/re-serialize round-trip: material 0 and both orientation records were byte-identical. Comparing the retained experimental FMB with native ENKEIRIGHT material 0 gives a narrower, <strong>unproven rendering discriminator</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Semantic field</th>
+  <th>Native ENKEIRIGHT material 0</th>
+  <th>Experimental flat record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Planar paint mode / correction</td>
+  <td><code>0</code> / <code>6.0</code></td>
+  <td><code>0</code> / <code>6.0</code></td>
+</tr>
+<tr>
+  <td>Base/color and normal slices</td>
+  <td><code>0</code>, <code>0</code></td>
+  <td><code>0</code>, <code>0</code></td>
+</tr>
+<tr>
+  <td>Base/detail orientation pair</td>
+  <td><code>(0,1)</code></td>
+  <td><code>(0,0)</code></td>
+</tr>
+<tr>
+  <td>Detail/multiplier texture slice</td>
+  <td><code>1</code></td>
+  <td><code>0</code></td>
+</tr>
+<tr>
+  <td>Euler orientation</td>
+  <td><code>(90°,0°,0°)</code> for both native orientations</td>
+  <td><code>(0°,0°,0°)</code></td>
+</tr>
+<tr>
+  <td>Projection scales</td>
+  <td><code>(7,7,7)</code> and <code>(100,100,100)</code></td>
+  <td><code>(20,20,20)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The exact shader specialization already matched a native-observed selector; these <strong>remaining byte/semantic differences</strong> are why matching an FMB shader filename alone does not validate planar terrain rendering. No direct in-game experiment in the inspected source establishes the root cause of a black surface or grants a universal material conversion rule. The separate auxiliary floats were deliberately not assigned a guessed native role.</p>
+<h2 id="why-ig-heigen507-2-fmb-should-remain-a-distinct-unknown">Why <code>IG_HEIGEN507_2.FMB</code> should remain a distinct unknown</h2>
+<p>The retained <code>_2</code> file is <em>not corrupt</em>. It passes the same structural checks with <strong>468 leaves</strong>, a <strong>1-metre mass-cell grid</strong>, sparse geometry of roughly <strong>1–61 triangles and 3–46 vertices per leaf</strong>, and central coverage around <strong>2500 × 2500 metres</strong>. It shares the main map's six-material/two-orientation structure and material lookup table, although its 27 config rows appear in a different order.</p>
+<p>However, the examined <code>IG_HEIGEN507.MAC</code> explicitly names the main and four ENKEI FMBs but <strong>does not name <code>_2</code></strong>; the retained RAB also provides no <code>_2</code> name link. The sources did <strong>not establish</strong> an implicit <code>*_2.FMB</code> loader rule. The only defensible classification is <strong>structurally valid secondary FMB with an unresolved native loading role</strong>. Its presence is not permission to assume all secondary FMBs load automatically.</p>
+<p><strong>Evidence:</strong> primary <code>R39_FMB_FULL_SEMANTIC_CENSUS_2026-10-16.json</code>, <code>MAP_STUDIO_R39_PROGRESS_2026-10-16.md</code>, and <code>R39_AUTHORITY_SUPERSESSION_2026-10-16.md</code> under <code>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/R39_FMB_FULL_SEMANTIC_CENSUS_2026-10-16/</code>. Only native file semantics are reported here; the separate preview/authoring code is not part of the game contract.</p>
+<h2 id="native-planar-material-orientation-field-example">Native planar-material orientation field example</h2>
+<p>A separately decoded <a href="maps-edf6-fieldrender-planar-material-orientation-and-texture-slice-reference.html">ENKEIRIGHT material 0</a> uses two orientation bindings, base slice 0, detail slice 1, normal slice 0. This is a material/orientation table example; it must not be confused with the leaf-local 16-byte <code>MaterialIDList</code>, whose non-<code>0xFF</code> occupancy has different semantics.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MAP_AUTHORING/R39_FMB_FULL_SEMANTIC_CENSUS_2026-10-16/MAP_STUDIO_R39_FMB_FULL_SEMANTIC_CENSUS_2026-10-16.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#full-native-control-corpus">Full native control corpus</a><a href="#main-ig-heigen507-fmb-example">　Main IG_HEIGEN507.FMB example</a><a href="#checks-that-distinguish-a-correct-decoder-from-a-plausible-looking-preview">Checks that distinguish a correct decoder from a plausible-looking preview</a><a href="#shader-selectors-are-not-proof-of-finished-rendering">Shader selectors are not proof of finished rendering</a><a href="#planar-material-orientation-is-a-separate-native-byte-contract">Planar material orientation is a separate native byte contract</a><a href="#why-ig-heigen507-2-fmb-should-remain-a-distinct-unknown">Why IG_HEIGEN507_2.FMB should remain a distinct unknown</a><a href="#native-planar-material-orientation-field-example">Native planar-material orientation field example</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-fmb-leaf-mass-materialidlist-and-secondary-layer"};</script><script src="../assets/site.js" defer></script></body></html>

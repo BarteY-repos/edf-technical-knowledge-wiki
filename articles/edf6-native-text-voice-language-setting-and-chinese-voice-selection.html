@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 language settings: display text and voice are separate engine values In the examined EDF6 executable, language selection is not one interchangeable scalar."><title>EDF6 language controls: separate text and voice values and Chinese voice mapping | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Native UI and settings</div><h1>EDF6 language controls: separate text and voice values and Chinese voice mapping</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Native UI and settings</span></div><div class="referencebadge">Technical reference · Static source and contributor checks, with build and open questions noted; no new R131 EDF runtime</div><div id="articleBody"><p>In the examined EDF6 executable, language selection is not one interchangeable scalar. The engine has a <strong>text-language integer</strong> and a neighboring <strong>voice-language integer</strong>, exposed by separate accessors. This distinction is relevant to UI strings, subtitles, voice lookups and localization testing.</p>
+<h2 id="native-text-selection">Native text selection</h2>
+<p>The original accessor at <code>EDF.dll+0xE4000</code> reads the text-language value at the build-specific global <code>+0x20B2B30</code>, while <code>+0xE4030</code> writes it. The observed enum order is:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Value</th>
+  <th>Text language</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>Japanese (<code>ja</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>English (<code>en</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>Korean (<code>kr</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3</code></td>
+  <td>Traditional Chinese (<code>cn</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td>Simplified Chinese (<code>sc</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>The source relates these numbers to option-string ordering and distinct Chinese font resources. They are <strong>build-specific enum values</strong>, not a general locale identifier for all EDF releases.</p>
+<h2 id="voice-language-is-normalized-separately">Voice language is normalized separately</h2>
+<p>A nearby getter at <code>+0xE4010</code> reads voice language from <code>+0x20B2B34</code>. Its setter at <code>+0xE4070</code> maps incoming <strong>value 4 to 3</strong>, so the two Chinese text-language choices share one Chinese voice-language selection in the studied build. This behavior does not establish that every line in each language has a voiced cue, nor does it imply that text and spoken language must always be the same.</p>
+<p>Other globals for input and UI sit in the same overall engine environment but have separate update paths. For example the keyboard-state buffer and the current input-mode byte are not the language controls; changing one is not evidence of a problem with the others.</p>
+<p><strong>Evidence:</strong> direct static read of native getters/setters for build <code>steam-678ccb46</code>, not a new in-game localization test. The precise voice table resolution for each cue belongs to the audio subsystem.</p>
+<p><strong>Attribution:</strong> EDF Knowledge Hub <code>edf6/globals.md</code>, facts <code>text-language-global</code>, <code>voice-language-global</code>, <code>input-ui-globals</code>, contributors novae (ajane) and original research authors. See <a href="edf6-voice-bgm-subtitle-text-table-and-talk-variation.html">EDF6 dialogue and subtitle pipeline</a> and <a href="kh-edf6-globals.html">original globals study</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 / edf6/globals.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-text-selection">Native text selection</a><a href="#voice-language-is-normalized-separately">Voice language is normalized separately</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-text-voice-language-setting-and-chinese-voice-selection"};</script><script src="../assets/site.js" defer></script></body></html>

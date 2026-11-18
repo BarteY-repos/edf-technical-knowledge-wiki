@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission RMPA: binary groups, waypoint IDs and serialization pitfalls Scope: The EDF5 → EDF6 source-only mission RMPA profile established from paired mission res"><title>Mission RMPA: binary groups, waypoint IDs and serialization pitfalls | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Mission RMPA: binary groups, waypoint IDs and serialization pitfalls</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled: source-owned writer + exact paired corpus</div><div id="articleBody"><p><strong>Scope:</strong> The EDF5 → EDF6 source-only mission RMPA profile established from paired mission resources and the retained <code>rmpa_source_only.py</code> writer. Mission RMPA is <strong>not the same format contract</strong> as map RMPA or the RMPA embedded in an MAE weather resource.</p>
+<h2 id="file-and-group-layout">File and group layout</h2>
+<p>The measured EDF6 output begins with a <strong>0x30-byte file header</strong>. Its principal 32-bit fields are <strong>big-endian</strong> (unlike the little-endian NVMD file). The first four bytes are <code>00 50 4D 52</code> (<code>\0PMR</code>), followed by version <strong>1</strong>.</p>
+<p>Four top-level group sections are referenced independently: <strong>routes, shapes, camera and spawn points</strong>. The audited writer places the first route type header at <code>0x30</code> and the first waypoint record at <code>0x50</code>.</p>
+<table>
+<thead>
+<tr>
+  <th>Record</th>
+  <th>Measured footprint</th>
+  <th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>File header</td>
+  <td><code>0x30</code> bytes</td>
+  <td>Version and group offsets/counts</td>
+</tr>
+<tr>
+  <td>Group type header</td>
+  <td><code>0x20</code> bytes</td>
+  <td>Group and string-table references</td>
+</tr>
+<tr>
+  <td>Waypoint</td>
+  <td><code>0x30</code> bytes</td>
+  <td>Global ID, position, links, descriptor</td>
+</tr>
+<tr>
+  <td>Route group</td>
+  <td><code>0x18</code> bytes</td>
+  <td>Membership and group-level references</td>
+</tr>
+<tr>
+  <td>Shape</td>
+  <td><code>0x24</code>-byte header plus <code>0x40</code>-byte payload; standard <code>0x10</code> metadata</td>
+  <td>Shape name/type and geometry</td>
+</tr>
+<tr>
+  <td>Spawn point</td>
+  <td><code>0x34</code> bytes</td>
+  <td>Global ID, two positions and name</td>
+</tr>
+</tbody>
+</table>
+<p>Some small descriptors are stored <strong>little-endian even though primary records are big-endian</strong>. An implementation must inspect each field rather than treating the whole file as one homogeneous byte order.</p>
+<h2 id="why-route-ids-change-in-a-conversion">Why route IDs change in a conversion</h2>
+<p>EDF5 route groups can number waypoints locally. The studied EDF6 profile uses <strong>one flattened global waypoint sequence</strong>. A local outgoing <code>next</code> reference must be translated by the containing route group's starting position.</p>
+<p><strong>For <code>MISSION.RMPA</code> specifically</strong>, the independently audited <code>mission_rmpa_source_only.py</code> builder flattens waypoint records across source route groups in file order and assigns <code>waypoint.no = 0, 1, …, N−1</code>. Each source <code>waypoint.gid</code> remains a <strong>separate, preserved identity</strong>, and route-local <code>next</code> indices are rebased to global waypoint indices by adding the route group's cumulative start offset. The 141-mission source/target audit confirms this global numbering, GID conservation, next-link rebasing and width conservation for <strong>5,103/5,103</strong> waypoints.</p>
+<p><strong>Do not import a <code>MAPB_T2_count + 3</code> starting-index rule from a map-owned RMPA/placement writer into the mission-owned profile.</strong> The inspected <code>mission_rmpa_source_only.py</code> takes only the original <code>MISSION.RMPA</code>, without MAPB placement count input. Cross-file identifiers, MAPB placement IDs and native NAV semantics remain separate systems. If another tool uses MAPB-based identity construction, that is a distinct format or tool-specific contract requiring its own evidence.</p>
+<h2 id="alignment-and-string-addressing">Alignment and string addressing</h2>
+<p>In the inspected <strong>mission</strong> writer, per-waypoint next-link arrays are padded to <strong>16-byte</strong> alignment when nonempty, and the <strong>route-group membership arrays also begin at 16-byte boundaries</strong>. The shape and spawn areas have independent 16-byte alignment rules. The shared UTF-16BE string table begins with the writer's <strong>two-byte zero anchor</strong>; an alleged eight-byte route-list prefix belongs to a different studied writer/packing context and is <strong>not</strong> a rule of this mission RMPA implementation.</p>
+<p>String records are UTF-16BE in the examined source-only profile, with a two-byte zero prefix. Several references are <strong>record-relative or field-relative</strong>, not absolute file pointers. Treat the base of each offset as part of its individual record's specification.</p>
+<p>One older RMPA description conflated a type-header field with an enumeration-subheader field near <code>0x1C</code>; the later correction stressed that <strong>field offsets are meaningful only relative to the correct structure base</strong>. Do not paste a context-free <code>0x18</code>/<code>0x1C</code> pointer rule into all RMPA variants.</p>
+<h2 id="validation">Validation</h2>
+<ol>
+<li>Check <code>\0PMR</code> and version, all four group ranges, and internal section counts.</li>
+<li>Confirm the route-local-to-global mapping for every outgoing waypoint link.</li>
+<li>Validate string pointer bases, mixed-endian descriptor fields and alignment.</li>
+<li>Resolve target IDs to the intended MAPB placements, shapes and scripts.</li>
+<li>Treat structural/byte tests and actual mission gameplay as separate evidence.</li>
+</ol>
+<p>In the shipping141 source/target research corpus, <strong>5,103 waypoints</strong>, <strong>1,355 shapes</strong>, <strong>3,387 spawn records</strong> and <strong>6,665 literal mission-script-to-RMPA references</strong> were accounted for in the offline gate. They are observed test counts, not limits of the binary format.</p>
+<p>Related: <a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">mission RMPA source-only profile</a>, <a href="missions-%26-scripting-how-missions-events-and-rmpa-work.html">mission events and RMPA</a>.</p>
+<p><strong>Evidence:</strong> retained <code>mission_rmpa_source_only.py</code>, <code>validate_mission_rmpa.py</code>, source/target audits and portable 141-mission gate. No new Windows runtime qualification.</p>
+<h2 id="source-target-proof-boundary-and-one-unusual-metadata-case-r94">Source/target proof boundary and one unusual metadata case (R94)</h2>
+<p>The full 141-mission source-only gate reports <strong>5,103 waypoints</strong>, <strong>1,355 shapes</strong>, <strong>3,387 spawns</strong> and <strong>6,665 AC-to-RMPA literal references</strong>, with <strong>zero</strong> missing generated RMPA names. A later portable source recovery matched the historical R1 output SHA for <strong>141/141</strong> mission candidates. This confirms a repeatable standalone format profile and source-reference closure, <strong>not gameplay-runtime acceptance</strong>.</p>
+<p>The exact target-profile audit found <strong>1,354/1,355</strong> shapes with the standard <code>Usage</code> / <code>通常</code> metadata and a single reference-port exception in <code>M061</code>, where one camera-named shape omitted it. Source semantics did not supply a reliable generic discriminator, so the source-only writer uses the standard descriptor and leaves the exceptional port-specific tuning <strong>unresolved</strong>, not hardcoded for all shapes.</p>
+<p><strong>Source:</strong> <code>MISSION_RMPA_SOURCE_ONLY_SHIPPING141_GATE_2026-08-27.json</code>, <code>MISSION_RMPA_PORTABLE_SHIPPING141_GATE_2026-09-04.json</code>, <code>MISSION_RMPA_TARGET_PROFILE_SHIPPING141_AUDIT_2026-08-27.json</code> and <code>mission_rmpa_source_only.py</code>, under <code>/EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/</code>.</p>
+<h2 id="shipping141-per-mission-evidence">Shipping141 per-mission evidence</h2>
+<p>See the <a href="edf5-edf6-mission-rmpa-141-mission-record-catalog.html">141-mission record catalogue</a> and <a href="edf5-edf6-mission-rmpa-reference-tuning-and-ac-dependencies.html">68-mission reference-tuning casebook</a> for the actual observed record inventories and named differences between paired EDF5/EDF6 reference resources.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/converter/mac/rmpa_source_only.py</li><li>R37 mission-RMPA source-only corpus</li><li>R6 format correction notes</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#file-and-group-layout">File and group layout</a><a href="#why-route-ids-change-in-a-conversion">Why route IDs change in a conversion</a><a href="#alignment-and-string-addressing">Alignment and string addressing</a><a href="#validation">Validation</a><a href="#source-target-proof-boundary-and-one-unusual-metadata-case-r94">Source/target proof boundary and one unusual metadata case (R94)</a><a href="#shipping141-per-mission-evidence">Shipping141 per-mission evidence</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-mission-rmpa-binary-records-groups-and-global-identities"};</script><script src="../assets/site.js" defer></script></body></html>

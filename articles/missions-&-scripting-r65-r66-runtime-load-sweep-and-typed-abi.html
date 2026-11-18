@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 mission-script ABI: typed MovingFortress calls, bools and fog Syntactically valid target AngelScript calls may still have incorrect typed argument domains "><title>EDF6 mission AngelScript ABI: MovingFortress types, booleans and fog | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 mission AngelScript ABI: MovingFortress types, booleans and fog</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime-proven compile/load classes</div><div id="articleBody"><p>Syntactically valid target AngelScript calls may still have incorrect <strong>typed argument domains</strong> or incomplete visual semantics. The retained EDF5→EDF6 source and modded runtime evidence established three useful independent boundaries.</p>
+<h2 id="object-movingfortress-activate-symbolic-domains"><code>Object::MovingFortress_Activate</code> symbolic domains</h2>
+<p>In the studied EDF6 script API, the object method accepts symbolic weapon and mode domains, not arbitrary interchangeable raw integers. The following pairs were used in the runtime-qualified modified missions M007, M021, M020 and M035; qualification concerned <strong>compile/load and this call domain</strong>, not complete fortress AI/pathing.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Raw source value</th>
+  <th>EDF6 symbolic parameter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td><code>MOVINGFORTRESS_BIG_CANNON</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td><code>MOVINGFORTRESS_CANNON</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td><code>MOVINGFORTRESS_SMALL_CANNON1</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>8</code></td>
+  <td><code>MOVINGFORTRESS_SMALL_CANNON2</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>16</code></td>
+  <td><code>MOVINGFORTRESS_SMALL_CANNON3</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>32</code></td>
+  <td><code>MOVINGFORTRESS_SMALL_CANNON_GREEN</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">Mode <code>0</code></td>
+  <td><code>MOVINGFORTRESS_FORT</code></td>
+</tr>
+<tr>
+  <td style="text-align:right">Mode <code>1</code></td>
+  <td><code>MOVINGFORTRESS_MOVING</code></td>
+</tr>
+</tbody>
+</table>
+<p>The native logical values and API type declarations are separate; do not infer that arbitrary numeric literals retain the correct typed domain.</p>
+<h2 id="boolean-domain-source-conversion">Boolean-domain source conversion</h2>
+<p>A source expression written in the form:</p>
+<pre><code class="language-cpp">IsOnlineMode() == 0
+</code></pre>
+<p>required target-domain Boolean semantics in the tested M081 case:</p>
+<pre><code class="language-cpp">IsOnlineMode() == false
+</code></pre>
+<p>An earlier test passed at compile/load, but a later combined candidate had a separate regression. The observed lesson is about the <strong>target function's Boolean return domain</strong>, not proof that any integer-to-Boolean replacement is always legal in every mission.</p>
+<h2 id="sceneeffect-fog-native-public-binding-versus-visual-composition"><code>SceneEffect_Fog</code> native public binding versus visual composition</h2>
+<p>The recovered live public script call was:</p>
+<pre><code class="language-text">SceneEffect_Fog(float, float, float, float)
+</code></pre>
+<p>Direct use of an internal fog implementation was not an accepted substitute. In a tested modified runtime, M200 and M201 both <strong>compiled and loaded</strong> with the public four-float ABI, yet <strong>visual parity failed</strong>: their fog remained weak relative to the source. The retained binary analysis recorded EDF6 internal particle count <strong>400</strong> and particle size <strong>10.0</strong>; the missing density was not explained simply by discarding a source particle count. The dense-fog scene uses particle fog <strong>together with environmental fog distance/color/background state</strong>.</p>
+<p>This demonstrates why a correct call signature is not sufficient to reproduce a complete effect. See <a href="maps-%26-navigation-mae-weather-dsgo-envmap-rmpa-binding.html">MAE weather environment bindings</a>.</p>
+<h2 id="scope-and-evidence">Scope and evidence</h2>
+<p>The historical runtime sweep tested compile/load for numerous missions but was not a complete mission-clear or multiplayer parity campaign. The exact retained examples above are bounded to their call family, source and target game build. Other runtime failures were environmental or content-specific; they do not change the identified script ABI.</p>
+<h2 id="native-dense-fog-is-a-composition-not-a-single-particle-call">Native dense fog is a composition, not a single particle call</h2>
+<p>The exact EDF6 runtime <code>SceneEffect_Fog(float,float,float,float)</code> binding constructs particles using a fixed <strong>400</strong> instances (<code>0x190</code>) and particle size <strong>10.0</strong>; its script duration/speed/horizontal parameters are forwarded through the registered callback. The examined native mission helper <code>Merman_FogScene(second, near, far, apply_ratio)</code> combines <strong>five</strong> components:</p>
+<ol>
+<li><code>EVENT_LIGHT_ENV_FADE_FOG_BG_APPLY</code>;</li>
+<li><code>EVENT_LIGHT_ENV_FADE_FOG_COLOR</code>;</li>
+<li><code>EVENT_LIGHT_ENV_FADE_FOG_DISTANCE</code>;</li>
+<li><code>SceneEffect_Fog(...)</code>;</li>
+<li><code>SceneEffect_StartFade(...)</code>.</li>
+</ol>
+<p>In the examined modified EDF5-content runtime, M200 and M201 moved from compile/load failure to <strong>compile/load PASS but visually weak fog</strong>. Therefore a correct public fog ABI cannot by itself prove the map's source-authentic short-visibility effect. M200 used <code>NW_JYOUSUICITY / cloudy</code>, whereas M201 used <code>NW_KITAGUNICITY / cloudy</code>, with distinct mission event sequences; it is unproven that the two have an identical missing carrier. Likewise the M020_5 sandstorm failure was traced to environmental map/profile behavior despite closely matching high-level mission script calls on the native EDF6 <code>IG_2000MCITY601 / evening</code> comparison.</p>
+<p>The specific negative tests do <strong>not</strong> justify an arbitrary fog-distance multiplier, replacement of source weather with a similarly named map, or copying native 601 weather assets into a separate map profile. The original evidence is <a href="maps-%26-navigation-mae-weather-dsgo-envmap-rmpa-binding.html">EDF6 MAE environment binding</a> plus the bounded <code>EDF5_EDF6_FOG_WEATHER_RUNTIME_FRONTIER_R66B_2026-09-05.md</code> runtime report.</p>
+<h2 id="distinguishing-a-failed-script-compilation-from-failed-in-game-behavior">Distinguishing a failed script compilation from failed in-game behavior</h2>
+<p>In an early <code>M008</code> build (visible mission 12), the apparent black screen was traced to a <strong>direct AngelScript compiler error</strong> rather than an inferred map or resource-loading failure:</p>
+<pre><code class="language-text">Can't implicitly convert from 'bool' to 'int&amp;'.
+</code></pre>
+<p>The generated carrier-wait loops discarded <code>IsAiMoveEnd(carrier01/2/3)</code> query results, assigned Boolean expressions to integer/counter fields and had a <code>while(true)</code> path lacking the correct terminating break. The working EDF5 source/official target comparison instead forms a Boolean OR of <strong>negated</strong> movement-completion queries, conditionally includes <code>carrier01_4</code> on higher difficulty, yields and exits once all relevant carriers have completed movement. A targeted control restored that intended polling structure without changing weather, mission RMPA or map geometry.</p>
+<p>The later broad <strong>R65 runtime sweep explicitly reports M008 compile/load PASS</strong>. Thus the early black-screen <em>mechanism</em> is important as a BVM-to-AC typing/control-flow pitfall, but <strong>the old M008 failure is not the latest known blocker</strong>. The early uppercase-preload experiment failed as a root-cause test; do not present it as the successful M008 fix. Likewise, R65 tested many missions for compile/load, not full mission-clear parity. Evidence: <code>M008_BLACKSCREEN_COMPILE_ROOT_CAUSE_UPDATE_2026-09-04.md</code> and <code>EDF5_EDF6_R65_RUNTIME_SWEEP_ACCEPTANCE_AND_R66A_FRONTIER_2026-09-04.md</code>.</p>
+<h2 id="the-later-runtime-resolution-of-the-two-fog-missions">The later runtime resolution of the two fog missions</h2>
+<p>The <strong>weak-visibility failure reported above is an earlier implementation state, not the latest verified status for those two missions</strong>. Both <code>M200</code> (displayed #58, <code>NW_JYOUSUICITY</code>) and <code>M201</code> (displayed #72, <code>NW_KITAGUNICITY</code>) received a subsequent <strong>direct modified-game runtime PASS</strong> for loading <strong>and effective fog/visibility behavior</strong> with source-derived, map-local <code>e5cloudy</code> weather profiles. This was not a new patch to the four-argument <code>SceneEffect_Fog</code> binding alone.</p>
+<p>The accepted profile path kept the original EDF5 <code>CLOUDY</code> RAB bytes under distinct <strong><code>E5CLOUDY</code></strong> names, used a source-derived weather RMPA representation, and changed the mission <code>PreloadMap</code>/<code>Map</code> weather choice from <code>cloudy</code> to <code>e5cloudy</code>. It did <strong>not</strong> overwrite the stock EDF6 <code>cloudy</code> profile, retune an arbitrary fog constant, or revive an internal fog callback. The two source maps and their weather assets were verified separately; the runtime PASS is for the <strong>tested mission/profile combinations</strong>, not a universal theorem about every EDF5 fog event or every source map.</p>
+<p>This is a useful causal sequence: <strong>script ABI repaired -&gt; mission loads but environment differs -&gt; source weather selection repaired -&gt; direct mission runtime accepted</strong>. If documenting the earlier failure, also document the later positive result. Evidence: <code>EDF5_EDF6_FOG_WEATHER_RUNTIME_FRONTIER_R66B_2026-09-05.md</code>, <code>EDF5_EDF6_M200_M201_R81_E5CLOUDY_SOURCE_WEATHER_AUDIT_2026-09-05.json</code>, <code>EDF5_EDF6_M200_M201_R81_E5CLOUDY_RUNTIME_PASS_2026-09-06.md</code>. No fresh game test was executed to create this article.</p>
+<h2 id="independent-mission-specific-runtime-confirmations-and-stale-backlog-entries">Independent mission-specific runtime confirmations and stale backlog entries</h2>
+<p>The early broad R65 backlog explicitly mixed <strong>runtime-positive</strong> cases, source/compile repairs awaiting smoke and separate <em>regression watch</em> reports. Its older M008 black-screen note was a compiler and Boolean-query control-flow defect, later superseded by compile/load success for the targeted carrier polling path. Its M200/M201 R66B visual failures were later superseded only <strong>for the tested E5CLOUDY runtime compositions</strong>, not by the generic fog callback. Conversely, early M072_3 and AI route watch items are not converted into successes by the R65 source gates alone.</p>
+<p>Three scoped runtime observations worth keeping distinct:</p>
+<ul>
+<li><code>DM024</code>: direct modified-game <strong>PASS</strong> for a <code>DropBoat_SetCrew</code> <strong>object-return type</strong> compatibility repair, while its independent <code>M075</code> use site remained a separate optional test (<code>DM024_R50_RUNTIME_PASS_2026-08-28.json</code>).</li>
+<li><code>DM021</code>, <code>DM001</code>, and mission metadata V3: the R54 user test accepted the <em>specific</em> DLC2 #3 spawn, practically accepted the then-current DM001, and confirmed tested campaign/limits/resource/drop metadata. The inherited R18–R32 DM001 diagnostic branches were not all separately retested (<code>R54_RUNTIME_STATE_2026-09-01.json</code>).</li>
+<li><code>M018</code> (<em>Escape</em>): native EDF6 DLC <code>RM018/MISSION.RMPA</code> returned direct <strong>PASS</strong> for opening NPC route pacing, with 4 route groups / 11 waypoints and unchanged shape/spawn records. It is mission-local vertical grounding, not a global RMPA transform (<code>EDF5_EDF6_M018_ESCAPE_RM018_RMPA_RUNTIME_ACCEPTANCE_2026-09-06.md</code>).</li>
+</ul>
+<p>These are <em>reported user runtime observations in modified content</em>, not source-only checks or claims that the whole ported 141-mission campaign was replayed. See <a href="missions-edf5-edf6-selected-cross-generation-gameplay-discrepancies.html">cross-gameplay cases</a> for the exact M018 and convoy lineage.</p>
+<h2 id="patch-1-0-2-versus-1-0-3-do-not-conflate-static-overlays-with-native-gameplay">Patch 1.0.2 versus 1.0.3: do not conflate static overlays with native gameplay</h2>
+<p>The <strong>1.0.2 RC1</strong> offline validation covered <strong>32/32 MISSION.AC files</strong>, 0 validator errors and one explicitly non-gating absent UTF-8 BOM in <code>M003</code>. A separately checked overlay simulation copied <strong>41/41</strong> payload files, preserved <strong>11/11</strong> inherited critical assets, kept all <strong>6/6</strong> LIST/TXT resources unchanged and left 145 physical mission directories including historical non-LIST residues. Its static assertions checked four-argument public fog ABI, <code>E5CLOUDY</code>/<code>E5EVENING</code> names and specific mission resource references. Those checks <strong>do not</strong> prove a combined RC gameplay regression.</p>
+<p>The <strong>1.0.3</strong> archive is a further <strong>incremental overlay over 1.0.2</strong>, with <strong>eight production files</strong> (two Desert508 MAEs and two RABs, the English VOICETABLE, <code>M018</code> route RMPA, <code>M020_5</code> AC and <code>DM018</code> AC), packaged with 10 ZIP entries and <strong>0 static pre/post ZIP validation errors</strong>. It is not a stand-alone replacement for 1.0.2, and its static PASS alone certifies no new mission behavior. The contemporaneous <code>R85</code> runtime ledger directly reports <code>M200/M201</code> R81 fog <strong>PASS</strong>, but lists the current exact-RC smoke and private two-peer testing as qualification gaps, and <code>DM019</code> AI-wall as a historical runtime failure needing a current retest. An <code>R79</code> caption suppression fix was still pending at the time of <strong>R85</strong>, independently of the later R97 subtitle observation.</p>
+<p>This corrects the most common bad reading of the release lineage: <strong>package-validation PASS</strong>, <strong>particular in-game mission PASS</strong>, and <strong>unperformed exact-package smoke</strong> are three separate evidence levels. Sources: <code>EDF5_EDF6_PATCH_1_0_2_RC1_STATIC_VALIDATION_2026-09-06.json/.md</code>, <code>EDF5_EDF6_PATCH_1_0_2_RC1_RUNTIME_STATE_R85_2026-09-06.json</code>, <code>PATCH_1_0_3_STATIC_VALIDATION_2026-09-06.json</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_R65_RUNTIME_SWEEP_ACCEPTANCE_AND_R66A_FRONTIER_2026-09-04.md</li><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_R67_WEATHER_BRIDGE_FRONTIER_2026-09-05.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/runtime/EDF5_EDF6_FOG_WEATHER_RUNTIME_FRONTIER_R66B_2026-09-05.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/runtime/M008_BLACKSCREEN_COMPILE_ROOT_CAUSE_UPDATE_2026-09-04.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/runtime/EDF5_EDF6_R65_RUNTIME_SWEEP_ACCEPTANCE_AND_R66A_FRONTIER_2026-09-04.md</li><li>data/R166_TARGETED_SOURCE_CLAIM_DISPOSITIONS.csv</li><li>data/R167_REMAINING_39_SOURCE_CLAIM_DISPOSITIONS.csv</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#object-movingfortress-activate-symbolic-domains">Object::MovingFortress_Activate symbolic domains</a><a href="#boolean-domain-source-conversion">Boolean-domain source conversion</a><a href="#sceneeffect-fog-native-public-binding-versus-visual-composition">SceneEffect_Fog native public binding versus visual composition</a><a href="#scope-and-evidence">Scope and evidence</a><a href="#native-dense-fog-is-a-composition-not-a-single-particle-call">Native dense fog is a composition, not a single particle call</a><a href="#distinguishing-a-failed-script-compilation-from-failed-in-game-behavior">Distinguishing a failed script compilation from failed in-game behavior</a><a href="#the-later-runtime-resolution-of-the-two-fog-missions">The later runtime resolution of the two fog missions</a><a href="#independent-mission-specific-runtime-confirmations-and-stale-backlog-entries">Independent mission-specific runtime confirmations and stale backlog entries</a><a href="#patch-1-0-2-versus-1-0-3-do-not-conflate-static-overlays-with-native-gameplay">Patch 1.0.2 versus 1.0.3: do not conflate static overlays with native gameplay</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-r65-r66-runtime-load-sweep-and-typed-abi"};</script><script src="../assets/site.js" defer></script></body></html>

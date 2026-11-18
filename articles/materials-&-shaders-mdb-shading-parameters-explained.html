@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MDB material parameters — roughness, metallic and normals How these values are actually stored in MDB The equations above describe shader semantics. A native MD"><title>MDB material parameters — roughness, metallic and normals | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>MDB material parameters — roughness, metallic and normals</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Technical reference · Mixed: native, corroborated and reference-derived</div><div id="articleBody"><h2 id="how-these-values-are-actually-stored-in-mdb">How these values are actually stored in MDB</h2>
+<p>The equations above describe <strong>shader semantics</strong>. A native MDB also has its own typed parameter and sampler record order. For example, <code>snd_BRDF_Map_Common</code> parameters are stored as <code>diffuse, metallic, normal_amount, roughness, specular_color, specular_diffuse_blend</code>, which differs from the reflected shader-variable order. Read <a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">How to read and write native MDB materials</a> before creating a fresh material; it includes the type/size records, observed defaults, texture slot order and raw integer exceptions.</p>
+<p>EDF6 MDB materials combine an <strong>exact shader family</strong>, parameters and textures. Their values should be interpreted according to that family, not according to a universal PBR importer. The equations below describe the studied <strong>ordinary MDB Common/BRDF-style material path</strong>, with provenance and exceptions stated explicitly. They do <strong>not</strong> apply wholesale to legacy character shaders or FieldRender terrain.</p>
+<h2 id="albedo-and-diffuse">Albedo and diffuse</h2>
+<p>For the described Common-family material path, the simple base color is approximately:</p>
+<pre><code class="language-hlsl">float3 baseColor = albedoTexture.rgb * diffuse.rgb;
+</code></pre>
+<p><code>diffuse</code> is a material color factor. The <code>albedo</code> sampler supplies texture color. Depending on the family, other masks can modify the color before it reaches the compositor.</p>
+<h2 id="metallic-which-texture-channel-matters">Metallic: which texture channel matters?</h2>
+<p>For observed <code>param_r_m_*</code> packed-texture families, the material's <code>metallic</code> scalar is <strong>modulated by the green (G) channel</strong>:</p>
+<pre><code class="language-hlsl">metallicValue = saturate(packedTexture.g * material.metallic);
+</code></pre>
+<p>Thus neither <code>metallic=1</code> nor a white albedo guarantees a metallic surface; the packed texture can reduce the effective value. Treat the stored texture's semantic family as part of the rule. Older reflect/spec masks are not automatically the same thing as this packed metallic channel.</p>
+<h2 id="roughness-including-hr">Roughness, including <code>_hr</code></h2>
+<p>For the same Common/BRDF <code>param_r_m_*</code> family, the <strong>red (R) channel</strong> modulates the material roughness scalar:</p>
+<pre><code class="language-hlsl">roughnessValue = saturate(packedTexture.r * material.roughness);
+</code></pre>
+<p>For the sampled <code>_hr</code> variant, <strong>alpha (A) is an additional roughness multiplier</strong>:</p>
+<pre><code class="language-hlsl">roughnessValue = saturate(packedTexture.r * packedTexture.a * material.roughness);
+</code></pre>
+<p>This explains a common Blender/Helix/glTF preview mismatch: connecting only <code>roughness</code> to a PBR shader ignores the red/alpha texture contribution. <code>roughness</code> is not a synonym for older <code>specular_pow</code> values.</p>
+<h2 id="normal-maps-and-normal-amount">Normal maps and <code>normal_amount</code></h2>
+<p>In the described ordinary Common/model-style path, the normal texture uses a nonstandard <strong>R×A / G</strong> decode:</p>
+<pre><code class="language-hlsl">float x = texture.r * texture.a * 2.0 - 1.0;
+float y = texture.g * 2.0 - 1.0;
+float z = sqrt(max(0.00001, 1.0 - x*x - y*y));
+x *= normal_amount;
+y *= normal_amount;
+// Transform (x,y,z) with tangent, binormal and geometric-normal basis,
+// then normalize for the relevant material path.
+</code></pre>
+<p>A conventional RGB or RG normal-map import can therefore be visibly wrong. <code>normal_amount=0</code> disables the tangent-plane perturbation; values greater than one exaggerate it and negative values reverse its X/Y direction. The convention is supported by the supplied rendering description and corroborated in the analyzed Water shader, but <strong>not every EDF shader family has been proven to use it</strong>.</p>
+<p><strong>FieldRender exception:</strong> the studied terrain normal path reconstructs X from <code>R×B</code>, and Y has an inverted sign; see <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender textures and normals</a>. Do not reuse the MDB decoder blindly for terrain.</p>
+<h2 id="color-change-masks">Color-change masks</h2>
+<p>For two-channel <code>param_cm0_cm1</code>, the supplied rendering description uses <strong>sequential interpolation</strong>, not one combined tint multiply:</p>
+<pre><code class="language-hlsl">float3 c = lerp(diffuse, change_color0, colorMask.r);
+c = lerp(c, change_color1, colorMask.g);
+float3 result = albedo.rgb * c;
+</code></pre>
+<p>The second interpolation sees the result of the first. Channel order and family-specific UV routing matter.</p>
+<h2 id="cutout-alpha-clip">Cutout/alpha clip</h2>
+<p>In <code>snd_BRDF_Map_Common_Clip</code>, pixels below the <code>alpha_clip</code> threshold are discarded:</p>
+<pre><code class="language-hlsl">if (albedoAlpha &lt; alpha_clip) discard;
+</code></pre>
+<p>In a 44-material native sample, 42 used <code>alpha_clip=0.5</code> and two used <code>0.3435</code>. Those counts are <strong>sample results</strong>, not universal defaults. Native BC1/DXT1 textures with one-bit transparency have been observed in foliage using this path.</p>
+<h2 id="specular-color-and-specular-diffuse-blend"><code>specular_color</code> and <code>specular_diffuse_blend</code></h2>
+<p>The supplied compositor description gives the following BRDF-family logical mixing rule:</p>
+<pre><code class="language-hlsl">float blend = metallicValue * specular_diffuse_blend;
+float3 specularRGB = lerp(specular_color,
+                           preEmissionAlbedo * specular_color,
+                           blend);
+float3 F0 = specularRGB * (0.04 + 0.96 * metallicValue);
+</code></pre>
+<p>This is a <strong>guide-derived model of the general path</strong>, not a claim of native-byte verification for every shader. <code>specular_color</code> participates in specular/Fresnel computation; it is not simply an albedo tint. The described direct-specular term is GGX/Schlick-like, subject to family-specific differences.</p>
+<h2 id="emission-and-light-masks">Emission and light masks</h2>
+<p>Emission is <strong>not universal across EDF6 shader families</strong>. For the studied <code>snd_BRDF_Map_Common_Light</code> shader, native shader analysis supports an accumulation term equivalent to:</p>
+<pre><code class="language-hlsl">emissionAccum.rgb = packedLightMask.b * light_color.rgb;
+</code></pre>
+<p>A mandatory extra multiplication by albedo has not been established for that exact write. Do not force one generic <code>albedo × light_color × mask</code> formula onto all families.</p>
+<h2 id="occlusion-and-why-a-standard-pbr-preview-differs">Occlusion and why a standard PBR preview differs</h2>
+<p>The supplied rendering model describes an unusual intermediate where the <strong>length of the stored surface normal</strong> carries occlusion information:</p>
+<pre><code class="language-hlsl">normalXYZ = normalizedSurfaceNormal * occlusion;
+</code></pre>
+<p>For the described composition, ambient diffuse can scale approximately with squared normal length, while several directional/specular/environment terms scale with length. This is not the same as applying a conventional ambient-occlusion texture only to base-color darkening. The system also includes distinct environment weighting, fog and HDR/exposure/bloom behavior. A Principled BSDF or generic glTF preview is therefore only a <strong>useful approximation</strong>.</p>
+<h2 id="shader-names-do-not-imply-interchangeable-data">Shader names do not imply interchangeable data</h2>
+<p>Older <code>snd_Map_*</code>, <code>SND_CHARA_BASIC</code> and specialized Window/Glass/Parallax/DirtScroll/Signboard materials can use different parameter and sampler ABIs. <code>specular_pow</code> must not be silently renamed <code>roughness</code>. Raw integer <code>type=4</code> parameters must retain their <strong>u32 bits</strong>, not float32 numeric values (for example raw integer <code>2</code> is <code>02 00 00 00</code>, whereas float <code>2.0</code> is <code>00 00 00 40</code>).</p>
+<p>For material-by-material tables and typed parameter order, see <a href="materials-%26-shaders-native-structural-profile-reference-blender-addon.html">native shader profiles</a>, <a href="materials-%26-shaders-specialized-map-material-abis-window-glass-parallax-dirtscroll-signboard.html">specialized shader families</a> and <a href="materials-%26-shaders-material-parameter-type-4-raw-integer-bits-in-float-sized-lanes-blender-addon.html">raw type-4 values</a>.</p>
+<p>For sampled shader-family counts, ordered sampler layouts and the <code>type=4</code> raw-u32 exception, see <a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">the native MDB shader family field guide</a>.</p>
+<h2 id="evidence-and-limits">Evidence and limits</h2>
+<ul>
+<li><strong>Native observations:</strong> sampled MDB material schemas and texture binding; exact Common_Clip/Light family behavior where audited; native texture/channel and source paired-asset findings.</li>
+<li><strong>Corroborated but not universal:</strong> Common/Water-style normal decoding, selected packed R/M rules.</li>
+<li><strong>External descriptive guide:</strong> parts of the high-level specular, occlusion and scene compositor equations above. Treat these as useful qualified descriptions, not proof for every shader binary.</li>
+<li><strong>Still unknown:</strong> universal behavior of legacy <code>SND_CHARA_BASIC</code>/non-BRDF scene composition, and a universally faithful stock Blender/glTF preview.</li>
+</ul>
+<h2 id="native-water-is-a-separate-mdb-shader-family">Native Water is a separate MDB shader family</h2>
+<p>One retained native MDB, <code>eu1_nw_field01_water.mdb</code>, uses <code>snd_BRDF_Map_Water</code> and has associated water-shore and normal texture resources. The wider four-map retained census does not establish separate River/Ocean shader families. See <a href="materials-%26-shaders-edf6-static-water-material-corpus-findings.html">native static-water shader evidence</a>. The existence of this specialized family does not change how unrelated BRDF or legacy MDB shaders should be interpreted.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_BLENDER_MDB_ADDON_INTEROP_RESEARCH_R4_2026-11-13.zip</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13.zip</li><li>EDF6 Common/Water family shader evidence</li><li>Supplied EDF6 rendering and compositor guide</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#how-these-values-are-actually-stored-in-mdb">How these values are actually stored in MDB</a><a href="#albedo-and-diffuse">Albedo and diffuse</a><a href="#metallic-which-texture-channel-matters">Metallic: which texture channel matters?</a><a href="#roughness-including-hr">Roughness, including _hr</a><a href="#normal-maps-and-normal-amount">Normal maps and normal_amount</a><a href="#color-change-masks">Color-change masks</a><a href="#cutout-alpha-clip">Cutout/alpha clip</a><a href="#specular-color-and-specular-diffuse-blend">specular_color and specular_diffuse_blend</a><a href="#emission-and-light-masks">Emission and light masks</a><a href="#occlusion-and-why-a-standard-pbr-preview-differs">Occlusion and why a standard PBR preview differs</a><a href="#shader-names-do-not-imply-interchangeable-data">Shader names do not imply interchangeable data</a><a href="#evidence-and-limits">Evidence and limits</a><a href="#native-water-is-a-separate-mdb-shader-family">Native Water is a separate MDB shader family</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-mdb-shading-parameters-explained"};</script><script src="../assets/site.js" defer></script></body></html>

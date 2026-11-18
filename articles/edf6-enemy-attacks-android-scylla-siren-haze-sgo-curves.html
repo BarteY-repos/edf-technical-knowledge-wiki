@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 Androids, Scylla, Siren and Haze: SGO-defined damage curves Evidence: Source-attributed static inspection of EDF6 steam-678ccb46 game_object_level / DSGO r"><title>EDF6 Androids, Scylla, Siren and Haze: DSGO attack curves | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 Androids, Scylla, Siren and Haze: DSGO attack curves</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> Source-attributed static inspection of EDF6 <code>steam-678ccb46</code> <code>game_object_level</code> / DSGO records in the <em>EDF Knowledge Hub</em> (2026-11-14, <code>54f89cd</code>). These are asset-defined <strong>base attack values</strong>, not full end-to-end measured gameplay damage.</p>
+<h2 id="the-common-normalized-level-and-interpolation">The common normalized level and interpolation</h2>
+<p>In this family, use <code>v = L/10</code>. The common interpolation coefficient is:</p>
+<p><code>q = clamp((v - 1)/29, 0, 1)</code>.</p>
+<p>Many asset values use <code>lerp(a,b,q) × v</code>. Some <code>BerserkerSettings</code> use <code>(v-1)/29</code> <strong>without clamping</strong>. Consequently, treating <em>all</em> enemy growth as capped at <code>v=30</code> is incorrect.</p>
+<h2 id="androids-and-their-variants">Androids and their variants</h2>
+<table>
+<thead>
+<tr>
+  <th>Asset/attack</th>
+  <th>Native source-data formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Standard Android <code>e602_berserker</code> rocket punch</td>
+  <td><code>lerp(10,15,q) × v</code></td>
+</tr>
+<tr>
+  <td>High Mobility Android grapple</td>
+  <td><code>lerp(8,12,q) × v</code></td>
+</tr>
+<tr>
+  <td>Super Android ace punch</td>
+  <td><code>lerp(20,30,q) × v</code></td>
+</tr>
+<tr>
+  <td>Giant Android punch</td>
+  <td><code>lerp(20,30,q) × v</code></td>
+</tr>
+<tr>
+  <td>Android beam A / B</td>
+  <td><code>5v</code> / <code>10v</code></td>
+</tr>
+<tr>
+  <td>Giant Android ordinary gun</td>
+  <td><code>10v</code></td>
+</tr>
+<tr>
+  <td>Giant Android machine gun / spread</td>
+  <td><code>3v</code> / <code>5v</code></td>
+</tr>
+<tr>
+  <td>Cyclops standard projectile</td>
+  <td><code>2v</code>; ace variant <code>1v</code></td>
+</tr>
+<tr>
+  <td>Cyclops stomp</td>
+  <td><code>30v</code></td>
+</tr>
+<tr>
+  <td>Grenadier bomb object</td>
+  <td>ordinary <code>20v</code>; middle bomb <code>60v</code></td>
+</tr>
+</tbody>
+</table>
+<p>This table is not a claim that every attack in a class uses one global <code>damage</code> scalar. The source data place values under <code>BerserkerSettings/PartsShootList</code>, gun-battery entries and distinct bomb objects. The linked community source records identify the exact classes.</p>
+<h2 id="scylla-haze-and-heavy-dango">Scylla, Haze and heavy Dango</h2>
+<table>
+<thead>
+<tr>
+  <th>Creature</th>
+  <th>Attack</th>
+  <th>Asset-derived base value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Scylla <code>e603_merman</code></td>
+  <td>Water-gun bullet</td>
+  <td><code>1v</code> per projectile; recorded burst count 30</td>
+</tr>
+<tr>
+  <td>Scylla</td>
+  <td>Poison mist</td>
+  <td><code>0.12v</code>; the light variant uses <code>0.36v</code>, with continuing area-hit behavior</td>
+</tr>
+<tr>
+  <td>Scylla</td>
+  <td>Dive / hands / hopping</td>
+  <td><code>40v</code></td>
+</tr>
+<tr>
+  <td>Scylla</td>
+  <td>Roll / slide / splash</td>
+  <td><code>30v</code> / <code>20v</code> / <code>2.5v</code></td>
+</tr>
+<tr>
+  <td>Haze <code>e618_squid_small*</code></td>
+  <td>Shot</td>
+  <td><code>15 + 2.5v</code> per projectile</td>
+</tr>
+<tr>
+  <td>Haze</td>
+  <td>Volley size</td>
+  <td><code>min(2 + 0.5v, 6)</code> in the source expression; runtime integer conversion not separately asserted here</td>
+</tr>
+<tr>
+  <td>Heavy Dango</td>
+  <td>Contact</td>
+  <td><code>lerp(100,70,q) × v</code> or <code>lerp(50,30,q) × v</code> depending on attack/variant</td>
+</tr>
+<tr>
+  <td>Heavy Dango large</td>
+  <td>Projectile</td>
+  <td><code>lerp(0.2,1,q) × v</code></td>
+</tr>
+</tbody>
+</table>
+<p>The Dango formulas show an important distinction: <strong>the per-level coefficient may decrease while the total product still increases</strong>. Reading only the start/end interpolation endpoints leads to misleading claims about absolute difficulty.</p>
+<h2 id="siren-glaukos-e604-radon">Siren / Glaukos (<code>e604_radon*</code>)</h2>
+<table>
+<thead>
+<tr>
+  <th>Attack</th>
+  <th>Base value and pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Flame-breath projectile</td>
+  <td><code>0.04v</code> per projectile; source row mentions 120 bullets at two-frame intervals</td>
+</tr>
+<tr>
+  <td>Fireball</td>
+  <td><code>60v</code>, 11 projectiles per volley; a source <code>online_damage_adjust=0.7</code> is recorded</td>
+</tr>
+<tr>
+  <td>Form-2 flame channels</td>
+  <td><code>1.575v</code> and <code>0.9v</code></td>
+</tr>
+<tr>
+  <td>Vertical channels</td>
+  <td><code>3.375v</code> and <code>1.6875v</code></td>
+</tr>
+<tr>
+  <td>Form-2 spark</td>
+  <td><code>10v</code>, blast radius 20</td>
+</tr>
+<tr>
+  <td>Dive contact</td>
+  <td><code>60v</code>, or <code>20v</code> in named mission-specific asset variants</td>
+</tr>
+<tr>
+  <td>Wind pressure / wing flap</td>
+  <td>Fixed source values 150 / 12.5, <strong>not level-scaled</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The mission variants <code>_m051</code>, <code>_m118_5</code> and <code>_rm034</code> change some source values; a universal Siren attack table would hide this. Some entities, such as <code>nephila</code> (Aranea), have attack logic in code that the cited SGO pass did not follow.</p>
+<h2 id="practical-boundaries">Practical boundaries</h2>
+<p>These formulas are excellent for comparing <strong>which native asset paths control which attacks</strong>. They are not a substitute for determining the attack's firing count, collision and target type, online adjustment, and any class-specific code multiplier. Consult <a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">native stop/hit filter behavior</a> and <a href="kh-edf6-enemy-attacks.html">the raw enemy evidence appendix</a> before extrapolating a final damage number.</p>
+<p><strong>Attribution:</strong> novae (ajane), <em>EDF Knowledge Hub</em> (2026-11-14), facts <code>dsgo-family-damage-keys</code>, <code>android-attack-level</code>, <code>scylla-haze-dango-attack-level</code>, <code>siren-attack-level</code>. No new runtime testing.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-common-normalized-level-and-interpolation">The common normalized level and interpolation</a><a href="#androids-and-their-variants">Androids and their variants</a><a href="#scylla-haze-and-heavy-dango">Scylla, Haze and heavy Dango</a><a href="#siren-glaukos-e604-radon">Siren / Glaukos (e604_radon*)</a><a href="#practical-boundaries">Practical boundaries</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-enemy-attacks-android-scylla-siren-haze-sgo-curves"};</script><script src="../assets/site.js" defer></script></body></html>

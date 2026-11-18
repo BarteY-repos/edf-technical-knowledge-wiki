@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Audio Overview Audio spans cue names, bank lookup, stream payloads, positional playback, voice/text ownership and resource lifetime. A correct playback ID is no"><title>Audio | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Audio</a></div><h1>Audio</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Audio</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>Audio spans <strong>cue names, bank lookup, stream payloads, positional playback, voice/text ownership and resource lifetime</strong>. A correct playback ID is not enough if its bank is missing, loaded under a conflicting name or freed while still referenced.</p>
+<h2 id="containers-and-playback">Containers and playback</h2>
+<table>
+<thead>
+<tr>
+  <th>Component</th>
+  <th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>AWE</code>, <code>AWB</code>, <code>ACB</code>, <code>EFARC</code> boundaries</td>
+  <td><a href="audio-awe-awb-acb-and-efarc-container-boundaries.html">Audio containers</a></td>
+</tr>
+<tr>
+  <td>EDF4.1 cue names and collision resolution</td>
+  <td><a href="audio-edf4-1-se-and-voice-bank-lookup-and-lifetime.html">Audio port and bank priority</a></td>
+</tr>
+<tr>
+  <td>Spatial placement and Doppler</td>
+  <td><a href="audio-edf6-spatial-sound-listener-matrix-panning-doppler-and-null-velocities.html">Spatial audio</a></td>
+</tr>
+<tr>
+  <td>Subtitles, voice and language</td>
+  <td><a href="audio-audio-banks-cues-dialogue-and-subtitles-explained.html">Dialogue and subtitle resource ownership</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="cross-version-notes">Cross-version notes</h2>
+<p>An EDF4.1 audio port studied 1,469 source SE entries, including collisions and names absent from EDF6. Its cue map is a <strong>case-specific corpus</strong>, not a promise that all future banks have the same identity. Different bank kinds require distinct handling, and resource ownership must be respected on shutdown. For generic mission dialogue, match the cue, subtitle and timing systems separately.</p>
+<h2 id="added-community-research-reference-japanese-workbook">Added community research reference (Japanese workbook)</h2>
+<ul>
+<li><a href="docs-audio-cues.html">Audio Cues &amp; Custom Sound</a> — source-specific detail, independently verified where stated</li>
+</ul>
+<h2 id="further-native-edf-references">Further native EDF references</h2>
+<ul>
+<li><a href="edf6-native-text-voice-language-setting-and-chinese-voice-selection.html">EDF6 text and voice language setting</a></li>
+</ul>
+<h2 id="further-edf-game-documentation">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf5-npc-radio-voice-table-trigger-conditions-cooldowns.html">EDF5 NPC voice-table triggers and cooldowns</a></li>
+</ul>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="audio-audio-banks-cues-dialogue-and-subtitles-explained.html">Audio and dialogue: banks, cues, languages and subtitles</a><a href="audio-edf6-spatial-sound-listener-matrix-panning-doppler-and-null-velocities.html">Spatial audio in EDF6 mods: listener matrix, equal-power panning and Doppler</a><a href="audio-edf4-1-se-and-voice-bank-lookup-and-lifetime.html">EDF4.1 audio in EDF6 — SE cue names, bank priority, voice playback and shutdown</a><a href="docs-audio-cues.html">Audio Cues &amp; Custom Sound</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#containers-and-playback">Containers and playback</a><a href="#cross-version-notes">Cross-version notes</a><a href="#added-community-research-reference-japanese-workbook">Added community research reference (Japanese workbook)</a><a href="#further-native-edf-references">Further native EDF references</a><a href="#further-edf-game-documentation">Further EDF game documentation</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-audio"};</script><script src="../assets/site.js" defer></script></body></html>

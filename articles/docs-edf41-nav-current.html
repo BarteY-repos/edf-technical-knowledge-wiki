@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 navigation conversion: practical entry point This section explains the reusable technical knowledge needed to investigate or implement navigation/collis"><title>EDF 4.1 navigation: start here | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Index</div><h1>EDF 4.1 navigation: start here</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Documentation</span><span class="chip">Start</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Native source-corpus and exact oracle, offline reconstruction only; no EDF6 in-game runtime tests</div><div id="articleBody"><p>This section explains the <strong>reusable technical knowledge</strong> needed to investigate or implement navigation/collision conversion from EDF 4.1 toward EDF 6. It is not a diary of reconstruction sessions and does not imply that the conversion is complete.</p>
+<h2 id="read-by-task">Read by task</h2>
+<table>
+<thead>
+<tr>
+  <th>Task</th>
+  <th>Where to go</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Understand the exact target and the source-semantic eligibility rules</td>
+  <td><a href="nav-edf41-r1d-source-authority.html">R1D oracle and reconstruction boundaries</a></td>
+</tr>
+<tr>
+  <td>Decode MAPO quaternion, relative position and color-like vector data</td>
+  <td><a href="nav-edf41-mapo-component-transform-evidence.html">MAPO component transforms</a></td>
+</tr>
+<tr>
+  <td>Avoid invalid deduplication and shape-owner shortcuts</td>
+  <td><a href="nav-edf41-selected-body-identity-audits.html">Body and placement identity audits</a></td>
+</tr>
+<tr>
+  <td>Work with MAPB/MAPO/FMB container structure</td>
+  <td><a href="maps-%26-navigation-map-container-stack-mac-mapb-mapo-fmb-fmep.html">Map container stack</a></td>
+</tr>
+<tr>
+  <td>Understand HKT/NVMD generations and validity checks</td>
+  <td><a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">Navmesh HKT / NVMD compatibility</a></td>
+</tr>
+<tr>
+  <td>Diagnose collision and shape data</td>
+  <td><a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Havok collision architecture</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="evidence-rules">Evidence rules</h2>
+<ul>
+<li><strong>Exact historical output:</strong> hashes, geometry counts and retained output can be oracles, but do not reveal the original construction algorithm by themselves.</li>
+<li><strong>Native parsed source data:</strong> demonstrates the existence and distribution of fields in the audited corpus, not automatically their runtime use.</li>
+<li><strong>Offline reconstructed candidate:</strong> may pass a population census but remain byte-incompatible or untested in game.</li>
+<li><strong>Runtime parity:</strong> cannot be inferred without a qualifying in-game test of the exact shipped candidate.</li>
+</ul>
+<p>The R1D target remains open despite a natural candidate with the exact <strong>65 / 1,405 / 251 / 1,153 / 1 / 4,971</strong> census. The source-backed work has already excluded global shape dedupe, simple placement aliases, alternate MAPO bases, body-role selector guesses and the specific eight post-selection full-MAPO-transform carve variants. Re-running those searches without a genuinely new source discriminator is not useful.</p>
+<p><strong>Conversion boundary:</strong> MAPO component transforms, source body <code>motionState</code> and body-local carve placement are related but not interchangeable. Keep map-object collision different from ordinary MDB prop rendering and from mission-side RMPA semantics.</p>
+<p><strong>Source class:</strong> EDF4.1 source-corpus and reconstruction evidence, with the latest selected checkpoint through R100 (15 November 2026). No new runtime evidence in this documentation revision.</p>
+<h2 id="seven-sk-map-terrain-object-contacts">Seven SK map terrain–object contacts</h2>
+<p>See the <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">source-census comparison of seven SK maps</a> for original SHFB versus MAD contacts across 1,770 recognized static-mesh placements. <strong>Contact geometry is not a NAV link</strong>; the R24–R28 offline measurements do not qualify NPC movement.</p>
+<h2 id="seven-original-shfb-maps-native-grid-structural-evidence-r31-r32">Seven original SHFB maps: native-grid structural evidence (R31–R32)</h2>
+<p>The <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">original EDF4.1 seven-SK-map 4 m grid and HKT/NVMD structural atlas</a> adds a different, source-mesh route from the historical HillyCity R1D oracle. Seven maps have a verified <strong>250,000-cell 4 m terrain plan</strong> each; only bounded 2/4/16-tile source windows have structural LOW/HIGH HKT/NVMD results. <strong>No full map HKT, placed-obstacle policy or in-game NPC pathfinding was qualified.</strong> Existing EDF5→EDF6 HKT migration knowledge is reused where it applies, not equated with an absent EDF4.1 source NAV file.</p>
+<h2 id="native-source-solid-and-agent-volume-evidence-from-one-sk-map">Native-source solid and agent-volume evidence from one SK map</h2>
+<p>The later <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">original-mesh 4 m atlas</a> now records a bounded <strong>64-tile / 256 m × 256 m terrain</strong> HKT/NVMD experiment. Even that wider window is not a complete NAV file or a gameplay-positive sample.</p>
+<p>The <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">seven-map terrain/contact study</a> has a subsequent <strong>one-map, 265-instance</strong> 3D refinement. For <code>SK_HEIGEN02</code>, 166 recognized placed MAD meshes satisfy a strict closed-edge-orientation test; 99 are open. An upright example capsule with height <strong>1.8 m</strong> and radius <strong>0.45 m</strong> touches <strong>243 distinct closed-solid candidate grid cells</strong> and <strong>495 open-surface hint cells</strong> across the sample. Those dimensions are <strong>not extracted EDF6 NPC dimensions</strong>. In particular, a road, roof, platform or river/water face may be open and still physically relevant: automatically deleting such cells destroys potentially valid walking surfaces. No native agent profile or gameplay pass has been established.</p>
+<p>The article <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">EDF4.1 source collision and NAV limitations</a> distinguishes this original-SK-map obstacle <em>hypothesis</em> from the independent R1D/HillyCity 4,971-footprint <em>oracle reconstruction</em>. Their measured counts and hashes are not interchangeable.</p>
+<h2 id="recent-original-source-nav-evidence-native-low-high-portals-and-group-placement-17-november-2026">Recent original-source NAV evidence: native LOW/HIGH, portals and group placement (17 November 2026)</h2>
+<p>The <a href="edf41-edf5-edf6-native-low-high-nav-and-source-clearance.html">original native LOW/HIGH and collision-clearance study</a> compares native EDF5/EDF6 NAV topology and then tests original EDF4.1 MAC/MAD source geometry in bounded HillyCity/Soukogai windows. Static contacts from point rays, side rays and sparse sphere probes exclude some naive candidate paths; they <strong>do not</strong> certify untouched paths as walkable. The source actor's group-parent transform and collision activation remain unresolved, so there is <strong>no runtime NPC fix</strong>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_SESSION_CLOSE_2026-11-15_R75.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R88..R100 source-provenance deltas</li><li>Original EDF41 R31/R32 SHFB 4m grid and bounded HKT/NVMD source evidence, 2026-11-16</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R33_PARALLEL_NATIVE_GRID/R33_REAL_SK_HEIGEN02_64TILE_LOW_HIGH.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_NAV_INTEGRATION_DECISIONS.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_AGENT_CAPSULE_ALL_265.json</li><li>R49–R57 source evidence reconciled 2026-11-17: edf41-edf5-edf6-native-low-high-nav-and-source-clearance</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#read-by-task">Read by task</a><a href="#evidence-rules">Evidence rules</a><a href="#seven-sk-map-terrain-object-contacts">Seven SK map terrain–object contacts</a><a href="#seven-original-shfb-maps-native-grid-structural-evidence-r31-r32">Seven original SHFB maps: native-grid structural evidence (R31–R32)</a><a href="#native-source-solid-and-agent-volume-evidence-from-one-sk-map">Native-source solid and agent-volume evidence from one SK map</a><a href="#recent-original-source-nav-evidence-native-low-high-portals-and-group-placement-17-november-2026">Recent original-source NAV evidence: native LOW/HIGH, portals and group placement (17 November 2026)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-edf41-nav-current"};</script><script src="../assets/site.js" defer></script></body></html>

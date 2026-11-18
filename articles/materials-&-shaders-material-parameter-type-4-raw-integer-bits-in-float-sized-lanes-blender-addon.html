@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Material parameter type=4: raw integer bits in float-sized lanes Material parameter type=4: raw integer bits in float-sized lanes This is a native EDF6 MDB mate"><title>EDF6 MDB type-4 parameters: raw u32 inside four-byte lanes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF6 MDB type-4 parameters: raw u32 inside four-byte lanes</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><h1>Material parameter <code>type=4</code>: raw integer bits in float-sized lanes</h1>
+<p>This is a native EDF6 MDB material-format finding.</p>
+<h2 id="what-was-observed">What was observed</h2>
+<p>In native EDF6 MDB material records, some scalar controls have <code>type=4</code>. Their 4-byte value lanes are <strong>raw u32 bit patterns</strong>, not numeric IEEE-754 float values.</p>
+<p>Confirmed examples:</p>
+<ul>
+<li><code>snd_BRDF_Map_Signboard_Pattern.image_split</code> = raw u32 <code>2</code>;</li>
+<li>Signboard boolean/direction controls = raw u32 <code>0</code> or <code>1</code>;</li>
+<li><code>snd_BRDF_Map_Build_Window.interior_wrap_count</code> = raw u32 <code>4</code>.</li>
+</ul>
+<h2 id="why-a-float-only-reader-is-deceptive">Why a float-only reader is deceptive</h2>
+<p>The byte pattern for integer 2 is:</p>
+<pre><code class="language-text">02 00 00 00
+</code></pre>
+<p>If those bytes are interpreted as a float32, the displayed numeric value is approximately <code>2.8025969e-45</code>.</p>
+<p>If a tool later writes the numeric float <code>2.0</code>, the bytes become:</p>
+<pre><code class="language-text">00 00 00 40
+</code></pre>
+<p>That is a completely different value to the game.</p>
+<h3 id="useful-test-vectors">Useful test vectors</h3>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Intended raw u32</th>
+  <th>Native bytes (LE)</th>
+  <th style="text-align:right">Same bits interpreted as float32</th>
+  <th>Wrong bytes if saved as numeric float</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td><code>00 00 00 00</code></td>
+  <td style="text-align:right">0.0</td>
+  <td>same</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td><code>01 00 00 00</code></td>
+  <td style="text-align:right">~1.4012985e-45</td>
+  <td><code>00 00 80 3F</code> (<code>1.0f</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td><code>02 00 00 00</code></td>
+  <td style="text-align:right">~2.8025969e-45</td>
+  <td><code>00 00 00 40</code> (<code>2.0f</code>)</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td><code>04 00 00 00</code></td>
+  <td style="text-align:right">~5.6051939e-45</td>
+  <td><code>00 00 80 40</code> (<code>4.0f</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="important-nuance-untouched-round-trip-vs-editing">Important nuance: untouched round-trip vs editing</h2>
+<p>A float-only implementation may accidentally round-trip an imported type-4 value <strong>bit-exactly</strong> if it reads the 32-bit pattern into a host float and later writes the exact same value back without editing. That does <strong>not</strong> make type 4 a float semantic.</p>
+<p>The dangerous operations are:</p>
+<ul>
+<li>interpreting it as an ordinary numeric float;</li>
+<li>emitting numeric float <code>1.0</code>, <code>2.0</code>, <code>4.0</code>, etc. in a type-4 lane;</li>
+<li>assuming the engine default is always numeric float <code>1.0</code>;</li>
+<li>arithmetic on the denormal before writing it back.</li>
+</ul>
+<p>The binary distinction is a <strong>declared type tag plus a raw 32-bit lane</strong>; any external interpretation that turns an integer bit pattern into an IEEE float value changes the stored parameter.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13.zip::EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13/04_TYPE4_INTEGER_PARAMETERS.md</li><li>/EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13.zip::EDF6_EDFMODELUTILITY_MINIWIKI_2026-11-13/04_TYPE4_INTEGER_PARAMETERS.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-was-observed">What was observed</a><a href="#why-a-float-only-reader-is-deceptive">Why a float-only reader is deceptive</a><a href="#useful-test-vectors">　Useful test vectors</a><a href="#important-nuance-untouched-round-trip-vs-editing">Important nuance: untouched round-trip vs editing</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-material-parameter-type-4-raw-integer-bits-in-float-sized-lanes-blender-addon"};</script><script src="../assets/site.js" defer></script></body></html>

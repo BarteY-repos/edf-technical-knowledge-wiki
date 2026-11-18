@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 objects on EDF6 multiplayer: native identity and a custom per-object event channel Separate the native object network from the mod&#39;s messages In the anal"><title>EDF4.1 objects on EDF6 multiplayer: native identity and a custom per-object event channel | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF4.1 objects on EDF6 multiplayer: native identity and a custom per-object event channel</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-reviewed exact-build native identity semantics + custom event envelope; pure C++ 36 checks PASS; multiplayer runtime pending</div><div id="articleBody"><h2 id="separate-the-native-object-network-from-the-mod-s-messages">Separate the native object network from the mod's messages</h2>
+<p>In the analyzed target EDF6 build, a script-spawned object receives a <strong>native NetworkObject identity</strong>. All participating machines execute the mission script, so all can construct the object; the host/owner is then authoritative for the state that needs correction. The retained R9 source describes per-object position/target/damage/kill replication and generation of <strong>child identities</strong> from a parent's identity.</p>
+<p>For a boss made of spawned panels or child turrets, a child is not safely identified merely by its pointer or its name. The native child identity registration consumes a <strong><code>uint16 index, uint16 sub</code> pair under a particular parent hash</strong>. The custom adapter tracks these pairs per parent control block to reject duplicates; newly created children can be held with weak references until the parent itself has a registered native identity. This preserves the difference between <em>constructing a local child object</em> and <em>making it recognizable to remote peers</em>.</p>
+<p>The same source also defines a <strong>mod-provided</strong> small-event channel that reuses the object's existing network transport but <strong>is not part of the original EDF6 protocol</strong>. The custom tag is 12. Stock base <code>GameObjectBase</code> event types are described as 0–3; vehicle events can use 4–5, and other mod features may use 13/14/15. Tag 12 is a choice scoped to the reviewed environment, not guaranteed free in all installed mod combinations.</p>
+<h2 id="wire-format-24-byte-header">Wire format: 24-byte header</h2>
+<p>The custom payload begins with this little-endian <code>Header</code>, followed by a variable-length event body:</p>
+<table>
+<thead>
+<tr>
+  <th>Offset</th>
+  <th>Type</th>
+  <th>Field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td>u32</td>
+  <td>Magic <code>0x4E313445</code> (<code>E41N</code> in little-endian byte order)</td>
+</tr>
+<tr>
+  <td><code>+0x04</code></td>
+  <td>u16</td>
+  <td>Version, currently <code>1</code></td>
+</tr>
+<tr>
+  <td><code>+0x06</code></td>
+  <td>u8</td>
+  <td>Event kind; <strong>0 is invalid</strong></td>
+</tr>
+<tr>
+  <td><code>+0x07</code></td>
+  <td>u8</td>
+  <td>Payload byte count</td>
+</tr>
+<tr>
+  <td><code>+0x08</code></td>
+  <td>u64</td>
+  <td>Random process/sender identity; <strong>0 invalid</strong></td>
+</tr>
+<tr>
+  <td><code>+0x10</code></td>
+  <td>u32</td>
+  <td>Sender's sequence; <strong>0 invalid</strong></td>
+</tr>
+<tr>
+  <td><code>+0x14</code></td>
+  <td>u32</td>
+  <td>Reserved; required to be <strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The maximum body is <strong>192 bytes</strong> (total message maximum <strong>216 bytes</strong>). The decoder rejects invalid magic, version, kind, zero sender/sequence, nonzero reserved field and any mismatch between actual bytes and <code>24 + size</code>. A zero-length body is permitted when the kind is nonzero.</p>
+<p>This is <strong>not reliable retransmission by itself</strong>: the format is a validated, bounded event envelope written through the existing game's stream. The source uses the game's stream small-int/tag writer, block writer and per-object <code>NetworkObject</code> <strong>send slot 16</strong>; it intercepts <strong>receive slot 17</strong> only on copied vtables for selected classes. It peeks using the reader's mark/rewind operations and forwards other tags to the preceding receiver. It does not overwrite every instance of the original native vtable.</p>
+<h2 id="reject-repeats-stale-messages-and-wrong-owners">Reject repeats, stale messages and wrong owners</h2>
+<p>A per-object gate retains up to <strong>eight sender watermarks</strong> (sender ID and newest sequence). A sequence is accepted for a known sender only when unsigned <code>new - previous</code> lies strictly between 0 and <code>0x80000000</code> — allowing legitimate 32-bit sequence wrap while rejecting repeats and old packets. If the eight sender slots are full, a ninth sender is refused rather than evicting an existing watermark.</p>
+<p>The receive path queues events <strong>only for guest copies</strong> of a registered object. It binds stored state to the object's <strong>control block</strong> as well as its memory address, so destroying an object and allocating another at the same pointer does not inherit old sequence gates. The per-object queue is limited to <strong>64 events</strong>; overflow drops the oldest. Events are drained at the object's normal update; the queue is not evidence that remote gameplay has been applied immediately.</p>
+<p>For child objects, a peer that is not yet registered may wait. Registration is retried from the parent update, using weak references; duplicate <code>(index,sub)</code> values under the same parent's control block fail closed. The retained source reserves ranges such as <code>1</code> for parts, <code>0x0100</code> for spawned children, <code>0x4000</code> for batteries, and <code>0x8000</code> for Earth Eater-specific spawn identities. Those ranges are <strong>conventions of this compatibility layer</strong>, not a universal EDF6 name-to-ID schema.</p>
+<h2 id="qualification-and-practical-use">Qualification and practical use</h2>
+<ul>
+<li>Native network ownership and virtual-slot addresses in the retained source are <strong>exact-build observations</strong>, not portable binary signatures.</li>
+<li>The 24-byte format, <code>Gate</code>, float bound checking (<code>finite</code>, absolute coordinate at most <code>1e7</code>) and ID-range constraints are <strong>custom code</strong>, not stock EDF6 wire messages.</li>
+<li>A source regression test executes <strong>36 checks</strong> of envelope encoding/decoding, reject cases, sequence wrapping, sender capacity and ID-space guards; that proves pure logic only.</li>
+<li>The R71 audit independently compiled and ran that pure test in Linux. <strong>This is not a two-peer Windows/EDF6 multiplayer PASS.</strong> Network message delivery, ownership and cross-mod collisions still require live game testing.</li>
+<li>Before reusing this pattern, ensure tag ownership is negotiated with other modules; preserve the underlying stock receive path and validate object lifetime, authority and child identity.</li>
+</ul>
+<p><strong>Sources:</strong> retained R9 <code>components/compatibility/src/edf41net.h</code>, <code>edf41net.cpp</code> and <code>components/compatibility/tests/edf41net_test.cpp</code>.</p>
+<p>Related: <a href="engine-re-%26-networking-edf6-per-object-online-authority-and-local-copies.html">native per-object online authority</a>, <a href="engine-re-%26-networking-edf6-controlled-pvp-object-tree-restoration-and-spawn-ownership.html">controlled object-tree restoration</a>, and <a href="engine-re-edf5-edf6-player-state-packet-lanes.html">EDF6 transport lanes</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/compatibility/src/edf41net.h</li><li>EDF41 R10 HF4 R9: components/compatibility/src/edf41net.cpp</li><li>EDF41 R10 HF4 R9: components/compatibility/tests/edf41net_test.cpp</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#separate-the-native-object-network-from-the-mod-s-messages">Separate the native object network from the mod&#39;s messages</a><a href="#wire-format-24-byte-header">Wire format: 24-byte header</a><a href="#reject-repeats-stale-messages-and-wrong-owners">Reject repeats, stale messages and wrong owners</a><a href="#qualification-and-practical-use">Qualification and practical use</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf41-per-object-event-wire-tag12-and-native-child-identities"};</script><script src="../assets/site.js" defer></script></body></html>

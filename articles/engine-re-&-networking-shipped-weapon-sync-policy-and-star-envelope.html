@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Shipped weapon sync policy and star-dependent envelope How exact RNG and receiver reconstruction fit into this policy The firing policy determines which state i"><title>Shipped weapon sync policy and star-dependent envelope | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Shipped weapon sync policy and star-dependent envelope</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Source-backed research / case study · Exact native binary + exhaustive shipped-data policy scan</div><div id="articleBody"><h2 id="how-exact-rng-and-receiver-reconstruction-fit-into-this-policy">How exact RNG and receiver reconstruction fit into this policy</h2>
+<p>The firing policy determines which state is transmitted before a projectile is built. For the exact per-Weapon LCG, random-number consumption per update/shot, subtype1 cumulative counters, Charge/PreCharge state and the affected projectile classes, see <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG and batched projectile reconstruction</a>. This is <strong>not</strong> resolved by a change in star policy alone: successful count reconciliation can leave class-internal projectile state different.</p>
+<p>Static SGO <code>fire_model_direction</code> values also do not exhaust effective modes: <a href="engine-re-%26-networking-vehicle-swing-shoot-dynamic-direction-mode.html">VehicleSwingShoot's dynamic mode 2</a> is selected at runtime even though the qualified shipping configuration scan contains no static mode-2 entries.</p>
+<p>EDF6 does not use one universal fire-synchronization policy for all weapons. Binary RE plus the shipped vanilla weapon corpus recovers a concrete policy surface on <code>Weapon</code> and shows that some weapons can change synchronization mode as their star-scaled parameters change.</p>
+<h2 id="core-fields-and-direct-fire-modes">Core fields and direct-fire modes</h2>
+<p>Recovered fields:</p>
+<ul>
+<li><code>Weapon+0x153C</code> — <code>fire_sync_policy_flags</code>;</li>
+<li><code>Weapon+0x1540</code> — <code>sync_level</code>, with normal shipping values <code>-1</code>, <code>0</code>, or <code>1</code>.</li>
+</ul>
+<p>For the direct subtype0 path, the three <code>sync_level</code> values have distinct authority:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right"><code>sync_level</code></th>
+  <th>Direct subtype0 authority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>-1</code></td>
+  <td>receiver-local full transform</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>0</code></td>
+  <td>sender orientation + receiver-local translation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>full sender transform</td>
+</tr>
+</tbody>
+</table>
+<p>These modes are part of the initial weapon-fire path. They are not the same thing as the later <code>NetworkBullet</code> selector0/1/2 trajectory/contact publications.</p>
+<h2 id="subtype1-is-a-different-creation-policy">Subtype1 is a different creation policy</h2>
+<p>Final policy bit 4 selects a six-Weapon-update batched subtype1 path with deferred receiver-local projectile realization.</p>
+<p>Important differences from direct subtype0:</p>
+<ul>
+<li>subtype1 does not carry the sender muzzle transform in the same form;</li>
+<li>no active pre-spread <code>Weapon+0xBC8</code> RNG-seed resynchronization is present on this path;</li>
+<li>subtype1 uses the non-retained lower fire lane in the R10 policy reconstruction;</li>
+<li>later <code>NetworkBullet</code> selectors may still publish trajectory/contact state, but they cannot retroactively recreate omitted class-internal creation state.</li>
+</ul>
+<p>This distinction explains why “the projectile is networked later” is not proof that the initial projectile construction was deterministic on both peers.</p>
+<h2 id="exact-shipped-data-scan">Exact shipped-data scan</h2>
+<p>The R10 shipped-data closure scanned the user-supplied vanilla weapon corpus:</p>
+<ul>
+<li>1,839 SGO entries;</li>
+<li>1,833 individual weapon/config DSGO files;</li>
+<li>1,564 <code>WEAPONTABLE</code> rows;</li>
+<li><strong>1,315 active</strong> <code>WEAPONTABLE</code> configurations with non-empty <code>AmmoClass</code>.</li>
+</ul>
+<p>The recovered MAB <code>fire_model_direction</code> distribution in those configs was:</p>
+<ul>
+<li>mode0: 1,708 records;</li>
+<li>mode1: 125 records;</li>
+<li>mode2: 0 static records;</li>
+<li>parse failures: 0.</li>
+</ul>
+<p>Every reachable subtype1 state in the qualified <code>WEAPONTABLE</code> star envelope uses normal-parser mode0. Static <code>fire_model_direction</code> is therefore not a substitute for evaluating the actual synchronization policy.</p>
+<h2 id="wslrf-star-evaluator">WSLRF / star evaluator</h2>
+<p><code>EDF+0xD7CE0</code> is the common seven-value Weapon WSLRF/star-scaled parameter evaluator used by the policy-relevant fields.</p>
+<p>Where the result is assigned to an integer field, the recovered rule is <strong>round to nearest, half away from zero</strong> after evaluation. Confirmed consumers include:</p>
+<ul>
+<li>AmmoCount → <code>Weapon+0x248</code>;</li>
+<li>ReloadTime → <code>Weapon+0x20C</code>;</li>
+<li>FireCount → <code>Weapon+0x368</code>;</li>
+<li>FireInterval → <code>Weapon+0x36C</code>;</li>
+<li>FireAccuracy → <code>Weapon+0x378</code> as float.</li>
+</ul>
+<p>Do not replace this with truncation, banker's rounding, or a guessed linear star formula.</p>
+<h2 id="correlated-reachable-policy-envelope">Correlated reachable policy envelope</h2>
+<p>Across the 1,315 active configs, roughly 2.9 million correlated reachable star states were evaluated.</p>
+<p>Stable policy groups:</p>
+<ul>
+<li>669 always direct sync1;</li>
+<li>162 always direct sync0;</li>
+<li>230 always direct sync-1;</li>
+<li>157 always subtype1.</li>
+</ul>
+<p>Additionally:</p>
+<ul>
+<li>97 weapons have star-dependent policy behavior;</li>
+<li>172 can reach subtype1 in at least one state;</li>
+<li><strong>15 switch between subtype1 and direct fire</strong> depending on reachable star values.</li>
+</ul>
+<p>The 15 switchers include Dunkel N202, Penetrator / Penetrator F, Buster Shot, Double Lance, Twin Lance, several Lightning Bow variants, Raijin and Raijin α.</p>
+<h2 id="implementation-consequences">Implementation consequences</h2>
+<p>A desync probe or repair must log the <strong>evaluated runtime policy</strong>, not infer it only from weapon name or base config.</p>
+<p>At minimum capture:</p>
+<ol>
+<li>weapon/config identity and <code>AmmoClass</code>;</li>
+<li><code>Weapon+0x153C</code> and <code>Weapon+0x1540</code>;</li>
+<li>direct subtype0 versus subtype1 selection;</li>
+<li>applicable <code>+0x1544/+0x1548/+0x154C/+0x1550</code> policy fields;</li>
+<li>shot-transform provenance/freshness;</li>
+<li>local/remote owner role and Soldier/Weapon SceneObject ordering.</li>
+</ol>
+<p><strong>Boundary:</strong> this article describes the initial fire-policy envelope. Later <code>NetworkBullet</code> selector reliability and contact semantics are separate layers and must not be conflated with initial fire authority.</p>
+<h2 id="exact-same-weapon-policy-test">Exact same-weapon policy test</h2>
+<p>A concrete falsifiable example of star-dependent policy is <code>AWEAPON104.SGO</code> (<strong>Penetrator F</strong>): the correlated source star states <code>{0:0,2:0,4:0,5:3}</code>, <code>{0:0,2:0,4:0,5:0}</code>, and <code>{0:0,2:1,4:0,5:0}</code> are predicted to select respectively subtype1/sync-1, direct/sync0, and direct/sync1. This follows the exact shipped-data evaluator and does <strong>not</strong> establish runtime acceptance of those states. See <a href="engine-re-edf6-fire-sync-runtime-discriminator-matrix.html">four-weapon discriminator matrix</a> for comparison controls and logging sites.</p>
+<h2 id="complete-list-and-star-dependent-examples">Complete list and star-dependent examples</h2>
+<p>The <strong>15 actual named subtype1/direct policy switchers</strong> and source-evaluated correlated star examples are now tabulated in <a href="edf6-weapon-star-dependent-fire-synchronization-complete-switcher-list.html">the dedicated EDF6 fire-policy switcher reference</a>, with an optional filterable CSV of all 1,315 active configuration records in the public archive. Do not interpret the 97 star-dependent configurations as 97 subtype1/direct switchers: <strong>82 vary only among direct synchronization modes</strong>, while <strong>15</strong> cross the subtype1 boundary.</p>
+<h2 id="lookup-table-for-every-qualified-weapon">Lookup table for every qualified weapon</h2>
+<p>The complete 1,315-row <a href="edf6-weapon-sync-policy-1315-config-reference-atlas.html">EDF6 weapon synchronization atlas</a> provides the per-SGO weapon name, AmmoClass, native class and set of reachable initial-fire policies. This page remains the interpretation reference; the atlas is a source-data lookup and is not another independently tested runtime proof.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_WEAPON_CONFIG_SCAN_V1_2026-09-28.json</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_WEAPON_STAR_POLICY_ENVELOPE_V1_2026-09-28.json</li><li>EDF6_ENGINE_RE_R13_RNG_LIFECYCLE_CHECKPOINT_2026-09-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#how-exact-rng-and-receiver-reconstruction-fit-into-this-policy">How exact RNG and receiver reconstruction fit into this policy</a><a href="#core-fields-and-direct-fire-modes">Core fields and direct-fire modes</a><a href="#subtype1-is-a-different-creation-policy">Subtype1 is a different creation policy</a><a href="#exact-shipped-data-scan">Exact shipped-data scan</a><a href="#wslrf-star-evaluator">WSLRF / star evaluator</a><a href="#correlated-reachable-policy-envelope">Correlated reachable policy envelope</a><a href="#implementation-consequences">Implementation consequences</a><a href="#exact-same-weapon-policy-test">Exact same-weapon policy test</a><a href="#complete-list-and-star-dependent-examples">Complete list and star-dependent examples</a><a href="#lookup-table-for-every-qualified-weapon">Lookup table for every qualified weapon</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-shipped-weapon-sync-policy-and-star-envelope"};</script><script src="../assets/site.js" defer></script></body></html>

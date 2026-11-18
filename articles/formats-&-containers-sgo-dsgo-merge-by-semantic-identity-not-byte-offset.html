@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SGO/DSGO semantic merge A mod that replaces an entire CONFIG.SGO can conflict at the file-path level with another mod even if the two mods edit unrelated logica"><title>SGO/DSGO semantic merge | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>SGO/DSGO semantic merge</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Formats &amp; Containers</span><span class="chip">File Formats</span></div><div class="referencebadge">Technical reference · Exact offline CONFIG three-way merge + synthetic semantic merge tests; runtime not established by merge itself</div><div id="articleBody"><p>A mod that replaces an entire <code>CONFIG.SGO</code> can conflict <strong>at the file-path level</strong> with another mod even if the two mods edit unrelated logical data. Choosing a winner silently discards the other mod's changes. Concatenating their binary records is just as unsafe: SGO/DSGO uses relative pointers, typed nodes and tables whose <em>physical order may not be semantic identity</em>.</p>
+<h2 id="the-correct-three-way-model">The correct three-way model</h2>
+<p>Take a known canonical <strong>vanilla baseline</strong> <code>V</code>, then compare every mod's independently supplied full-file replacement <code>M1</code>, <code>M2</code> against that <strong>same baseline</strong>:</p>
+<pre><code class="language-text">V (the game's exact original CONFIG.SGO)
+├─ semantic_diff(V, M1) → delta A
+└─ semantic_diff(V, M2) → delta B
+                         ↓
+              merge deltas by semantic path
+                         ↓
+                   reserialize SGO/DSGO
+</code></pre>
+<p>This is <strong>not</strong> a two-way diff between <code>M1</code> and <code>M2</code>, because both contain huge unchanged baseline regions. It is also not an unconditional last-wins load order. The binary frontend/backend in the studied proof was <code>sgott</code>; the merger operated on structured JSON containing typed nodes (<code>type</code>, optional <code>name</code>, and <code>value</code>). Classic SGO and DSGO still need their <strong>respective</strong> serializers.</p>
+<h2 id="what-identifies-the-same-logical-object">What identifies the same logical object?</h2>
+<table>
+<thead>
+<tr>
+  <th>Structure</th>
+  <th>Identity policy</th>
+  <th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Top-level variable nodes</td>
+  <td>Stable <code>name</code>, not serialized array position</td>
+  <td>Native paired resources can reorder the same named variables</td>
+</tr>
+<tr>
+  <td>Known CONFIG tables</td>
+  <td>Explicit schema-derived row keys, e.g. weapon ID</td>
+  <td>Prevents mixing two distinct weapons with the same row position</td>
+</tr>
+<tr>
+  <td>Other record arrays</td>
+  <td>Unique stable string, path or ID fields if proved</td>
+  <td>Allows independent record insertions and field edits</td>
+</tr>
+<tr>
+  <td>Fixed-size unnamed tuple</td>
+  <td>Position, provided length remains unchanged</td>
+  <td>Index is meaningful only while shape is stable</td>
+</tr>
+<tr>
+  <td>Variable-length unkeyed array</td>
+  <td><strong>Conflict / manual review</strong></td>
+  <td>No defensible rule for matching old and new records</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Nonconflicting operations:</strong> different fields, different keyed rows, identical writes to one field, or additions with distinct keys. <strong>Conflicts:</strong> different writes to one semantic field, deleting a row that another mod edits, or adding the same key with differing content. Competing reorder operations require special care if order controls gameplay or display; merely equal row sets is insufficient.</p>
+<p>The historical PoC's preview could select a deterministic later winner under conflict. <strong>That preview behavior was not approval to use last-wins in production.</strong> Production should fail closed or require explicit user conflict policy.</p>
+<h2 id="measured-example-mission-packs-plus-air-raider-equipment">Measured example: mission packs plus Air Raider equipment</h2>
+<p>A real September 2026 offline composition used three <code>CONFIG.SGO</code> inputs:</p>
+<table>
+<thead>
+<tr>
+  <th>File</th>
+  <th style="text-align:right">Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Canonical recompiled baseline</td>
+  <td style="text-align:right">27,826 B</td>
+</tr>
+<tr>
+  <td>Air Raider replacement, byte-exact <code>sgott</code> round-trip</td>
+  <td style="text-align:right">27,938 B</td>
+</tr>
+<tr>
+  <td>EDF5 mission-port replacement</td>
+  <td style="text-align:right">41,592 B</td>
+</tr>
+<tr>
+  <td>Merged result</td>
+  <td style="text-align:right"><strong>41,704 B</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The mission port adds six <code>ModeList</code> entries for offline/online <code>MissionPack03/04/05</code>. The Air Raider mod expands named <code>SoldierInit</code> weapon/category arrays. For example, categories <code>eLimpetGun01</code>, <code>eDrone_attacker01</code> and <code>eDrone_airstrike01</code> add <code>302</code> and <code>331</code>; <code>eVehicleNone</code> adds <code>8</code>, <code>9</code>, <code>10</code>. The two change sets did <strong>not</strong> overlap. The result preserved both, had <strong>zero semantic conflicts, zero warnings</strong>, and recompiled with exact JSON-semantic round-trip. It is precisely <strong>112 bytes larger</strong> than the mission-port file, matching the independent Air Raider delta.</p>
+<p>The successful static/round-trip evidence is <strong>not a direct EDF6 runtime proof</strong> of arbitrary future CONFIG compositions.</p>
+<h2 id="cross-file-relationships-make-a-single-file-merge-insufficient">Cross-file relationships make a single-file merge insufficient</h2>
+<p><code>CONFIG.ModeList</code>, <code>MISSIONLIST.*.LIST.SGO</code>, localized TXT, preview-image RAB and save namespace (<code>MissionPackNN.MST</code>) may refer to the same logical campaign. Likewise <code>WEAPONTABLE</code> and <code>WEAPONTEXT</code> are related by weapon identity. If a new LIST row changes ordering, a TXT or image archive may need corresponding updates: a syntactically valid <code>CONFIG.SGO</code> alone does not establish a coherent game menu.</p>
+<p>Do not use guessed positional merges to hide missing keys. Cache the merged <em>derived</em> file with a key incorporating the vanilla baseline, ordered provider hashes, merger/schema versions and conflict policy. Keep original mod archives untouched, report the exact winning source for every semantic change, and support rollback.</p>
+<p>See <a href="tooling-%26-editors-edf6-legacy-missionpack-07-08-runtime-parity-and-save-isolation.html">legacy MissionPack namespace tests</a>, <a href="formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">RAB/MRAB named entries</a> and <a href="formats-%26-containers-resource-identity-virtual-path-cache-and-deployment-contracts.html">resource identity</a>.</p>
+<p><strong>Evidence boundary:</strong> September 1, 2026 PoC and exact CONFIG audit. An arbitrary schema-unspecified variable-length table, a game binary, or the entire module graph cannot be declared mergeable from these results alone.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>SGO_LEGACY_DELTA_MERGE_POC_2026-09-01.md</li><li>AIR_RAIDER_EDF5PORT_CONFIG_MERGE_AUDIT_2026-09-01.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-correct-three-way-model">The correct three-way model</a><a href="#what-identifies-the-same-logical-object">What identifies the same logical object?</a><a href="#measured-example-mission-packs-plus-air-raider-equipment">Measured example: mission packs plus Air Raider equipment</a><a href="#cross-file-relationships-make-a-single-file-merge-insufficient">Cross-file relationships make a single-file merge insufficient</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"formats-&-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset"};</script><script src="../assets/site.js" defer></script></body></html>

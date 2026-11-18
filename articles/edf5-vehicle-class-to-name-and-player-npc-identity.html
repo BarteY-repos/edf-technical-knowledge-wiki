@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="The runtime class does not identify who owns the vehicle EDF5 mostly uses the same C++ class for a vehicle&#39;s player-summoned, AI-driven and parked mission varia"><title>EDF5 vehicle class crosswalk: tanks, helicopters, bikes, cars and mechs | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Vehicles / native classes</div><h1>EDF5 vehicle class crosswalk: tanks, helicopters, bikes, cars and mechs</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Vehicles / native classes</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 mostly uses the <strong>same C++ class</strong> for a vehicle's player-summoned, AI-driven and parked mission variants. Its owner, driver, ride link and SGO setup determine whether it behaves as the player's vehicle, an ally-operated vehicle or an empty map object.</p>
+<table>
+<thead>
+<tr>
+  <th>Native class</th>
+  <th>Vehicle family</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>Vehicle402_Rocket</code></td>
+  <td>Naegling</td>
+</tr>
+<tr>
+  <td><code>Vehicle403_Tank</code></td>
+  <td>Epsilon / Menace railgun</td>
+</tr>
+<tr>
+  <td><code>Vehicle404_Tank</code></td>
+  <td>Titan</td>
+</tr>
+<tr>
+  <td><code>Vehicle501_FortressRobo</code></td>
+  <td>Barga/Balam</td>
+</tr>
+<tr>
+  <td><code>Vehicle502_GroundRobo</code></td>
+  <td>Depth Crawler</td>
+</tr>
+<tr>
+  <td><code>Vehicle503_Bike</code></td>
+  <td>Free Bike</td>
+</tr>
+<tr>
+  <td><code>Vehicle504_begaruta</code></td>
+  <td>Nix</td>
+</tr>
+<tr>
+  <td><code>Vehicle505_Tank</code></td>
+  <td>Blacker</td>
+</tr>
+<tr>
+  <td><code>Vehicle506_Helicopter</code></td>
+  <td>Eros</td>
+</tr>
+<tr>
+  <td><code>Vehicle507_Rescuetank</code></td>
+  <td>Caliban</td>
+</tr>
+<tr>
+  <td><code>Vehicle510_Maser</code></td>
+  <td>EMC</td>
+</tr>
+<tr>
+  <td><code>VehicleBegaruta</code> / <code>Vehicle407_bigbegaruta</code></td>
+  <td>Proteus</td>
+</tr>
+<tr>
+  <td><code>VehicleHelicopter409</code></td>
+  <td>Nereid</td>
+</tr>
+<tr>
+  <td><code>VehicleHelicopter410</code></td>
+  <td>Brute</td>
+</tr>
+<tr>
+  <td><code>Vehicle_Car</code></td>
+  <td>Grape and civilian/light trucks</td>
+</tr>
+</tbody>
+</table>
+<p><code>V505_TANK</code>, <code>V505_TANK_AI</code> and <code>V505_TANK_MISSION</code> can all resolve to <code>Vehicle505_Tank</code>. NPC soldier SGOs similarly use player-style classes (<code>AssultSoldier</code>, <code>HeavyArmor</code>, <code>PaleWing</code>) while loading different weapons and behaviour settings.</p>
+<p>The source did <strong>not</strong> identify an in-game vehicle for <code>Vehicle511_Bike</code>; that mapping remains unknown. The grouping into tanks, helicopters, bikes and mechs is editorial rather than a discovered native base-class hierarchy. Depth Crawler is separated because its wall/ceiling traversal is mechanically different.</p>
+<p><strong>Source:</strong> <code>edf5/object-classes.md</code>, facts <code>classes-player-vs-npc</code>, <code>vehicle-class-to-name</code>, <code>vehicle-class-groups</code> (RTTI/SGO inspection; contributor grouping convention).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-vehicle-class-to-name-and-player-npc-identity"};</script><script src="../assets/site.js" defer></script></body></html>

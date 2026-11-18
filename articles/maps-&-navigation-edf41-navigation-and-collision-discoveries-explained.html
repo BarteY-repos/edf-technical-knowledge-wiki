@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 navigation and collision: what the data reveals R19 correction on the 4,971-footprint study Historical R19 only: a then-latest natural geometry/ranking "><title>EDF 4.1 navigation and collision: what the data reveals | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-navigation.html">Navigation</a></div><h1>EDF 4.1 navigation and collision: what the data reveals</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Exact sampled binary, source/offline; runtime unresolved</div><div id="articleBody"><h2 id="r19-correction-on-the-4-971-footprint-study">R19 correction on the 4,971-footprint study</h2>
+<p><strong>Historical R19 only:</strong> a then-latest natural geometry/ranking path produced <strong>5,026</strong> active footprints (55 above the 4,971 historical oracle), and 4,948 belonged to a different intermediate trial. <strong>Subsequent R32 source-semantic reconstruction supersedes this count</strong>: group-union XZ ranking, raw cached-AABB <code>max_xz &gt;= 5.75</code>, <strong>4,994</strong> pre-deduplication instances and <strong>23</strong> source-scoped FixB removals reproduce the required <strong>4,971</strong> population. The exact historical <em>carve/HKT bytes</em> remain unrecovered. The old R1/R1B harness did not preserve that threshold and is not current classifier authority. See <a href="maps-%26-navigation-edf41-r1d-active-body-eligibility-and-oracle-diagnostics.html">how the body-eligibility/GroupGeometry distinction works</a>.</p>
+<p>The 7,872,840-byte figure occasionally cited in old research is a <strong>whole-MAC</strong> size; it was never MAPO size. The inner MAPO record-family relayout is described <a href="maps-%26-navigation-edf41-mapo-core-relayout-vs-whole-mac-size.html">here</a>.</p>
+<p>Navigation across EDF generations is <strong>not just a set of waypoints that can be copied</strong>. The studied EDF4.1→EDF6 research combines map-object placements, collision-body identity, Havok-derived geometry, raster/triangle selection and game-specific navigation output. Its most valuable community finding is which parts can be reproduced exactly and which remain unknown.</p>
+<h2 id="map-object-references-must-resolve-to-the-right-collision-bodies">Map object references must resolve to the right collision bodies</h2>
+<p>The studied <code>MAPO</code>/source-MAD collision-reference population contains <strong>40,920 non-empty references</strong>. A reconstructed identity resolver accounts for:</p>
+<table>
+<thead>
+<tr>
+  <th>Resolution route</th>
+  <th style="text-align:right">References recovered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Strict base + collision identity</td>
+  <td style="text-align:right">27,018</td>
+</tr>
+<tr>
+  <td><code>.hkt</code> / base-only recovery</td>
+  <td style="text-align:right">420</td>
+</tr>
+<tr>
+  <td>Unique StationWindow fallback</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td>Structural Fix A: list-shape body groups</td>
+  <td style="text-align:right">1,945</td>
+</tr>
+<tr>
+  <td>Structural Fix B: dual base/collision-source identity</td>
+  <td style="text-align:right">3,988</td>
+</tr>
+<tr>
+  <td><strong>Resolved total</strong></td>
+  <td style="text-align:right"><strong>33,383</strong></td>
+</tr>
+<tr>
+  <td><strong>Not safely resolved</strong></td>
+  <td style="text-align:right"><strong>7,537</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The residual cannot be filled by approximate name matching without making unsupported claims about the collision data. Fix B's natural selection identifies 16 groups and 26 source bodies; other MOPP/StorageExtendedMesh alias candidates were deliberately rejected rather than count-fitted.</p>
+<h2 id="reconstructing-navigable-geometry">Reconstructing navigable geometry</h2>
+<p>An exact reference from the studied four-tile map has <strong>1,562 vertices and 2,928 triangles</strong>. A later historical target uses the same vertex count but <strong>2,651 triangles</strong>, meaning <strong>277 triangles were removed</strong>. Recovering the correct removal geometry is not the same as simply producing any triangulation with the right count.</p>
+<p>The source geometry/placement analysis has recovered a <strong>65-group</strong> selection with <strong>1,405 placements</strong>, consisting of 251 zero-rotation, 1,153 yaw-only and one mixed-XZ placement. The <strong>4,971</strong> active footprint population has since been reproduced naturally under a source-semantic R32 <strong>candidate</strong>. The remaining blocker is the complete historical body eligibility/carve identity and the exact HKT bytes. A retained <strong>natural</strong> 277-face candidate is <strong>381,544 bytes (+32)</strong> against the historical 381,512-byte LOW oracle; the historical <strong>+16</strong> byte comparison came from a <em>non-natural rank-swap control</em>, not the best natural current candidate. Neither a matching face count nor NVMD identity qualifies an EDF6 runtime NAV.</p>
+<h2 id="what-an-implementer-should-take-from-this">What an implementer should take from this</h2>
+<ul>
+<li>Preserve native map-object-to-collision-body identity; not every geometric candidate is a valid binding.</li>
+<li>Treat HKT/SHKT/MAD geometry, map RMPA and native NAV/NVMD as <strong>separate but interacting</strong> sources.</li>
+<li>Distinguish measured source geometry from byte-exact target output and runtime pathfinding behavior.</li>
+<li>Never “fix” a mismatch by arbitrarily deleting 277 triangles, adding/removing 16 bytes or selecting collision bodies to fit known totals.</li>
+<li>Loading donor NAV from a later EDF can be a compatibility compromise rather than faithful reconstruction.</li>
+</ul>
+<p>For exact structures and further details see <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">native EDF4.1 navigation, MAPO and collision study</a>, <a href="maps-%26-navigation-havok-mad-shkt-collision-contracts.html">MAD/SHKT</a> and <a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">map consumers explained</a>.</p>
+<p><strong>Evidence boundary:</strong> exact source/target binary observations and offline reproductions are available for defined cases; the unresolved target-specific selection rules and full EDF6 gameplay/runtime equivalence must not be claimed solved.</p>
+<h2 id="why-later-solid-capsule-contact-studies-still-do-not-finish-the-nav-conversion">Why later solid/capsule contact studies still do not finish the NAV conversion</h2>
+<p>On original <code>SK_HEIGEN02</code> source mesh data, a 265-instance MAD/MAPB survey distinguishes 166 closed 2-manifold candidates from 99 open source surfaces. A radius-0.45 m, height-1.8 m <em>illustrative</em> capsule finds 243 closed-solid candidate 4 m cells plus 495 open-surface hint cells. The 158 source point-in-solid positive cells are a subset of the 243, but none of the candidate cells may be assumed impassable without collision-layer, agent-profile and game-runtime evidence. A tiny four-tile test changes 512 source terrain triangles to 504 by excluding four example cells while retaining three open-only hints; <strong>HKT structurally passes, gameplay does not</strong>.</p>
+<p>Keep three separate questions: <strong>R1D HillyCity original-byte oracle</strong>, <strong>R31–R33 4 m original SHFB terrain tile-bake feasibility</strong>, and <strong>R34–R35 source-MAD 3D obstacle/contact hints on one SK map</strong>. None individually proves that the EDF6 Ranger/Fencer/Hector correctly navigates an EDF4.1 map. The latest source studies used a later-game HKT/NVMD backend; this is an output-format compatibility experiment, not proof of Sandlot's original EDF4.1 agent-size or navmesh-generation algorithm.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_CLASSIFIER_FRONTIER_2026-11-14.json</li><li>START_HERE_EDF41_SESSION_CLOSE_2026-11-14.md</li><li>R47 EDF4.1 NAV/MAPO research article</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_NAV_INTEGRATION_DECISIONS.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_REAL_SK_HEIGEN02_AGENT_CAPSULE_ALL_265.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R35_AGENT_CAPSULE_CONTACTS/R35_OFFLINE_QUALIFICATION.json</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R33_PARALLEL_NATIVE_GRID/R33_REAL_SK_HEIGEN02_64TILE_LOW_HIGH.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#r19-correction-on-the-4-971-footprint-study">R19 correction on the 4,971-footprint study</a><a href="#map-object-references-must-resolve-to-the-right-collision-bodies">Map object references must resolve to the right collision bodies</a><a href="#reconstructing-navigable-geometry">Reconstructing navigable geometry</a><a href="#what-an-implementer-should-take-from-this">What an implementer should take from this</a><a href="#why-later-solid-capsule-contact-studies-still-do-not-finish-the-nav-conversion">Why later solid/capsule contact studies still do not finish the NAV conversion</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-edf41-navigation-and-collision-discoveries-explained"};</script><script src="../assets/site.js" defer></script></body></html>

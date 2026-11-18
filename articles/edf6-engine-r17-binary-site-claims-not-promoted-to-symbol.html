@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 Engine RE exact site claims not promoted to named symbols The R17 database distinguishes a semantic symbol from a discrete binary or structure-relative evi"><title>EDF6 native Engine RE: 188 unpromoted address and field claims | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / </div><h1>EDF6 native Engine RE: 188 unpromoted address and field claims</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span></div><div class="referencebadge">Technical reference · Exact build static evidence; not a gameplay runtime qualification</div><div id="articleBody"><p>The R17 database distinguishes a <strong>semantic symbol</strong> from a discrete <strong>binary or structure-relative evidence claim</strong>. This reference contains the <strong>188 claims where <code>promoted_to_symbol=false</code></strong>. Some original status strings still contain <code>PROMOTED_NEW</code>; that is not an instruction to promote the address here. The explicit boolean is preserved and controls this separation. Where a record is <code>BINARY_CONFIRMED</code>, it may name one observed instruction/site within a function, <strong>not necessarily a safe function entry point</strong>. The complete original 330-row claim set (including separately promoted claims) is exported as <code>reference/EDF6_R17_ADDRESS_CLAIMS_330.csv</code>.</p>
+<p>These static records belong to one evidence database (R17 source ZIP SHA-256 <code>93419d55b395c9452e1b23fbccdb37baba3cdb9c4c63f71bac5e31e809e86784</code>). The source includes older EDF5-related loot notes as relative offsets; <strong>their pseudo-VA must not be attributed to the EDF6 image</strong>. No new in-game test has been conducted. See the separate <a href="edf6-engine-r17-native-symbol-and-rva-reference.html">symbol atlas</a> and <a href="edf6-engine-r17-native-struct-field-offset-reference.html">structure field atlas</a>.</p>
+<h2 id="four-structure-relative-values-not-code-rvas">Four structure-relative values — not code RVAs</h2>
+<table>
+<thead>
+<tr>
+  <th>Relative offset</th>
+  <th>Base</th>
+  <th>Source meaning</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x18</code></td>
+  <td>loot record</td>
+  <td>Structure-relative claim only: loot entry float field P4</td>
+  <td>STRUCT_RELATIVE_UNPROMOTED</td>
+</tr>
+<tr>
+  <td><code>0x1C</code></td>
+  <td>loot record</td>
+  <td>Structure-relative claim only: loot entry integer field P5</td>
+  <td>STRUCT_RELATIVE_UNPROMOTED</td>
+</tr>
+<tr>
+  <td><code>0x28</code></td>
+  <td>loot record</td>
+  <td>Structure-relative claim only: loot entry integer field P8</td>
+  <td>STRUCT_RELATIVE_UNPROMOTED</td>
+</tr>
+<tr>
+  <td><code>0x2C</code></td>
+  <td>loot record</td>
+  <td>Structure-relative claim only: loot entry byte field P6</td>
+  <td>STRUCT_RELATIVE_UNPROMOTED</td>
+</tr>
+</tbody>
+</table>
+<h2 id="184-binary-site-claims-not-promoted-to-semantic-symbols">184 binary site claims (not promoted to semantic symbols)</h2>
+<p>These retain the <strong>research database status</strong>, and should be understood as static sites or claim anchors. They are not exported game APIs. Source documents may be modding/research evidence, not solely pristine game-symbol names.</p>
+<h3 id="humanoid-1-sites">Humanoid — 1 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x47143A</code></td>
+  <td>EXACT_UNPROMOTED_CLAIM</td>
+  <td>Humanoid/Weapon</td>
+  <td>Start of statically audited generic Humanoid ready-child iteration region 0x47143A..0x471683; range anchor only, not promoted as a function boundary.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="network-66-sites">Network — 66 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x22EA7B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase default NetworkBullet selector flags = 1</td>
+</tr>
+<tr>
+  <td><code>0x22F1D0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>NetworkBullet selector2 gate tests Bullet+0xE8C bit0x4</td>
+</tr>
+<tr>
+  <td><code>0x22F237</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>NetworkBullet selector1 gate tests Bullet+0xE8C bit0x1</td>
+</tr>
+<tr>
+  <td><code>0x22F2A9</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>NetworkBullet selector0 spatial gate tests Bullet+0xE8C bit0x2</td>
+</tr>
+<tr>
+  <td><code>0x22F6A8</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>RX dispatcher marks selector2 bit0x4 and enters selector2 receive path</td>
+</tr>
+<tr>
+  <td><code>0x230F98</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Collision producer appends complete 0x50-byte record into state+0x6C0 vector</td>
+</tr>
+<tr>
+  <td><code>0x23167A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Motion response loads last collision record +0x20 normal</td>
+</tr>
+<tr>
+  <td><code>0x2316CF</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Motion response multiplies dot product by canonical -2.0 reflection constant</td>
+</tr>
+<tr>
+  <td><code>0x2324C5</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase network position publish to active position</td>
+</tr>
+<tr>
+  <td><code>0x2327A8</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Common Bullet state update activates selector1 external-object contact/reference context</td>
+</tr>
+<tr>
+  <td><code>0x2328F6</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Common Bullet state update writes selector1 local/contact vector A +0xC20</td>
+</tr>
+<tr>
+  <td><code>0x232954</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Common Bullet state update writes selector1 local/contact vector B +0xC30</td>
+</tr>
+<tr>
+  <td><code>0x2337ED</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 RX marks reconstructed external contact/reference context active</td>
+</tr>
+<tr>
+  <td><code>0x2338EA</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 RX restores vector A +0xC20</td>
+</tr>
+<tr>
+  <td><code>0x2338F5</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 RX restores vector B +0xC30</td>
+</tr>
+<tr>
+  <td><code>0x233A04</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 TX gates on external contact context active +0xC00</td>
+</tr>
+<tr>
+  <td><code>0x233B02</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 TX serializes vector A from +0xC20</td>
+</tr>
+<tr>
+  <td><code>0x233B17</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Selector1 TX serializes vector B from +0xC30</td>
+</tr>
+<tr>
+  <td><code>0x23403B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Collision path invokes 0x230CA0 record producer</td>
+</tr>
+<tr>
+  <td><code>0x234210</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Second collision path invokes 0x230CA0 record producer</td>
+</tr>
+<tr>
+  <td><code>0x2342D4</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Active selector1 +0xC00 bypasses ordinary collision/position branch</td>
+</tr>
+<tr>
+  <td><code>0x234A13</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Active selector1 +0xC00 returns before ordinary motion integration</td>
+</tr>
+<tr>
+  <td><code>0x234ADB</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase network motion/direction update site</td>
+</tr>
+<tr>
+  <td><code>0x234B11</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>BulletBase position advance from motion/direction state</td>
+</tr>
+<tr>
+  <td><code>0x235BB1</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>World-normal rebuild reads selector1 local normal +0xC30</td>
+</tr>
+<tr>
+  <td><code>0x236A71</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>External contact world-anchor reads local position +0xC20</td>
+</tr>
+<tr>
+  <td><code>0x236B1E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>Fallback object-resolution path also transforms +0xC20</td>
+</tr>
+<tr>
+  <td><code>0x236C30</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>0x50-byte collision record vector reserve helper</td>
+</tr>
+<tr>
+  <td><code>0x2370D0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>0x50-byte collision record vector append helper</td>
+</tr>
+<tr>
+  <td><code>0x2692DA</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>MissileBullet01 constructor enables Bullet+0xE8C bit0x4</td>
+</tr>
+<tr>
+  <td><code>0x26C983</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>MissileBullet02 constructor enables Bullet+0xE8C bit0x4</td>
+</tr>
+<tr>
+  <td><code>0x28E3B8</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>SolidExpBullet01 clears inherited selector1 enable bit in Bullet+0xE8C</td>
+</tr>
+<tr>
+  <td><code>0x59FE3C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>Soldier ordinary serializer mask bit 0x10 direction/orientation branch</td>
+</tr>
+<tr>
+  <td><code>0x72F057</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Transport</td>
+  <td>Logical type6 wrapper hardcodes type 6</td>
+</tr>
+<tr>
+  <td><code>0x758010</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver decoded pending byte set = 1</td>
+</tr>
+<tr>
+  <td><code>0x75807C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver decoded pending byte cleared = 0 before target gate</td>
+</tr>
+<tr>
+  <td><code>0x7580AA</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver target NetworkObject vslot +0x20 gate call</td>
+</tr>
+<tr>
+  <td><code>0x75810A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver target NetworkObject vslot +0x90 pre-apply call</td>
+</tr>
+<tr>
+  <td><code>0x75811E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>SceneObjectReceiver target NetworkObject vslot +0x30 ordinary-state apply call</td>
+</tr>
+<tr>
+  <td><code>0x75BAE0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network</td>
+  <td>NetworkObject cached-Soldier initializer registration-time callsite</td>
+</tr>
+<tr>
+  <td><code>0x764040</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Projectile</td>
+  <td>NetworkBullet 0x3500 route predicate</td>
+</tr>
+<tr>
+  <td><code>0x764816</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Projectile</td>
+  <td>BulletManager mode1 contrasts with normal mode0 by using sender context +0x50.</td>
+</tr>
+<tr>
+  <td><code>0x12C307D</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Mode1 builder calls 0x12D1040 non-retained frame builder.</td>
+</tr>
+<tr>
+  <td><code>0x12C8C54</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Transport</td>
+  <td>EOS_P2P_SendPacket callsite in unreliable wrapper</td>
+</tr>
+<tr>
+  <td><code>0x12C90EC</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Transport</td>
+  <td>EOS_P2P_SendPacket callsite in unreliable wrapper</td>
+</tr>
+<tr>
+  <td><code>0x12CE2A9</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Receive parser identifies reliable DATA control type 0x1200.</td>
+</tr>
+<tr>
+  <td><code>0x12CE2BC</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Receive parser identifies ACK control type 0x1300.</td>
+</tr>
+<tr>
+  <td><code>0x12CE2CA</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Receive parser identifies receiver-dedupe retirement control type 0x1400.</td>
+</tr>
+<tr>
+  <td><code>0x12CE30F</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>0x1400 branch removes matching receiver-dedupe marker.</td>
+</tr>
+<tr>
+  <td><code>0x12CE3C8</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>0x1300 ACK branch removes matching sender-pending ReliableInfo node.</td>
+</tr>
+<tr>
+  <td><code>0x12CE507</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>0x1200 DATA branch calls reliable DATA dedupe/ACK handler 0x12CFCD0.</td>
+</tr>
+<tr>
+  <td><code>0x12CEF24</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Retry scheduler compares elapsed milliseconds with ReliableInfo+0x28 threshold.</td>
+</tr>
+<tr>
+  <td><code>0x12CF001</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Expired ReliableInfo re-enqueues exact retained ReliableBuffer bytes.</td>
+</tr>
+<tr>
+  <td><code>0x12CF018</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Subsequent send adds 1000.0 ms to retry threshold.</td>
+</tr>
+<tr>
+  <td><code>0x12CF03E</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Retry scheduler compares current threshold against 7000.0 ms fault threshold.</td>
+</tr>
+<tr>
+  <td><code>0x12CF047</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Retry threshold beyond 7000.0 sets ReliableMgr+0x98 retry fault flag.</td>
+</tr>
+<tr>
+  <td><code>0x12CF153</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>ReliableMgr maintenance ages receiver-dedupe records after approximately 40 seconds.</td>
+</tr>
+<tr>
+  <td><code>0x12CFDC6</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Reliable DATA handler emits control type 0x1300 with matching sequence.</td>
+</tr>
+<tr>
+  <td><code>0x12CFE16</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Reliable DATA handler inserts/touches timestamped receiver-dedupe sequence record.</td>
+</tr>
+<tr>
+  <td><code>0x12D01C7</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Physical flush reads ReliableInfo sequence key at +0x08.</td>
+</tr>
+<tr>
+  <td><code>0x12D01EF</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Physical flush refreshes ReliableInfo last-send timestamp +0x30.</td>
+</tr>
+<tr>
+  <td><code>0x12D0205</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Physical flush inserts/looks up sender-pending map by sequence and retains ReliableInfo shared ownership.</td>
+</tr>
+<tr>
+  <td><code>0x12D0B96</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>Retained builder writes reliable DATA wrapper word 0x401200.</td>
+</tr>
+<tr>
+  <td><code>0x12D0D87</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>ReliableInfo sent_once initialized to zero.</td>
+</tr>
+<tr>
+  <td><code>0x12D0DE0</code></td>
+  <td>PROMOTED_NEW</td>
+  <td>Network/Transport</td>
+  <td>ReliableInfo retry threshold initialized from 700.0 ms global.</td>
+</tr>
+<tr>
+  <td><code>0x12D122A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Network/Transport</td>
+  <td>Non-retained Sandlot builder enqueues directly without retained wrapper</td>
+</tr>
+</tbody>
+</table>
+<h3 id="projectile-30-sites">Projectile — 30 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x22EA3E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/Core</td>
+  <td>Bullet constructor selects complete-object +0x140 replicated-state subobject</td>
+</tr>
+<tr>
+  <td><code>0x22EA45</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/Core</td>
+  <td>Bullet constructor initializes replicated state from created-object transform</td>
+</tr>
+<tr>
+  <td><code>0x22EA5F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>BulletBase ctor reads projectile RNG transport from InitParam+0x1A0</td>
+</tr>
+<tr>
+  <td><code>0x22EA66</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>BulletBase ctor stores zero-extended transported RNG value into final BulletBase+0x130</td>
+</tr>
+<tr>
+  <td><code>0x231E04</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/Network</td>
+  <td>Initial replicated motion/direction state write</td>
+</tr>
+<tr>
+  <td><code>0x23557F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Common motion-direction updater writes embedded replicated-state +0xB90 / complete Bullet+0xCD0</td>
+</tr>
+<tr>
+  <td><code>0x25A733</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning constructor passes final Bullet+0x130 RNG state to randomized-vector wrapper</td>
+</tr>
+<tr>
+  <td><code>0x25A80E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning constructor stores randomized initial path state at +0x1160</td>
+</tr>
+<tr>
+  <td><code>0x25A81F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning constructor feeds randomized path vector to common replicated motion-direction updater</td>
+</tr>
+<tr>
+  <td><code>0x25B121</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning OnUpdate passes final Bullet+0x130 RNG state to randomized-vector wrapper</td>
+</tr>
+<tr>
+  <td><code>0x25B132</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning OnUpdate loads and advances Bullet+0x130 RNG state directly</td>
+</tr>
+<tr>
+  <td><code>0x25B143</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning OnUpdate stores advanced Bullet+0x130 RNG state</td>
+</tr>
+<tr>
+  <td><code>0x25B38C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning OnUpdate writes random-path-derived current projectile position at Bullet+0x90</td>
+</tr>
+<tr>
+  <td><code>0x25B3D4</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>Lightning OnUpdate commits position delta into replicated motion/direction state through 0x235540</td>
+</tr>
+<tr>
+  <td><code>0x26102C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 ctor loads final Bullet+0x130 RNG state</td>
+</tr>
+<tr>
+  <td><code>0x261068</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 ctor stores first RNG-derived class motion scalar at +0x11D0</td>
+</tr>
+<tr>
+  <td><code>0x261085</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 ctor stores twice-advanced Bullet+0x130 RNG state</td>
+</tr>
+<tr>
+  <td><code>0x2610B7</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 ctor stores second RNG-derived class motion scalar at +0x11D8</td>
+</tr>
+<tr>
+  <td><code>0x2622D4</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 OnUpdate reads RNG-derived class motion scalar +0x11D0</td>
+</tr>
+<tr>
+  <td><code>0x2622F3</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 OnUpdate accumulates second RNG-derived scalar +0x11D8 into motion phase</td>
+</tr>
+<tr>
+  <td><code>0x262412</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>FlameBullet02 OnUpdate writes transformed complete-Bullet+0xCD0 network motion/direction state</td>
+</tr>
+<tr>
+  <td><code>0x28E015</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 ctor loads final Bullet+0x130 RNG state</td>
+</tr>
+<tr>
+  <td><code>0x28E026</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 ctor stores advanced Bullet+0x130 RNG state</td>
+</tr>
+<tr>
+  <td><code>0x28E05D</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 ctor stores RNG-derived integer detonation countdown at +0xF00</td>
+</tr>
+<tr>
+  <td><code>0x28E9E7</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExp detonation helper constructs BlowHit01::InitParam</td>
+</tr>
+<tr>
+  <td><code>0x28EA61</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExp detonation helper copies current projectile position into BlowHit spawn param</td>
+</tr>
+<tr>
+  <td><code>0x28EA9A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExp detonation helper submits BlowHit spawn through SceneObject manager</td>
+</tr>
+<tr>
+  <td><code>0x28F3B0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 OnUpdate reads +0xF00 countdown</td>
+</tr>
+<tr>
+  <td><code>0x28F3B9</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 OnUpdate decrements +0xF00 countdown</td>
+</tr>
+<tr>
+  <td><code>0x28F3C6</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Projectile/RNG</td>
+  <td>SolidExpBullet01 countdown expiration invokes detonation/BlowHit spawn helper</td>
+</tr>
+</tbody>
+</table>
+<h3 id="renderer-4-sites">Renderer — 4 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x11544F0</code></td>
+  <td>EXACT_UNPROMOTED_CLAIM</td>
+  <td>Renderer/VFX</td>
+  <td>Lower VFX submit helper observed in deep seam census; exact role diverges by renderer and current architecture explicitly rejects moving interpolation here.</td>
+</tr>
+<tr>
+  <td><code>0x11548F0</code></td>
+  <td>EXACT_UNPROMOTED_CLAIM</td>
+  <td>Renderer/VFX</td>
+  <td>Lower VFX submit helper observed in deep seam census; exact role diverges by renderer and current architecture explicitly rejects moving interpolation here.</td>
+</tr>
+<tr>
+  <td><code>0x1154F70</code></td>
+  <td>EXACT_UNPROMOTED_CLAIM</td>
+  <td>Renderer/VFX</td>
+  <td>Lower VFX submit helper observed in deep seam census; exact role diverges by renderer and current architecture explicitly rejects moving interpolation here.</td>
+</tr>
+<tr>
+  <td><code>0x1155810</code></td>
+  <td>EXACT_UNPROMOTED_CLAIM</td>
+  <td>Renderer/VFX</td>
+  <td>Lower VFX submit helper observed in deep seam census; exact role diverges by renderer and current architecture explicitly rejects moving interpolation here.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sceneobject-2-sites">SceneObject — 2 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x1189CAC</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>SceneObject/Core</td>
+  <td>SceneObject base constructor loads InitParam+0x8 transform</td>
+</tr>
+<tr>
+  <td><code>0x119429A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>SceneObject/Core</td>
+  <td>Generic SceneObject create stores transform pointer in InitParam+0x8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="soldier-4-sites">Soldier — 4 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x575820</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Soldier/Weapon</td>
+  <td>Soldier refresh updates owner named-node hierarchy world matrices</td>
+</tr>
+<tr>
+  <td><code>0x58F558</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Soldier/Weapon</td>
+  <td>Owned-Weapon descriptor stores Soldier named-node hierarchy</td>
+</tr>
+<tr>
+  <td><code>0x59AC29</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Soldier/Weapon</td>
+  <td>SoldierBase OnUpdate invokes owner root/named-node refresh first</td>
+</tr>
+<tr>
+  <td><code>0x59B498</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Soldier/Weapon</td>
+  <td>SoldierBase propagates owner attachment/node state into Weapon</td>
+</tr>
+</tbody>
+</table>
+<h3 id="weapon-77-sites">Weapon — 77 sites</h3>
+<table>
+<thead>
+<tr>
+  <th>Source RVA</th>
+  <th>Status</th>
+  <th>Subdomain</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x68AAB5</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon construction provisionally initializes Weapon+0xBC8 to 0x7B9 before live reseed.</td>
+</tr>
+<tr>
+  <td><code>0x68ADB6</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon constructor advances shared process-global RNG state at EDF+0x1F54128 using the common 64-bit LCG.</td>
+</tr>
+<tr>
+  <td><code>0x68ADE4</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon constructor stores upper-derived value of updated process-global RNG as live Weapon+0xBC8 state.</td>
+</tr>
+<tr>
+  <td><code>0x68AF9E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Weapon primary source node lookup uses owner hierarchy descriptor</td>
+</tr>
+<tr>
+  <td><code>0x68B8BB</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>WeaponBase per-shot staging direction mode initializes to 0.</td>
+</tr>
+<tr>
+  <td><code>0x68B8D7</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>WeaponBase fire_model_direction parser compares source value against zero; positive values select mode1.</td>
+</tr>
+<tr>
+  <td><code>0x68B8E4</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>WeaponBase parser stores normalized direction mode as only 0 or 1; config cannot directly produce mode2.</td>
+</tr>
+<tr>
+  <td><code>0x68C53B</code></td>
+  <td>EXACT_BINARY_CLAIM</td>
+  <td>Weapon/Config</td>
+  <td>AmmoCount WSLRF evaluator call; result is rounded half-away-from-zero and stored to Weapon+0x248.</td>
+</tr>
+<tr>
+  <td><code>0x68C9C0</code></td>
+  <td>EXACT_BINARY_CLAIM</td>
+  <td>Weapon/Config</td>
+  <td>ReloadTime WSLRF evaluator call; result is rounded half-away-from-zero and stored to Weapon+0x20C.</td>
+</tr>
+<tr>
+  <td><code>0x68CDC2</code></td>
+  <td>EXACT_BINARY_CLAIM</td>
+  <td>Weapon/Config</td>
+  <td>FireCount WSLRF evaluator call; result is rounded half-away-from-zero and stored to Weapon+0x368.</td>
+</tr>
+<tr>
+  <td><code>0x68CE19</code></td>
+  <td>EXACT_BINARY_CLAIM</td>
+  <td>Weapon/Config</td>
+  <td>FireInterval WSLRF evaluator call; result is rounded half-away-from-zero and stored to Weapon+0x36C.</td>
+</tr>
+<tr>
+  <td><code>0x68CE85</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>WeaponBase parser stores evaluated FireBurstCount to Weapon+0x370.</td>
+</tr>
+<tr>
+  <td><code>0x68CF16</code></td>
+  <td>EXACT_BINARY_CLAIM</td>
+  <td>Weapon/Config</td>
+  <td>FireAccuracy WSLRF evaluator call; float result is stored directly to Weapon+0x378.</td>
+</tr>
+<tr>
+  <td><code>0x690460</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Subtype1 RX loads current cumulative target before monotonic gate.</td>
+</tr>
+<tr>
+  <td><code>0x690468</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Subtype1 RX signed stale gate rejects incoming counter only when incoming &amp;lt; current target.</td>
+</tr>
+<tr>
+  <td><code>0x690540</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Accepted subtype1 RX stores incoming cumulative target counter to Weapon+0x1544.</td>
+</tr>
+<tr>
+  <td><code>0x690546</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Accepted subtype1 state calls class vslot33 commit after target acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x690C75</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>Common local-fire setup stores max(FireBurstCount-1,0) to Weapon+0xE18 remaining burst counter.</td>
+</tr>
+<tr>
+  <td><code>0x690D1C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Local direct fire refreshes selected shot entry immediately before TX</td>
+</tr>
+<tr>
+  <td><code>0x690D3B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Local fire orchestration invokes weapon-fire packet sender before local projectile creation</td>
+</tr>
+<tr>
+  <td><code>0x690D54</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Local fire orchestration invokes common projectile creation</td>
+</tr>
+<tr>
+  <td><code>0x6916FF</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>FireSpreadType 3 path loads Weapon+0xBC8 and begins one LCG advance for random spread.</td>
+</tr>
+<tr>
+  <td><code>0x691721</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>FireSpreadType 3 path stores advanced LCG state back to Weapon+0xBC8.</td>
+</tr>
+<tr>
+  <td><code>0x6917F7</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>FireSpreadType 1 path loads Weapon+0xBC8 and begins one LCG advance for random spread.</td>
+</tr>
+<tr>
+  <td><code>0x691819</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>FireSpreadType 1 path stores advanced LCG state back to Weapon+0xBC8.</td>
+</tr>
+<tr>
+  <td><code>0x691B51</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Final spread transform output write begins</td>
+</tr>
+<tr>
+  <td><code>0x691F81</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Remote-proxy batched path dispatches deferred catch-up</td>
+</tr>
+<tr>
+  <td><code>0x6929FD</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Selector0 RX tests local fire policy bit3 (0x08) before optional Weapon RNG seed restore.</td>
+</tr>
+<tr>
+  <td><code>0x692A0B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Selector0 RX writes serialized 64-bit seed to Weapon+0xBC8 before common projectile creation when policy bit3 is active.</td>
+</tr>
+<tr>
+  <td><code>0x692A24</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Remote fire receiver invokes common projectile creation</td>
+</tr>
+<tr>
+  <td><code>0x693565</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common Weapon OnUpdate loads Weapon+0xBC8 for unconditional per-update LCG advance.</td>
+</tr>
+<tr>
+  <td><code>0x693576</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common Weapon OnUpdate stores exactly one advanced LCG state back to Weapon+0xBC8.</td>
+</tr>
+<tr>
+  <td><code>0x69366A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Weapon common update refreshes each per-shot entry</td>
+</tr>
+<tr>
+  <td><code>0x6940E1</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>Common Weapon update decrements positive Weapon+0xE18 remaining burst counter.</td>
+</tr>
+<tr>
+  <td><code>0x6943DD</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Weapon common update enters batched send/catch-up state at end of update</td>
+</tr>
+<tr>
+  <td><code>0x6949AF</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Direct fire computes lower-lane selector from policy bit0</td>
+</tr>
+<tr>
+  <td><code>0x694C7F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Direct subtype0 sender tests policy bit3 before optional Weapon RNG seed serialization.</td>
+</tr>
+<tr>
+  <td><code>0x694C86</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Direct subtype0 sender loads Weapon+0xBC8 for policy-bit3 seed serialization.</td>
+</tr>
+<tr>
+  <td><code>0x6954CF</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common selector0 state builder explicitly zeros its local optional-seed flag before serialization.</td>
+</tr>
+<tr>
+  <td><code>0x695501</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common selector0 state builder tests the still-zero local seed flag; its BC8 branch is inactive.</td>
+</tr>
+<tr>
+  <td><code>0x695F4B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Subtype1 TX clears six-update send delay before frame submission.</td>
+</tr>
+<tr>
+  <td><code>0x695F55</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Subtype1 TX clears dirty before frame submission to non-retained lane; no same-state application retry remains armed.</td>
+</tr>
+<tr>
+  <td><code>0x695FEA</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Batched subtype1 sender uses owner NetworkObject vslot14 with send bool 1</td>
+</tr>
+<tr>
+  <td><code>0x69684B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective FireCount to Weapon+0x368.</td>
+</tr>
+<tr>
+  <td><code>0x696899</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective AmmoDamage to Weapon+0x89C.</td>
+</tr>
+<tr>
+  <td><code>0x6968BC</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective AmmoSize to Weapon+0x8C0.</td>
+</tr>
+<tr>
+  <td><code>0x6968DC</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective AmmoSpeed to Weapon+0x894.</td>
+</tr>
+<tr>
+  <td><code>0x6968FF</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective AmmoExplosion to Weapon+0x8B0.</td>
+</tr>
+<tr>
+  <td><code>0x696938</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common recomputation writes effective FireAccuracy to Weapon+0x378.</td>
+</tr>
+<tr>
+  <td><code>0x696B70</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>Common per-shot transform composer reads direction-mode selector at entry+0xE0.</td>
+</tr>
+<tr>
+  <td><code>0x696B90</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>Common per-shot transform composer enters dedicated mode2 runtime override-basis branch.</td>
+</tr>
+<tr>
+  <td><code>0x6976CA</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common creation calls spread transform builder</td>
+</tr>
+<tr>
+  <td><code>0x69773F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common projectile creation loads Weapon+0xBC8 for unconditional per-projectile LCG advance after spread.</td>
+</tr>
+<tr>
+  <td><code>0x69775A</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common projectile creation stores post-spread/per-projectile advanced state back to Weapon+0xBC8.</td>
+</tr>
+<tr>
+  <td><code>0x69776D</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Common projectile creation stores upper-derived RNG value into the created projectile state at +0x1A0.</td>
+</tr>
+<tr>
+  <td><code>0x69799F</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Projectile</td>
+  <td>Common creation passes same transform to generic SceneObject creation</td>
+</tr>
+<tr>
+  <td><code>0x69C090</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge vslot33 commits pending +0x1A70/+0x1A74 to committed +0x1A68/+0x1A6C.</td>
+</tr>
+<tr>
+  <td><code>0x69C0D9</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge subtype1 RX writes incoming scalar to pending +0x1A70 before counter acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x69C10D</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge subtype1 RX writes incoming auxiliary value to pending +0x1A74 before counter acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x69C4E6</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge vslot34 snapshots derived +0xBE8 into committed subtype1 auxiliary +0x1A6C.</td>
+</tr>
+<tr>
+  <td><code>0x69C4F8</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge vslot34 snapshots normalized local charge scalar into committed +0x1A68.</td>
+</tr>
+<tr>
+  <td><code>0x69C5ED</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge committed-state apply calls common Weapon parameter recomputation 0x6967C0.</td>
+</tr>
+<tr>
+  <td><code>0x69C646</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Charge alternate committed-state apply calls common Weapon parameter recomputation 0x6967C0.</td>
+</tr>
+<tr>
+  <td><code>0x69D62B</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon_Gatling class packet sender explicitly zeros helper flag before calling optional-seed packet helper.</td>
+</tr>
+<tr>
+  <td><code>0x69D643</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon_Gatling class packet sender calls 0x6952D0 with seed flag clear.</td>
+</tr>
+<tr>
+  <td><code>0x69D921</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon_Gatling auxiliary sender explicitly zeros helper flag before calling optional-seed packet helper.</td>
+</tr>
+<tr>
+  <td><code>0x69D93C</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/RNG</td>
+  <td>Weapon_Gatling auxiliary sender calls 0x6952D0 with seed flag clear.</td>
+</tr>
+<tr>
+  <td><code>0x6A77F0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>PreCharge vslot33 commits pending +0x17D4 to committed +0x17D0.</td>
+</tr>
+<tr>
+  <td><code>0x6A7817</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>PreCharge subtype1 RX writes incoming state to pending +0x17D4 before counter acceptance.</td>
+</tr>
+<tr>
+  <td><code>0x6A7916</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>PreCharge vslot34 snapshots derived +0xBE8 into committed +0x17D0.</td>
+</tr>
+<tr>
+  <td><code>0x6A7992</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>PreCharge committed-state apply calls common Weapon parameter recomputation 0x6967C0.</td>
+</tr>
+<tr>
+  <td><code>0x6B40D0</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>VehicleSwingShoot active callback calls runtime override installer with progress derived from remaining burst / FireBurstCount.</td>
+</tr>
+<tr>
+  <td><code>0x6B4161</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>VehicleSwingShoot activation callback calls runtime override installer with progress 0.0 after snapshotting source transform.</td>
+</tr>
+<tr>
+  <td><code>0x6B4242</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>VehicleSwingShoot runtime installer begins loop over Weapon+0x1E0 per-shot entry count.</td>
+</tr>
+<tr>
+  <td><code>0x6B4273</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>VehicleSwingShoot runtime installer adds Weapon+0x1D0 per-shot vector base after index*0xF0 stride.</td>
+</tr>
+<tr>
+  <td><code>0x6B428E</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Transform</td>
+  <td>VehicleSwingShoot runtime installer writes swing-derived override matrix to PerShotEntry+0xD0.</td>
+</tr>
+<tr>
+  <td><code>0x767452</code></td>
+  <td>BINARY_CONFIRMED</td>
+  <td>Weapon/Network</td>
+  <td>Final bit4 strict batched-protocol predicate begins</td>
+</tr>
+</tbody>
+</table>
+<h2 id="negative-inference-rules">Negative inference rules</h2>
+<p>A structure-relative field is not a process-relative address. A mid-function instruction site is not its function start. An exact site in one <code>EDF.dll</code> revision cannot be patched by copying its RVA to an unknown build. Raw source status labels are not proof of game-runtime effect. The source database describes research facts; no source or executable binary is distributed here.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R17_2026-09-29.zip</li><li>R17 static EDF6 executable research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#four-structure-relative-values-not-code-rvas">Four structure-relative values — not code RVAs</a><a href="#184-binary-site-claims-not-promoted-to-semantic-symbols">184 binary site claims (not promoted to semantic symbols)</a><a href="#humanoid-1-sites">　Humanoid — 1 sites</a><a href="#network-66-sites">　Network — 66 sites</a><a href="#projectile-30-sites">　Projectile — 30 sites</a><a href="#renderer-4-sites">　Renderer — 4 sites</a><a href="#sceneobject-2-sites">　SceneObject — 2 sites</a><a href="#soldier-4-sites">　Soldier — 4 sites</a><a href="#weapon-77-sites">　Weapon — 77 sites</a><a href="#negative-inference-rules">Negative inference rules</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-engine-r17-binary-site-claims-not-promoted-to-symbol"};</script><script src="../assets/site.js" defer></script></body></html>

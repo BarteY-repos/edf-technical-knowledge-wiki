@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 and EDF6 walking controllers: ground support is not ground transport The examined EDF5 and EDF6 character controllers share recognizable physics concepts: "><title>EDF5 versus EDF6 walking controllers: support states, gravity and moving surfaces | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Character control and physics</div><h1>EDF5 versus EDF6 walking controllers: support states, gravity and moving surfaces</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Character control and physics</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Static source and contributor checks, with build and open questions noted; no new R131 EDF runtime</div><div id="articleBody"><p>The examined EDF5 and EDF6 character controllers share recognizable physics concepts: a desired horizontal velocity, a separate vertical/ballistic velocity, a support-normal query and a <strong>60 Hz step</strong>. A key detail is that Havok can report velocity for the supporting surface even while the character's stock walking code chooses <strong>not to inherit that velocity</strong>.</p>
+<h2 id="edf5-s-native-walking-step">EDF5's native walking step</h2>
+<p>In EDF5 build <code>steam-5d11de53</code>, <code>xgs::havok::CharacterControl_Walk</code> has its own RTTI/vtable and a shared step routine at <code>EDF.dll+0x628B80</code>. It is owned by several classes, including <code>HumanBase</code>, <code>HumanoidBase</code>, <code>MonsterBase</code>, <code>AlienTrailer</code>, Barga/Balam-like fortress robotics and the Nix/Begaruta walking controller. It makes an <code>hkStepInfo</code> of <strong>1/60 s</strong> and reads <code>checkSupport</code> into an <code>hkpSurfaceInfo</code>.</p>
+<table>
+<thead>
+<tr>
+  <th><code>hkpSurfaceInfo</code> field</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Supported state</td>
+  <td><code>0</code> unsupported, <code>1</code> sliding, <code>2</code> supported</td>
+</tr>
+<tr>
+  <td>Surface normal</td>
+  <td>Direction used to project movement onto a slope</td>
+</tr>
+<tr>
+  <td>Surface velocity</td>
+  <td>Velocity of the ground contact, <strong>available but not consumed by the stock walk step</strong></td>
+</tr>
+<tr>
+  <td>Dynamic flag</td>
+  <td>Describes a moving/dynamic support-body property</td>
+</tr>
+</tbody>
+</table>
+<p>When supported, the controller projects desired movement onto the ground and adjusts ballistic motion. A launch flag protects jumps from being immediately treated as ordinary supported movement; when airborne, the vertical velocity changes under gravity. The stock controller combines these fields into one character-body linear-velocity update.</p>
+<h2 id="the-moving-platform-trap">The moving-platform trap</h2>
+<p>The EDF5 walk function reads the support <strong>state and normal</strong> but not the reported surface velocity or dynamic-support flag. EDF6's studied controller likewise calculates an output from its own movement and external velocity slots rather than automatically carrying over the surface velocity from a moving support body. Thus simply standing on a moving actor need not transport a soldier at the platform's speed.</p>
+<p>For EDF5, the Havok support query <strong>does populate</strong> the ground-velocity field. Its <code>getGround</code> route, however, is called with <code>useDynamicBodyVelocities=0</code>, which can limit which ground-body motions contribute. Neither source establishes correct movement-on-every-vehicle behavior: whether a particular collision layer allows standing on a body and how that body's motion is represented remain separate questions.</p>
+<h2 id="cross-generation-differences-and-limits">Cross-generation differences and limits</h2>
+<p>EDF6's controller field offsets differ (for example desired velocity appears at <code>+0x20</code> in the retained EDF6 map versus <code>+0x50</code> in EDF5). Directly reusing memory offsets or moving-platform assumptions across builds is unsafe. The EDF5 source also notes that mode changes for <strong>ragdoll parts</strong> are a separate physical system from the ordinary walking controller.</p>
+<p><strong>Evidence:</strong> static exact-build reverse engineering, not a new test involving a moving platform. Potential alterations to surface-velocity inheritance in the original source were <strong>unverified engineering hypotheses</strong> and are not presented as native game behavior.</p>
+<p><strong>Attribution:</strong> novae (ajane), EDF Knowledge Hub <code>edf5/character-control.md</code> and <code>edf6/character-control.md</code>; facts <code>edf5-walk-step</code>, <code>edf5-walk-fields</code>, <code>edf5-moving-ground-stock</code>, <code>edf5-get-ground-velocity</code>, <code>edf6-moving-ground-stock</code>. See <a href="kh-edf5-character-control.html">EDF5 character source</a> and <a href="edf6-native-walk-controller-support-velocity-and-gravity.html">EDF6 walk controller details</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14 / edf5/character-control.md</li><li>EDF Knowledge Hub 2026-11-14 / edf6/character-control.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#edf5-s-native-walking-step">EDF5&#39;s native walking step</a><a href="#the-moving-platform-trap">The moving-platform trap</a><a href="#cross-generation-differences-and-limits">Cross-generation differences and limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-walk-controllers-ground-support-and-uninherited-surface-velocity"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 R1D navigation reconstruction: verified boundaries and current source identity Applies to: EDF 4.1 source maps and EDF 6-target navigation conversion, p"><title>EDF 4.1 R1D: exact oracles, source selection and carve boundaries | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / <a href="docs-navigation.html">Navigation</a></div><h1>EDF 4.1 R1D: exact oracles, source selection and carve boundaries</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Native source-corpus and exact oracle, offline reconstruction only; no EDF6 in-game runtime tests</div><div id="articleBody"><p><strong>Applies to:</strong> EDF 4.1 source maps and EDF 6-target navigation conversion, particularly the <code>NW_HILLYCITY_LIGHT</code> reconstruction. <strong>Evidence:</strong> exact retained output hashes and structural source-corpus audits; reconstruction tests are <strong>offline only</strong>. Nothing in this article qualifies an EDF 6 runtime deployment.</p>
+<h2 id="what-is-actually-known">What is actually known</h2>
+<p>The <strong>R1C LOW navigation tile set</strong> has been reproduced byte-exact from retained source/tooling. The historical <strong>R1D target</strong> is known byte-exact as an oracle, but its complete original eligibility/carve pipeline has not been recovered. An independently constructed, source-semantic <strong>R32 body-selection candidate</strong> reproduces the required classifier/placement population. It does <strong>not</strong> reproduce the target HKT bytes.</p>
+<table>
+<thead>
+<tr>
+  <th>Constraint</th>
+  <th style="text-align:right">R1C known input</th>
+  <th style="text-align:right">Historical R1D target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Vertices</td>
+  <td style="text-align:right">1,562</td>
+  <td style="text-align:right">1,562</td>
+</tr>
+<tr>
+  <td>Triangles</td>
+  <td style="text-align:right">2,928</td>
+  <td style="text-align:right">2,651</td>
+</tr>
+<tr>
+  <td>Triangles removed</td>
+  <td style="text-align:right">—</td>
+  <td style="text-align:right">277</td>
+</tr>
+<tr>
+  <td>LOW HKT byte length</td>
+  <td style="text-align:right">421,684</td>
+  <td style="text-align:right">381,512</td>
+</tr>
+<tr>
+  <td>LOW HKT SHA-256</td>
+  <td style="text-align:right"><code>aabcc26f982c4d9d78697ebc0bb32ab239366cdeeadedf362f748cbeb9842bd2</code></td>
+  <td style="text-align:right"><code>87f8b3594f081c9dc758e41a7149971061d0bf6dad41867a6d342507507fc5fb</code></td>
+</tr>
+<tr>
+  <td>HIGH HKT SHA-256</td>
+  <td style="text-align:right"><code>e144ff813c965b4477001d552390c6b656d16a2fa0228731a749ff66b2422326</code></td>
+  <td style="text-align:right"><code>c4878388bca0f41555762667e4eb7c10a5f4d9fa1f9a08b7200001e9f8d206f0</code></td>
+</tr>
+<tr>
+  <td>LOW/HIGH NVMD SHA-256</td>
+  <td style="text-align:right"><code>9285880fbece6169120e6559f84a21439eeeb88b2796f728d18f7194e6b3b2c6</code></td>
+  <td style="text-align:right">same</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Implementation rule:</strong> never infer exact output identity from equal triangle counts, tile-face counts, matching NVMD or matching file length. For R1D the LOW SHA is a distinct final gate. HIGH should not be promoted on the strength of an unmatched LOW.</p>
+<h2 id="r32-source-semantic-selection-candidate">R32 source-semantic selection candidate</h2>
+<p>The strongest retained independent reconstruction uses:</p>
+<ol>
+<li>A source-MAD group-union XZ-area metric, with constituent geometry positioned by body <code>motionState</code>, to rank <strong>the natural top 65 groups</strong>.</li>
+<li>A <strong>raw source cached-AABB</strong> body classifier with <code>max_xz &gt;= 5.75</code>, not an arbitrarily rounded proxy.</li>
+<li>MAPB activation under the historical census: <strong>1,405 placements</strong>, of which <strong>251</strong> have exact-zero rotation, <strong>1,153</strong> are yaw-only and <strong>1</strong> has mixed X/Z rotation.</li>
+<li><strong>4,994</strong> pre-deduplication footprint instances. Source-semantic FixB duplicate-shape handling removes <strong>23</strong>, leaving <strong>4,971</strong>.</li>
+</ol>
+<p>The R100 identity audit has a crucial capture limit: only <strong>63 of the 65</strong> selected groups have an observed MAPO base/collision source pair; the other <strong>two groups</strong> have zero captured signatures, not competing signatures. The source audit README incorrectly states that all 65 have a signature; see the <a href="nav-edf41-selected-body-identity-audits.html">exact 65-group census</a>.</p>
+<p>The R32 active population uses <strong>479 distinct body identities</strong>. It is a <strong>reconstructed candidate</strong>, not a recovered copy of the old historical body-eligibility function. The retained classifier's lost implementation is still a provenance gap, even when the numeric census is exact.</p>
+<p>The earlier 4,913, 4,916, 4,944, 4,948 and 5,026 populations came from <strong>different</strong> experimental geometry/filter orderings; do not present them as later tolerances of one common algorithm. Separately, a 4,971 population produced through a contrived <strong>rank-24/rank-78 group swap</strong> is a forensic control, not a plausible source-derived top-65 ranking.</p>
+<h2 id="body-local-carve-is-different-from-group-selection">Body-local carve is different from group selection</h2>
+<p>The retained body-local carve lineage uses the local rounded body AABB/piece plus the MAPB placement. It does <strong>not</strong> re-apply the source rigid body's internal <code>motionState</code> when constructing each individual carve footprint. That <code>motionState</code> belongs to group-ranking geometry, not automatically to body-local carving.</p>
+<p>The current source-semantic R32 footprint population and retained finite carve predicates produce candidate 277-face sets, but no exact historical LOW HKT. The best retained R32 natural 277-face candidate at the R75 closure has <strong>381,544 bytes</strong> (<strong>+32</strong> from the historical R1D LOW length), with exact NVMD and correct face topology; its HKT hash differs. The older <strong>381,528 bytes</strong> (<strong>+16</strong>) control comes from the non-natural group-swap population and should not steer source-recovery work.</p>
+<p>Full MAPO quaternion+relative-position transforms have also been checked as post-selection geometry (see <a href="nav-edf41-mapo-component-transform-evidence.html">MAPO component semantics</a>). All eight natural variants preserved the 4,971 footprint count, but the complete finite carve enumeration found <strong>zero</strong> 277-face outputs. This is negative evidence for that specific candidate family, not proof that MAPO rotation is unrelated to rendering or placement.</p>
+<h2 id="what-a-converter-should-do">What a converter should do</h2>
+<ul>
+<li>Preserve the exact source MAPB / MAPO group, placement, rotation and resolution census.</li>
+<li>Preserve the <strong>raw cached-AABB classifier</strong> semantics if reconstructing the R32 candidate; never adjust <code>5.75</code> to force a historical count.</li>
+<li>Distinguish <strong>group-union XZ ranking</strong>, <strong>body eligibility</strong>, <strong>post-selection source identity</strong>, and <strong>body-local carve geometry</strong>.</li>
+<li>Apply provenance-based FixB semantic duplicate handling, not a global <code>shape_hash</code> collapse on unrelated strict groups.</li>
+<li>Use a retained finite set of natural carve predicates rather than brute-force 277-face subset search.</li>
+<li>Keep the exact R1C, historical R1D and R32 candidate identities distinct.</li>
+</ul>
+<p><strong>Do not assume:</strong> a candidate that passes all these population rules has recovered the historical R1D HKT. The last-mile source/carve identity remains open.</p>
+<h2 id="source-provenance-and-limitations">Source provenance and limitations</h2>
+<p>Primary retained material: <code>START_HERE_EDF41_SESSION_CLOSE_2026-11-15_R75.md</code> (R1D reconstruction session close), <code>EDF41_R1D_FRONTIER_2026-11-15_R75.json</code>, <code>EDF41_R1D_R90_MAPO_VECTOR_SEMANTICS_DELTA.zip</code>, <code>EDF41_R1D_R93_R92_FULLTRANSFORM_R58_ENUM_DELTA.zip</code>, and the R94–R100 source-provenance deltas under <code>/EDF41_EDF6_RESEARCH/</code>. The later deltas narrow identity hypotheses but <strong>do not promote</strong> an R14/product/runtime authority. The general conversion product authority remains the separate R10 HF3 source checkpoint and R13 Friendly candidate boundary documented by the EDF4.1 project.</p>
+<p>Related: <a href="nav-edf41-mapo-component-transform-evidence.html">MAPO component transforms</a>, <a href="nav-edf41-selected-body-identity-audits.html">body and placement identity limits</a>, <a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">existing NAV geometry reference</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41_R1D_SESSION_CLOSE_2026-11-15_R75.md</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R88..R100 source-provenance deltas</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-is-actually-known">What is actually known</a><a href="#r32-source-semantic-selection-candidate">R32 source-semantic selection candidate</a><a href="#body-local-carve-is-different-from-group-selection">Body-local carve is different from group selection</a><a href="#what-a-converter-should-do">What a converter should do</a><a href="#source-provenance-and-limitations">Source provenance and limitations</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"nav-edf41-r1d-source-authority"};</script><script src="../assets/site.js" defer></script></body></html>

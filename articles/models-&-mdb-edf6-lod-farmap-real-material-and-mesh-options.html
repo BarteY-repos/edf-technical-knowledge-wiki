@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="LOD and FarMap — geometry, materials and shaders EDF6 map models may have multiple geometry levels of detail (LOD). A lower-detail MDB does not automatically re"><title>LOD and FarMap — geometry, materials and shaders | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-models.html">Models</a></div><h1>LOD and FarMap — geometry, materials and shaders</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Models &amp; MDB</span><span class="chip">Models</span></div><div class="referencebadge">Technical reference · Finite four-map native sample; runtime LOD switching untested</div><div id="articleBody"><p>EDF6 map models may have <strong>multiple geometry levels of detail (LOD)</strong>. A lower-detail MDB does <strong>not</strong> automatically require a shader whose name contains <code>LOD</code>. This matters when reducing polygon counts, building a loader, or converting a model: the mesh, material family and switching behavior are separate systems.</p>
+<h2 id="what-the-retained-native-materials-show">What the retained native materials show</h2>
+<p>Across the examined NW_EUROPE01, HEIGEN507, CAVE503 and DESERT508 map-resource archives, six shader names were explicitly related to LOD or FarMap:</p>
+<table>
+<thead>
+<tr>
+  <th>Shader family name</th>
+  <th style="text-align:right">Observed native materials in the four-map corpus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_LOD</code></td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_LOD_CC</code></td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>snd_Map_LOD</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>snd_Map_LOD_CC</code></td>
+  <td style="text-align:right">15</td>
+</tr>
+<tr>
+  <td><code>snd_Map_LOD_NoEnv</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>snd_FarMap_Simple</code></td>
+  <td style="text-align:right">5</td>
+</tr>
+</tbody>
+</table>
+<p>These are <em>measured resource occurrences</em>, not a list of all shaders in every EDF6 asset. An <code>_lod.mdb</code> name is likewise a clue about a model role, not a complete material specification.</p>
+<h3 id="native-lod-geometry-can-retain-an-ordinary-shader">Native LOD geometry can retain an ordinary shader</h3>
+<p>In the tested DESERT508 archive there are <strong>16 <code>_lod.mdb</code> resource names, and none uses the six special LOD/FarMap shaders</strong>. Most use the ordinary <code>snd_Map_Build_NoOcc</code> family, with ordinary Object/Build/Glass families also present. NW_EUROPE01 also includes an LOD companion using the regular <code>snd_BRDF_Map_Common_Clip</code> shader.</p>
+<p>Therefore the transformation <strong>“lower-detail mesh → replace shader with <code>snd_BRDF_Map_LOD</code>” is not a general EDF6 rule</strong>. For native round-trips, retain the original material unless a particular paired LOD profile supports a change.</p>
+<h2 id="what-actually-changes-when-authoring-an-lod">What actually changes when authoring an LOD</h2>
+<p>A typical manually authored LOD can reduce mesh complexity while preserving the normal native MDB material structure. A valid converter must still respect:</p>
+<ul>
+<li>Vertex declaration and UV channels (including texture coordinates required for normals, macro dirt and occlusion);</li>
+<li>Tangent space and skinning channels where native materials require them;</li>
+<li>Material parameter type/size, ordering, sampler slots and raw values;</li>
+<li>Resource identities and the engine's method of associating base and LOD assets.</li>
+</ul>
+<p>A lower triangle count alone does not establish valid in-game switching. <strong>Switch thresholds, visibility, and real performance were not verified by this particular four-map material census.</strong> The archived manual geometry LOD writer passed offline format checks; EDF6 runtime-switching qualification remained separate.</p>
+<h2 id="three-different-questions">Three different questions</h2>
+<ol>
+<li><strong>Can the material be loaded?</strong> Check the native shader/material ABI and required textures.</li>
+<li><strong>Is this a valid lower-detail mesh?</strong> Check its geometry, UV and material identity and the applicable LOD association.</li>
+<li><strong>Will EDF6 switch it in the intended situation?</strong> Requires a game/runtime observation; it is not proven by parsing the MDB or noticing a shader with <code>LOD</code> in its name.</li>
+</ol>
+<p>Specialized FarMap shaders are worth preserving when found, but are not a prerequisite for every reduced-geometry model. Their existence does not establish a universal shader conversion recipe.</p>
+<p>See also <a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">reading and writing native MDB materials</a> and <a href="models-%26-mdb-edf5-edf6-mdb-migration-findings-relevant-to-a-blender-importer-exporter-blender-addon.html">EDF5→EDF6 MDB migration findings</a>.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>The figures above come from a <strong>finite four-map native RAB census</strong> retained in our October 2026 research. They support the negative conclusion that <strong>special LOD shaders are not mandatory for every native geometry LOD</strong> in that corpus. They do not prove exact runtime switching thresholds, all model families, or a universal FarMap authoring algorithm.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R49_LOD_FARMAP_RECONCILIATION_2026-10-16.md</li><li>R49_LOD_FARMAP_CENSUS.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-retained-native-materials-show">What the retained native materials show</a><a href="#native-lod-geometry-can-retain-an-ordinary-shader">　Native LOD geometry can retain an ordinary shader</a><a href="#what-actually-changes-when-authoring-an-lod">What actually changes when authoring an LOD</a><a href="#three-different-questions">Three different questions</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"models-&-mdb-edf6-lod-farmap-real-material-and-mesh-options"};</script><script src="../assets/site.js" defer></script></body></html>

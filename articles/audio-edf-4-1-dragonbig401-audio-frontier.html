@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 DragonBig401 audio frontier Source-game audio roles identified; target playback remains unqualified DragonBig401 source attack state reconstruction now "><title>EDF 4.1 DragonBig401 audio frontier | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-audio.html">Audio</a></div><h1>EDF 4.1 DragonBig401 audio frontier</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Audio</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Exact source inputs available; cue/preset bridge unresolved</div><div id="articleBody"><h2 id="source-game-audio-roles-identified-target-playback-remains-unqualified">Source-game audio roles identified; target playback remains unqualified</h2>
+<p><a href="missions-%26-scripting-edf4-1-dragonbig401-flame-windows-and-attack-states.html">DragonBig401 source attack state reconstruction</a> now explains which <code>MAB</code> fire events (<code>火炎開始</code> / <code>火炎終了</code>) drive <code>FlameBullet02</code>, the named muzzle locator and the glide-versus-hover behavior. These findings establish the <strong>gameplay-event route</strong>. Later native-source SGO/EXE analysis (R14) and exact source/target audio comparisons (R17, both 15 November 2026) <strong>did</strong> recover the source cue → preset → bank roles. Runtime equivalence of playback, timing and spatial attachment in EDF6 remains untested.</p>
+<h2 id="what-is-already-available">What is already available</h2>
+<p>The targeted EDF4.1 fidelity input package contains the object-side evidence required to continue this work without another broad source scan, including:</p>
+<ul>
+<li><code>DRAGONBIG401.SGO</code>;</li>
+<li><code>DRAGONBIG401.CAS</code>;</li>
+<li><code>RAGDOLL_BIGDRAGON401BLUE_HAS_HKA.SHKT</code>;</li>
+<li>shared source material needed to inspect the SE preset/bank route.</li>
+</ul>
+<p>The retained mission-script census also proves <code>DragonBig401.sgo</code> is referenced by multiple source missions; this is not an unused object curiosity.</p>
+<h2 id="five-original-edf4-1-sound-roles-and-their-resource-identity">Five original EDF4.1 sound roles and their resource identity</h2>
+<p><strong>Static native evidence:</strong> <code>DRAGONBIG401.SGO</code> (SHA-256 <code>f699efd0ff65c8fb43a9a3704276bde71bc533f515601980eaec0834ab7382c1</code>) points to shared bank <strong><code>app:/sound/adx/tikyuu4_en_Dragon.acb</code></strong>; a corresponding dragon sound bank was found in the examined EDF6 resource tree. The source has <strong>five ordered <code>se_table</code> entries</strong>. A matching EDF4.1 executable audit identifies which code path consumes each slot:</p>
+<table>
+<thead>
+<tr>
+  <th>Source slot / byte offset</th>
+  <th>Original cue or effect</th>
+  <th>Source executable RVA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0 / <code>0x00</code></td>
+  <td><code>ドラゴン大ヒットエフェクト</code> — damage hit-effect</td>
+  <td><code>0x1EDC15</code></td>
+</tr>
+<tr>
+  <td>1 / <code>0x40</code></td>
+  <td><code>ドラゴン大ｖ死亡大</code> — death</td>
+  <td><code>0x1EF98B</code></td>
+</tr>
+<tr>
+  <td>2 / <code>0x80</code></td>
+  <td><code>敵共通血しぶき大</code> — blood effect</td>
+  <td><code>0x1EF9F8</code></td>
+</tr>
+<tr>
+  <td>3 / <code>0xC0</code></td>
+  <td><code>ドラゴン大通過</code> — pass-by</td>
+  <td><code>0x1F158D</code></td>
+</tr>
+<tr>
+  <td>4 / <code>0x100</code></td>
+  <td><code>ドラゴン炎のブレス着弾</code> — <code>FlameBullet02</code> impact</td>
+  <td><code>0x1ED62D</code></td>
+</tr>
+</tbody>
+</table>
+<p>A <strong>separate</strong> <code>ragdoll_contact</code> record identifies <code>ドラゴン大衝突</code> with source scalar fields <strong><code>2000</code>, <code>0.5</code>, <code>10</code>, <code>120</code></strong>. That cue is <strong>not</strong> a sixth <code>se_table</code> entry. The EDF4.1 DragonBig damage handler plays source slot 0 <strong>as the hit effect</strong>; it has <strong>no distinct small-dragon-style hurt-roar slot</strong>. An examined pass-by path includes a target-plane Y adjustment of <strong>+30.0</strong>; static reconstruction distinguishes its attack/flame activity and target-plane crossing conditions, while actual audio playback remains a separate runtime question.</p>
+<h2 id="why-the-edf6-dragonsmall-slots-are-not-a-direct-1-1-copy">Why the EDF6 <code>DragonSmall</code> slots are not a direct 1:1 copy</h2>
+<p>The examined EDF6 donor <code>DragonSmall</code> family has <strong>nine</strong> sound table slots of <strong><code>0x80</code> bytes per entry</strong>, whereas the source role offsets above advance by <code>0x40</code>. Its native timed hit/death/blood consumers use slots <strong>1, 2, 3</strong>. Critically, the target's <strong>slot 0 is an extra small-dragon hurt-roar</strong> (<code>ドラゴン小ｖダメージ大</code>) reached on damage subject to an <strong>8-frame cooldown</strong>. This target-only role has no corresponding source <code>DragonBig401</code> <code>se_table</code> entry, so blindly copying names or leaving the donor slot 0 audible can create a false hurt sound.</p>
+<p>The later R17 compatibility audit describes installing source hit/death/blood at target slots 1/2/3 and using a <strong>valid silent native sound-preset object</strong> in target slot 0, with the native cooldown and other target slots retained. This is <strong>source-only static reconciliation, not a confirmed EDF6 game fix</strong>. The pass-by, impact and ragdoll-contact actions use their distinct paths and must not be conflated with the target slots 1/2/3. R14 reported <strong>44/44 static checks</strong>; R17 reported <strong>108/108 static checks</strong>. Neither is an in-game sound test.</p>
+<h2 id="what-remains-open">What remains open</h2>
+<p>Exact runtime cue audibility, simultaneous sounds, event timing and positional attachment still require a game test. Source/target identities do not prove that all native consumers are reached in the converted object. Some target-only sound slots and their reachability remain unqualified. Preserve this boundary; avoid calling the original source audio routing unknown now that R17 has resolved its <strong>static</strong> structure.</p>
+<p><strong>Primary evidence:</strong> <code>R13_FUNCTIONALITY_WIP_R14_DRAGONBIG_AUDIO_RE_EVIDENCE.json</code>, <code>R13_FUNCTIONALITY_WIP_R17_DRAGONBIG_DONOR_HURT_EVIDENCE.json</code>, and the corresponding R14/R17 audit JSONs in <code>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-15_R13_FUNCTIONALITY_WIP_R14/</code> and <code>/...R17/</code>. Identified EDF4.1 executable SHA-256 <code>39b4abf7fe722175741a5e0a154063b27ef8c589a1aa5f86c84853571ac7bda8</code>; examined EDF6 <code>EDF.dll</code> SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>.</p>
+<h2 id="important-negative-rule">Important negative rule</h2>
+<p>The absence of a dedicated <code>DragonBig401.ACB/AWB</code> is <strong>not</strong> evidence that the sounds cannot be restored.</p>
+<p>EDF objects can route named events through shared presets and shared banks. Before inventing a new bank or declaring the source sound absent, trace the preset/name lookup chain.</p>
+<h2 id="relationship-to-audio-r5">Relationship to Audio R5</h2>
+<p>Audio R5 establishes the broader source-only MissionBundle audio contracts: source input ownership, bank/table handling, suffix normalization and redistribution boundaries.</p>
+<p>DragonBig401 is an <strong>object-specific audio event</strong> with statically recovered sound roles and a remaining EDF6 runtime/audio-semantic gate. It is distinct from the general voice/subtitle table pipeline.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>The exact source-side sound-role mapping is <strong>statically recovered</strong>; no target gameplay playback is claimed. The historical discovery that no dedicated <code>DragonBig401.ACB</code> was present must not be misread as evidence of missing audio.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: START_HERE_EDF41_SESSION_CLOSE_2026-11-10.md</li><li>Library: EDF41_R13_FIX_INPUTS.zip (targeted source package)</li><li>Library: ALL_142_SCRIPTS.json</li><li>Library: EDF41 R14/R17 DragonBig audio native static evidence (2026-11-15)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#source-game-audio-roles-identified-target-playback-remains-unqualified">Source-game audio roles identified; target playback remains unqualified</a><a href="#what-is-already-available">What is already available</a><a href="#five-original-edf4-1-sound-roles-and-their-resource-identity">Five original EDF4.1 sound roles and their resource identity</a><a href="#why-the-edf6-dragonsmall-slots-are-not-a-direct-1-1-copy">Why the EDF6 DragonSmall slots are not a direct 1:1 copy</a><a href="#what-remains-open">What remains open</a><a href="#important-negative-rule">Important negative rule</a><a href="#relationship-to-audio-r5">Relationship to Audio R5</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"audio-edf-4-1-dragonbig401-audio-frontier"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 NPC weapons: native SGO values versus reported on-screen damage The damage number stored in an NPC weapon&#39;s SGO is not automatically the damage that an all"><title>EDF6 allied NPC weapons and vehicles: SGO damage numbers and unresolved factors | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Gameplay and allied units</div><h1>EDF6 allied NPC weapons and vehicles: SGO damage numbers and unresolved factors</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Gameplay and allied units</span></div><div class="referencebadge">Technical reference · Source-derived; evidence grades and build restrictions described in article; no new EDF runtime</div><div id="articleBody"><p>The damage number stored in an NPC weapon's SGO is not automatically the damage that an ally deals on a given difficulty. An EDF Knowledge Hub comparison of <strong>24 NPC soldier weapon entries</strong> with the Japanese EDF6 wiki found a consistent factor-of-two difference in the quoted <strong>Normal-and-above</strong> damage figures. That comparison is a strong data observation; the native code path that would independently prove the scaling factor was <strong>not identified</strong>.</p>
+<h2 id="soldier-weapons-measured-pairs">Soldier weapons: measured pairs</h2>
+<table>
+<thead>
+<tr>
+  <th>EDF6 weapon SGO</th>
+  <th style="text-align:right"><code>AmmoDamage</code> in SGO</th>
+  <th style="text-align:right">Figure in Japanese EDF6 wiki</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>aisoldierrifle01</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">2.5</td>
+</tr>
+<tr>
+  <td><code>aisoldiershotgun01</code></td>
+  <td style="text-align:right">3 × 10</td>
+  <td style="text-align:right">1.5 × 10</td>
+</tr>
+<tr>
+  <td><code>aisoldiersniperrifle02</code></td>
+  <td style="text-align:right">25</td>
+  <td style="text-align:right">12.5</td>
+</tr>
+</tbody>
+</table>
+<p>All 24 tested soldier-weapon rows followed that relationship. The likely explanation is that the game scales NPC weapon damage to one-half of the SGO amount under the wiki's test conditions. <strong>That is an inference from correlated data, not a traced damage routine.</strong> EDF5's comparable wiki historically used the full SGO figure, which helps explain misleading comparisons across generations.</p>
+<h2 id="vehicle-sgo-mission-setup-0-is-not-a-generic-damage-flag">Vehicle SGO <code>mission_setup[0]</code> is not a generic damage flag</h2>
+<p>Research compared the two-element <code>mission_setup[0]</code> list in several allied vehicle SGOs. It found values that numerically reproduce the Japanese wiki's vehicle-weapon reductions, notably:</p>
+<table>
+<thead>
+<tr>
+  <th>Vehicle SGO</th>
+  <th>Observed pair</th>
+  <th>Supporting comparison</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v504_begaruta_ai</code>, <code>v504_begaruta_g_ai</code> (Nix)</td>
+  <td><code>[1, 0.8]</code></td>
+  <td>Weapon figures 5 and 60 × 0.8 = 4.0 and 48</td>
+</tr>
+<tr>
+  <td><code>v608_oldrobot_ai</code> (Gravis)</td>
+  <td><code>[1, 1]</code></td>
+  <td>Same base weapon figures listed as 5.0 and 60</td>
+</tr>
+<tr>
+  <td><code>v603_flak_weak_ai</code></td>
+  <td><code>[1, 0.5]</code></td>
+  <td>Ordinary <code>v603_flak_ai</code> is <code>[1, 1]</code></td>
+</tr>
+<tr>
+  <td><code>vehicle403_tank_mission</code></td>
+  <td><code>[1, 0.6]</code></td>
+  <td>Distinct mission actor preset</td>
+</tr>
+<tr>
+  <td><code>v603_flak_mission</code></td>
+  <td><code>[1.25, 1]</code></td>
+  <td>First element differs; role unknown</td>
+</tr>
+<tr>
+  <td><code>v614_proteus_mk2</code> and related mission variants</td>
+  <td><code>[3, 3.5]</code></td>
+  <td>Not a standard <code>[1,1]</code> preset</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>second</strong> value behaving like a damage multiplier is plausible but still <strong>unverified</strong>. The reader of that pair was not traced. The <strong>first</strong> value's meaning is unknown; treating it as a durability multiplier would be speculation.</p>
+<h2 id="vehicle-base-value-cross-check-and-exception">Vehicle base-value cross-check and exception</h2>
+<p>A broader check found the Japanese EDF6 NPC vehicle wiki usually agrees with the SGO <strong>base durability</strong>: e.g. Blacker and Varius 700, Titan 2,400, Epsilon 1,600, Proteus 7,500 and War/Armament Barga 40,000. Most weapon entries also agree, but the <strong>Proteus Buster Cannon is unresolved</strong>: the wiki quotes <strong>60</strong>, while one sampled <code>v_407bigbegaruta_cannon_ai</code> SGO has <strong>35</strong> and the associated mission setup is <code>[1,1]</code>. The Combat Wagon variants have difficulty-specific durability entries <code>[700,700,2100]</code>, not one universal figure.</p>
+<p><strong>Evidence:</strong> SGO comparisons, not independent R130 gameplay tests; EDF6 Steam build <code>steam-678ccb46</code>. The Japanese wiki's displayed figures are <em>source comparison data</em>, not original Sandlot documentation.</p>
+<p><strong>Attribution:</strong> EDF Knowledge Hub <code>edf6/npc-data.md</code>, facts <code>npc-weapon-damage-half-wiki</code>, <code>npc-vehicle-mission-setup-factor</code>, <code>npc-vehicles-wiki-match</code>; KH chat 117/118 and Japanese EDF6 atwiki page 343. See <a href="kh-edf6-npc-data.html">original source note</a>, <a href="edf41-edf5-edf6-enemy-hp-float32-scaling-and-shield-bearer-exception.html">enemy scaling</a> and <a href="edf6-vehicle-native-gear-fuel-and-recoil-data.html">vehicle physics</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026: edf6/npc-data.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#soldier-weapons-measured-pairs">Soldier weapons: measured pairs</a><a href="#vehicle-sgo-mission-setup-0-is-not-a-generic-damage-flag">Vehicle SGO mission_setup[0] is not a generic damage flag</a><a href="#vehicle-base-value-cross-check-and-exception">Vehicle base-value cross-check and exception</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-npc-weapon-sgo-damage-and-vehicle-mission-setup-uncertainties"};</script><script src="../assets/site.js" defer></script></body></html>

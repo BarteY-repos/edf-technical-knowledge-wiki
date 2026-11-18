@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="NAVMESH HKT and NVMD: compatibility migration vs native rebake Evidence level: Reconciled structural, binary and runtime evidence across EDF5→EDF6 and EDF4.1 re"><title>NAVMESH HKT and NVMD: compatibility migration vs native rebake | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>NAVMESH HKT and NVMD: compatibility migration vs native rebake</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime</div><div id="articleBody"><p><strong>Evidence level:</strong> Reconciled structural, binary and runtime evidence across EDF5→EDF6 and EDF4.1 reconstruction work.</p>
+<h2 id="two-different-goals">Two different goals</h2>
+<p><strong>Implementation rule:</strong> Distinguish:</p>
+<ol>
+<li><strong>compatibility migration</strong> — produce target-readable/usable navigation data while preserving source semantics as closely as possible;</li>
+<li><strong>exact native rebake</strong> — reproduce a target-native or historical byte/topology oracle.</li>
+</ol>
+<p>These are not the same problem.</p>
+<h2 id="hkt">HKT</h2>
+<p><strong>Observed native behavior:</strong> NAV HKT requires Havok-generation migration (EDF5-era Havok 2015/64-bit representation to EDF6-era 2020/32-bit representation in the qualified workflow).</p>
+<p>Exact native parity is an inverse-bake/rebake problem. EDF6 native data may retessellate topology, and runtime HKT does not serialize every generator setting needed to reconstruct the original bake mechanically.</p>
+<p><strong>Do not assume:</strong> Header/version edits or topology-preserving reserialization reproduce native EDF6 output.</p>
+<h3 id="qualified-tagfile-generation-bridge">Qualified tagfile-generation bridge</h3>
+<p>In the retained EDF5→EDF6 compatibility line, source NAV HKT is a <strong>64-bit Havok tagfile</strong> identified as <code>SDKV20150100</code>; the EDF6 target family is a <strong>32-bit</strong> <code>SDKV20200100</code> tagfile. The working converter does not merely patch that string: it decodes source graph/nav structures and reserializes them against the target type registry.</p>
+<p>High-value measured deltas include:</p>
+<ul>
+<li>source/target nav faces remain 16-byte records in the qualified path;</li>
+<li>nav edges remain 20 bytes and vertices 16 bytes;</li>
+<li>graph nodes/edges remain 8-byte records;</li>
+<li>graph connection representation grows from 16 to 20 bytes in the measured bridge;</li>
+<li>source volume connections are dropped where the qualified EDF6 target has them empty;</li>
+<li>EDF6 adds/uses target-side annotated-streaming-set wrappers;</li>
+<li>the source <code>hkaiNavMeshQueryMediator</code> role becomes the EDF6 <code>hkaiQueryMediator</code> form used by the bridge;</li>
+<li>source 64-bit user data is narrowed to the target 32-bit representation where required.</li>
+</ul>
+<p>The converted shared-map HKT files preserve the <strong>source geometry</strong> exactly enough for compatibility validation, but they are intentionally not claimed byte/topology-identical to native EDF6 rebakes. A representative CAVE501 comparison illustrates the distinction: the retained EDF5 navmesh has 21,778 vertices while the native EDF6 rebake has 6,883.</p>
+<h2 id="nvmd">NVMD</h2>
+<p><strong>Observed native behavior:</strong> NVMD requires structural migration, including the measured <code>0x120 → 0x130</code> / record-0 expansion family.</p>
+<p>The measured record-0 change is <strong>4 → 8 bytes</strong>, with downstream offsets rebased. Some shared-map NVMD outputs become byte-identical to native EDF6 after applying the measured conversion, but that success does not imply the paired HKT should also be byte-identical: target-native HKT is frequently a fresh rebake.</p>
+<p><strong>Implementation rule:</strong> NVMD identity/faceData correctness is a separate gate from HKT geometry. Exact NVMD does not prove exact HKT, and exact HKT structure does not prove AI behavior.</p>
+<h2 id="streaming-graph-and-geometry-are-separate-axes">Streaming, graph and geometry are separate axes</h2>
+<p>Keep these independent during diagnosis:</p>
+<ul>
+<li>tile geometry/topology;</li>
+<li>streaming/seam connections;</li>
+<li>graph/tree serialization;</li>
+<li>clearance/generator settings;</li>
+<li>section/face identity;</li>
+<li>AI query/perception behavior.</li>
+</ul>
+<p>A corrected graph decoder fixed narrow-int/hkHalf16 interpretation in research tooling without changing raw serialized ITEM payloads. That tool correction must not be mistaken for a runtime navigation fix.</p>
+<h2 id="roomb-negative-evidence">RoomB negative evidence</h2>
+<p>A real high-only source streaming bridge was found penetrating a closed convex collider by about 1.1083 m. The structural detector reproduced the issue, but removing that stitch in the R2O experiment was runtime-negative for the observed AI wall symptom.</p>
+<p><strong>Known exception:</strong> Physical wall collision itself was confirmed: actors and web projectiles cannot cross. The remaining symptom is more consistent with AI targeting/perception/query behavior than absence of the physical wall.</p>
+<p><strong>Implementation rule:</strong> A structural anomaly can be real without being the behavioral root cause.</p>
+<h2 id="source-graph-cross-corpus-audit-18-navigation-variants">Source-graph cross-corpus audit: 18 navigation variants</h2>
+<p>A bounded source-only study screened <strong>18 low/high navigation variants</strong> for a closest-edge streaming bridge that passes through a <strong>closed convex</strong> static collision primitive. This was a diagnostic for one class of invalid streaming relation, <strong>not</strong> a complete map connectivity or native AI visibility test. The criterion was a solid crossing of at least <strong>0.05 m</strong> and at least <strong>90%</strong> of the tested edge bridge, with a 1 m agent-height sample offset and a scoped, placement-linked <code>hkpListShape</code> convex child. Other shape types, placement orientations and AI query paths were not exhaustively evaluated.</p>
+<table>
+<thead>
+<tr>
+  <th>Source variant</th>
+  <th style="text-align:right">Examined connections</th>
+  <th style="text-align:right">Flagged bridges</th>
+  <th>Distinction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>DM019 LOW / HIGH</td>
+  <td style="text-align:right">926 / 912</td>
+  <td style="text-align:right">0 / <strong>1</strong></td>
+  <td>HIGH bridge crossed the RoomB convex collider for <strong>1.1083 m</strong> (99.47% of tested segment)</td>
+</tr>
+<tr>
+  <td>IG_EDFROOM01 LOW / HIGH</td>
+  <td style="text-align:right">776 / 920</td>
+  <td style="text-align:right"><strong>1</strong> / 0</td>
+  <td>Source LOW <code>cube39</code> relation absent after the paired native-local rebake</td>
+</tr>
+<tr>
+  <td>IG_EDFROOM02 LOW / HIGH</td>
+  <td style="text-align:right">1,738 / 1,864</td>
+  <td style="text-align:right">0 / <strong>1</strong></td>
+  <td>Source HIGH <code>cube8</code> relation absent after the paired native-local rebake</td>
+</tr>
+<tr>
+  <td>CAVE503 LOW / HIGH</td>
+  <td style="text-align:right">1,832 / 1,974</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>No selected crossings under this detector</td>
+</tr>
+<tr>
+  <td>HEIGEN507 LOW / HIGH</td>
+  <td style="text-align:right">6,474 / 6,546</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>Same bounded negative result</td>
+</tr>
+<tr>
+  <td>NW_EUROPE01 LOW / HIGH</td>
+  <td style="text-align:right">182 / 966</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>Same bounded negative result</td>
+</tr>
+<tr>
+  <td>KAIGAN502 LOW / HIGH</td>
+  <td style="text-align:right">3,394 / 6,164</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>Same bounded negative result</td>
+</tr>
+<tr>
+  <td>SANGAKU506 LOW / HIGH</td>
+  <td style="text-align:right">13,020 / 14,114</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>Same bounded negative result</td>
+</tr>
+<tr>
+  <td>DESERT508 LOW / HIGH</td>
+  <td style="text-align:right">4,044 / 4,266</td>
+  <td style="text-align:right">0 / 0</td>
+  <td>Threshold-free control saw 15 contacts, but the longest solid penetration was only about <strong>0.0139 m</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three of eighteen</strong> examined variants were flagged; fifteen had no selection <em>under this predicate</em>. The two observed EDFROOM source/native-local differences show that an analogous source shortcut can disappear after a native rebake, but they do not prove a universal target-engine rule for graph generation. Do not equate any zero selection with full native parity or a guaranteed navigable corridor. Full 18-row results are retained in <code>data/EDF5_NAV_DEEP_CONVEX_18_VARIANTS_R142.csv</code>.</p>
+<p><strong>Subsequent runtime result supersedes the earlier research flag <code>RUNTIME_UNTESTED</code>:</strong> removing just the DM019 HIGH suspect relation in the R2O candidate <strong>did not fix</strong> spider-to-ally wall targeting. The tested wall remained physically blocking for actors and web projectiles. This specifically weakens a streaming-stitch-only root-cause hypothesis, not every possible NAV/LOS error. One user's observation that allied NPCs did not return fire does not establish universal NPC-to-spider targeting asymmetry.</p>
+<p><strong>Evidence:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/NAVMESH_DEEP_CONVEX_EXPANDED_CENSUS_2026-08-25.json</code>; <code>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/NAVMESH_DEEP_CONVEX_EXPANDED_CORPUS_STATE_2026-08-26.json</code>; later <code>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/runtime/EDFROOM_R2O_RUNTIME_NEGATIVE_2026-08-26.json</code>. Source-only detector values and later runtime observation are independent evidence classes.</p>
+<h2 id="edf4-1-exact-oracle-work">EDF4.1 exact-oracle work</h2>
+<p>EDF4.1 R1C demonstrates the stricter case: byte-exact HKT/NVMD reproduction can be required as an oracle. R1D remains non-exact even when triangle counts and NVMD match; exact hashes are the gate there.</p>
+<h2 id="havok-type-wire-generation-a-concrete-compatibility-trap">Havok TYPE wire generation: a concrete compatibility trap</h2>
+<p>HKT type metadata may be <em>semantically</em> readable by a permissive offline parser while using a <strong>wire envelope incompatible with the native target loader</strong>. The retained source-generated NAV TYPE bridge was corrected from a legacy-compatible record family:</p>
+<pre><code class="language-text">TPTR / TSTR / TNAM / FSTR / TBDY / THSH / TPAD
+</code></pre>
+<p>to the native EDF6 Havok-2020 family:</p>
+<pre><code class="language-text">TST1 / TNA1 / FST1 / TBDY / TPAD
+</code></pre>
+<p>Both represent the studied <strong>89-type</strong> symbolic NAV schema. The modern generated TYPE section measures <strong>3,960 bytes</strong>. Its parsed semantic fingerprint matches the independently inspected native diagnostic even though the raw TYPE bytes are intentionally <strong>not copied</strong> from the game. Older tooling emitted unnecessary body records for rootless/zero-option types and a synthetic zero-filled pointer table because the old parser tolerated them; that permissiveness was not proof of actual engine compatibility.</p>
+<p>The corrected source-only writer passed paired low/high offline gates on CAVE503, HEIGEN507, NW_EUROPE01 and DESERT508 (<strong>8 candidate outputs</strong>). A later current-authority ledger classified the modern TYPE path as <strong>runtime-positive</strong>, superseding the earlier document that correctly described it as runtime-pending <em>at that earlier date</em>. These statements apply to the qualified conversion family, not arbitrary HKT writers or exact native navmesh rebakes.</p>
+<h2 id="when-physical-collision-passes-but-ai-still-ignores-the-wall">When physical collision passes but AI still ignores the wall</h2>
+<p>A concrete example is <a href="maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">the EDFROOM solid-wall / AI-targeting experiment</a>: observed spiders could attack <em>toward</em> allied NPCs through a physical wall, even though web projectiles stopped on the wall. A real high-HKT cross-solid streaming connection was measured and removed in a one-variable experiment, but the later gameplay test was <strong>negative</strong>. This distinguishes <strong>collision blocking</strong>, <strong>streaming topology</strong>, <strong>agent/target selection</strong> and <strong>line-of-sight</strong>. A navigation anomaly does not automatically explain AI perception or projectile impact.</p>
+<h2 id="working-with-a-measured-nvmd-binary-not-just-a-version-number">Working with a measured NVMD binary, not just a version number</h2>
+<p>The source-owned NVMD converter gives a concrete implementation reference: <code>DMVN</code>, a <code>0x2C</code>-byte little-endian header, sections A/B/C/D and a B-record widening from four to eight bytes in <code>0x130</code>. Its added float is a <strong>compatibility default</strong> in the source-only conversion, not a reconstruction of the target's native agent data. The exact field-by-field tables, offset equations and qualification limits are available in <a href="maps-%26-navigation-nvmd-dmvn-binary-format-version-0120-to-0130.html">NVMD / DMVN binary format</a>.</p>
+<p>The examined 14 source high/low NAV HKT outputs for seven shared maps preserve the source graph/geometry in the measured migration path, but <strong>do not reproduce native EDF6 rebakes</strong>. Native conversion parity must be assessed independently for topology, streaming connections and agent settings. Some exact-edge matching tests returned high precision for native connections under strict tolerance but failed to cover the more general EDFROOM geometry; filtering to exact matches would therefore destroy valid source connectivity.</p>
+<h2 id="coarse-graph-clearance-encoding-in-the-edfroom-pair">Coarse graph/clearance encoding in the EDFROOM pair</h2>
+<p>The DM019 graph edge records remained <strong>8 bytes</strong> on both sides of the examined compatibility pair. Face-cluster adjacency exactly yielded <strong>84 LOW and 374 HIGH</strong> stored intercluster edges. The examined <code>mcpData</code> is a pair of bytes (interpolant + clearance); <code>faceOffsets</code> are <code>uint32</code>, and edge-pair/vertex clearances are <code>uint8</code>. An earlier decoder confused the <strong>2-byte upper-half-of-float32 <code>hkHalf16</code></strong> with a 4-byte float, producing false <code>bEdgeCost</code> differences. For the values and limits see <a href="edf5-edf6-hkt-coarse-graph-clearance-and-half16-encoding.html">native HKT graph and clearance reference</a>.</p>
+<p>Correct serialization is not a native navmesh rebake, and structurally correct clearance cache arrays are not a runtime AI LOS guarantee.</p>
+<h2 id="edf4-1-source-terrain-without-a-legacy-hkt-measured-r31-r32-boundary">EDF4.1 source terrain without a legacy HKT: measured R31/R32 boundary</h2>
+<p>The seven original EDF4.1 SK SHFB maps audited for the <a href="edf41-sk-native4m-nav-terrain-lattice-and-hkt-nvmd-evidence.html">native 4 m terrain/HKT/NVMD case</a> contain source heightfield and placements <strong>but no <code>NAVMESH.HKT</code> in that retained map corpus</strong>. Thus the EDF5→EDF6 existing-HKT converter is not a substitute for extracting the original 4.1 walkable surface. What remains reusable is its verified target format, graph/streaming/clearance representation, and source-derived geometry validators.</p>
+<p>For <code>SK_HEIGEN02</code>, a 16-tile <strong>bounded window</strong> yielded <strong>2,048</strong> 4 m source triangles and <strong>24</strong> streaming seams in both LOW/HIGH structural candidates. LOW/HIGH NVMD bytes and hashes match each other within the sample, while the HKT hashes differ. The full seven-map 4 m grid <strong>layout</strong> covers 250,000 cells per map, but no full 4 m HKT or EDF6 NPC gameplay result was produced. This source construction must not be conflated with the separate historical HillyCity exact R1D oracle.</p>
+<h2 id="measured-native-low-versus-high-topology-edf5-edf6">Measured native LOW versus HIGH topology (EDF5/EDF6)</h2>
+<p>A matched <code>NW_EUROPE01</code> original-file sample shows native LOW at <strong>4 tiles</strong> and HIGH at <strong>16 tiles</strong> in both game generations, with genuinely distinct face/edge counts per variant. A root <code>erosionRadius=0</code> in this sample must not be read as an NPC collision radius. Original EDF4.1 lacks corresponding transferable source <code>NAVMESH.HKT</code> in the audited corpus. See <a href="edf41-edf5-edf6-native-low-high-nav-and-source-clearance.html">native LOW/HIGH and EDF4.1 source-collision/clearance evidence</a> for exact source counts and caveats.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json</li><li>START_HERE_EDF41_SESSION_CLOSE_2026-11-10.md</li><li>NAVMESH_TYPE_WIRE_RECONCILIATION_2026-08-23.md</li><li>MAP_NAVMESH_CURRENT_AUTHORITY_2026-09-04.md</li><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_NAVMESH_MISSION_CFG_2026-08-25.md</li><li>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/NAVMESH_DEEP_CONVEX_EXPANDED_CENSUS_2026-08-25.json</li><li>Original EDF41 R31/R32 SHFB 4m grid and bounded HKT/NVMD source evidence, 2026-11-16</li><li>R49–R57 source evidence reconciled 2026-11-17: edf41-edf5-edf6-native-low-high-nav-and-source-clearance</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-different-goals">Two different goals</a><a href="#hkt">HKT</a><a href="#qualified-tagfile-generation-bridge">　Qualified tagfile-generation bridge</a><a href="#nvmd">NVMD</a><a href="#streaming-graph-and-geometry-are-separate-axes">Streaming, graph and geometry are separate axes</a><a href="#roomb-negative-evidence">RoomB negative evidence</a><a href="#source-graph-cross-corpus-audit-18-navigation-variants">Source-graph cross-corpus audit: 18 navigation variants</a><a href="#edf4-1-exact-oracle-work">EDF4.1 exact-oracle work</a><a href="#havok-type-wire-generation-a-concrete-compatibility-trap">Havok TYPE wire generation: a concrete compatibility trap</a><a href="#when-physical-collision-passes-but-ai-still-ignores-the-wall">When physical collision passes but AI still ignores the wall</a><a href="#working-with-a-measured-nvmd-binary-not-just-a-version-number">Working with a measured NVMD binary, not just a version number</a><a href="#coarse-graph-clearance-encoding-in-the-edfroom-pair">Coarse graph/clearance encoding in the EDFROOM pair</a><a href="#edf4-1-source-terrain-without-a-legacy-hkt-measured-r31-r32-boundary">EDF4.1 source terrain without a legacy HKT: measured R31/R32 boundary</a><a href="#measured-native-low-versus-high-topology-edf5-edf6">Measured native LOW versus HIGH topology (EDF5/EDF6)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake"};</script><script src="../assets/site.js" defer></script></body></html>

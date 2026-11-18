@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 resource loading, ModeList and custom MissionPack identities This section concerns what the game loads and how it identifies resources, not a guide to any "><title>EDF6 resource loading, ModeList and MissionPack identities | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Resource Loading</a></div><h1>EDF6 resource loading, ModeList and MissionPack identities</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Resource Loading</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><p>This section concerns <strong>what the game loads and how it identifies resources</strong>, not a guide to any particular mod loader.</p>
+<p><strong>Stock-game boundary:</strong> A native EDF6 <code>MissionPack</code> identity, mode, resource name or archive lookup is an observation about game-side data. Injecting additional packs through a third-party loader, substituting assets or extending the pack namespace is an additional mechanism; the game&#39;s native metadata alone does not establish that this extension works in an unmodified executable. References to earlier tooling investigations are included only for their resulting game-side behavior and failure evidence.</p>
+<h2 id="native-systems-and-observed-failure-modes">Native systems and observed failure modes</h2>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How does EDF6 choose a mission pack?</td>
+<td><a href="edf6-native-missionpack-mode-and-lobby-identity.html">MissionPack/ModeList native IDs</a></td>
+</tr>
+<tr>
+<td>Why might mission selection show zero missions?</td>
+<td><a href="tooling-%26-editors-edf6-missionpack06-selection-zero-count-crash-request-identity.html">Selected LIST request and manager-state timing</a></td>
+</tr>
+<tr>
+<td>What changes with <code>MissionMgr::SetMode</code>?</td>
+<td><a href="edf6-mission-manager-mode-config-loading-save-state.html">Mode transitions, CONFIG and save-state risk</a></td>
+</tr>
+<tr>
+<td>How are CPK, RAB, MARC and virtual paths resolved?</td>
+<td><a href="formats-%26-containers-resource-archives-and-lookup-explained.html">Archives and virtual resource resolution</a></td>
+</tr>
+<tr>
+<td>How do additional custom packs keep their LIST/TXT order?</td>
+<td><a href="edf6-native-missionpack-mode-and-lobby-identity.html">Custom MissionPack namespace and companion resources</a></td>
+</tr>
+<tr>
+<td>Which Windows multimedia symbols does EDF6 import?</td>
+<td><a href="edf6-winmm-import-surface.html">Native WinMM call-path audit</a></td>
+</tr>
+</tbody></table>
+<p><strong>Scope caution:</strong> Custom-provider and third-party compatibility observations do not prove that stock EDF6 directly supports the same extension model. Never confuse an on-disk resource, a resolved runtime resource and a successful multiplayer session.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-systems-and-observed-failure-modes">Native systems and observed failure modes</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-mod-platform"};</script><script src="../assets/site.js" defer></script></body></html>

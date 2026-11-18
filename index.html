@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Earth Defense Force 4.1 / 5 / 6 — Technical Knowledge Wiki This is a game-centered, searchable reference to the three EDF generations: the native formats, missi"><title>Earth Defense Force 4.1 / 5 / 6 — Technical Knowledge Wiki | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="#article-start">Documentation</a> / <a href="articles/docs-universal.html">Universal</a> / Index</div><h1>Earth Defense Force 4.1 / 5 / 6 — Technical Knowledge Wiki</h1><div class="release-note"><strong>R193 multi-page beta preview.</strong> Each article now has a direct HTML page. The original R192 research text, sources and evidence labels are preserved; public HTTPS acceptance remains pending.</div><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Start</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Editorial navigation; individual facts cited in linked references</div><div id="articleBody"><p>This is a <strong>game-centered, searchable reference</strong> to the three EDF generations: the native formats, mission scripting, enemy and ally AI, rendering, physics, multiplayer, save data and known differences. Open a chapter below, browse by topic on the left, or use the search box for a class, filename, mission ID, byte offset or other identifier.</p>
+<blockquote>
+<p><strong>Public beta candidate R192 (17 November 2026).</strong> This is an unofficial, community-maintained technical reference, not a claim of exhaustive coverage or verified retail-game behavior. Source observations, interpretations and modified-runtime tests are distinguished throughout. The project owner reported permission to incorporate EDF Knowledge Hub and Japanese workbook research on 15 November 2026; that does not imply unrestricted reuse of every third-party passage or game asset. The public-site package excludes the original research archives and game assets. Open technical questions remain labelled; <strong>public HTTPS deployment has not yet been accepted</strong>. See <a href="articles/open-questions.html">evidence limits</a> and individual source notes.</p>
+</blockquote>
+<p><strong>Reading the R192 index:</strong> Every article is accessible from the navigation: <strong>Documentation</strong>, <strong>Technical references</strong> and <strong>Research appendices</strong>, grouped by game where appropriate. The topic selector includes both core and specialist topics. In 30 larger articles, an existing reader synthesis has been moved to the beginning or an editorial map of sections added there. The full original source findings, grades, fact IDs, attributions and technical details remain available in those articles. R192 additionally records an offline release-preflight for internal links, static packaging and the smallest reference pages; a live browser and public HTTPS acceptance are still pending.</p>
+<p><strong>Current research boundary:</strong> the original EDF4.1 18-map Havok census identifies <strong>15 source-body cohorts</strong>, and R188 adds EDF6 Havok 2020 exact-build filter code evidence. <strong>Actual NPC collision-mask assignments and working NAV on converted maps remain unverified.</strong> See <a href="articles/edf41-original-mapb-actor-matrix-and-havok2014-filter-presence.html">the measured source-body and native filter reference</a>.</p>
+<h2 id="begin-with-a-game">Begin with a game</h2>
+<table>
+<thead>
+<tr>
+<th>Game / comparison</th>
+<th>Recommended starting points</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><a href="articles/docs-edf41.html">EDF 4.1</a></strong></td>
+<td>Original mission BVM, actors, vehicles, 16-map geometry subset and 18-map collision census, terrain and boss behaviors</td>
+</tr>
+<tr>
+<td><strong><a href="articles/docs-edf5.html">EDF 5</a></strong></td>
+<td>Mission VM and 141 shipping scripts, native AI, weapons, visuals and online item drops</td>
+</tr>
+<tr>
+<td><strong><a href="articles/docs-edf6.html">EDF 6</a></strong></td>
+<td>Native object/weapon definitions, Havok SHKT, online rooms, damage and simulation</td>
+</tr>
+<tr>
+<td><strong><a href="articles/docs-compatibility.html">Across generations</a></strong></td>
+<td>Confirmed commonalities, incompatible layouts, and the meaning of source-versus-runtime evidence</td>
+</tr>
+<tr>
+<td><strong><a href="articles/docs-universal.html">Universal concepts</a></strong></td>
+<td>Terminology and systems shared <em>conceptually</em>, not necessarily byte for byte</td>
+</tr>
+</tbody></table>
+<h2 id="follow-a-technical-system">Follow a technical system</h2>
+<table>
+<thead>
+<tr>
+<th>Resources and presentation</th>
+<th>World and gameplay</th>
+<th>Runtime and evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="articles/docs-file-formats.html">Containers and file formats</a></td>
+<td><a href="articles/docs-maps.html">Maps</a></td>
+<td><a href="articles/docs-networking.html">Networking</a></td>
+</tr>
+<tr>
+<td><a href="articles/docs-models.html">Models and MDB</a></td>
+<td><a href="articles/docs-navigation.html">Navigation</a></td>
+<td><a href="articles/docs-performance.html">Performance</a></td>
+</tr>
+<tr>
+<td><a href="articles/docs-textures.html">Textures</a></td>
+<td><a href="articles/docs-collision.html">Physics and collision</a></td>
+<td><a href="articles/docs-mod-platform.html">Resource identity</a></td>
+</tr>
+<tr>
+<td><a href="articles/docs-shaders.html">Shader and material behavior</a></td>
+<td><a href="articles/docs-missions.html">Mission content</a></td>
+<td><a href="articles/docs-conversion.html">Cross-game interpretation</a></td>
+</tr>
+<tr>
+<td><a href="articles/docs-animation.html">Animation</a></td>
+<td><a href="articles/docs-scripting.html">Script VM and API</a></td>
+<td><a href="articles/docs-troubleshooting.html">Known caveats</a></td>
+</tr>
+<tr>
+<td><a href="articles/docs-audio.html">Audio</a></td>
+<td><a href="articles/docs-gameplay.html">Gameplay and AI</a></td>
+<td><a href="articles/open-questions.html">Open research questions</a></td>
+</tr>
+</tbody></table>
+<h2 id="representative-primary-references">Representative primary references</h2>
+<ul>
+<li><a href="articles/cross-game-conversion-edf41-edf5-edf6-generation-and-version-matrix.html">Cross-generation format and version matrix</a> — where numerical identity is meaningful and where it fails.</li>
+<li><a href="articles/missions-%26-scripting-mission-corpus-scope-corrected-final-classification.html">EDF5 original BVM corpus and shipping-mission scope</a> — original source versus later legacy copies.</li>
+<li><a href="articles/missions-%26-scripting-edf-4-1-raw-bvm-before-scenes-and-compatibility-runtime.html">EDF4.1 147-versus-138 mission accounting</a> — 89 offline + 9 reported online-only + 26/23 DLC; the nine online IDs still need direct original-list verification.</li>
+<li><a href="articles/edf5-edf6-dlc1-dlc2-mission-source-compatibility-matrix.html">EDF5 DLC1/DLC2 all 29 missions</a> — source script and reference RMPA differences, with known runtime exceptions.</li>
+<li><a href="articles/edf41-original-mad-static-geometry-16-map-3d-surface-survey.html">EDF 4.1 16-map original collision body census</a> — original geometry is <strong>not</strong> an automatically working target navmesh.</li>
+<li><a href="articles/edf41-original-mapb-actor-matrix-and-havok2014-filter-presence.html">EDF4.1 native MAPB actor matrices and 18,520 Havok bodies</a> — original 18-map static evidence and what remains unknown for NPC navigation.</li>
+<li><a href="articles/edf41-mission-object-roots-111-target-class-and-resource-dependency-catalog.html">EDF4.1 source mission objects: 111 root identities</a> — exact bounded research corpus and dependencies.</li>
+<li><a href="articles/edf6-weapon-sync-policy-1315-config-reference-atlas.html">EDF6 weapon synchronization policy: 1,315 configurations</a> — searchable static source records, not 1,315 in-game tests.</li>
+<li><a href="articles/edf6-havok-2020-tag0-container-sdkv-type-data-index.html">EDF6 original Havok SHKT layout</a> — build-specific native physics serialization.</li>
+<li><a href="articles/edf41-edf5-edf6-native-vehicle-seats-boarding-and-class-masks.html">Cross-generation vehicle boarding</a> and <a href="articles/edf41-edf6-vehicle402-403-404-weapon-sgo-role-pairs-and-native-fields-atlas.html">EDF4.1 vehicle weapon comparisons</a>.</li>
+</ul>
+<h2 id="interpret-the-evidence-correctly">Interpret the evidence correctly</h2>
+<p><strong>Static file/binary findings</strong>, <strong>reconstructed or converted game content</strong>, and <strong>observations from a running game</strong> are separate kinds of evidence. A feature seen in a modified runtime is not proof of an equivalent stock-game behavior. A source-asset file in a port is not necessarily an original shipping EDF6 file. Examples of corrected misunderstandings include the <a href="articles/camera-edf5-edf6-reconciliation.html">debug-only FreeViewCamera, not a confirmed player photo mode</a>, the <a href="articles/maps-%26-navigation-native-grass-grass-merge-grb-and-map-classes.html">EDF5-derived Desert grass sample, not a native EDF6 generic grass oracle</a>, and <a href="articles/maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">collision geometry that does not prove AI NAV/LOS parity</a>.</p>
+<p>The <strong>full archive</strong> contains the standalone <code>index.html</code>, all <strong>581</strong> Markdown articles, machine-readable reference tables, <code>OPEN_QUESTIONS.md</code> and source/evidence audits. Offline search requires no account, CDNs or live services. The R189 editorial and coverage audit is included as a separate archival Markdown report, outside the 581 searchable game articles. Its findings do <strong>not</strong> imply that every historical research archive has been exhaustively inspected or every behavior runtime-tested.</p>
+<h2 id="contributors-and-publication-scope">Contributors and publication scope</h2>
+<p>Research from <a href="articles/docs-community-knowledge-hub.html">EDF Knowledge Hub</a> was compiled by <strong>novae (ajane)</strong>; supporting findings name their original contributors and build-specific evidence. The Japanese workbook <code>mod製作メモ.xlsx</code> has an unnamed contributor in the retained source notes. <strong>The project owner reported permission on 15 November 2026 to incorporate both bodies of research into a larger public knowledge base.</strong> This is not a blanket code, asset, or third-party text license. The public reader embeds the authored reference pages, not the original ZIP, spreadsheet or game media.</p>
+<p>This is a <strong>beta release candidate</strong>, prepared for public hosting at the project owner&#39;s discretion. The research is attributed and the technical evidence grades remain visible. Third-party expression and attribution can be corrected during ongoing editorial maintenance; this version does not claim a blanket permission or a completed legal audit. Public HTTPS testing remains outstanding.</p>
+<h2 id="extended-reference-atlas">Extended reference atlas</h2>
+<p>The <a href="articles/docs-specialist-topic-index.html">complete specialist topic index</a> retains 154 specialist article destinations omitted from the shorter game guides. The full text of the earlier guides is preserved in <code>reference/r147-exact-reader-guides/</code> in the archive.</p>
+<h2 id="research-provenance-and-beta-publication">Research provenance and beta publication</h2>
+<p>Source citations are not claims of first-hand testing. Linked public findings retain individual author/source provenance; native binary reads, build-specific addresses and runtime observations are qualified separately. The R179–R181 full-source and wording audits remain available in the archival distribution, but are not presented as a list of missing game documentation. The public beta package intentionally excludes game media, original outside-author research archives and internal workbooks.</p>
+<p>The <strong>remaining operational publication gate</strong> is deployment to a project-controlled static site and validation of the real HTTPS page, including search, deep links and mobile browsing. This archive does not represent an already deployed site, and publication cannot imply endorsement by EDF&#39;s publisher.</p>
+<h2 id="direct-access-to-the-contributor-research-indexes">Direct access to the contributor research indexes</h2>
+<p>For original research attribution and the reader&#39;s scoped source coverage, visit the <a href="articles/docs-community-knowledge-hub.html">EDF Knowledge Hub source register</a> and the <a href="articles/docs-japanese-workbook-deep.html">Japanese workbook research notes</a>. The <a href="articles/missions-%26-scripting-1-0-6-bvm-parity-repairs.html">EDF5 BVM event/difficulty reference</a> explains the historically audited 27-mission pre-1.0.6 parity difference without claiming 27 unresolved bugs.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 public source articles and evidence lists</li><li>2026-11-15 user-relayed source-author permissions; R178 scoped source rights matrix</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#begin-with-a-game">Begin with a game</a><a href="#follow-a-technical-system">Follow a technical system</a><a href="#representative-primary-references">Representative primary references</a><a href="#interpret-the-evidence-correctly">Interpret the evidence correctly</a><a href="#contributors-and-publication-scope">Contributors and publication scope</a><a href="#extended-reference-atlas">Extended reference atlas</a><a href="#research-provenance-and-beta-publication">Research provenance and beta publication</a><a href="#direct-access-to-the-contributor-research-indexes">Direct access to the contributor research indexes</a></div></aside></main><script>window.EDF_SITE={prefix:"",article:"docs-home"};</script><script src="assets/site.js" defer></script></body></html>

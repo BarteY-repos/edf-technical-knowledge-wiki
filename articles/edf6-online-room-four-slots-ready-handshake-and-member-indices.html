@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 online rooms: four slots, member indices and READY handshake The original EDF6 online room is a four-member system in several separate layers: eos::Users, "><title>EDF6 online rooms: four slots, member indices and READY handshake | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 online rooms: four slots, member indices and READY handshake</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Networking</span></div><div class="referencebadge">Technical reference · Source-code/static interpretation with explicitly labelled contributor gameplay observations; no new game runtime</div><div id="articleBody"><p>The original EDF6 online room is a <strong>four-member system in several separate layers</strong>: <code>eos::Users</code>, per-peer packet sessions, the mission context, HUD widgets and loadout tables. The four-player limit is therefore more than one menu setting. The details below refer to the examined <code>steam-678ccb46</code> build and are not a description of an eight-player modification.</p>
+<h2 id="user-slots-are-not-always-hud-player-numbers">User slots are not always HUD player numbers</h2>
+<p>The room's <code>eos::Users</code> collection assigns a new member the <strong>first available slot</strong> (<code>Users::Add</code>, RVA <code>0x12B7F50</code>). Removing a member empties a slot; it does not compact everyone upward. A later join can reuse the vacancy. The <strong><code>User+0x40</code> network/member slot</strong>, used in packets and initial synchronization, must not be assumed to equal the <strong><code>User+0x48</code> HUD/loadout player index</strong>. The latter is assigned through mission and roster synchronization. A source harness observed a lost start-sync record after different machines saw leave/join slot orders differently; this is not a reported stock-production crash in every session.</p>
+<p>Original room construction and UI also use <strong>four</strong> entries for the voice-talk display, status lamps, packet sessions and other per-member arrays. A larger mod has to reconcile these independent limits; changing a single room-capacity integer is insufficient.</p>
+<h2 id="ready-is-a-state-machine-not-merely-the-host-pressing-start">Ready is a state machine, not merely the host pressing Start</h2>
+<p>The <code>HUiRoom</code> screen exposes <code>Request_ReadyWait</code>. Members enter a ready handshake that tracks the roster count, content entitlement/availability checks and a short start countdown. The examined handshake states are:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">State</th>
+  <th>Meaning in the source investigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Idle</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Start initiated</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Own ready state submitted</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Roster locked / counting down</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td>Mission-start commit</td>
+</tr>
+</tbody>
+</table>
+<p>The exact state-object names are inferred from call sites; their numeric values and branching are from code. A changing member count or incompatible selected content can cancel or block the transition. The source reports a <strong>1000 ms countdown</strong> stored when the ready flow starts; it is not a complete guarantee of wall-clock start latency under loading or network delays.</p>
+<p><code>HUiRoom</code>'s transition to mission start is a <strong>local screen/state commit</strong>; it should not be confused with the native <code>MissionMgr::LoadPackage</code> or a fresh <code>SetGameMode</code> call. See <a href="edf6-mission-manager-mode-config-loading-save-state.html">MissionMgr package model</a> for those separate responsibilities.</p>
+<h2 id="can-someone-join-during-a-mission">Can someone join during a mission?</h2>
+<p>In the source contributor's actual online gameplay, players could leave mid-mission, but a newly joined member stayed in the <strong>room</strong> until the <strong>next mission</strong>, rather than materializing mid-combat. That observation is <strong>contributor-verified gameplay</strong>; the separate four-slot limits and UI/state details are static binary research. Do not use a room-entry observation as proof that a live mission supports dynamically rebuilding every player object.</p>
+<p><strong>Sources and credit:</strong> KH <code>net-room-four-slots</code>, <code>net-member-slots</code>, <code>net-room-ready-handshake</code>, <code>net-no-mid-mission-join</code>; EDF6Coop binary-site audit, hajisensai / All Forces, novae/ajane. Only the last claim is a reported gameplay observation, not newly reproduced.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 (novae/ajane), EDF 6 Netcode: KH fact ID and original investigator named below; code build steam-678ccb46</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#user-slots-are-not-always-hud-player-numbers">User slots are not always HUD player numbers</a><a href="#ready-is-a-state-machine-not-merely-the-host-pressing-start">Ready is a state machine, not merely the host pressing Start</a><a href="#can-someone-join-during-a-mission">Can someone join during a mission?</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-online-room-four-slots-ready-handshake-and-member-indices"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 → EDF6 conversion: which parts can be carried across? EDF5 and EDF6 reuse recognizable names and resource roles, but the same filename extension does not g"><title>EDF5 → EDF6: what actually needs conversion? | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-conversion.html">Conversion</a></div><h1>EDF5 → EDF6: what actually needs conversion?</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled exact paired assets, native corpus and limited runtime evidence</div><div id="articleBody"><p>EDF5 and EDF6 reuse recognizable names and resource roles, but the same filename extension does not guarantee that an EDF5 payload is valid inside EDF6. Reliable conversion works <strong>per subsystem and per observed target profile</strong>.</p>
+<h2 id="conversion-at-a-glance">Conversion at a glance</h2>
+<table>
+<thead>
+<tr>
+  <th>Subsystem</th>
+  <th>What the research establishes</th>
+  <th>Unsafe shortcut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MDB</code> model</td>
+  <td>Vertex declarations, materials, texture bindings, bone/object relationships may differ</td>
+  <td>Header version bump or one universal vertex stride</td>
+</tr>
+<tr>
+  <td>Material/shader</td>
+  <td>Shader, ordered parameters, samplers, sampler state and vertex layout are coupled</td>
+  <td>Rename the shader alone</td>
+</tr>
+<tr>
+  <td>Texture masks</td>
+  <td>Native target pairs can be rebaked with family-specific packing</td>
+  <td>One global FPR channel shuffle</td>
+</tr>
+<tr>
+  <td><code>CANM</code> animation</td>
+  <td>EDF5 <code>0x200</code> to EDF6 <code>0x300</code> changes channel layout and rotation representation</td>
+  <td>Rewrite version field only</td>
+</tr>
+<tr>
+  <td><code>CAS</code> wrapper</td>
+  <td>Has independent generation and references surrounding CANM</td>
+  <td>Assume the wrapper version equals CANM version</td>
+</tr>
+<tr>
+  <td><code>MAB</code></td>
+  <td>Validated v15 <code>0x03</code>→<code>0x83</code> migration changes internal pointer bases; 1,318 paired resources show separate content retargeting</td>
+  <td>Assume all MAB offsets are absolute or treat re-encoding as gameplay parity</td>
+</tr>
+<tr>
+  <td><code>MAD</code> collision</td>
+  <td>Older Havok data must be structurally re-encoded into target <code>hknp</code> layouts</td>
+  <td>Copy old motion/shape bytes into new headers</td>
+</tr>
+<tr>
+  <td><code>HKT</code>/<code>NVMD</code> navigation</td>
+  <td>Semantic geometry and target binary output are separately important</td>
+  <td>Assume matching triangle counts prove correctness</td>
+</tr>
+<tr>
+  <td>Mission BVM → AC</td>
+  <td>Event graph, scheduler, control/dataflow and engine API semantics need translation</td>
+  <td>Text-only opcode replacement</td>
+</tr>
+<tr>
+  <td>Mission RMPA</td>
+  <td>Dedicated target record layout and reference rebasing</td>
+  <td>Reuse the map-RMPA converter</td>
+</tr>
+<tr>
+  <td>Archive/resource lookup</td>
+  <td>Container and path identity must be preserved across packaging</td>
+  <td>Rename every <code>.trb</code> to <code>.mdx</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-one-mdb-leaf-mesh-changes-even-when-index-count-does-not">Example: one MDB leaf mesh changes even when index count does not</h2>
+<p>A paired native palm example found an EDF5 leaf mesh with <strong>888 vertices and 1,944 indices</strong> whose EDF6 counterpart had <strong>1,380 vertices and the same 1,944 indices</strong>. Another paired leaf mesh changed <strong>36 → 72 vertices</strong>, keeping <strong>144 indices</strong>. Tangent/normal/UV seam splitting changed the vertex representation without changing the polygon index count.</p>
+<p>The study also showed that an EDF5 <code>snd_Map_Simple_Clip</code> material does not generally map to one universal EDF6 shader: of <strong>38 paired source materials</strong>, only one native target used <code>snd_BRDF_Map_Simple_Clip</code>; other target families differed. That one target still changed its parameter ABI. A shader-string-only experiment produced black leaves; restoring a coherent material contract resolved that observed failure.</p>
+<p>This is a <strong>paired-case result</strong>, not a rule that every EDF5 leaf must increase its vertices by a fixed ratio.</p>
+<h2 id="example-binormal-migration-must-be-contextual">Example: binormal migration must be contextual</h2>
+<p>In retained compatibility-pair research, TANGENT and TEXCOORD could remain stable while BINORMAL changed to:</p>
+<pre><code class="language-text">EDF6 binormal = (-source.x, -source.y, -source.z, source.w)
+</code></pre>
+<p>The retained fixture measured <strong>16,796 half-float binormals</strong> and <strong>1,093 float32 binormals</strong> matching that sign behaviour; the 1,093 sampled float32 tangents matched exactly. This is a <strong>cross-game migration observation</strong>, not a command to negate binormals already correct inside a native EDF6 file.</p>
+<h2 id="example-version-numbers-are-not-the-animation-format">Example: version numbers are not the animation format</h2>
+<p>The studied CANM generations differ in record size and semantic encoding:</p>
+<ul>
+<li>EDF5: <code>0x200</code>, roughly <code>0x20</code>-byte channel records and Euler-radian animation representation;</li>
+<li>EDF6: <code>0x300</code>, roughly <code>0x30</code>-byte channel records with XYZW base/multiplier/encoding fields and quaternion animation representation.</li>
+</ul>
+<p>The associated CAS wrapper may be a separate generation. A conversion tool should parse both generations explicitly and retain unknown data safely instead of assuming that the first successful parse proves compatible animation behaviour.</p>
+<h2 id="conversion-evidence-levels">Conversion evidence levels</h2>
+<p>A conversion can be:</p>
+<ol>
+<li><strong>Structurally valid</strong> — reader/writer and invariants pass.</li>
+<li><strong>Source-semantically reconciled</strong> — events, references or vertex/sample semantics are retained against studied source/target data.</li>
+<li><strong>Target-runtime accepted</strong> — the exact modified asset/game build loads and behaves in the relevant test.</li>
+<li><strong>Gameplay faithful</strong> — the particular behaviour has been compared at runtime, not inferred from file layout alone.</li>
+</ol>
+<p>These are progressively stronger claims. A source-only PASS is valuable research but not automatic gameplay parity.</p>
+<p>For the detailed rules, open <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">MAB v15 pointer migration</a>, <a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB model structure</a>, <a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">Native material families</a>, <a href="animation-canm-cas-and-mab-formats-explained.html">Animation formats</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Collision and navigation</a> and <a href="missions-%26-scripting-event-registration-scheduling-and-state.html">Mission events</a>.</p>
+<p><strong>Evidence status:</strong> exact paired same-asset source/target observations for several MDB/animation rules, sampled native shader corpora, source/binary collision research, mission translator and runtime case studies. No universal across-all-assets converter is claimed.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/12_EDF5_EDF6_MDB_MIGRATION.md</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/13_CANM_CAS_CROSS_GAME_NOTES.md</li><li>R48 model/animation/collision/mission conversion findings</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#conversion-at-a-glance">Conversion at a glance</a><a href="#example-one-mdb-leaf-mesh-changes-even-when-index-count-does-not">Example: one MDB leaf mesh changes even when index count does not</a><a href="#example-binormal-migration-must-be-contextual">Example: binormal migration must be contextual</a><a href="#example-version-numbers-are-not-the-animation-format">Example: version numbers are not the animation format</a><a href="#conversion-evidence-levels">Conversion evidence levels</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-what-changes-between-edf5-and-edf6"};</script><script src="../assets/site.js" defer></script></body></html>

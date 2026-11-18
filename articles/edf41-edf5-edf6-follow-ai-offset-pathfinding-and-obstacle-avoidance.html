@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 to EDF6: friendly follower movement, formation offsets and routes A friendly soldier&#39;s follow behavior is not equivalent to finding a globally optimal wa"><title>EDF4.1 to EDF6: friendly follower movement, random formation offsets and route handling | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / AI and navigation</div><h1>EDF4.1 to EDF6: friendly follower movement, random formation offsets and route handling</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">AI and navigation</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Attribution and grade per source fact; this edition adds no game runtime test</div><div id="articleBody"><p>A friendly soldier's <strong>follow</strong> behavior is not equivalent to finding a globally optimal walkable path to the player. Across EDF4.1, EDF5 and EDF6, the source builds a target from the leader's position plus a <strong>random, world-space formation offset</strong>. How the soldier then steers toward that target changed significantly between generations.</p>
+<h2 id="three-generations-at-a-glance">Three generations at a glance</h2>
+<table>
+<thead>
+<tr>
+  <th>Game</th>
+  <th>Following movement</th>
+  <th>Follow anchor / formation</th>
+  <th>Obstacle strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>EDF4.1</strong></td>
+  <td>Direct virtual-stick movement written by <code>SoldierBase</code></td>
+  <td>Leader position + world-space offset</td>
+  <td>Local contact normal and periodic short forward box sweep; sidestep/jump-like response</td>
+</tr>
+<tr>
+  <td><strong>EDF5</strong></td>
+  <td>Target handed to a movement/path controller on the soldier</td>
+  <td>Same leader-plus-offset concept</td>
+  <td>Controller-based pathing; some controller fields updated while following</td>
+</tr>
+<tr>
+  <td><strong>EDF6</strong></td>
+  <td><code>Think</code> and <code>AiRouteExplorerBase</code>/path controller cooperate</td>
+  <td>Leader anchor + world-space offset, with <code>ChaseLeader</code> state</td>
+  <td>Scripted route, navigation route and path-mesh branches exist separately</td>
+</tr>
+</tbody>
+</table>
+<p>These are descriptions of the <strong>examined code paths</strong>, not comparative performance benchmarks. A different navmesh or missing map collision may still make the newer controller fail.</p>
+<h2 id="edf4-1-immediate-steering-and-contact-probes">EDF4.1: immediate steering and contact probes</h2>
+<p>The EDF4.1 follower state is <code>SoldierBase</code> virtual slot <strong>58</strong>, while guard is <strong>57</strong> and engage <strong>59</strong>. <code>move-and-look</code> writes a virtual move stick into the soldier's movement-input fields and a separate pitch/yaw request toward a look target. Unlike EDF5, this call does not delegate its follow target to a persistent path-controller object.</p>
+<p>When touching an obstacle whose surface normal opposes the desired direction, the code periodically sweeps a <strong>box about 3 m forward</strong>. If it finds a free path it can request a jump-like response; otherwise it retains a sidestep direction for a bounded interval. The jump flag's exact behavioral interpretation was inferred from the write, <strong>not observed afresh in this edition</strong>.</p>
+<h2 id="formation-offsets-across-the-series">Formation offsets across the series</h2>
+<p>In the EDF4.1 code, normal followers eventually redraw a random horizontal offset with radius about <strong>3–10 m</strong> at a timer of <strong>900–1799 frames</strong> (approximately 15–30 seconds at 60 updates/s), seeded from a local AI random source and synchronized through a dedicated AI message online. The offset is expressed in <strong>world coordinates</strong>: turning in place does <strong>not rotate it behind the player</strong>. A soldier can therefore appear in front of a stationary leader after a redraw without deliberately choosing to block the player.</p>
+<p>EDF5 and EDF6 retain the broadly similar world-space offset and timed redraw model, but have distinct object fields, path controller and route management. The EDF4.1 mission-native formation spread can enlarge this radius for scripted squads; a Balam leader can impose a minimum separation. The 3–10 m range is not a universal distance for every mission-controlled formation.</p>
+<h2 id="navigational-and-script-consequences">Navigational and script consequences</h2>
+<p>A mission's <code>SetAiRoute</code>, <code>SetAiRouteNavigate</code> and following-leader states are not synonymous. EDF6's <code>AiRouteExplorerBase</code> is also used by vehicles and enemies; the native <code>IsAiMoveEnd</code> family checks whether the explorer pointer is gone, which can leave mission events waiting if pathing never completes. An NPC already under a leader can ignore some route commands until its follow state changes. These distinctions explain why fixing a 4.1 map's physical geometry does not automatically fix the EDF6 AI route assigned to it.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>The three source appendices provide <strong>static decompilation</strong>, not a newly executed comparison run. Relative RVAs (4.1 <code>0x2B48E0</code>, EDF5 <code>0x30B610</code>, EDF6 <code>0x596B50</code>) refer to their individually studied binaries. We do not claim the 4.1 virtual-stick branch solves navigation or that a path-controller's presence guarantees correct traversal.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf41-squad-follow</code> (facts <code>edf41-follow-spot</code>, <code>edf41-follow-offset-pick</code>, <code>edf41-follow-obstacle</code>), <code>kh-edf5-squad-follow</code> and <code>kh-edf6-squad-follow</code>, plus the source's <code>kh-edf6-soldier-ai</code> route census; community researchers novae/ajane and hajisensai/All Forces. See <a href="edf41-edf5-edf6-friendly-squad-recruitment-guard-follow-and-target-states.html">three-generation recruitment</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14: original EDF4.1/EDF5/EDF6 binary/SGO data and attributed contributor analyses; build-specific findings</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#three-generations-at-a-glance">Three generations at a glance</a><a href="#edf4-1-immediate-steering-and-contact-probes">EDF4.1: immediate steering and contact probes</a><a href="#formation-offsets-across-the-series">Formation offsets across the series</a><a href="#navigational-and-script-consequences">Navigational and script consequences</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-follow-ai-offset-pathfinding-and-obstacle-avoidance"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 → EDF6 MissionPack03–05: indexed LIST/TXT/image parity evidence Scope: recorded 2026-09-02 offline static acceptance of the EDF5-derived MissionPack03–05 r"><title>EDF5 MissionPack03–05 LIST/TXT/image parity: exact static audit | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF5 MissionPack03–05 LIST/TXT/image parity: exact static audit</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Historical exact source and offline static audit; runtime correction specifically noted</div><div id="articleBody"><p><strong>Scope:</strong> recorded <strong>2026-09-02 offline static acceptance</strong> of the EDF5-derived MissionPack03–05 resource set on the studied EDF6 target profile. This is a precise reference for how to <em>verify</em> a bundle; it is not an assertion that every new deployment has identical artifacts or that an offline gate is a gameplay runtime pass.</p>
+<h2 id="the-cross-file-invariant">The cross-file invariant</h2>
+<p>For this target, OFFLINE and ONLINE share one save/index axis. Every mission position must agree across the mission LIST, localized TXT title/brief arrays and the image entry resolved by LIST <code>field2</code>. The <strong>mode-specific gameplay profile</strong> can still differ via CONFIG/ModeList despite identical LIST and TXT data.</p>
+<table>
+<thead>
+<tr>
+  <th>Converted pack</th>
+  <th>Content</th>
+  <th style="text-align:right">OFFLINE LIST entries</th>
+  <th style="text-align:right">ONLINE LIST entries</th>
+  <th style="text-align:right">Underground rows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MissionPack03</code></td>
+  <td>EDF5 base</td>
+  <td style="text-align:right">112</td>
+  <td style="text-align:right">112</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>MissionPack04</code></td>
+  <td>EDF5 DLC1</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>MissionPack05</code></td>
+  <td>EDF5 DLC2</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td></td>
+  <td style="text-align:right"><strong>141</strong></td>
+  <td style="text-align:right"><strong>141</strong></td>
+  <td style="text-align:right"><strong>15</strong></td>
+</tr>
+</tbody>
+</table>
+<p>In the R4 fixture, corresponding OFFLINE and ONLINE LISTs were <strong>byte-identical within each pack</strong>, with zero missing/extra/duplicate mission names and all 15 underground <code>flags=40</code> rows matching the mapped underground missions. The equality is intentional for the <strong>index</strong>, not for the gameplay balance.</p>
+<h2 id="localization-audit-five-tables-two-modes-three-packs">Localization audit: five tables, two modes, three packs</h2>
+<p>The fixture checked <code>EN</code>, <code>JA</code>, <code>KR</code>, <code>CN</code>, and <code>SC</code> for every pack and mode: <strong>30 localized TXT combinations</strong>. Every combination matched its LIST row count and was byte-identical between ONLINE/OFFLINE for the same language and pack.</p>
+<p>A previous R2 parity attempt changed MP03 ONLINE LIST to 112 rows while leaving its <strong>ONLINE TXT at 111 rows</strong>. Its record <em>N</em> could therefore show another mission's title or brief even when mission loading was correct. The R3 resource parity audit found this, and the R4 fixture corrected it.</p>
+<p>For MP03, missing <code>M082</code>/<code>M083</code> source title rows were filled using the EDF5 ONLINE text source, separately for each locale. Do not synthesize an English row into all languages or assume a successful LIST parser proves localized ordinal alignment.</p>
+<h2 id="the-shared-mission-image-archive">The shared mission image archive</h2>
+<p>The preceding shared-image baseline had <strong>286 entries</strong> (<code>147</code> native EDF6 + <code>139</code> EDF5). The R4 source audit appended exactly two missing EDF5 image entries, <code>EDF5_M082.dds</code> and <code>EDF5_M083.dds</code>, yielding <strong>288 entries</strong> (<code>147</code> EDF6 + <code>141</code> EDF5) while preserving all existing 286 entries.</p>
+<p>The audited shared OFFLINE/ONLINE image RAB outputs had identical SHA-256:</p>
+<p><code>711a6430bad870d637d5eea79954dd417c909f2ddfb74c2cce61b24eae149ccc</code></p>
+<p>This is <strong>a fixture-specific checksum</strong>, not a universal archive signature. The retained source notes RAB version <code>272</code> and entry kind <code>TEXTURE</code>. The archive is not packaged in this wiki.</p>
+<h2 id="config-and-deployment-boundary">CONFIG and deployment boundary</h2>
+<p>The R4 resource bundle intentionally <strong>did not overwrite <code>CONFIG.SGO</code></strong>. The retained R43 CONFIG had already been checked for appropriate mode-specific LIST/TXT/image routing, and replacing it would have overridden unrelated mod merges. In another target profile, failing to include or reconcile the right CONFIG binding can leave a correct archive unreachable.</p>
+<p><strong>Minimal validation sequence:</strong></p>
+<ol>
+<li>Check the pack identity, target mission ordinal and deployed LIST row in both modes.</li>
+<li>Verify <code>field2</code> references an entry in the actual shared runtime image RAB.</li>
+<li>For each of the five languages, check TXT count and exact ordinal mapping against LIST.</li>
+<li>Confirm <code>flags=40</code> on the audited underground set and standard <code>8</code> on other rows.</li>
+<li>Check mode-specific CONFIG gameplay profiles separately from shared metadata.</li>
+<li>Observe actual mission selection, title/thumbnail and eventual gameplay in runtime before claiming a complete port.</li>
+</ol>
+<p>See <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">shared progress/metadata</a>, <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">mission previews</a> and <a href="missions-%26-scripting-underground-mission-flags-and-weapon-condition.html">underground runtime restrictions</a>.</p>
+<p><strong>Primary source:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R5_FULL_INDEXED_RESOURCE_PARITY/FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</code>. Historical 111-row mismatch confirmed in <code>R4_FULL_RESOURCE_PARITY/EDF5_MISSIONPACK03_04_05_FULL_RESOURCE_PARITY_AUDIT_R3_2026-09-02.json</code>.</p>
+<h2 id="why-the-historical-underground-patch-reported-29-changed-records">Why the historical underground patch reported 29 changed records</h2>
+<p>The 15 underground mission IDs would produce <strong>30</strong> mode-scoped LIST entries in the final 112/15/14 shared-index target. The earlier underground-only R2 audit counted <strong>29</strong> because <code>M000</code> was not yet present in MP03 ONLINE. The later shared-progress reconstruction added that missing online <code>M000</code> and made the paired lists byte-identical; the subsequent resource-parity step repaired the still-stale 111-row online localization table. Never carry this older 29-instance patch count forward as evidence for the final two-mode lists.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_DIFFICULTY_SWITCH_SCALAR_CLOSURE_R8_2026-09-27.md</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R5_FULL_INDEXED_RESOURCE_PARITY/FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R6_ONLINE_UNDERGROUND_RESTRICTION/R6_ONLINE_UNDERGROUND_RESTRICTION_DIAGNOSTIC.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-cross-file-invariant">The cross-file invariant</a><a href="#localization-audit-five-tables-two-modes-three-packs">Localization audit: five tables, two modes, three packs</a><a href="#the-shared-mission-image-archive">The shared mission image archive</a><a href="#config-and-deployment-boundary">CONFIG and deployment boundary</a><a href="#why-the-historical-underground-patch-reported-29-changed-records">Why the historical underground patch reported 29 changed records</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-indexed-resource-parity-evidence"};</script><script src="../assets/site.js" defer></script></body></html>

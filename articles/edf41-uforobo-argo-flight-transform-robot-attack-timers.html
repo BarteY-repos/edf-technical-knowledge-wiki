@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF4.1 UfoRobo (Argo): one boss, two movement forms The EDF4.1 giant Argo ship, internally UfoRobo, is not two unrelated NPCs swapped in a mission. The source d"><title>EDF4.1 UfoRobo (Argo): flight, transformation, robot locomotion and attack-state timing | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf41.html">EDF 4.1</a> / Enemy state machines</div><h1>EDF4.1 UfoRobo (Argo): flight, transformation, robot locomotion and attack-state timing</h1><div class="meta"><span class="chip">EDF 4.1</span><span class="chip">Game technical references</span><span class="chip">Enemy state machines</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>The EDF4.1 giant Argo ship, internally <code>UfoRobo</code>, is not two unrelated NPCs swapped in a mission. The source describes <strong>one native game object and one object handle</strong>, with a body state machine and a higher-level AI state machine. Mission scripts can subscribe to the object's durability events before and after its transformation.</p>
+<h2 id="script-actions">Script actions</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right"><code>ObjectAction</code></th>
+  <th>Native meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Begin the transformation from flying ship to robot if alive; may be replayed</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Enter the robot form immediately, using <code>stand</code> and approach behavior</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Switch to approach behavior without performing the full transform</td>
+</tr>
+</tbody>
+</table>
+<p>These are action IDs for <strong>EDF4.1 UfoRobo</strong>, not generic action IDs for other EDF enemies or the EDF6 MovingFortress.</p>
+<h2 id="body-state-sequence">Body-state sequence</h2>
+<table>
+<thead>
+<tr>
+  <th>State</th>
+  <th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>S0–S3</td>
+  <td>Ship idle and successive small, medium and buster attacks</td>
+</tr>
+<tr>
+  <td>S4</td>
+  <td>Transforming; the cited native damage check makes this stage invulnerable</td>
+</tr>
+<tr>
+  <td>S5–S6</td>
+  <td>Falling into robot form and landing</td>
+</tr>
+<tr>
+  <td>S7</td>
+  <td>Robot main state: plan a step, turn or attack</td>
+</tr>
+<tr>
+  <td>S8–S9</td>
+  <td>Execute a step/turn or execute an attack</td>
+</tr>
+<tr>
+  <td>S10–S11</td>
+  <td>Death sequence, followed by a wreck state and deletion</td>
+</tr>
+</tbody>
+</table>
+<p>In ship form, an AI steering state circles roughly 300–500 m from its target, about 250 m above it. Heading changes are constrained, and sideways slip is part of the flight behavior. The robot uses <strong>animation root motion</strong>, turned into the chosen world heading; a downward map ray keeps its feet aligned with the terrain during stepping.</p>
+<h2 id="gun-groups-and-pacing">Gun groups and pacing</h2>
+<p>Native gun data distinguishes the knee beam weapons (<code>BeamBullet01</code>), shoulder rocket volleys (<code>RocketBullet01</code>), large hand weapons and the annihilation cannon. Each group has idle, charging and firing phases. Source parameters include a roughly <strong>300-frame buster charge</strong>, with subsequent shots spaced by <strong>31 frames</strong> during the firing interval. Other guns run separate timers and have individual distance windows.</p>
+<p>The robot's high-level state selects attacks by distance and angle windows in <code>robo_attack_table</code>. An attack switches the body to S9, and the AI does not return to movement planning until the body returns to S7. Consequently <strong>attack time does not count toward the ordinary movement-phase timers</strong>. The lengthy native animation clips help explain the boss's deliberate, stop-start walking tempo; they are not necessarily AI stalls.</p>
+<p>The original static analysis also found a possible edge case: when no valid attack-table entry exists (for example a target beyond the allowed range), a fallback assigns an AI function into the body-state machine. The source author considered this a probable EDF4.1 bug; the wiki does not claim a newly reproduced crash or stuck state.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf41-enemies</code>, facts <code>uforobo-states-ai</code>, <code>uforobo-guns-events-death</code>, <code>uforobo-attack-rhythm</code>, <code>uforobo-function-map</code>; original RE attributed to hajisensai / All Forces, Steam build <code>57aab039</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf41-enemies</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#script-actions">Script actions</a><a href="#body-state-sequence">Body-state sequence</a><a href="#gun-groups-and-pacing">Gun groups and pacing</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-uforobo-argo-flight-transform-robot-attack-timers"};</script><script src="../assets/site.js" defer></script></body></html>

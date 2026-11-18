@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Models Overview MDB carries model geometry and a hierarchy of objects, bones and material references. The vertex declaration tells the engine how to interpret e"><title>Models | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Models</a></div><h1>Models</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Models</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p><code>MDB</code> carries model geometry and a hierarchy of objects, bones and material references. The vertex declaration tells the engine how to interpret each mesh stream; a plausible-looking vertex array is not enough without matching indices, weights and material slots.</p>
+<h2 id="reference-topics">Reference topics</h2>
+<table>
+<thead>
+<tr>
+  <th>Component</th>
+  <th>Documentation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MDB mesh/header layout</td>
+  <td><a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB model format</a></td>
+</tr>
+<tr>
+  <td>Shader and material schema</td>
+  <td><a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">MDB parameters and samplers</a></td>
+</tr>
+<tr>
+  <td>Bind poses, bones and physics proxies</td>
+  <td><a href="cross-game-conversion-edf6-vehicle-ragdoll-shkt-bind-pose-refit-and-cas-rebasing.html">MDB/SHKT retargeting</a></td>
+</tr>
+<tr>
+  <td>CANM/CAS attachment and animation</td>
+  <td><a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">Animation records</a></td>
+</tr>
+<tr>
+  <td>Renderer selection and invalid MDB loads</td>
+  <td><a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Resource dispatch and CMPL failure case</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="compatibility-rules">Compatibility rules</h2>
+<p>Preserve vertex declarations and bone hierarchy. When a skeleton is changed, re-evaluate animation bind pose, SHKT physics anchors, sockets and script/object references together. The documented retargeting workflow moves <strong>joints at both ends</strong> and rest-pose definitions rather than translating one bone in isolation.</p>
+<p>Successful MDB parsing does not prove correct rendering, physics or navigation. <a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Typed loader mismatch</a> documents an example in which a valid MDB was handed to the wrong consumer.</p>
+<h2 id="additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</h2>
+<ul>
+<li><a href="edf6-shkt-sgo-ragdoll-bone-binding-and-part-hit-zones.html">Ragdoll bones and weak-point bodies</a></li>
+<li><a href="edf6-accessory-ragdolls-cloth-sway-and-sgo-motion-settings.html">Native accessory rig physics</a></li>
+</ul>
+<h2 id="related-game-mechanics-native-source-references">Related game mechanics (native-source references)</h2>
+<ul>
+<li><a href="edf6-weapon-sgo-mab-muzzle-attachment-bone-and-shot-origin.html">EDF6 weapon-model MAB muzzle attachments</a></li>
+</ul>
+<h2 id="further-edf-game-documentation">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf5-erginus-king-unspawned-held-over-edf41-asset.html">EDF5 unused Erginus King model</a></li>
+</ul>
+<h2 id="further-edf-game-documentation-2">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf6-havok-shkt-physics-scene-ragdoll-tree-and-classes.html">EDF6 SHKT ragdoll scene graph</a></li>
+</ul>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB model format</a><a href="models-%26-mdb-edf6-lod-farmap-real-material-and-mesh-options.html">LOD and FarMap — geometry, materials and shaders</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#reference-topics">Reference topics</a><a href="#compatibility-rules">Compatibility rules</a><a href="#additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</a><a href="#related-game-mechanics-native-source-references">Related game mechanics (native-source references)</a><a href="#further-edf-game-documentation">Further EDF game documentation</a><a href="#further-edf-game-documentation-2">Further EDF game documentation</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-models"};</script><script src="../assets/site.js" defer></script></body></html>

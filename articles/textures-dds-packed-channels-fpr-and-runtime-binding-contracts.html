@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="DDS, packed channels, FPR and runtime texture-binding contracts Texture handling in EDF6 is not one universal “DDS in, DDS out” rule. Compression, packed channe"><title>DDS, packed channels, FPR and runtime texture-binding contracts | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-textures.html">Textures</a></div><h1>DDS, packed channels, FPR and runtime texture-binding contracts</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Textures</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled native corpus + runtime-positive EDF6 custom binding + bounded source-guide semantics</div><div id="articleBody"><p>Texture handling in EDF6 is not one universal “DDS in, DDS out” rule. Compression, packed channels, sampler meaning, resource admission and shader-family semantics all matter independently.</p>
+<h2 id="native-bc1-dxt1-cutout-evidence">Native BC1 / DXT1 cutout evidence</h2>
+<p>A retained native Common_Clip foliage texture, <code>sk_pShrub003-df.dds</code>, is classic DXT1/BC1. In its audited top mip:</p>
+<ul>
+<li>all <strong>32,768 BC1 blocks</strong> used transparent mode (<code>color0 &lt;= color1</code>);</li>
+<li><strong>427,079 pixels</strong> selected palette index 3 / transparent.</li>
+</ul>
+<p>This proves a real native one-bit-alpha path. It does <strong>not</strong> prove that every alpha-cutout texture should be rebuilt as BC1.</p>
+<p>A source-authored Common_Clip experiment generated deterministic DXT1 one-bit-alpha DDS with a full mip chain, but that experimental output remained runtime-unverified in the October writer checkpoint. Keep native evidence and new-writer qualification separate.</p>
+<h2 id="cutout-mip-alpha-coverage-preservation">Cutout mip alpha-coverage preservation</h2>
+<p>A source-owned Common_Clip diagnostic exposed a concrete mip-generation failure: the 64×64 BC1 top level retained 50% transparent coverage through 8×8, but the original deterministic opaque-majority downsampler collapsed transparency to <strong>0% at 4×4, 2×2 and 1×1</strong>. The associated LOD DDS began at 4×4, so the entire distant cutout chain was opaque.</p>
+<p>R14 added an <strong>opt-in</strong> coverage-preserving BC1 mip generator. It tracks fractional per-area alpha during downsampling and chooses the target number of opaque/transparent texels per mip with a deterministic 8×8 Bayer-ranked tie breaker. The top 64×64 BC1 payload remains byte-identical to the original path.</p>
+<p>Measured transparent texels for the 50% diagnostic:</p>
+<table>
+<thead>
+<tr>
+<th>Mip</th>
+<th style="text-align:right">Original</th>
+<th style="text-align:right">R14 coverage-preserving</th>
+<th style="text-align:right">Ideal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>64×64</td>
+<td style="text-align:right">2048</td>
+<td style="text-align:right">2048</td>
+<td style="text-align:right">2048</td>
+</tr>
+<tr>
+<td>32×32</td>
+<td style="text-align:right">512</td>
+<td style="text-align:right">512</td>
+<td style="text-align:right">512</td>
+</tr>
+<tr>
+<td>16×16</td>
+<td style="text-align:right">128</td>
+<td style="text-align:right">128</td>
+<td style="text-align:right">128</td>
+</tr>
+<tr>
+<td>8×8</td>
+<td style="text-align:right">32</td>
+<td style="text-align:right">32</td>
+<td style="text-align:right">32</td>
+</tr>
+<tr>
+<td>4×4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right"><strong>8</strong></td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td>2×2</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right"><strong>2</strong></td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>1×1</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0.5, not representable</td>
+</tr>
+</tbody>
+</table>
+<p>This is an <strong>offline/source-owned quality fix</strong>, not a recovered universal Sandlot mip generator. It is appropriate only for one-bit-alpha cutouts; do not use it for glass/translucency. A controlled EDF6 side-by-side render is still required before treating the policy as production visual authority.</p>
+<h2 id="runtime-positive-custom-texture-binding">Runtime-positive custom texture binding</h2>
+<p>The custom-map runtime chain establishes more than filename lookup:</p>
+<ul>
+<li><strong>R12G:</strong> custom albedo identity + authored HD/LOD DDS + canonical RAB insertion rendered correctly;</li>
+<li><strong>R13A:</strong> custom normal identity + authored HD/LOD DDS rendered through the normal sampler;</li>
+<li><strong>R13B:</strong> custom mask identity + authored HD/LOD DDS visibly changed mask-controlled material response.</li>
+</ul>
+<p>Therefore albedo, normal and mask slots are each independently runtime-positive with custom resource identities in the tested Sikiita-scaffold path.</p>
+<p>The earlier black-texture failure was not evidence that custom names or authored DDS were unsupported. It was traced to <strong>noncanonical resource admission/order</strong>. New texture resources must be inserted into the canonical contiguous type blocks rather than appended after MODEL entries:</p>
+<pre><code class="language-text">*.lod.dds -&gt; TEXTURE
+HD *.dds  -&gt; HD-TEXTURE
+</code></pre>
+<p>For the tested 512×512 / 10-mip DXT1 path, the runtime-positive LOD contract used the HD mip tail beginning at mip level 4, producing a 32×32 / 6-mip LOD resource.</p>
+<h2 id="source-image-compiler-boundary">Source-image compiler boundary</h2>
+<p>The later Source Texture V1 backend accepts a bounded artist-source subset — non-interlaced 8-bit RGB/RGBA PNG and 24/32-bit truecolor TGA — and deterministically emits BC1/DXT1 with a full mip chain under additional constraints. That <strong>compiler path was offline-qualified</strong>; it inherits useful runtime oracles from the earlier DDS lineage, but it must not be described as if every PNG/TGA conversion output had separately passed in game.</p>
+<h2 id="packed-normal-conventions-are-family-specific">Packed normal conventions are family-specific</h2>
+<p>For reconciled Common/Water-style paths, the documented packed normal reconstruction is:</p>
+<pre><code class="language-text">x = 2*R*A - 1
+y = 2*G - 1
+z = sqrt(max(1e-5, 1-x*x-y*y))
+</code></pre>
+<p><code>normal_amount</code> scales XY before basis transformation, and the retained compositor research gives stored logical-normal magnitude a lighting role. FieldRender terrain is a known exception with a different <code>R*B</code> / signed-G decode. Do not use one normal decoder globally.</p>
+<h2 id="metallic-roughness-packing">Metallic / roughness packing</h2>
+<p>For the known Common/BRDF-style guide contract:</p>
+<ul>
+<li>typical metallic = packed <strong>G</strong> × material <code>metallic</code>;</li>
+<li>typical roughness = packed <strong>R</strong> × material <code>roughness</code>;</li>
+<li><code>_hr</code> roughness = packed <strong>R × A</strong> × material <code>roughness</code>.</li>
+</ul>
+<p>This is useful behind a known material-family profile. It is not permission to interpret unknown legacy samplers by name alone.</p>
+<h2 id="fpr-mask-conversion-no-universal-channel-shuffle">FPR / mask conversion: no universal channel shuffle</h2>
+<p>Paired EDF5→EDF6 same-asset research shows that some native EDF6 targets underwent real material/texture rebakes. A simple “source mask → destination FPR by fixed channel permutation” worked for some observations but failed to generalize across the corpus.</p>
+<p>The safe conversion rule is therefore:</p>
+<ol>
+<li>identify the target material/shader family;</li>
+<li>use a proven family-specific packed-texture contract when one exists;</li>
+<li>preserve the source/unknown texture when no exact migration is established;</li>
+<li>never synthesize FPR solely because the destination sampler has an FPR-like name.</li>
+</ol>
+<h2 id="mip-lod-implications">Mip / LOD implications</h2>
+<p>Texture identity and sampler binding are only part of runtime correctness. The tested custom-map path required both HD and LOD resources, correct mip lineage and canonical RAB type-block admission. A correct-looking DDS payload in the wrong resource topology can still fail at runtime.</p>
+<p>This is also why model-material migration must move the complete shader/material/sampler/vertex/texture contract rather than just rename a shader or reshuffle channels.</p>
+<h2 id="fieldrender-texture-arrays-are-separate-from-static-model-packed-masks">FieldRender texture arrays are separate from static-model packed masks</h2>
+<p>An original EDF6 terrain corpus of <strong>20 DDS files from five maps</strong> used DX10 array headers and exact BC-compressed mip chains. Common dimensions were color 2048²/12 mips and 512²/10 mips; normal 2048²/12 and 128²/8 mips. Native slice counts varied by map (color 4–12, normals 3–9), and normal DXGI format was <code>77</code> (BC3_UNORM) in three maps but <code>71</code> (BC1_UNORM) in two. <strong>Value <code>71</code> is BC1_UNORM, not BC1_UNORM_SRGB (<code>72</code>)</strong>; preserve the raw value where older research called 71 “sRGB”. These are FieldRender terrain-array observations, not rules for the R/M/O packed masks used by static MDB props. See <a href="edf6-fieldrender-native-dds-leaf-capacity-and-mac-registration.html">native FMEP texture and material evidence</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_MAP_STUDIO_NATIVE_MATERIAL_LOD_WRITER_R2_2026-10-07.md</li><li>Library: EDF6_CUSTOM_MAP_AUTHORING_R12G_RUNTIME_PASS_COMPILER_V032_R13A_FRONTIER_2026-09-08.md</li><li>Library: EDF6_CUSTOM_MAP_AUTHORING_R13A_RUNTIME_PASS_R13B_CUSTOM_MASK_FRONTIER_2026-09-08.md</li><li>Library: EDF6_CUSTOM_MAP_AUTHORING_R13B_RUNTIME_PASS_R13C_V033_FRONTIER_2026-09-08.md</li><li>Library: EDF6_CUSTOM_MAP_AUTHORING_TEXTURE_SOURCE_V1_OFFLINE_PASS_RUNTIME_FRONTIER_2026-09-10.md</li><li>EDF6_SHADER_PIPELINE_GODOT_INTEGRATION_R1_2026-11-13/Docs/RECONCILIATION.md</li><li>EDF6 Blender/EDFModelUtility mini-wiki cross-game MDB conversion articles</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-bc1-dxt1-cutout-evidence">Native BC1 / DXT1 cutout evidence</a><a href="#cutout-mip-alpha-coverage-preservation">Cutout mip alpha-coverage preservation</a><a href="#runtime-positive-custom-texture-binding">Runtime-positive custom texture binding</a><a href="#source-image-compiler-boundary">Source-image compiler boundary</a><a href="#packed-normal-conventions-are-family-specific">Packed normal conventions are family-specific</a><a href="#metallic-roughness-packing">Metallic / roughness packing</a><a href="#fpr-mask-conversion-no-universal-channel-shuffle">FPR / mask conversion: no universal channel shuffle</a><a href="#mip-lod-implications">Mip / LOD implications</a><a href="#fieldrender-texture-arrays-are-separate-from-static-model-packed-masks">FieldRender texture arrays are separate from static-model packed masks</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"textures-dds-packed-channels-fpr-and-runtime-binding-contracts"};</script><script src="../assets/site.js" defer></script></body></html>

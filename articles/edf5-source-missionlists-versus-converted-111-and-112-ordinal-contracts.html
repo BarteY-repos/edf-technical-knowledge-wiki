@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Why the number of EDF5 missions can appear to change Three counts can all appear in project documents without describing the same file set. The original EDF5 mi"><title>EDF5 mission lists: original 110/111, converted 112/111 and target 112/112 are different data sets | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Missions / provenance</div><h1>EDF5 mission lists: original 110/111, converted 112/111 and target 112/112 are different data sets</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Missions / provenance</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R133 test</div><div id="articleBody"><p>Three counts can all appear in project documents without describing the same <em>file set</em>. The original EDF5 mission lists have their own offline/online membership. Later EDF5-derived content was expanded for an EDF6-compatible mission pack, and a still later layout intentionally assigned the same number of progress slots to both modes.</p>
+<h2 id="a-source-sensitive-comparison">A source-sensitive comparison</h2>
+<table>
+<thead>
+<tr>
+  <th>Evidence corpus</th>
+  <th style="text-align:right">Base OFFLINE</th>
+  <th style="text-align:right">Base ONLINE</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Original EDF5</strong> active LIST tables, as counted in R37 source census</td>
+  <td style="text-align:right"><strong>110</strong></td>
+  <td style="text-align:right"><strong>111</strong></td>
+  <td>Original mode-specific membership, with a <strong>112-ID union</strong></td>
+</tr>
+<tr>
+  <td><strong>Historical converted R41 EDF5-content pack</strong></td>
+  <td style="text-align:right"><strong>112</strong></td>
+  <td style="text-align:right"><strong>111</strong></td>
+  <td>Expanded offline list, with original online-only IDs also present offline</td>
+</tr>
+<tr>
+  <td><strong>Later EDF6-compatible shared-progress target</strong></td>
+  <td style="text-align:right"><strong>112</strong></td>
+  <td style="text-align:right"><strong>112</strong></td>
+  <td>Intentionally identical ordinal axes for save-progress compatibility</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>112 original base-union IDs</strong> are not the same as 112 original offline rows. Tutorial <code>M000</code> was originally <strong>OFFLINE-only</strong>. <code>M082</code> and <code>M083</code> were originally <strong>ONLINE-only</strong>. Their presence in a later converted offline table does not retroactively change the original EDF5 shipping LIST.</p>
+<p>DLC membership is separate: <strong>15 DLC1</strong> and <strong>14 DLC2</strong> missions, bringing the distinct primary shipping corpus to <strong>141 scripts</strong> (<code>112+15+14</code>). The source census counted <strong>335 BVM files overall</strong>, but this included 10 nonshipping source orphans, 126 EDF4.1-subtree files, 56 TEST files and two TGS/demo files. A 145-script stress set is likewise <em>not</em> the shipping mission count.</p>
+<h2 id="why-the-distinction-matters">Why the distinction matters</h2>
+<p>A save system can attach clear marks to mission <strong>ordinal</strong> instead of to a filesystem <code>Mxxx</code> name. A port that changes the list membership or row order without translating save progress can attribute a completion to the wrong mission. Conversely, a converted mission-list table is useful as a <em>study/reference order</em> but is not proof that the untouched original EDF5 OFFLINE list had exactly those rows.</p>
+<p>Other resources—name tables, image RABs, <code>CONFIG.SGO</code> and each mission's script—must be compared separately. A valid script ID alone does not prove it is offered in every mode.</p>
+<p><strong>Evidence:</strong> EDF5 original source LIST census <code>edf5/mission-vm.md</code>, facts <code>bvm-corpus-335</code>, <code>bvm-shipping-141</code>, <code>bvm-orphans</code>; historical converted and shared-progress versions independently recorded in the wiki. Counts are not merged into a single invented universal list.</p>
+<p>See <a href="missions-edf5-content-r41-converted-mission-list-order-141-campaign-reference.html">historical converted 141-mission ordering</a>, <a href="missions-%26-scripting-mission-corpus-scope-corrected-final-classification.html">mission source scope</a> and <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">shared progress</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/mission-vm.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#a-source-sensitive-comparison">A source-sensitive comparison</a><a href="#why-the-distinction-matters">Why the distinction matters</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-source-missionlists-versus-converted-111-and-112-ordinal-contracts"};</script><script src="../assets/site.js" defer></script></body></html>

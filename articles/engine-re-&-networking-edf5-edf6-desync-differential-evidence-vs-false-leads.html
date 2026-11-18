@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Diagnosing EDF6 multiplayer desync without reopening discarded theories The EDF5→EDF6 network investigation produced several exact binary differences, but no un"><title>EDF5 versus EDF6 desync: proven network differences and rejected root causes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF5 versus EDF6 desync: proven network differences and rejected root causes</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Cross-version binary comparison and previously observed symptoms; repair runtime remains separate</div><div id="articleBody"><p>The EDF5→EDF6 network investigation produced several exact <em>binary</em> differences, but <strong>no universal, runtime-proven fix for every desync symptom</strong>. Treat a player's pose, aim, HP and projectile motion as separate state flows that share some transport layers. The evidence below tells a debugger what to instrument and which historical assumptions were already disproved.</p>
+<h2 id="verified-architecture-by-layer">Verified architecture by layer</h2>
+<pre><code class="language-text">ordinary scene transform    → class 3 / 0x3300 ───────────────────┐
+DamageObject / game event   → class 4 / 0x3400 → retained RUDP ───┤
+NetworkBullet update        → class 5 / 0x3500 → retained RUDP ───┤
+                                                                ▼
+                                          EDF6 ordinary EOS physical send
+                                       (coalescing, then UnreliableUnordered)
+</code></pre>
+<p>The fact that the lower EOS send uses <code>UnreliableUnordered</code> <strong>does not</strong> mean that class 4 and class 5 have lost their application-level reliability. They are ACKed by Sandlot RUDP before being physically sent over the same lower layer. In EDF5, the matching RUDP flush likewise reaches the ordinary Steam <code>Unreliable</code> physical slot; it does <strong>not</strong> use the <code>UnreliableNoDelay</code> slot.</p>
+<h2 id="which-hypotheses-survived-the-source-comparison">Which hypotheses survived the source comparison?</h2>
+<table>
+<thead>
+<tr>
+  <th>Candidate explanation</th>
+  <th>Retained result</th>
+  <th>What to test next</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF5 and EDF6 use different central 150/350/450/20 scheduler constants</td>
+  <td><strong>Rejected</strong>: both have a homologous low-priority scheduler with carry/debt and one low-priority packet per cycle</td>
+  <td>Do not blame constants alone</td>
+</tr>
+<tr>
+  <td>EDF6 invented <code>LightSync</code></td>
+  <td><strong>Rejected</strong>: the same LightSync concepts were found in EDF5</td>
+  <td>Check actual configured use, not name existence</td>
+</tr>
+<tr>
+  <td>An ordinary walking packet encodes only a delta</td>
+  <td><strong>Rejected</strong>: observed Soldier XYZ is an absolute compressed transform, roughly six wire bytes for its component</td>
+  <td>If drift persists, look for repeated loss, staging/gating or another state stream</td>
+</tr>
+<tr>
+  <td>Jumping globally repairs a broken session</td>
+  <td><strong>Rejected by user observation</strong>: a high jump sends an immediate reliable transform <strong>outward</strong> from the jumper, without resyncing the jumper's view of others</td>
+  <td>Correlate direction, owner and message lane</td>
+</tr>
+<tr>
+  <td>EDF6 downgraded <code>NetworkBullet</code> from reliable to unreliable</td>
+  <td><strong>Rejected</strong>: audited normal EDF5 and EDF6 projectile paths use Sandlot RUDP</td>
+  <td>Examine missing class-internal state/selector payload</td>
+</tr>
+<tr>
+  <td>A normal RUDP record reaches an invalid 1400-byte packet</td>
+  <td><strong>Rejected for qualified sender</strong>: 1144-byte payload → 1156-byte retained record → 1164-byte physical aggregate; EOS limit 1170</td>
+  <td>Do not revive oversized-packet theory without a new, different path</td>
+</tr>
+<tr>
+  <td>Sender mode-0 retransmissions repeatedly consume <code>EventController</code> budget</td>
+  <td><strong>Rejected</strong>: retransmission is below the event scheduler</td>
+  <td>Observe RUDP queue rather than treating event budget as repeated debit</td>
+</tr>
+<tr>
+  <td><code>Watchdog_Session</code> removal is proven cause</td>
+  <td><strong>Rejected for studied PC build</strong>: EDF5 PC functions are stub/residue-like</td>
+  <td>Avoid using script-text absence as runtime proof</td>
+</tr>
+<tr>
+  <td>EOS ordinary physical send lost the EDF5 delayed-delivery distinction</td>
+  <td><strong>Binary-confirmed difference</strong>, potential repair candidate</td>
+  <td>Scope runtime A/B experiment to the ordinary physical send only</td>
+</tr>
+<tr>
+  <td><code>RemoteConnectionClosed</code> replaces Link without clearing READY</td>
+  <td><strong>Binary-confirmed candidate defect</strong>; INITIAL recovery can be bypassed</td>
+  <td>Correlate Link creation, READY transitions, handshake and ACK receipt</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reconnect-and-retry-are-separate-lifetimes">Reconnect and retry are separate lifetimes</h2>
+<p>The native physical <code>p2p::Link</code> can be replaced while the logical peer <code>UserSession</code> and reliable send/receive state survive. If the old READY bit remains set when a new Link enters INITIAL, the normal retry and handshake cycle can be skipped. This is different from removing a peer, which destroys the logical session. <strong>Do not reset RUDP sender sequence numbers or dedupe tables simply because the physical Link changed.</strong></p>
+<p>Retained RUDP DATA is <code>0x1200</code>; its sequence ACK is <code>0x1300</code>. The timeout interval starts at <strong>700 ms</strong>, grows by <strong>1000 ms</strong> after each resend, and marks fault after the running interval passes <strong>7000 ms in EDF6</strong> (versus <strong>20000 ms</strong> in the studied EDF5 homolog). The roughly <strong>25.9 s vs 204 s</strong> cumulative no-ACK exposure follows from the progression; these are not seven-second and twenty-second one-shot timers.</p>
+<h2 id="minimal-evidence-to-collect-for-an-actual-reproduction">Minimal evidence to collect for an actual reproduction</h2>
+<ol>
+<li>Record monotonic timestamps from <strong>both</strong> peers, local/remote object identity and which peer owns each object.</li>
+<li>Track physical EOS result, aggregate size, Link READY, INITIAL entry, and reconnect notifications.</li>
+<li>Record outgoing/received class3 <code>0x3300</code>, then the deferred <code>SceneObjectReceiver</code> enqueue → parse → apply result; the receive path clears a pending flag <em>before</em> the target apply gate, which can drop one staged batch.</li>
+<li>Independently record class4 <code>0x3400</code> EventController protocol IDs and RUDP sequences/ACKs, especially <code>DamageObject</code> protocol <strong>1</strong>.</li>
+<li>Record class5 <code>0x3500</code> bullet selector/mode and the projectile's serialized versus private state.</li>
+<li>Repeat an ordinary walk and a class-specific jump. Observe the outgoing jumper's state separately from the jumper's remote view.</li>
+</ol>
+<p>No plugin build, trace run or in-game reconnect repair was performed during this reconciliation. The reported results are retained earlier observations and source/binary reconstructions; the two candidate repairs still require clean Windows game A/B qualification.</p>
+<p>See <a href="engine-re-%26-networking-edf6-native-event-protocol-registry-and-damage-object-route.html">packet/event registry</a>, <a href="engine-re-edf5-edf6-player-state-packet-lanes.html">player-state lanes</a> and <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">RUDP lifecycle</a>.</p>
+<h2 id="cross-layer-causal-interpretation-of-captured-desync">Cross-layer causal interpretation of captured desync</h2>
+<p>The retained R7 two-PC physical-payload matches and the approximately <strong>183-world-unit</strong> remote-position divergence are detailed in <a href="engine-re-network-desync-r8-sceneobject-staging-frontier.html">SceneObject's R7/R8 receive-frontier study</a>. They rule out a <em>simple missing physical EOS packet as the sufficient explanation for that captured run</em>, not all connection-related faults. A successful physical receive is not proof of <code>SceneObject</code> staging, Soldier transform application or a successful <code>DamageObject</code> event.</p>
+<p>The practical diagnostic separation is:</p>
+<ul>
+<li><strong>Class 3 positional divergence:</strong> distinguish <code>0x3300</code> physical delivery, individual fragment/type staging, 16-bit sequence freshness and concrete Soldier application. Different fragments may legitimately share a sender batch sequence, so a global equal-sequence filter is unsafe.</li>
+<li><strong>Class 4 event divergence:</strong> use the <code>0x3400</code> event identity plus Sandlot's reliable DATA sequence and ACK; a recovered reliable message may still be applied to the wrong object or with wrong game state.</li>
+<li><strong>Class 5 projectile divergence:</strong> <code>0x3500</code> retained selectors cannot replace Flame/Lightning/SolidExp constructor-internal RNG or detonation state that was never serialized.</li>
+<li><strong>Transient reconnect failure:</strong> separate physical <code>p2p::Link</code> replacement/READY from the packet Controller/UserSession/ReliableMgr lifetime. A persistent READY flag and no ACK can create a different failure chain, but has not been proven to cause ordinary R7 position drift.</li>
+</ul>
+<p>The later R8 29-hook and R9 31-hook diagnostic candidates are <strong>static-qualified only</strong> in the retained sources; they did not retroactively repair or re-run the R7 two-computer capture. This source lineage is not an argument for automatically installing a global transport rewrite or for treating a per-type staging hypothesis as fully proven.</p>
+<p><strong>Source boundary:</strong> <code>NETWORK/EDF6_NETWORK_RC1_R8_MAXCAP_STATIC_CHECKPOINT_2026-09-11.md</code>; <code>NETWORK/EDF6_DESYNC_R9_PROTOCOL_AWARE_CANDIDATE_2026-09-29.zip</code>. No new game run was conducted for R169.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF6_NETWORK_EOS_REPAIR_EVIDENCE_LEDGER_2026-08-31_R7.json (NET-001–056)</li><li>Library: EDF6_ENGINE_RE_SANDLOT_RUDP_RECONNECT_LIFECYCLE_CLOSURE_2026-09-29.md</li><li>Library: EDF6_ENGINE_RE_R17_DELIVERY_LOSS_RECOVERY_CHECKPOINT_2026-09-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#verified-architecture-by-layer">Verified architecture by layer</a><a href="#which-hypotheses-survived-the-source-comparison">Which hypotheses survived the source comparison?</a><a href="#reconnect-and-retry-are-separate-lifetimes">Reconnect and retry are separate lifetimes</a><a href="#minimal-evidence-to-collect-for-an-actual-reproduction">Minimal evidence to collect for an actual reproduction</a><a href="#cross-layer-causal-interpretation-of-captured-desync">Cross-layer causal interpretation of captured desync</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf5-edf6-desync-differential-evidence-vs-false-leads"};</script><script src="../assets/site.js" defer></script></body></html>

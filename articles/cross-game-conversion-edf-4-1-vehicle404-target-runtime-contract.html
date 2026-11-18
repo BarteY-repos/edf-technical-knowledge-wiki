@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 friendly vehicles 402/403/404 — target-runtime contracts Superseding weapon-level comparison (5 November source-only corpus) The earlier R1 object-corpu"><title>EDF 4.1 friendly vehicles 402/403/404 — target-runtime contracts | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF 4.1 friendly vehicles 402/403/404 — target-runtime contracts</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Raw paired SGO corpus + cross-generation reconciliation</div><div id="articleBody"><h2 id="superseding-weapon-level-comparison-5-november-source-only-corpus">Superseding weapon-level comparison (5 November source-only corpus)</h2>
+<p>The earlier R1 object-corpus finding that <strong>weapon parity was pending</strong> was later <strong>partially closed</strong> by comparing the <em>separate</em> EDF4.1 and EDF6 weapon SGOs. The subsequent <code>FRIEND_VEHICLE_WEAPON_FIDELITY_R2.json</code> report identifies these <strong>material</strong> differences:</p>
+<table>
+<thead>
+<tr>
+<th>Source role</th>
+<th>Field</th>
+<th style="text-align:right">EDF4.1 source</th>
+<th style="text-align:right">Stock EDF6</th>
+<th style="text-align:right">Evidence-backed private EDF4.1 compatibility value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vehicle402 AI rocket launcher</td>
+<td><code>AmmoCount</code></td>
+<td style="text-align:right">100</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right"><strong>100</strong></td>
+</tr>
+<tr>
+<td>Vehicle403 player cannon</td>
+<td><code>AmmoDamage</code></td>
+<td style="text-align:right">900</td>
+<td style="text-align:right">600</td>
+<td style="text-align:right"><strong>900</strong></td>
+</tr>
+<tr>
+<td>Vehicle403 player cannon</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">13.5</td>
+<td style="text-align:right"><strong>6</strong></td>
+</tr>
+<tr>
+<td>Vehicle403 player cannon</td>
+<td><code>AmmoHitSizeAdjust</code></td>
+<td style="text-align:right">0.25</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right"><strong>0.25</strong></td>
+</tr>
+<tr>
+<td>Vehicle403 gunner machine gun</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right"><strong>4</strong></td>
+</tr>
+<tr>
+<td>Vehicle404 AI cannon</td>
+<td><code>AmmoDamage</code></td>
+<td style="text-align:right">1500</td>
+<td style="text-align:right">750</td>
+<td style="text-align:right"><strong>1500</strong></td>
+</tr>
+<tr>
+<td>Vehicle404 AI cannon</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">0.1</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right"><strong>0.1</strong></td>
+</tr>
+<tr>
+<td>Vehicle404 AI cannon</td>
+<td><code>AmmoAlive</code></td>
+<td style="text-align:right">2400</td>
+<td style="text-align:right">300</td>
+<td style="text-align:right"><strong>2400</strong></td>
+</tr>
+<tr>
+<td>Vehicle404 AI cannon</td>
+<td><code>ReloadTime</code></td>
+<td style="text-align:right">2400</td>
+<td style="text-align:right">1200</td>
+<td style="text-align:right"><strong>2400</strong></td>
+</tr>
+<tr>
+<td>Vehicle404 player main cannon</td>
+<td><code>AmmoDamage/AmmoSpeed/AmmoAlive</code></td>
+<td style="text-align:right"><code>1500 / 0.1 / 2400</code></td>
+<td style="text-align:right"><code>750 / 8 / 300</code></td>
+<td style="text-align:right"><strong>source values</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Vehicle402 <strong>player</strong> launcher, Vehicle403 <strong>AI</strong> cannon, and remaining qualified Vehicle404 secondary weapons did <strong>not</strong> require such a material patch. The differing Vehicle402 <code>Ammo_CustomParameter</code> tail was classified as <strong>audio/presentation</strong>, not a gameplay ammunition change.</p>
+<p>The candidate uses <strong>private, namespaced vehicle and weapon SGO resources</strong> for converted EDF4.1 missions. It does <strong>not</strong> globally overwrite EDF6 objects or copy legacy <code>CarBase</code> movement coefficients. Vehicle403/404 driver masks revert from target <strong>15</strong> to source <strong>9</strong> only in the private compatibility copies (<code>9</code> = Ranger + Air Raider). DLC1 M416 is the strongest shared-vehicle runtime discriminator in the retained mission census.</p>
+<p><strong>Important:</strong> this is <strong>exact source-pair evidence and an offline-qualified compatibility candidate</strong>, not a runtime-positive mod. The later HF4 R9 candidate still lacked a real Windows/MSVC build, installed EDF6 gameplay, restart and multiplayer qualification. The R10 HF3 product baseline remains separate authority. The older “weapon comparison pending” statement in this article applies only to the earlier R1 object-level stage.</p>
+<p><strong>Evidence level:</strong> Exact raw EDF4.1/EDF6 AI-vehicle SGO corpus plus cross-generation R13 reconciliation. This is evidence, not a new product authority; R10 HF3 remains source/product authority.</p>
+<h2 id="raw-corpus-result">Raw corpus result</h2>
+<p>The retained R1 corpus contains exact raw EDF4.1 and EDF6 AI vehicle SGOs, parser-normalized JSON and a hash-backed report for Vehicle402/403/404.</p>
+<p>At object level the important result is conservative:</p>
+<ul>
+<li>core durability contracts match;</li>
+<li>camera contracts match;</li>
+<li>sound contracts match;</li>
+<li>mount contracts match;</li>
+<li>EDF6 runtime schema differs substantially and should remain EDF6-native;</li>
+<li>movement-coefficient differences are <strong>not</strong> promoted to patches without runtime evidence;</li>
+<li>weapon parity required a separate asset-level comparison because weapon SGOs are separate resources; the later source-only R2 comparison above identifies material weapon deltas.</li>
+</ul>
+<h3 id="proven-capability-divergence">Proven capability divergence</h3>
+<p>For Vehicle403/404, the driver class mask differs:</p>
+<ul>
+<li>EDF4.1: <code>9</code>;</li>
+<li>EDF6: <code>15</code>.</li>
+</ul>
+<p>This is the one object-level divergence in the R1 corpus explicitly classified as gameplay-capability material. Preserve the evidence-backed class-mask/driver compatibility patch where required; do not extrapolate every numeric difference into a source-value override.</p>
+<h2 id="vehicle404-mission-setup-delta">Vehicle404 mission_setup delta</h2>
+<p>A notable main-cannon control tuple differs:</p>
+<ul>
+<li>EDF4.1 <code>Vehicle404</code>: <code>[0.2, 2.0]</code>;</li>
+<li>EDF5/EDF6: <code>[0.0, 2.0]</code>.</li>
+</ul>
+<p>The adjacent <code>[10, 0.01, 0.1]</code> tuple remains unchanged.</p>
+<p>Cross-generation context shows this is part of a broader runtime migration:</p>
+<table>
+<thead>
+<tr>
+<th>Vehicle</th>
+<th>EDF4.1 global tuple</th>
+<th>EDF5/EDF6 global tuple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vehicle402</td>
+<td><code>[1, 5, 0.02, 3, 0.04, 1]</code></td>
+<td><code>[1, 5, 0.02, 0.91, 0.18, 0.4]</code></td>
+</tr>
+<tr>
+<td>Vehicle403</td>
+<td><code>[0.15, 14, 0.015, 1.5, 0.02, 1.2]</code></td>
+<td><code>[0.15, 14, 0.015, 0.537, 0.02, 1.2]</code></td>
+</tr>
+<tr>
+<td>Vehicle404</td>
+<td><code>[0.05, 6, 0.025, 2, 0.025, 0.5]</code></td>
+<td><code>[0.05, 6, 0.025, 0.29, 0.15, 0.5]</code></td>
+</tr>
+</tbody>
+</table>
+<p>The Vehicle404 main-cannon nested tuple likewise changes from <code>[0.2,2]</code> to <code>[0,2]</code> and remains <code>[0,2]</code> in both EDF5 and EDF6.</p>
+<h2 id="runtime-class-migration">Runtime class migration</h2>
+<p>Vehicle404 also changes runtime class:</p>
+<ul>
+<li>EDF4.1: <code>VehicleTank404</code>;</li>
+<li>EDF5/EDF6: <code>Vehicle404_Tank</code>.</li>
+</ul>
+<p>The private object layout grows substantially. That is consistent with a rewritten control schema, not a one-field typo.</p>
+<p><strong>Decision:</strong> keep EDF5/EDF6 <code>[0,2]</code> as target-runtime authority.</p>
+<p>Source gameplay fidelity is enforced through narrower evidence-backed patches such as:</p>
+<ul>
+<li>AI main-cannon damage/speed/life/reload;</li>
+<li>player main-cannon damage/speed/life;</li>
+<li>proven driver/class-mask compatibility.</li>
+</ul>
+<h2 id="mission-exposure">Mission exposure</h2>
+<p>An earlier 142-script census found these friendly vehicle families frequently enough to require deliberate testing rather than assumption:</p>
+<ul>
+<li>Vehicle402: about 8 mission records;</li>
+<li>Vehicle403: about 13 mission records;</li>
+<li>Vehicle404: about 4 mission records.</li>
+</ul>
+<p>Runtime qualification should focus on role/voice/icon/loadout/AI, driver compatibility, scripted transitions and mission restart rather than pixel-identical tuning.</p>
+<h2 id="general-conversion-rule">General conversion rule</h2>
+<p>A source number is not automatically portable when the owning runtime class and surrounding schema changed. Prefer target-runtime semantics where EDF5 and EDF6 agree, then patch only <strong>material source gameplay differences proven by direct evidence</strong>.</p>
+<h2 id="bounded-mission-script-calls-for-friendly-vehicles-402-403-and-404">Bounded mission-script calls for friendly vehicles 402, 403 and 404</h2>
+<p>The earlier R1 source audit also preserved <strong>25 vehicle-by-script records</strong> from its conversion-era mission corpus. The counted call IDs reflect <em>static appearances in that corpus</em>, not proven native in-game execution or the number of vehicles spawned. These scripts were drawn from the audited research/All Forces-derived collection and must not be mistaken for an independently verified, untouched retail EDF 4.1 script census.</p>
+<table>
+<thead>
+<tr>
+<th>Vehicle family</th>
+<th style="text-align:right">Scripts referencing variant</th>
+<th style="text-align:right">Scripts with <code>3100</code> move-speed call</th>
+<th style="text-align:right">Scripts with <code>3040</code> attack call</th>
+<th style="text-align:right">Total <code>3100</code> calls</th>
+<th style="text-align:right">Total <code>3040</code> calls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>402</code></td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">52</td>
+<td style="text-align:right">39</td>
+</tr>
+<tr>
+<td><code>403</code></td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">90</td>
+<td style="text-align:right">55</td>
+</tr>
+<tr>
+<td><code>404</code></td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">80</td>
+<td style="text-align:right">21</td>
+</tr>
+</tbody>
+</table>
+<p>This explains why copying old drive coefficients byte-for-byte is not a reliable shortcut: most inspected scripts also set AI speed explicitly. The Vehicle402 M602 record has <strong>zero</strong> observed <code>3100</code> calls, and Vehicle403 MP501 has <strong>zero</strong> observed <code>3040</code> calls; neither exception proves the AI cannot move or attack by any other route. The reported <code>3113</code> call count is zero across these 25 records, which similarly is <strong>not</strong> a universal claim about original EDF 4.1 boarding.</p>
+<p>The complete 25-row research table is retained as <code>data/EDF41_VEHICLE_402_404_MISSION_NATIVE_CALLS_25_R146.csv</code> in the archive. Its <code>campaign</code>/<code>dlc1</code>/<code>dlc2</code> section tags and mission IDs are <strong>research-corpus identifiers</strong>, not independent retail shipping ordinals. This static census is complementary to — and does not override — the later R2 weapon-SGO parity findings above.</p>
+<h2 id="r147-decoded-weapon-reference-and-role-aware-identity">R147 decoded-weapon reference and role-aware identity</h2>
+<p>The 402 AI <code>AmmoCount</code> <strong>100/200</strong> comparison above is <strong>role-aware</strong>: original <code>V_402ROCKET_ROCKETCANNON.SGO</code> is compared with EDF6 <code>V_402ROCKET_ROCKETCANNON_AI.SGO</code>. The same-named EDF4.1/EDF6 <code>V_402ROCKET_AI_ROCKETCANNON.SGO</code> files instead each declare 50; these are distinct pairing questions. <strong>The R2 role comparison remains correct.</strong> A separate <a href="edf41-edf6-vehicle402-403-404-weapon-sgo-role-pairs-and-native-fields-atlas.html">19-pair native weapon field atlas</a> documents 14 decoded gameplay fields per same-name variant, all 11 role-based R2 comparisons and the five target-only names in the research sample. The R2 patch list is narrower than this static field inventory, and neither establishes game-runtime qualification.</p>
+<p>\n## Driver class-mask bits, not just a numeric difference\n\nThe <code>9 → 15</code> field difference above is recorded in <code>vehicle_riding_position[*][4]</code>, the <strong>driver/seat class-eligibility mask</strong> in the examined source SGO schema. In the source evidence, mask <code>9</code> admits <strong>Ranger and Air Raider</strong>; the later EDF6 mask <code>15</code> admits <strong>all four player classes</strong>. This is a material player-vehicle interaction rule, unlike unqualified changes in acceleration or steering coefficients.\n\nThe related R16 and R17 static reports duplicate one <strong>18/18</strong> offline contract check; they do not constitute separate in-game proof. They also keep NPC role/voice/icon and automatically added vehicle crew <strong>separate</strong> from source-authored vehicle-seat eligibility. The player-seat mask alone is no evidence that NPCs historically boarded, manned guns or drove on their own. Source: <code>FRIENDLY_NPC_GAMEPLAY_FIDELITY_POLICY.md</code>, <code>reports/R16_FRIENDLY_FIDELITY.json</code>, <code>reports/R17_FRIENDLY_FIDELITY.json</code>.\n</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: README_R1.md — Friendly Vehicle 402/403/404 raw corpus</li><li>Library: EDF41_R13_OFFLINE_RECON_2026-11-06.md</li><li>Library: Wklejony tekst(20261104-210631).txt</li><li>EDF41_EDF6_RESEARCH/FRIEND_VEHICLE_402_404_RAW_2026-11-04/REPORT_R1.json</li><li>Library /EDF41_EDF6_RESEARCH/FRIEND_VEHICLE_402_404_RAW_2026-11-04/WEAPON_402_404_EDF41_EDF6_RAW_2026-11-04.zip</li><li>reports/R10_HF4_R13_HECTOR_EXE_EVIDENCE.json</li><li>reports/R10_HF4_R13_HECTOR_PROJECTILE_FIDELITY_AUDIT.json</li><li>reports/R10_HF4_R10_M015_SHIELDBEARER_STATIC_EVIDENCE.json</li><li>reports/R10_HF4_R12_SHIELDBEARER_NATIVE_COLLISION_EVIDENCE.json</li><li>reports/R10_HF4_R12_SHIELDBEARER_NATIVE_COLLISION_AUDIT.json</li><li>reports/R16_FRIENDLY_FIDELITY.json</li><li>reports/R17_FRIENDLY_FIDELITY.json</li><li>FRIENDLY_NPC_GAMEPLAY_FIDELITY_POLICY.md</li><li>components/compatibility/reports/R13_SHIELD_HECTOR_STATIC_RECON_2026-11-08.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#superseding-weapon-level-comparison-5-november-source-only-corpus">Superseding weapon-level comparison (5 November source-only corpus)</a><a href="#raw-corpus-result">Raw corpus result</a><a href="#proven-capability-divergence">　Proven capability divergence</a><a href="#vehicle404-mission-setup-delta">Vehicle404 mission_setup delta</a><a href="#runtime-class-migration">Runtime class migration</a><a href="#mission-exposure">Mission exposure</a><a href="#general-conversion-rule">General conversion rule</a><a href="#bounded-mission-script-calls-for-friendly-vehicles-402-403-and-404">Bounded mission-script calls for friendly vehicles 402, 403 and 404</a><a href="#r147-decoded-weapon-reference-and-role-aware-identity">R147 decoded-weapon reference and role-aware identity</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-edf-4-1-vehicle404-target-runtime-contract"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 weapon stars can change the network fire policy: all 15 static subtype switchers Key result: For the examined EDF6 weapon resource corpus, the same weapon "><title>EDF6 weapon stars and networking: 15 subtype1/direct switchers | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Weapon stars and projectile synchronization</div><h1>EDF6 weapon stars and networking: 15 subtype1/direct switchers</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Weapon stars and projectile synchronization</span></div><div class="referencebadge">Technical reference · Source-derived EDF6 static binary/corpus evaluator, no new game-runtime parity</div><div id="articleBody"><p><strong>Key result:</strong> For the examined EDF6 weapon resource corpus, the same weapon may use a <strong>different initial multiplayer fire-creation policy at different reachable star states</strong>. A weapon's name, SGO file and nominal AmmoClass alone do not fix its network behavior.</p>
+<h2 id="static-census-of-the-studied-shipping-configuration-corpus">Static census of the studied shipping configuration corpus</h2>
+<p>The retained source scan covers <strong>1,315 active <code>WEAPONTABLE</code> weapon configurations with non-empty <code>AmmoClass</code></strong>. Correlated reachable star-state evaluation used the game's observed seven-element WSLRF records, including the rule that fields sharing a save slot use the <strong>same</strong> current star value. Results (configuration counts, not individual guns fired in runtime):</p>
+<table>
+<thead>
+<tr>
+  <th>Evaluated policy envelope</th>
+  <th style="text-align:right">Configurations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Always direct, full sender transform (<code>sync_level=1</code>)</td>
+  <td style="text-align:right"><strong>669</strong></td>
+</tr>
+<tr>
+  <td>Always direct, sender orientation with local translation (<code>sync_level=0</code>)</td>
+  <td style="text-align:right"><strong>162</strong></td>
+</tr>
+<tr>
+  <td>Always direct, receiver-local transform (<code>sync_level=-1</code>)</td>
+  <td style="text-align:right"><strong>230</strong></td>
+</tr>
+<tr>
+  <td>Always subtype1, batched receiver-local construction</td>
+  <td style="text-align:right"><strong>157</strong></td>
+</tr>
+<tr>
+  <td><strong>Star-dependent policy</strong> (any change among possible direct/subtype modes)</td>
+  <td style="text-align:right"><strong>97</strong></td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>1,315</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Of the 97 star-dependent configurations, <strong>15</strong> can switch between subtype1 and a direct path. The remaining 82 vary among <strong>direct</strong> synchronization outcomes only. Exactly <strong>172</strong> configs can reach subtype1 at some star state (157 always + 15 sometimes).</p>
+<h2 id="complete-named-list-of-the-15-subtype1-direct-switchers">Complete named list of the 15 subtype1/direct switchers</h2>
+<p>Each row shows <strong>example correlated states from the static source evaluator</strong>, not a claim that these states were obtained and fired in EDF6. Notation <code>slot 2=3</code> means star-value 3 in <strong>save/stat position slot 2</strong>; it does not necessarily mean a single global weapon star. The last column is the evaluated <em>direct</em> alternative to subtype1.</p>
+<table>
+<thead>
+<tr>
+  <th>Weapon</th>
+  <th>Weapon config</th>
+  <th>Example subtype1 stars</th>
+  <th>Example direct stars</th>
+  <th>Direct result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Dunkel N202</strong></td>
+  <td><code>AWEAPON083.SGO</code></td>
+  <td>slot 0=0, 2=0, 4=0, 5=0</td>
+  <td>slot 0=0, 2=3, 4=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Penetrator</strong></td>
+  <td><code>AWEAPON098.SGO</code></td>
+  <td>slot 0=0, 2=0, 4=0, 5=3</td>
+  <td>slot 0=0, 2=0, 4=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Penetrator F</strong></td>
+  <td><code>AWEAPON104.SGO</code></td>
+  <td>slot 0=0, 2=0, 4=0, 5=3</td>
+  <td>slot 0=0, 2=0, 4=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Buster Shot</strong></td>
+  <td><code>MPACK_A_WEAPON003.SGO</code></td>
+  <td>slot 2=0, 4=0, 5=10</td>
+  <td>slot 2=0, 4=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Double Lance</strong></td>
+  <td><code>PWEAPON011.SGO</code></td>
+  <td>slot 0=2, 3=0</td>
+  <td>slot 0=0, 3=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Twin Lance</strong></td>
+  <td><code>PWEAPON035.SGO</code></td>
+  <td>slot 0=2, 3=0</td>
+  <td>slot 0=0, 3=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow</strong></td>
+  <td><code>PWEAPON100.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow M2</strong></td>
+  <td><code>PWEAPON103.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow M3</strong></td>
+  <td><code>PWEAPON106.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow M4</strong></td>
+  <td><code>PWEAPON111.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow M5</strong></td>
+  <td><code>PWEAPON115.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow GD</strong></td>
+  <td><code>PWEAPON120.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Lightning Bow ZA</strong></td>
+  <td><code>PWEAPON124.SGO</code></td>
+  <td>slot 0=0, 2=2, 5=0</td>
+  <td>slot 0=0, 2=0, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Raijin</strong></td>
+  <td><code>PWEAPON135.SGO</code></td>
+  <td>slot 4=0, 5=0</td>
+  <td>slot 4=2, 5=0</td>
+  <td>sync0</td>
+</tr>
+<tr>
+  <td><strong>Raijin α</strong></td>
+  <td><code>PWEAPON147.SGO</code></td>
+  <td>slot 4=0, 5=0</td>
+  <td>slot 4=2, 5=0</td>
+  <td>sync0</td>
+</tr>
+</tbody>
+</table>
+<p>The table is intentionally exhaustive for the <strong>15 subtype1/direct switchers found in this particular 1,315-config corpus</strong>, not a blanket claim about every future EDF6 build or installed mod.</p>
+<h2 id="exact-three-outcome-example-penetrator-f">Exact three-outcome example — Penetrator F</h2>
+<p><code>AWEAPON104.SGO</code> exposes <strong>three</strong> reachable outcomes in the retained correlated star envelope:</p>
+<table>
+<thead>
+<tr>
+  <th>Saved star slots (others <code>0</code>)</th>
+  <th>Native evaluated values of interest</th>
+  <th>Initial fire policy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>slot <code>0=0</code>, <code>2=0</code>, <code>4=0</code>, <code>5=0</code></td>
+  <td><code>FireInterval=60</code>, <code>FireAccuracy≈0.021</code></td>
+  <td>Direct, <code>sync_level=0</code></td>
+</tr>
+<tr>
+  <td>slot <code>0=0</code>, <code>2=0</code>, <code>4=0</code>, <code>5=3</code></td>
+  <td><code>FireInterval=45</code>, <code>FireAccuracy≈0.021</code></td>
+  <td>Batched subtype1 / receiver-local</td>
+</tr>
+<tr>
+  <td>slot <code>0=0</code>, <code>2=1</code>, <code>4=0</code>, <code>5=0</code></td>
+  <td><code>FireInterval=60</code>, <code>FireAccuracy≈0.0039732</code></td>
+  <td>Direct, <code>sync_level=1</code></td>
+</tr>
+</tbody>
+</table>
+<p>Thus improving <strong>rate of fire</strong> can move the weapon to subtype1 while improving <strong>accuracy</strong> can move it to full sender transform. These statements are derived from the recovered native policy/evaluator and shipping SGO configuration; their exact in-game synchronization at these star levels still requires a two-peer runtime test.</p>
+<h3 id="other-useful-discriminators">Other useful discriminators</h3>
+<ul>
+<li><strong>Dunkel N202:</strong> star-dependent accuracy produces subtype1 or direct sync0; it is not enough to examine FireInterval.</li>
+<li><strong>Penetrator and Buster Shot:</strong> changing FireInterval from a slower sample to a faster sample can switch direct sync0 to batched subtype1.</li>
+<li><strong>Double Lance and Twin Lance:</strong> a reachable AmmoCount increase from <code>1</code> to <code>2</code> changes the evaluated policy from direct sync0 to subtype1.</li>
+<li><strong>Lightning Bow family:</strong> the sample <code>FireInterval</code> change from <code>3</code> to <code>2</code> produces the subtype1 alternative for seven named configurations.</li>
+<li><strong>Raijin and Raijin α:</strong> better sample <code>FireAccuracy</code> can change subtype1 to direct sync0 despite <code>FireInterval=1</code> in both samples.</li>
+</ul>
+<h2 id="wslrf-evaluation-versus-weapon-stat-display-formatting">WSLRF evaluation versus weapon-stat display formatting</h2>
+<p>The native evaluator was identified around <code>EDF+0xD7CE0</code>. The seven-slot weapon-stat record describes base value at star 5, setting type, save slot, per-stat max star, factor, exponent and a metadata/display flag. The setting type's low two bits distinguish increasing (<code>0</code>) and decreasing (<code>1</code>) in the examined data. The star denominator is <strong>5.0</strong>.</p>
+<p>Where the evaluated result becomes an <strong>integer gameplay field</strong> (AmmoCount, ReloadTime, FireCount, FireInterval), the native quantization is <strong>nearest integer with ties away from zero</strong>, implemented through an appropriate <code>±0.5f</code> adjustment before truncation. This is not equivalent to naïve truncation or banker's rounding. The workbook's seventh-record display-precision notes concern formatting and must <strong>not</strong> be used to override native gameplay integer quantization.</p>
+<p>Across the studied records, <code>WEAPONTABLE</code> star metadata agreed with the raw <code>max_star</code> fields for all checked pointer fields. This is a corpus-specific structural observation, not proof that all custom weapons follow it.</p>
+<h2 id="why-subtype1-matters-for-synchronizing-an-actual-projectile">Why subtype1 matters for synchronizing an actual projectile</h2>
+<p>The initial subtype1 path uses batched/deferred receiver-local projectile creation and does not transmit the same muzzle-transform payload as the direct subtype0 family. Some projectile internal state is not reconstructed merely because later <code>NetworkBullet</code> selector messages arrive reliably. For the exact distinction between <strong>initial weapon fire policy</strong> and <strong>later projectile trajectory/contact state</strong>, see <a href="engine-re-%26-networking-shipped-weapon-sync-policy-and-star-envelope.html">shipped EDF6 fire policy</a> and <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">projectile RNG and batching</a>.</p>
+<h2 id="full-reference-dataset-and-evidence-limits">Full reference dataset and evidence limits</h2>
+<p>An optional companion <code>data/EDF6_WEAPON_STAR_POLICY_1315_CONFIGS.csv</code> is included in the <strong>public ZIP</strong> for offline filtering by weapon name, SGO, AmmoClass and reachable outcomes. It is a static parsed game-configuration dataset; the standalone HTML is self-contained and does not require this CSV.</p>
+<p>The source-derived analysis evaluates correlated star states and the recovered static native call path. <strong>It is not a 1,315-weapon in-game test</strong>, does not demonstrate that every state has been legitimately obtained, and does not guarantee identical behavior after DLC updates or mods. The evidence originates in the EDF6 Engine RE weapon star envelope (<code>EDF6_ENGINE_RE_WEAPON_STAR_POLICY_ENVELOPE_V1_2026-09-28.json</code> and matching CSV) and the R10 binary/shipping-policy checkpoint under the private research library. No fresh game runtime or binary disassembly was performed for this wiki update.</p>
+<p>For non-switcher weapons and direct-only star-variable configurations, consult the <a href="edf6-weapon-sync-policy-1315-config-reference-atlas.html">complete 1,315-weapon policy atlas</a>. It indexes every active source configuration in the qualified R10 sample; the 15 cases above remain the detailed star-state examples.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_WEAPON_STAR_POLICY_ENVELOPE_V1_2026-09-28.json</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#static-census-of-the-studied-shipping-configuration-corpus">Static census of the studied shipping configuration corpus</a><a href="#complete-named-list-of-the-15-subtype1-direct-switchers">Complete named list of the 15 subtype1/direct switchers</a><a href="#exact-three-outcome-example-penetrator-f">Exact three-outcome example — Penetrator F</a><a href="#other-useful-discriminators">　Other useful discriminators</a><a href="#wslrf-evaluation-versus-weapon-stat-display-formatting">WSLRF evaluation versus weapon-stat display formatting</a><a href="#why-subtype1-matters-for-synchronizing-an-actual-projectile">Why subtype1 matters for synchronizing an actual projectile</a><a href="#full-reference-dataset-and-evidence-limits">Full reference dataset and evidence limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-weapon-star-dependent-fire-synchronization-complete-switcher-list"};</script><script src="../assets/site.js" defer></script></body></html>

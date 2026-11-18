@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 FieldRender / FMEP source-record observations and terrain normal boundaries EDF6 FieldRender terrain is a separate material/resource family from ordinary M"><title>EDF6 FieldRender/FMEP: source records, terrain normals and evidence limits | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF6 FieldRender/FMEP: source records, terrain normals and evidence limits</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Source-backed research / case study · Current-suite exact source contract; runtime parity remains FieldRender-specific</div><div id="articleBody"><p>EDF6 FieldRender terrain is a separate material/resource family from ordinary MDB character or static-map materials. This page distinguishes <strong>observed native/source records</strong> from a later non-native material-preview translation; the latter is not an engine specification.</p>
+<h2 id="native-resource-record-structure-in-the-bounded-samples">Native-resource record structure in the bounded samples</h2>
+<p>The FMEP structural audit used a source <code>Mass</code> record width of <strong><code>0x50</code> bytes</strong> and <code>MaterialIDList</code> width of <strong><code>0x10</code> bytes</strong>. In the studied FIX3 source/profile it reported:</p>
+<ul>
+<li>FMB version <code>0x110</code> and <strong>21</strong> shader-configuration rows in that specific record set;</li>
+<li>a type-2 leaf containing <strong>2 triangles and 4 vertices</strong> with a flat zero-height bounding box;</li>
+<li>a local material list of width <strong>2</strong>, shader capacity <strong>2</strong>, configuration index <strong>4</strong>;</li>
+<li>shader configuration row 4 <code>(2,1,0,0,0,0,0)</code> for the tested planar FieldRender2 path;</li>
+<li>packed terrain corner weights <strong>127/127</strong>, sum <strong>254</strong>, consistent with the observed quantization;</li>
+<li>source texture-array DDS records <strong>2048 × 2048</strong>, <strong>12 mip levels</strong>, color BC1/DXGI 71 and normal BC3/DXGI 77.</li>
+</ul>
+<p>These are bounded structural observations of a specific resource profile. They are not universal capacities of every EDF6 terrain profile and do not establish a visually correct in-game render.</p>
+<h2 id="terrain-normals-and-logical-material-values-attribution-limit">Terrain normals and logical material values: attribution limit</h2>
+<p>Controlled native <code>MAP_FIELD_RENDER</code> pixel-shader comparisons in <strong>R4 (17 September 2026)</strong> established the following packed-normal decode; a later non-native preview translation reproduced it. This is <strong>static DXBC-derived behaviour</strong>, not yet proof of the final G-buffer/compositor output:</p>
+<pre><code class="language-text">x = 2 * (R * B - 0.5)
+y = -2 * (G - 0.5)
+z = sqrt(max(1 - x*x - y*y, 1e-5))
+</code></pre>
+<p>The later preview translation also emitted logical <code>metallic=0</code>, <code>roughness=0.980133056640625</code>, <code>specular=0</code>. <strong>These logical material values do not independently establish the exact native output channels or final-frame shader.</strong> In particular, the bridge's 12 local RGBA8 slot/weight transport is not proven to be the game's original GPU texture layout. Full original implementation details are kept outside the public wiki in the R97 maintainer audit.</p>
+<p>For comparison, other measured Common/Water paths used different <code>R*A</code>/<code>G</code> normal decoding; no single cross-family normal decoder is justified.</p>
+<h2 id="what-the-fix3-comparison-cannot-prove">What the FIX3 comparison cannot prove</h2>
+<p>The retained FIX3 MAC/MAD/RAB resource carriers differed substantially from the earlier FIX2 version, and the loader path changed too. FIX3 versus FIX2 was <strong>not</strong> a clean single-variable shader experiment. Structural acceptance and valid nonblack DDS contents did not establish in-game pixel output. The exact native FieldRender compositor/texture bindings still require a matched runtime shader/capture observation.</p>
+<p>See <a href="materials-%26-shaders-reconciliation-edf6-shader-pipeline.html">shader evidence and deferred compositor scope</a>.</p>
+<h2 id="exhaustive-fmb-census-and-non-terminating-material-slots">Exhaustive FMB census and non-terminating material slots</h2>
+<p>A later complete native HEIGEN FMB census validated <strong>1,200/1,200 leaves</strong> (plus a 102-leaf CAVE control) across geometry, compressed payloads, mass grids, material selector bounds and sparse material lists. The 16-byte <code>MaterialIDList</code> is <strong>not zero/FF terminated</strong>: <code>0xFF</code> denotes an empty position, and active local material count must count all non-<code>0xFF</code> entries. A leaf's separate capacity-like descriptor is not always numerically identical to that count. Full details and the uncertain native role of the separate <code>_2</code> FMB layer are given in <a href="edf6-fmb-leaf-mass-materialidlist-and-secondary-layer.html">native FMB leaf structure</a>.</p>
+<p>The specific experimental shader selector <code>0x0202</code> with configuration row 4 is also present in <strong>80/118</strong> native ENKEIRIGHT leaves. That supports native shader selection but does not resolve differences between non-native and native material/orientation records. A preview's apparent normal or colour cannot substitute for actual renderer evidence.</p>
+<h2 id="native-enkeiright-projection-orientation-reference">Native ENKEIRIGHT projection/orientation reference</h2>
+<p>An exact retained ENKEIRIGHT material 0 uses base/color slice <code>0</code>, detail slice <code>1</code>, normal slice <code>0</code> and <strong>two</strong> orientation entries with <code>(90,0,0)</code> Euler angles and XYZ scales <code>7</code> and <code>100</code>. The accompanying <a href="maps-edf6-fieldrender-planar-material-orientation-and-texture-slice-reference.html">native planar-projection reference</a> gives the complete source-field comparison and its evidence limits. A matching shader selector does not prove material/orientation equality.</p>
+<h2 id="fieldrender-in-the-five-family-shader-qualification-boundary">FieldRender in the five-family shader qualification boundary</h2>
+<p>FieldRender is one of the five families covered by the retained EDF6 shader research. A native shader-oracle inventory that also contains Common, Common Clip, Common Light and Water should <strong>not</strong> be read as evidence that all five share one material ABI. Terrain uses FMEP/FMB leaf/material selectors and texture-array registrations rather than the ordinary static MDB sampler contract.</p>
+<p>The static terrain evidence and experimental renderer translation answer different questions. Reconstructed shader selectors and native DDS slice ranges can validate source-resource interpretation. A Godot preview's 12 local RGBA slot/weight transport is a translation, not a captured native EDF6 SRV/sampler layout. A runtime test must bind a known native FieldRender leaf and verify shader bytecode, actual SRVs, samplers, cbuffer lanes, RTV targets and downstream pixel output. Without that chain, the preview formula and exact final-compositor behavior remain deliberately separate.</p>
+<p>See <a href="materials-%26-shaders-reconciliation-edf6-shader-pipeline.html">EDF6 shader static/runtime proof matrix</a> and <a href="edf6-fieldrender-native-dds-leaf-capacity-and-mac-registration.html">native FieldRender DDS and FMB leaf records</a>.</p>
+<h2 id="edf6-fieldrender-g-buffer-outputs-and-terrain-material-constants">EDF6 FieldRender — G-buffer outputs and terrain material constants</h2>
+<p><strong>Evidence classification (17 November 2026).</strong> The terrain sampling, projection modes and normal reconstruction were already recovered by <strong>static native DXBC comparisons in R4/R6 (17 September 2026)</strong>. The additional G-buffer values below come from an <strong>external author's interpretation</strong> of the ground shader, retained in <code>EDF6_FieldRender_Ground_Shader_2026-11-17_WIKI_INTAKE.md</code>. They are <strong>reported</strong>, not independently checked against a pinned EDF6 output-writing pixel-shader variant and actual render-target state. The note repeated several of its own items; repetition is not additional evidence.</p>
+<table>
+<thead>
+<tr>
+  <th>Logical buffer/output</th>
+  <th>Reported terrain-shader behavior</th>
+  <th>Evidence limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>albedoRGB</code></td>
+  <td>Weighted product of base and detail color samples divided by total material weight; reported output alpha <strong>1</strong></td>
+  <td><code>base.rgb × detail.rgb</code> and cross-material denominator <strong><code>sumWeights + 1e-7</code></strong> are <strong>R4/R6 DXBC-derived</strong>; alpha 1 is part of the <em>external output report</em></td>
+</tr>
+<tr>
+  <td><code>specularRGB</code></td>
+  <td><strong><code>float4(0, 0, 0, 1)</code></strong></td>
+  <td>New external <strong>four-channel</strong> output claim; earlier preview recorded only logical <code>specular=0</code></td>
+</tr>
+<tr>
+  <td><code>metallic_roughness</code></td>
+  <td>Metallic <strong>0</strong>; roughness approximately <strong>0.980133</strong></td>
+  <td>These scalar values were <strong>already present</strong> in the R6-derived translation (<code>0.980133056640625</code>); precise native component packing/write remains to verify</td>
+</tr>
+<tr>
+  <td><code>normalXYZ</code></td>
+  <td>Final weighted terrain normal multiplied by rows of <code>g_world_matrix</code> (three dot products); reported <strong>alpha 1</strong></td>
+  <td>Explicit final-output-stage description is <strong>external</strong>; verify actual matrix space, row convention, output signature and shader permutation</td>
+</tr>
+<tr>
+  <td><code>viewXYZ_id</code></td>
+  <td>Reported to follow ordinary model-shader treatment</td>
+  <td>Too imprecise to establish native position-space, ID/alpha packing or bit layout</td>
+</tr>
+<tr>
+  <td><code>light_accumulate</code></td>
+  <td>Reportedly <strong>not written</strong> in this FieldRender pass</td>
+  <td>Not the same as zero/cleared content or absence of later light contribution</td>
+</tr>
+<tr>
+  <td><code>specular_accumulate</code></td>
+  <td>Reportedly <strong>not written</strong> in this FieldRender pass</td>
+  <td>Does not establish final reflections/specular appearance or frame-wide write behaviour</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong><code>0.980133056640625</code> roughness</strong> is not the <strong><code>0.98000002</code> normal-basis adjustment</strong> proven in R4: these constants have different roles. Nor are the normal Z reconstruction, directional projection and normal-accumulation <code>1e-5</code> safeguards interchangeable with the color-denominator <code>1e-7</code>.</p>
+<p><strong>Projection authority retained:</strong> R4 distinguishes <strong>Mode 0</strong> (one projection), <strong>Mode 1</strong> (two directional projections), and <strong>Mode 2</strong> (three projections). In Mode 2 the row1-axis projection selects material/orientation slot <strong>1</strong> when <code>dot(N,row1(pair0.color)) &gt; 0</code>, otherwise slot <strong>2</strong>; the selected face uses <code>(row0,row2)</code>. The separate pair-0 side projections still use <code>(row2,row1)</code> and <code>(row0,row1)</code>. The geometric normal is normalized before weighting, but native orientation rows are <strong>not</strong> normalized before their dot products. An external two-mode summary cannot supersede these controlled DXBC observations.</p>
+<p><strong>Verification still needed:</strong> pin the exact native <code>MAP_FIELD_RENDER</code> shader permutation and output signature; inspect stores/swizzles, render-target formats and write masks for all G-buffer outputs; resolve <code>viewXYZ_id</code> packing, <code>g_world_matrix</code> convention, and later light/compositor passes. A reported <code>specularRGB</code> of zero does <strong>not</strong> imply the terrain receives no reflections or other specular contribution in the finished image. See <a href="materials-%26-shaders-reconciliation-edf6-shader-pipeline.html">deferred shader-pipeline semantics</a> and <a href="maps-edf6-fieldrender-planar-material-orientation-and-texture-slice-reference.html">native planar orientation example</a>.</p>
+<p><strong>Primary provenance:</strong> R4 <code>EDF6_MISSION_STUDIO_GODOT_FORK_BOOTSTRAP_R4_FIELDRENDER_EXACT_CHECKPOINT_2026-09-17.md</code>; R6 <code>EDF6_MISSION_STUDIO_GODOT_FORK_BOOTSTRAP_R6_EXACT_FIELDRENDER_BRIDGE_CHECKPOINT_2026-09-17.md</code>; external interpretation in the 2026-11-17 intake above. The intake's new G-buffer claims have <strong>not</strong> been promoted to native-runtime proof.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_SHADER_PIPELINE_GODOT_INTEGRATION_R1_2026-11-13/Source/CurrentSuite_Selected/Mission/.../field/edf6_field_render_bridge.cpp</li><li>EDF6_SHADER_PIPELINE_GODOT_INTEGRATION_R1_2026-11-13/Docs/RECONCILIATION.md</li><li>/EDF5_EDF6_RESEARCH/research/active/A2Z/SHADER_FIDELITY_MERGE_RECONCILIATION_2026-10-25.md</li><li>Library: /EDF_FULL_KNOWLEDGE_WIKI/incoming/EDF6_FieldRender_Ground_Shader_2026-11-17_WIKI_INTAKE.md</li><li>Library: EDF6 R4/R6 FieldRender exact checkpoints (2026-09-17)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-resource-record-structure-in-the-bounded-samples">Native-resource record structure in the bounded samples</a><a href="#terrain-normals-and-logical-material-values-attribution-limit">Terrain normals and logical material values: attribution limit</a><a href="#what-the-fix3-comparison-cannot-prove">What the FIX3 comparison cannot prove</a><a href="#exhaustive-fmb-census-and-non-terminating-material-slots">Exhaustive FMB census and non-terminating material slots</a><a href="#native-enkeiright-projection-orientation-reference">Native ENKEIRIGHT projection/orientation reference</a><a href="#fieldrender-in-the-five-family-shader-qualification-boundary">FieldRender in the five-family shader qualification boundary</a><a href="#edf6-fieldrender-g-buffer-outputs-and-terrain-material-constants">EDF6 FieldRender — G-buffer outputs and terrain material constants</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-fieldrender-texture-arrays-and-local-slot-transport"};</script><script src="../assets/site.js" defer></script></body></html>

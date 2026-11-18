@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 highest-LOD foliage failure family Symptom family Two retained runtime observations point to the same distance-dependent surface: earlier port builds sh"><title>EDF 4.1 highest-LOD foliage failure family | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF 4.1 highest-LOD foliage failure family</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime-observed issue family; exact asset root cause open</div><div id="articleBody"><h2 id="symptom-family">Symptom family</h2>
+<p>Two retained runtime observations point to the same distance-dependent surface:</p>
+<ul>
+<li>earlier port builds showed black leaves on the highest palm/tree LOD;</li>
+<li>later feedback reported leaves disappearing at close range and reappearing farther away, with scope/zoom not restoring them.</li>
+</ul>
+<p>The visible symptom changed, but both failures are tied to the <strong>closest/highest-detail foliage LOD</strong>.</p>
+<h2 id="strong-suspects">Strong suspects</h2>
+<p>Until the exact affected MDB/material family is identified, the highest-value candidates are:</p>
+<ul>
+<li>alpha-test / alpha-clip state;</li>
+<li>opacity texture semantic or channel interpretation;</li>
+<li>material/shader variant used only by LOD0;</li>
+<li>highest-LOD material binding;</li>
+<li>LOD resource-path mismatch.</li>
+</ul>
+<p>Distance dependence makes a generic “missing texture payload” explanation too weak by itself: a farther LOD can render while the closest LOD is wrong.</p>
+<h2 id="diagnostic-method">Diagnostic method</h2>
+<p>For the exact affected tree/palm family:</p>
+<ol>
+<li>identify the runtime MDB and material used by the failing close LOD;</li>
+<li>identify the next farther LOD that renders correctly;</li>
+<li>compare material/shader binding, alpha-test/clip state and opacity texture binding;</li>
+<li>compare texture format/alpha semantics only for the actual bound resources;</li>
+<li>verify LOD resource paths and model/material table indices;</li>
+<li>change only the first evidenced divergence and retest the distance transition.</li>
+</ol>
+<h2 id="cross-project-caution">Cross-project caution</h2>
+<p>Other EDF6 foliage research has proven that some <code>Common_Clip</code>-family assets legitimately use BC1 transparent mode. That is useful background, not proof that this EDF4.1 port issue is a BC1 problem.</p>
+<p>Do not apply a global foliage shader or DDS conversion merely because another foliage asset used alpha clipping.</p>
+<h2 id="status">Status</h2>
+<p>This remains an <strong>open map-rendering/material issue family</strong>. The wiki records the stable diagnostic boundary so future work does not restart from “maybe the DDS is missing” or conflate a LOD0 binding bug with all foliage rendering.</p>
+<h2 id="historical-same-palm-cross-generation-discriminator">Historical same-palm cross-generation discriminator</h2>
+<p>A recovered historical EDF5→EDF6 Desert case identified a concrete <strong>highest-LOD <code>sk_ptree007_11m_shuro</code> palm</strong> mismatch. The old leaf MDB used <code>snd_Map_Simple_Clip</code>, <code>alpha_clip=0.5</code>, a single <code>albedo</code> sampler and <strong>44-byte</strong> vertices without tangent/binormal. A bad compatibility edit replaced <em>only the shader name</em> with <code>snd_BRDF_Map_Simple_Clip</code> while leaving all other material, sampler and vertex ABI fields unchanged. That mismatched shader/geometry contract, not a missing diffuse DDS, was the demonstrated problem for the <strong>historical black-leaf case</strong>.</p>
+<p>The corresponding <em>native EDF6</em> palm instead uses <code>snd_BRDF_Map_Common_Clip</code>, <strong>60-byte</strong> tangent/binormal-bearing vertices, full albedo/normal/parameter samplers and FNM/FPR resources. The leaf diffuse texture itself matched the historical source, showing that identical diffuse pixels do not make two material ABIs equivalent.</p>
+<p>One further historical <code>sk_ptree007_11m_shuro.trb</code> pair had a branch value <code>[0.0,10.0]</code> on the source side versus <code>[0.0]</code> on the native EDF6 side. With its generic schema migration, that one branch change reproduced the native TRB bytes, but a corresponding runtime experiment <strong>did not fix the previous black-leaf defect</strong>. Do <strong>not</strong> adopt a global <code>[0,10]→[0]</code> rewrite.</p>
+<p>The current EDF4.1→EDF6 converter does <strong>not</strong> perform the old shader-name-only substitution, and the latest close-range disappearance report has <strong>not been tied to that same palm</strong>. Therefore this historical evidence narrows the differential diagnosis but does not explain or close the current issue. Source: <code>R10_FOLIAGE_RECON_2026-11-15.md</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF41_RUNTIME_FEEDBACK_MISSION40_TRIAGE_2026-11-05.md</li><li>Library: EDF41_RUNTIME_FEEDBACK_UPSTREAM_RECON_2026-11-05.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#symptom-family">Symptom family</a><a href="#strong-suspects">Strong suspects</a><a href="#diagnostic-method">Diagnostic method</a><a href="#cross-project-caution">Cross-project caution</a><a href="#status">Status</a><a href="#historical-same-palm-cross-generation-discriminator">Historical same-palm cross-generation discriminator</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-edf-4-1-highest-lod-foliage-failure-family"};</script><script src="../assets/site.js" defer></script></body></html>

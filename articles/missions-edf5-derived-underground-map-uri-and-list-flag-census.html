@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5-derived underground missions: exact map references and LIST condition census Evidence: Static R4 source-derived mission-script Map() reference census and t"><title>EDF5-derived underground mission map URI and LIST flag census | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF5-derived underground mission map URI and LIST flag census</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Audited source-derived EDF5 mission AC map-reference and EDF6-compatible converted LIST flags, offline/static; bounded user runtime samples reported separately</div><div id="articleBody"><p><strong>Evidence:</strong> Static R4 source-derived mission-script <code>Map()</code> reference census and the corresponding <em>converted EDF6-compatible</em> OFFLINE/ONLINE <code>MISSIONLIST</code> rows, dated 2 September 2026. This is <strong>not a newly verified raw-shipping EDF5 LIST dump</strong>, nor a runtime test of all missions.</p>
+<h2 id="two-distinct-identities">Two distinct identities</h2>
+<p>A mission has at least two identifiers here: its logical mission name (<code>M001</code>, <code>DM019</code>, etc.) and the exact virtual resource path supplied to the mission's map call (<code>app:/Map/...mac</code>). The EDF6-compatible <code>MISSIONLIST</code> adds a separate mode-specific ordinal and a numeric flag field. A change to one identity does not automatically update the others.</p>
+<p>The source-derived audit found <strong>15 distinct underground missions</strong>: 11 base, three DLC1, one DLC2. Each appears in both OFFLINE and ONLINE after the studied <em>shared-progress</em> list unification, yielding <strong>30 mode-specific LIST rows</strong>. In this specific converted corpus every one carries <code>flags=40</code> (<code>0x28</code>, ordinary <code>0x08</code> plus underground/no-support <code>0x20</code>). Surface rows retain <code>8</code>. This is an exact corpus observation, <strong>not a license to assign 40 to every cave-like map in other EDF versions</strong>.</p>
+<h2 id="exact-map-uri-and-list-ordinal-reference">Exact map URI and list ordinal reference</h2>
+<p>The paths below intentionally retain the <strong>original letter case reported by the R4 audit</strong>. Some map identifiers appear with <code>app:/Map/</code> and others with <code>app:/map/</code>. Do not normalize these strings by hand and then claim byte identity.</p>
+<table>
+<thead>
+<tr>
+  <th>Campaign</th>
+  <th>Mission</th>
+  <th><code>Map()</code> virtual URI in audited mission script</th>
+  <th style="text-align:right">OFFLINE ordinal</th>
+  <th style="text-align:right">ONLINE ordinal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Base</td>
+  <td><code>M000</code></td>
+  <td><code>app:/Map/ig_EDFRoom01.mac</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M001</code></td>
+  <td><code>app:/Map/ig_EDFRoom02.mac</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M014</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">17</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M027</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">31</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M028</code></td>
+  <td><code>app:/map/ig_cave503.mac</code></td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">32</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M029</code></td>
+  <td><code>app:/Map/ig_Cave504.mac</code></td>
+  <td style="text-align:right">33</td>
+  <td style="text-align:right">33</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M056</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">51</td>
+  <td style="text-align:right">51</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M057</code></td>
+  <td><code>app:/Map/ig_Cave503.mac</code></td>
+  <td style="text-align:right">85</td>
+  <td style="text-align:right">85</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M062</code></td>
+  <td><code>app:/Map/ig_cave503.mac</code></td>
+  <td style="text-align:right">90</td>
+  <td style="text-align:right">90</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M072_2</code></td>
+  <td><code>app:/Map/ig_edfroom02.mac</code></td>
+  <td style="text-align:right">80</td>
+  <td style="text-align:right">80</td>
+</tr>
+<tr>
+  <td>Base</td>
+  <td><code>M204</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">98</td>
+  <td style="text-align:right">98</td>
+</tr>
+<tr>
+  <td>DLC1</td>
+  <td><code>DM001</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td>DLC1</td>
+  <td><code>DM007</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td>DLC1</td>
+  <td><code>DM019</code></td>
+  <td><code>app:/Map/ng_dlc_edfroom03.mac</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td>DLC2</td>
+  <td><code>DM007_2</code></td>
+  <td><code>app:/Map/ig_Cave501.mac</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">5</td>
+</tr>
+</tbody>
+</table>
+<p>Ordinals are zero-based and refer to this <strong>R4 converted EDF6-compatible LIST</strong>. They are not global chronological level numbers. The historical R41 converted package preserved a <em>different</em> MP03 ONLINE convention with M000 absent (111 rows), while the later unified list used in the R4 parity audit has M000 in <strong>both</strong> 112-row base lists. Both are real historical converted configurations; neither should be silently substituted for the other.</p>
+<p>The complete 30-row dataset is also included as <code>data/EDF5_DERIVED_UNDERGROUND_MAPS_R4_30_MODE_ROWS.csv</code> in the public archive. It preserves pack, mode, zero-based ordinal, exact-case map path and converted LIST flag.</p>
+<h2 id="why-underground-appearance-and-support-eligibility-are-different">Why underground appearance and support eligibility are different</h2>
+<p>The studied native EDF6 <code>MissionScriptASImplement</code> path interprets <code>LIST</code> bit <code>0x20</code> as a no-support condition. Equipment may still appear red or be selectable in the loadout UI. The gameplay question is whether an Air Raider support/vehicle request succeeds <em>inside</em> the mission, after the active mode/list selection and map initialization.</p>
+<p>Historic diagnostics exposed why this matters: a broad modded UI setter affected 23 unrelated call sites, and a separate experimental host-side mode refresh was <strong>runtime-negative for the reported restriction symptom</strong>. A proposed direct <code>SetWeaponCondition(WEAPON_CONDITION_NO_SUPPORT)</code> after <code>Map()</code> calls was a <strong>static-only candidate</strong>. These experiments do not supersede the source-derived row values or prove a game-wide rule for all online hosts.</p>
+<p>The parent <a href="missions-%26-scripting-underground-mission-flags-and-weapon-condition.html">underground weapon-condition article</a> documents later bounded user in-game observations for <code>M000</code>, <code>M001</code> and <code>DM019</code>, separately from the 15-mission R4 offline census. <strong>Do not count 30 static LIST rows as 30 successful runtime missions.</strong></p>
+<h2 id="what-this-table-cannot-prove">What this table cannot prove</h2>
+<ul>
+<li>That all 15 modes/mission pairs ran successfully in EDF6 or enforce the correct support rules in multiplayer.</li>
+<li>That case-distinct strings refer to different or identical resources after CRI/VFS normalization.</li>
+<li>That the R4 generated LIST bytes are unmodified source EDF5 shipping LIST bytes.</li>
+<li>That a DLL or mod loader may safely infer the selected mission solely from physical MissionPack parity.</li>
+</ul>
+<p><strong>Source:</strong> <code>MISSION_META/FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</code> (full 112/112 + 15/15 + 14/14 corpus, <code>expected_underground_from_AC_maps</code>, <code>underground_maps</code>, <code>underground_flag_40</code> and mode list ordering); related <code>MISSION_META/ONLINE_HOST_MODE_REFRESH_AUDIT_R5_2026-09-03.json</code>, <code>R6_ONLINE_UNDERGROUND_RESTRICTION_DIAGNOSTIC.json</code>, <code>R7_M000_M001_NO_SUPPORT_AUDIT.json</code> for historically tested diagnostic hypotheses.</p>
+<p>See also <a href="missions-edf5-content-r41-converted-mission-list-order-141-campaign-reference.html">EDF5-content mission ordering</a> and <a href="missions-%26-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract.html">mission package progression identity</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/FULL_PARITY_FINAL_GATE_R4_2026-09-02.json</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION_META/R7_M000_M001_NO_SUPPORT_AUDIT.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#two-distinct-identities">Two distinct identities</a><a href="#exact-map-uri-and-list-ordinal-reference">Exact map URI and list ordinal reference</a><a href="#why-underground-appearance-and-support-eligibility-are-different">Why underground appearance and support eligibility are different</a><a href="#what-this-table-cannot-prove">What this table cannot prove</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-edf5-derived-underground-map-uri-and-list-flag-census"};</script><script src="../assets/site.js" defer></script></body></html>

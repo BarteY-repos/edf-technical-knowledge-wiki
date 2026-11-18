@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 → EDF 5 → EDF 6 generation and version matrix The useful model for the three games is shared lineage with subsystem-specific migration, not “the same en"><title>EDF 4.1 → EDF 5 → EDF 6 generation and version matrix | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-conversion.html">Conversion</a></div><h1>EDF 4.1 → EDF 5 → EDF 6 generation and version matrix</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p>The useful model for the three games is <strong>shared lineage with subsystem-specific migration</strong>, not “the same engine with version numbers changed.” Some containers remain recognizable, some ABIs change structurally, and some runtime systems are rewritten while preserving familiar names.</p>
+<h2 id="high-value-matrix">High-value matrix</h2>
+<table>
+<thead>
+<tr>
+  <th>Subsystem</th>
+  <th>EDF 4.1</th>
+  <th>EDF 5</th>
+  <th>EDF 6</th>
+  <th>Current migration rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Main runtime binary</td>
+  <td>older generation</td>
+  <td>mission/runtime code concentrated in monolithic <code>EDF5.exe</code> in the retained build</td>
+  <td>small <code>EDF6.exe</code> plus large <code>EDF.dll</code></td>
+  <td>compare EDF5 runtime primarily against EDF6 <code>EDF.dll</code>, never port RVAs numerically</td>
+</tr>
+<tr>
+  <td>CAS wrapper</td>
+  <td>version <code>0x00020000</code></td>
+  <td><code>0x03020000</code></td>
+  <td><code>0x04020000</code></td>
+  <td>incompletely understood; version-only rewrite is unsafe</td>
+</tr>
+<tr>
+  <td>CANM</td>
+  <td>older/related generation</td>
+  <td><code>0x200</code>, ~<code>0x20</code> channel record</td>
+  <td><code>0x300</code>, ~<code>0x30</code> channel record with XYZW base/multiplier + encoding type</td>
+  <td>semantic conversion required; animated rotation representation changes</td>
+</tr>
+<tr>
+  <td>MDB</td>
+  <td>older model generation</td>
+  <td>header gate <code>0x14</code> in retained EDF5 work</td>
+  <td>header gate <code>0x20</code> plus target-native material/vertex semantics</td>
+  <td>header patch alone is not canonical conversion</td>
+</tr>
+<tr>
+  <td>NVMD</td>
+  <td>generation-specific</td>
+  <td><code>0x120</code> in measured source path</td>
+  <td><code>0x130</code> in canonical target path</td>
+  <td>structural/version migration; several record/offset changes</td>
+</tr>
+<tr>
+  <td>Havok map collision</td>
+  <td>older Havok generation</td>
+  <td>hkp-era source lineage in conversion research</td>
+  <td>hknp2020 target structures</td>
+  <td>re-encode/rebuild target structures; SDK-string edits are insufficient</td>
+</tr>
+<tr>
+  <td>SGO/DSGO</td>
+  <td>familiar typed-tree family</td>
+  <td>SGO and mission/resource schemas</td>
+  <td>SGO plus DSGO usage in EDF6 mission/list workflows</td>
+  <td>shared container grammar does not imply shared resource schema</td>
+</tr>
+<tr>
+  <td>Mission code</td>
+  <td>older BVM/script conventions</td>
+  <td>BVM/AC mission source is the major conversion input</td>
+  <td>AngelScript/native EDF6 APIs plus retained BVM-facing compatibility surfaces</td>
+  <td>semantic transpilation: CFG, events, stack/dataflow, timing and API meaning matter</td>
+</tr>
+<tr>
+  <td>RMPA</td>
+  <td>older generation</td>
+  <td>source mission/map RMPA layouts</td>
+  <td>different EDF6 parser/layout expectations</td>
+  <td>structural conversion; mission RMPA and map RMPA are separate subsystems</td>
+</tr>
+<tr>
+  <td>Save crypto</td>
+  <td>shared lineage</td>
+  <td>shared lineage</td>
+  <td>retained reference reports same GST IV/keys across 4.1–6</td>
+  <td>encryption reuse is <strong>not</strong> structural save parity</td>
+</tr>
+<tr>
+  <td>Materials</td>
+  <td>legacy shader families common</td>
+  <td>legacy <code>snd_Map_*</code> remains important</td>
+  <td>BRDF/Common/Build/LOD families dominate many native targets while legacy lanes still exist</td>
+  <td>migrate the whole shader/material/sampler/vertex contract; shader-name swaps are unsafe</td>
+</tr>
+</tbody>
+</table>
+<h2 id="where-edf5-is-a-useful-intermediate-oracle-for-edf4-1-edf6">Where EDF5 is a useful intermediate oracle for EDF4.1 → EDF6</h2>
+<p>EDF5 is especially valuable where <strong>EDF5 and EDF6 already agree on the rewritten target-side runtime contract</strong>.</p>
+<p>A concrete example is <code>Vehicle404</code>: EDF4.1 uses a different class generation and source control values, while EDF5 and EDF6 share the target-era <code>Vehicle404_Tank</code> contract and the same <code>[0, 2]</code> nested main-cannon tuple. In such cases EDF5 helps distinguish a deliberate generation change from an EDF6-specific regression.</p>
+<p>EDF5 also provides paired same-asset evidence for model/material migration: it exposes what the older asset looked like immediately before the EDF6 BRDF/material generation, making native EDF6 same-asset targets useful conversion oracles.</p>
+<h2 id="where-edf5-is-not-a-safe-universal-bridge">Where EDF5 is <strong>not</strong> a safe universal bridge</h2>
+<p>Do not assume “EDF4.1 → EDF5 → EDF6” is always composable as two mechanical converters.</p>
+<p>Examples:</p>
+<ul>
+<li>EDF4.1 source gameplay semantics may need to be preserved even when EDF5/EDF6 rewrote the underlying runtime class.</li>
+<li>NAV/Havok geometry must be judged against the source mission/map and target runtime; donor EDF5/EDF6 topology is not automatically source-faithful.</li>
+<li>shared container names such as SGO, RAB, MAC or RMPA do not prove identical embedded schemas.</li>
+<li>common save encryption does not prove common offsets or table meaning.</li>
+<li>a native EDF6 asset can be a <strong>target ABI oracle</strong> without being a semantic donor for the EDF4.1 content.</li>
+</ul>
+<h2 id="three-different-kinds-of-same">Three different kinds of “same”</h2>
+<p>When reconciling generations, classify similarity explicitly:</p>
+<ol>
+<li><strong>Container same</strong> — parser/container family is recognizable, but payload schema may differ.</li>
+<li><strong>Runtime ABI same</strong> — target-side field/class behavior matches across generations, as with some EDF5/EDF6 vehicle contracts.</li>
+<li><strong>Semantic same</strong> — gameplay/visual behavior is actually equivalent.</li>
+</ol>
+<p>Only the third is gameplay parity. The first two are useful evidence, not substitutes for runtime or source-semantic validation.</p>
+<h2 id="practical-conversion-policy">Practical conversion policy</h2>
+<p>For every format or subsystem, prefer this order:</p>
+<p><code>source semantics -&gt; measured source structure -&gt; paired target-native oracle -&gt; target writer/runtime contract -&gt; runtime validation</code></p>
+<p>Do not replace it with:</p>
+<p><code>copy bytes -&gt; bump version -&gt; rename resource -&gt; assume parity</code>.</p>
+<p>That distinction is the central cross-generation rule of this wiki.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_MEGA_WIKI_R4_2026-08-26.md</li><li>/R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json</li><li>/EDF41_R13_OFFLINE_RECON_2026-11-06.md</li><li>/EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#high-value-matrix">High-value matrix</a><a href="#where-edf5-is-a-useful-intermediate-oracle-for-edf4-1-edf6">Where EDF5 is a useful intermediate oracle for EDF4.1 → EDF6</a><a href="#where-edf5-is-not-a-safe-universal-bridge">Where EDF5 is not a safe universal bridge</a><a href="#three-different-kinds-of-same">Three different kinds of “same”</a><a href="#practical-conversion-policy">Practical conversion policy</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-edf41-edf5-edf6-generation-and-version-matrix"};</script><script src="../assets/site.js" defer></script></body></html>

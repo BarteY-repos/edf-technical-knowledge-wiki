@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Distance and detail across EDF4.1, EDF5 and EDF6 All three examined games use camera-distance-dependent model selection for map trees, structures and other prop"><title>EDF4.1/5/6 map LOD: tree billboards, building switches and distant animation frequency | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Rendering and map LOD</div><h1>EDF4.1/5/6 map LOD: tree billboards, building switches and distant animation frequency</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Rendering and map LOD</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived; evidence grades and build restrictions described in article; no new EDF runtime</div><div id="articleBody"><p>All three examined games use <strong>camera-distance-dependent model selection</strong> for map trees, structures and other props, but the default distances and engine controls differ. The same source also records a separate <strong>distance-dependent animation update skip</strong>, which should never be confused with mesh LOD or with animation being absent.</p>
+<h2 id="mesh-billboard-cull-for-trees">Mesh → billboard → cull for trees</h2>
+<p>In each studied generation the tree renderer compares a <strong>squared camera-distance metric</strong> to squared thresholds from the map's <code>.trb</code> definitions. Below the near threshold it draws the mesh; in the near-to-far band it blends full mesh and billboard; farther away it draws the billboard where available; past the cut-off it draws neither. Some pass types do not submit the billboard. The camera-distance factor has an additional view-dependent multiplier whose writer was not resolved consistently in all studies.</p>
+<table>
+<thead>
+<tr>
+  <th>Game</th>
+  <th>Native <code>.trb</code> examples</th>
+  <th>Evidence scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF4.1</td>
+  <td>Most trees: <strong>10 m near</strong>, far often <strong>110–250 m</strong>; selected city street trees start at 50 m</td>
+  <td>96 <code>.trb</code> examples across the studied map set</td>
+</tr>
+<tr>
+  <td>EDF5</td>
+  <td>Most trees: <strong>50 m near</strong>, often <strong>100–180 m far</strong>; bushes commonly 10/50 m</td>
+  <td>149 entries in the studied all-map enumeration</td>
+</tr>
+<tr>
+  <td>EDF6</td>
+  <td>Trees on HEIGEN507: <strong>50 m near</strong>, <strong>100–180 m far</strong>, usually 1000 m cut-off; bushes 10/50 m</td>
+  <td>19 local <code>.trb</code> entries in one named map</td>
+</tr>
+</tbody>
+</table>
+<p>The EDF6 example is <strong>not an all-map census</strong> and should not be compared numerically with the wider EDF4.1/5 corpora as if they sampled equally. A billboard texture must also exist; otherwise a far-distance selection may render nothing.</p>
+<h2 id="buildings-are-not-smoothly-crossfaded-in-the-studied-builds">Buildings are not smoothly crossfaded in the studied builds</h2>
+<p>Placed building structures have up to three model choices. The engine selects a level based on LOD distance fields in <code>MAPB</code> and the corresponding part fields in <code>MAPO</code>; when both specify thresholds, the larger defined value is used. The observed native renderer <strong>hard-switches</strong> between structure LODs rather than smoothly dithering from one to another. A contributor verified a plainly visible EDF6 building pop when walking a small step in a city scene.</p>
+<p>Common <strong>squared-metre</strong> fields explain thresholds that otherwise look too large:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Field value</th>
+  <th style="text-align:right">Equivalent distance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>6,400</code></td>
+  <td style="text-align:right">80 m</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>10,000</code></td>
+  <td style="text-align:right">100 m</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>22,500</code></td>
+  <td style="text-align:right">150 m</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>40,000</code></td>
+  <td style="text-align:right">200 m</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>90,000</code></td>
+  <td style="text-align:right">300 m</td>
+</tr>
+</tbody>
+</table>
+<p>Across EDF4.1, 3,011 of 4,632 sampled placed category-1 <code>.mosb</code> buildings used the 150 m first LOD with no second LOD; EDF5's 8,365 placed buildings included 2,854 such 150 m/no-second-LOD cases. EDF6 included several frequent <strong>two-threshold</strong> pairs, such as <strong>200/300 m</strong> or <strong>100/300 m</strong>, and a separate <strong>150 m/no-second-LOD</strong> class. These are observed frequency tables, not map-independent rendering contracts.</p>
+<h2 id="distant-animation-updates-are-another-knob">Distant animation updates are another knob</h2>
+<p>The generation crosswalk identified <strong>pose-job frequency reduction</strong> for EDF5 and EDF6 insect actors. In EDF5, the native distance bands can update poses once every <strong>1, 4, 8 or 16</strong> normal job slots; for humans the corresponding path is gated by <code>human_frame_skip_enable</code> and is usually disabled by default. EDF6 insects use corresponding bands, influenced by <code>insectbase_AnimationLodAdjust</code> from SGO data. EDF4.1 had the mesh LOD selector but <strong>no corresponding animation skip was found in the inspected paths</strong>. That is a negative-search result, not proof no skip mechanism exists anywhere in the game.</p>
+<p>EDF4.1 uniquely exposes <code>set_lod_distance_scale</code>, which changes several distance-scale globals (the <code>chara</code> family is treated separately). EDF5 did not have the corresponding global distance-scale control in the researched build; EDF6 uses distinct global structure scaling values. Nothing here establishes that changing any of these controls is safe for performance, shadow passes or other map content.</p>
+<h2 id="what-this-comparison-does-and-does-not-establish">What this comparison does and does not establish</h2>
+<p>Three independent systems matter: <strong>tree billboard selection</strong>, <strong>building mesh LOD</strong> and <strong>skeleton/pose scheduling</strong>. Changing a mesh selection threshold does not force new animation frames, improve an existing source texture, or solve foliage alpha blending. Likewise, retaining distant full-resolution meshes can increase draw or visibility cost.</p>
+<p><strong>Evidence:</strong> source-code/disassembly and named-map asset studies, plus one contributor's observed EDF6 building pop. No new game run was performed for this article.</p>
+<p><strong>Attribution:</strong> EDF Knowledge Hub <code>crosswalk/lod-distance-animation.md</code>, <code>edf41/map-lod.md</code>, <code>edf5/map-lod.md</code>, <code>edf6/map-lod.md</code>; novae (ajane), KH 00v/autorun contributors. Exact fact IDs preserved in the separate provenance ledger. See <a href="kh-edf41-map-lod.html">original EDF4.1 LOD source</a>, <a href="kh-edf5-map-lod.html">EDF5</a>, <a href="kh-edf6-map-lod.html">EDF6</a> and <a href="performance-profiler-p1-p2-p3r-visibility-cost.html">native visibility cost</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 14-Nov-2026: crosswalk/lod-distance-animation.md</li><li>EDF Knowledge Hub export 14-Nov-2026: edf41/map-lod.md</li><li>EDF Knowledge Hub export 14-Nov-2026: edf5/map-lod.md</li><li>EDF Knowledge Hub export 14-Nov-2026: edf6/map-lod.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#mesh-billboard-cull-for-trees">Mesh → billboard → cull for trees</a><a href="#buildings-are-not-smoothly-crossfaded-in-the-studied-builds">Buildings are not smoothly crossfaded in the studied builds</a><a href="#distant-animation-updates-are-another-knob">Distant animation updates are another knob</a><a href="#what-this-comparison-does-and-does-not-establish">What this comparison does and does not establish</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-native-distance-lod-tree-billboard-and-animation-skip"};</script><script src="../assets/site.js" defer></script></body></html>

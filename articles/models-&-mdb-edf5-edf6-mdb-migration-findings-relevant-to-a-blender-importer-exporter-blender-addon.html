@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 to EDF6 MDB: paired-model geometry, material and object changes EDF5 → EDF6 MDB migration is a semantic conversion, not a version-field rewrite. The findin"><title>EDF5 → EDF6 MDB conversion: geometry, names, materials and native paired evidence | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-models.html">Models</a></div><h1>EDF5 → EDF6 MDB conversion: geometry, names, materials and native paired evidence</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Models &amp; MDB</span><span class="chip">Models</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p>EDF5 → EDF6 MDB migration is a <strong>semantic conversion</strong>, not a version-field rewrite. The findings below come from bounded paired native-model corpora and modded-game compatibility experiments; they do not establish a single universal MDB layout or a stock-game crash rule for every variation.</p>
+<h2 id="paired-corpus-measurements">Paired-corpus measurements</h2>
+<ul>
+<li><strong>HEIGEN:</strong> 63/63 source models passed structural and independent audit, with approximately 2.0 MB of semantic vertex lanes examined.</li>
+<li><strong>NW_EUROPE:</strong> 163/163 source MDBs passed source-integrity/binary checks, with approximately 31 MB examined.</li>
+<li><strong>DESERT:</strong> 76/76 models passed audit, including approximately 6.5 MB of vertex data.</li>
+</ul>
+<p>These are validation counts on the studied corpus, <strong>not</strong> counts of distinct renderer profiles or proof of universal game compatibility.</p>
+<h2 id="mdb-vertex-declaration-formats">MDB vertex declaration formats</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Code</th>
+  <th>Observed representation</th>
+  <th style="text-align:right">Width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>float32 ×4 (<code>BLENDWEIGHT</code> in examples)</td>
+  <td style="text-align:right">16 bytes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td>float32 ×3</td>
+  <td style="text-align:right">12 bytes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>7</code></td>
+  <td>float16 ×4 (often POSITION / NORMAL / TANGENT / BINORMAL)</td>
+  <td style="text-align:right">8 bytes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>12</code></td>
+  <td>float32 ×2 (<code>TEXCOORD</code>)</td>
+  <td style="text-align:right">8 bytes</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>21</code></td>
+  <td>uint8 ×4 (<code>BLENDINDICES</code>)</td>
+  <td style="text-align:right">4 bytes</td>
+</tr>
+</tbody>
+</table>
+<p>Legitimate EDF6 material/geometry families in these samples include <strong>60-, 68-, 76- and 84-byte</strong> layouts; several native-compatible records have repeated TEXCOORD occurrence orders such as <code>0,2,1</code> or <code>1,0</code>. Therefore the visible UV-channel index and the physical declaration occurrence order are separate pieces of information. No evidence here shows that <em>every</em> alternative semantically equivalent ordering crashes the game.</p>
+<h2 id="tangent-space-and-precision-changes">Tangent space and precision changes</h2>
+<p>In the studied compatibility path, POSITION, TEXCOORD, BLENDWEIGHT and TANGENT were preserved while BINORMAL became <code>(-x,-y,-z,w)</code> across the game boundary. <strong>16,796 half-float</strong> and <strong>1,093 float32</strong> binormals matched this sign rule; <strong>1,093 float32</strong> tangents were byte-exact. This is a <em>cross-game relationship</em>, not an instruction to negate binormals inside already-valid EDF6 data.</p>
+<p>A set of <strong>12 high-precision DESERT source meshes</strong> retained float32 lanes. Compatible 76-/84-byte layouts occurred elsewhere in native EDF6 even when the exact same shader-plus-layout combination was uncommon. Source precision should not be assumed incompatible simply because half-float is prevalent in another sample.</p>
+<h2 id="bone-object-name-and-entry-offset-identity">Bone, object name and entry-offset identity</h2>
+<p>Keeping the EDF5 source bone graph and its blend indices coherent proved a defensible compatibility strategy; matched EDF6 targets sometimes re-authored helper-bone order or count, so this is <strong>not</strong> a claim that the source bone graph is native-identical.</p>
+<p>In EDF6/v32, the <strong>first Object dword</strong> behaved as the dedicated object NameTable reference; the <strong>second reference</strong> retained the linked bone/node role. For <strong>165/165 paired target objects</strong>, the two names resolved to the same semantic string, although the NameTable integer indices need not be equal.</p>
+<p>Offsets into Name, Texture, Material, MaterialParameter, MaterialTexture, Object, MeshInfo and declaration entries were consistently treated as <strong>relative to the entry containing the offset</strong> in the studied corpus. Any additional target-specific offset role must be established from its own records.</p>
+<h2 id="shader-and-material-migration-is-not-a-rename">Shader and material migration is not a rename</h2>
+<p>Of <strong>38 paired EDF5 source materials</strong> using <code>snd_Map_Simple_Clip</code>, only <strong>one</strong> native EDF6 target used <code>snd_BRDF_Map_Simple_Clip</code>. Other targets used Common, Common_Clip, Build or LOD families; even the one BRDF Simple Clip target changed its material ABI.</p>
+<p>A matched palm leaf demonstrates the geometric implication:</p>
+<table>
+<thead>
+<tr>
+  <th>Studied feature</th>
+  <th>EDF5 source</th>
+  <th>EDF6 native target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Leaf shader</td>
+  <td>Legacy <code>Simple_Clip</code></td>
+  <td>BRDF <code>Common_Clip</code></td>
+</tr>
+<tr>
+  <td>Samplers</td>
+  <td>Albedo only</td>
+  <td>Albedo + normal + packed parameters</td>
+</tr>
+<tr>
+  <td>Vertex stride</td>
+  <td>44 bytes</td>
+  <td>60 bytes</td>
+</tr>
+<tr>
+  <td>Tangent space</td>
+  <td>No tangent/binormal</td>
+  <td>Tangent and binormal included</td>
+</tr>
+<tr>
+  <td>First leaf mesh</td>
+  <td>888 vertices, 1944 indices</td>
+  <td>1380 vertices, 1944 indices</td>
+</tr>
+<tr>
+  <td>Second leaf mesh</td>
+  <td>36 vertices, 144 indices</td>
+  <td>72 vertices, 144 indices</td>
+</tr>
+</tbody>
+</table>
+<p>The unchanged index counts with greater vertex counts are consistent with tangent/normal/UV seam splitting rather than new triangles. In a tested modded-game conversion, swapping only the shader name while keeping the old material/geometry contract produced <strong>black leaves</strong>; restoring a coherent legacy contract removed the symptom. That test does not establish the full native BRDF rebake for every asset.</p>
+<p>EDF6 native counterparts can have genuinely <strong>re-authored packed textures</strong>. No universal source-mask → FPR channel shuffle is supported by these comparisons. See <a href="materials-%26-shaders-native-structural-profile-reference-blender-addon.html">native MDB material profiles</a> and <a href="textures-dds-packed-channels-fpr-and-runtime-binding-contracts.html">packed R/M/FPR semantics</a>.</p>
+<h2 id="162-material-r5-abi-census-why-a-shader-only-change-is-detectable">162-material R5 ABI census: why a shader-only change is detectable</h2>
+<p>A separate source/target material audit of the studied DESERT508 R5 RAB inspected <strong>162 material records</strong> against the native EDF6 HEIGEN507 and NW_EUROPE01 shader signature corpus. All 162 shader names were represented in that corpus, but exactly <strong>one</strong> material had a previously unseen parameter/sampler ABI for its selected shader: leaf material 1 of <code>sk_ptree007_11m_shuro.mdb</code>. It was also the <strong>only shader-name change</strong> from the EDF5 source. This is an independently bounded structural anomaly; it does not imply all shader/material mismatches necessarily crash.</p>
+<p>The original EDF5 palm asset is byte-identical between DESERT508 and HEIGEN507 (decompressed MDB <strong>53,806 bytes</strong>, SHA-256 <code>b9bc10fcca56383701e0b1fe325f0adeb8667e061be1c1bf9b6f5bc7522b2caa</code>). Its legacy <code>snd_Map_Simple_Clip</code> leaf material declares <code>diffuse</code>, <code>specular_pow</code>, <code>specular_color</code>, <code>light_smooth</code>, <code>alpha_clip</code>, and an <strong>albedo-only</strong> sampler. By contrast, the only sampled native <code>snd_BRDF_Map_Simple_Clip</code> material declares <code>diffuse</code>, <code>specular_color</code>, <code>specular_diffuse_blend</code>, <code>metallic</code>, <code>roughness</code> and an albedo sampler. Replacing just the shader string therefore creates an unobserved hybrid ABI.</p>
+<p>Across the 38 paired legacy <code>snd_Map_Simple_Clip</code> source materials: <strong>HEIGEN507's 30</strong> mapped to 17 Common, 12 Common_Clip and 1 LOD material, while <strong>NW_EUROPE01's 8</strong> mapped to 3 Common, 1 Common_Clip, 1 Simple_Clip and 3 different Build-family shaders. The exact palm's <em>native</em> target requires <code>Common_Clip</code>, extra texture maps, tangent/binormal data and vertex splitting; keeping the source's coherent legacy Simple_Clip material avoids the invalid hybrid in the bounded compatibility path. A full native-style rebake is a different operation, not accomplished by merely renaming a shader.</p>
+<p>This exact <strong>162/162 inspected, 1 anomalous</strong> material result is an offline structural finding; the reported black-leaf observation belongs to a modified-game test. Primary source: <code>/EDF5_EDF6_RESEARCH/research/knowledge/RAB_MDB_SIMPLE_CLIP_ROOT_CAUSE_2026-08-23.md</code>. Do not generalize the native profile sample to every shipped EDF5/EDF6 foliage asset.</p>
+<h2 id="scope-and-limits">Scope and limits</h2>
+<p>These findings describe bounded paired assets and compatibility tests. They do not prescribe the implementation of any third-party model editor. Unknown shader families and opaque declarations need separate source evidence rather than forced normalization.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13.zip::EDF6_BLENDER_MDB_ADDON_MINIWIKI_2026-11-13/06_EDF5_TO_EDF6_MODEL_CONVERSION.md</li><li>/EDF5_EDF6_RESEARCH/research/knowledge/RAB_MDB_SIMPLE_CLIP_ROOT_CAUSE_2026-08-23.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#paired-corpus-measurements">Paired-corpus measurements</a><a href="#mdb-vertex-declaration-formats">MDB vertex declaration formats</a><a href="#tangent-space-and-precision-changes">Tangent space and precision changes</a><a href="#bone-object-name-and-entry-offset-identity">Bone, object name and entry-offset identity</a><a href="#shader-and-material-migration-is-not-a-rename">Shader and material migration is not a rename</a><a href="#162-material-r5-abi-census-why-a-shader-only-change-is-detectable">162-material R5 ABI census: why a shader-only change is detectable</a><a href="#scope-and-limits">Scope and limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"models-&-mdb-edf5-edf6-mdb-migration-findings-relevant-to-a-blender-importer-exporter-blender-addon"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Weapon Upgrades (Stars) EDF 5 introduced a weapon upgrade/star system that the research memo reports as retained in EDF 6. Individual weapon statistics can leve"><title>Weapon Upgrades (Stars) | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Weapon Upgrades (Stars)</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Documentation</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span></div><div class="referencebadge">Technical reference · Community-provided Japanese memo; source-specific and not independently rerun</div><div id="articleBody"><p>EDF 5 introduced a weapon upgrade/star system that the research memo reports as retained in EDF 6. Individual weapon statistics can level independently. <strong>A weapon's stars are data in three places</strong>, not merely a label in its description.</p>
+<h2 id="sgo-upgrade-record-seven-numeric-fields">SGO upgrade record: seven numeric fields</h2>
+<p>A star-upgradeable field is represented by a <code>ptr</code> whose payload is a <strong>seven-number record</strong>.</p>
+<table>
+<thead>
+<tr>
+  <th>Index</th>
+  <th>Meaning</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0</td>
+  <td>Base statistic</td>
+  <td>The contributor identifies this as the value at <strong>star level 5</strong>, <em>not necessarily at maximum stars</em></td>
+</tr>
+<tr>
+  <td>1</td>
+  <td>Stat type</td>
+  <td>Correlates with kind/direction of progression; numeric enum is not exhaustively decoded</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>Save/stat position index</td>
+  <td>Must agree between weapon SGO, WEAPONTABLE, and WEAPONTEXT</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td>Maximum star level</td>
+  <td>Each statistic can have a different cap</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>Coefficient 1 (<code>a</code>)</td>
+  <td>Controls deviation from the base value</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>Coefficient 2 (<code>p</code>)</td>
+  <td>Exponent controlling progression curve</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>Display precision mode</td>
+  <td><code>0</code> integer/truncate; <code>1</code> one decimal and rounding, <strong>as reported for display formatting</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong> <code>AWEAPON001</code> / Minion Buster uses separate records for <code>AmmoCount</code>, <code>AmmoDamage</code>, <code>FireAccuracy</code>, reload, range, velocity and firing rate. <code>WEAPONTABLE</code> stores the maximum stars in the matching <strong>position order</strong>. <code>WEAPONTEXT</code> uses placeholders such as <code>$0</code> with an accompanying data record.</p>
+<h2 id="progression-formulas-documented-in-the-workbook">Progression formulas documented in the workbook</h2>
+<p>Let <code>B</code> be the base value, <code>L</code> the actual star level, <code>a</code> coefficient 1 and <code>p</code> coefficient 2. The memo uses <strong>5 as the normalization level</strong>:</p>
+<p><strong>Increasing statistic:</strong></p>
+<p><code>V_inc(L) = B * (a * (L/5)^p - a + 1)</code></p>
+<p>[ V(L)=B\left[a\left(\frac{L}{5}\right)^p-a+1\right] ]</p>
+<p><strong>Decreasing statistic</strong> (reload time is an example):</p>
+<p><code>V_dec(L) = B * ((1+a) - a * (L/5)^p)</code></p>
+<p>[ V(L)=B\left[(1+a)-a\left(\frac{L}{5}\right)^p\right] ]</p>
+<p>At <code>L=5</code> both formulas produce <code>B</code>. For example with <code>B=100</code>, <code>a=0.8</code>, <code>p=1.5</code>, the increasing curve starts at <strong>20</strong> for star 0 and gives <strong>100</strong> at star 5, while the decreasing curve starts at <strong>180</strong> for star 0 and reaches <strong>100</strong> at star 5.</p>
+<p><strong>Important:</strong> The workbook spreadsheet deliberately evaluates levels up to 10 and yields <strong>negative values for the decreasing curve at levels 9–10 with these example coefficients</strong>. This is a mathematical consequence of the formula, <strong>not proof that EDF allows a negative in-game reload time</strong>. Validate caps and coefficients before editing.</p>
+<h2 id="editing-checklist">Editing checklist</h2>
+<ol>
+<li>Choose the actual field and its <code>type</code>/position mapping; do not reorder records casually.</li>
+<li>Keep the same stat-index correspondence in <strong>weapon SGO, WEAPONTABLE and WEAPONTEXT</strong>.</li>
+<li>Preserve maximum stars and display formatting in each of the three locations.</li>
+<li>Validate increasing or decreasing direction using the game's target field, not just the enum guess.</li>
+<li>Avoid extrapolating beyond the configured maximum star level.</li>
+<li>Test a newly obtained item and an existing saved item; a static SGO round-trip cannot establish save compatibility.</li>
+</ol>
+<p><strong>Source:</strong> <code>星システム!B1:K38</code>, <code>星システム!B42:L69</code>, <code>星システム!B69:L235</code> and <code>星システム!B242:E278</code> in <code>mod製作メモ.xlsx</code>. Formulas and sample values are reproduced as <strong>reported by that source</strong>; no new EDF6 runtime verification was performed.</p>
+<h2 id="native-gameplay-rounding-differs-from-stat-display-formatting">Native gameplay rounding differs from stat display formatting</h2>
+<p>The seventh element in the workbook's seven-number record is described as a <strong>display precision/formatting</strong> field. Separate EDF6 binary research identifies the gameplay <strong>integer field quantization</strong> after the common evaluator at <code>EDF+0xD7CE0</code>: nearest integer, half away from zero, rather than generic truncation. That behavior applies to examined integer consumers such as AmmoCount, ReloadTime, FireCount and FireInterval. <strong>Do not infer the engine's gameplay rounding from the workbook's display-text precision flag.</strong> See <a href="edf6-weapon-star-dependent-fire-synchronization-complete-switcher-list.html">full star-dependent network fire-policy census</a> and <a href="engine-re-%26-networking-shipped-weapon-sync-policy-and-star-envelope.html">shipped weapon synchronization</a> for the test scope.</p>
+<h2 id="related-game-mechanics-native-source-references">Related game mechanics (native-source references)</h2>
+<ul>
+<li><a href="edf5-weapon-stat-star-curves-and-hq-aggregate-labels.html">EDF5 star curves and HQ averaging</a></li>
+<li><a href="edf6-weapon-ownership-flags-starting-dlc-result-and-sorting.html">EDF6 ownership, NEW and UPGRADED bits</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Community Japanese workbook: `mod製作メモ.xlsx` (supplied 2026-11-15; publication rights to be confirmed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#sgo-upgrade-record-seven-numeric-fields">SGO upgrade record: seven numeric fields</a><a href="#progression-formulas-documented-in-the-workbook">Progression formulas documented in the workbook</a><a href="#editing-checklist">Editing checklist</a><a href="#native-gameplay-rounding-differs-from-stat-display-formatting">Native gameplay rounding differs from stat display formatting</a><a href="#related-game-mechanics-native-source-references">Related game mechanics (native-source references)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-weapon-upgrades"};</script><script src="../assets/site.js" defer></script></body></html>

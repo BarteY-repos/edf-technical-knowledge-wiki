@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Shader pipeline: observed compatibility and unresolved behaviour EDF6 shader pipeline: what the source guide and native shader evidence establish Evidence label"><title>EDF6 rendering pipeline: observed shader equations, buffers and unresolved paths | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>EDF6 rendering pipeline: observed shader equations, buffers and unresolved paths</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><h1>EDF6 shader pipeline: what the source guide and native shader evidence establish</h1>
+<h2 id="evidence-labels">Evidence labels</h2>
+<ul>
+<li><code>EXACT_R18</code>: hash-pinned static DXBC / reflected contract from R18.</li>
+<li><code>FIELD_TRANSLATION</code>: a source-informed Godot preview translation, <strong>not a native GPU texture-layout or compositor proof</strong>.</li>
+<li><code>SOURCE_GUIDE</code>: supplied third-party guide; useful but not independently re-proven here.</li>
+<li><code>RECONCILED</code>: guide and retained exact evidence agree in the relevant scope.</li>
+<li><code>CONFLICT_HOLD</code>: guide is more general or contradicts exact family evidence; retain exact evidence.</li>
+<li><code>UNRESOLVED</code>: insufficient evidence for a production rule.</li>
+</ul>
+<h2 id="1-pipeline-structure">1. Pipeline structure</h2>
+<p>The contributed guide describes an EDF6-style deferred logical pipeline with material drawing producing:</p>
+<ul>
+<li><code>albedoRGB</code></li>
+<li><code>specularRGB</code></li>
+<li><code>normalXYZ</code></li>
+<li><code>metallic_roughness</code></li>
+<li><code>viewXYZ_id</code></li>
+<li><code>light_accumulate</code></li>
+<li><code>specular_accumulate</code></li>
+<li><code>z_buffer</code></li>
+</ul>
+<p>followed by scene compositing, fog/distance handling, exposure and two-scale bloom/tonemapping.</p>
+<p>This directly addresses the largest R18 gap: R18 had family-specific shader structure/output evidence but deliberately stopped before claiming actual final-frame renderer parity.</p>
+<p>Status: <code>SOURCE_GUIDE + CONSISTENT_WITH_R18_ARCHITECTURE</code>.</p>
+<p>Note: the guide text says &quot;7 things&quot; but lists eight. Treat the list, not the count, as the semantic statement.</p>
+<h2 id="2-albedo-and-color-masks">2. Albedo and color masks</h2>
+<p>Guide:</p>
+<ul>
+<li>base <code>albedo.rgb * diffuse</code>;</li>
+<li>optional <code>param_cm0_cm1.r/g</code> sequential blend between <code>diffuse</code>, <code>change_color0</code>, <code>change_color1</code>;</li>
+<li>alpha cutout via <code>albedo.a &lt; alpha_clip</code>;</li>
+<li>emissive masks remove the emissive fraction from ordinary albedo contribution.</li>
+</ul>
+<p>R18:</p>
+<ul>
+<li>Common_Clip has two independently proven static alpha predicates matching <code>discard if sampled_albedo_alpha &lt; alpha_clip</code>.</li>
+</ul>
+<p>Decision:</p>
+<ul>
+<li>promote the cutout comparison to <code>RECONCILED</code> for known Common_Clip paths;</li>
+<li>keep color-mask/change-color equations as <code>SOURCE_GUIDE</code> until cross-checked against the exact relevant family program(s).</li>
+</ul>
+<h2 id="3-normal-decoding">3. Normal decoding</h2>
+<p>Guide generic/common-style decode:</p>
+<p><code>x = 2*R*A - 1</code></p>
+<p><code>y = 2*G - 1</code></p>
+<p><code>z = sqrt(max(1e-5, 1-x^2-y^2))</code></p>
+<p>then XY are scaled by <code>normal_amount</code>, transformed through normalized T/B/N basis vectors, and final normal magnitude is multiplied by occlusion.</p>
+<p>R18 Water R12 HF1 independently proved the same R/A and G source-channel reconstruction for the three Water normal maps. This strongly corroborates the generic decode family.</p>
+<p>A later <strong>source-informed FieldRender preview translation</strong> uses a different path (not independently established as the native final-frame shader):</p>
+<p><code>x = 2*(R*B - 0.5)</code></p>
+<p><code>y = -2*(G - 0.5)</code></p>
+<p><code>z = sqrt(max(1e-5, 1-x^2-y^2))</code></p>
+<p>Decision:</p>
+<ul>
+<li><code>RECONCILED</code> for the common/Water-style RA/G decode;</li>
+<li><code>FIELD_TRANSLATION</code> FieldRender differs in the preview implementation; do not promote it to an exact native shader claim;</li>
+<li>never globalize the generic normal decoder across terrain.</li>
+</ul>
+<p>This is compatible with the guide's warning that terrain is an exception, but it is not independent native compositor evidence.</p>
+<h2 id="4-metallic-roughness-packing">4. Metallic / roughness packing</h2>
+<p>Guide:</p>
+<ul>
+<li>logical output R = metallic;</li>
+<li>logical output G = roughness;</li>
+<li>typical packed param texture: metallic = sample.G * material <code>metallic</code>;</li>
+<li>typical roughness = sample.R * material <code>roughness</code>;</li>
+<li><code>_hr</code> roughness = sample.R * sample.A * material <code>roughness</code>;</li>
+<li>compositor saturates metallic/roughness for normal use.</li>
+</ul>
+<p>Decision: <code>SOURCE_GUIDE</code>, suitable for implementation behind per-family contracts. Do not infer this for unknown legacy shaders only from parameter names.</p>
+<p>FieldRender remains special: retained FieldRender implementation contract uses fixed <code>metallic=0</code>, <code>roughness=0.980133056640625</code>, <code>specular=0</code> for the Godot translation of the closed Field material outputs.</p>
+<p><strong>FieldRender-specific G-buffer addendum (external source, 17 November 2026):</strong> the newly supplied ground-shader interpretation reports <code>specularRGB = float4(0,0,0,1)</code>; a weighted normal transformed through rows of <code>g_world_matrix</code> with <code>normalXYZ.w = 1</code>; and no writes by this terrain path to <code>light_accumulate</code> or <code>specular_accumulate</code>. These exact output/write claims remain <strong>EXTERNAL_UNVERIFIED</strong> until a pinned native shader permutation and MRT/write-mask captures are examined. An omitted write does <strong>not</strong> define a target's contents or the final frame's lighting. The reported roughness ≈<code>0.980133</code> agrees with the existing translation but is distinct from the <strong>DXBC-derived <code>0.98000002</code></strong> tangent-basis adjustment. The exact native Field normal decode (<code>R×B</code>, inverted <code>G</code>) and <strong>Mode 2</strong> were already established by the September R4 DXBC comparison; they are not new claims from this note. See the <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender G-buffer claim matrix</a>.</p>
+<h2 id="5-specularrgb">5. specularRGB</h2>
+<p>Guide:</p>
+<p><code>blend = metallic * specular_diffuse_blend</code></p>
+<p><code>specularRGB = lerp(specular_color, pre_emission_albedo * specular_color, blend)</code></p>
+<p>Decision: <code>SOURCE_GUIDE</code>. It is a strong candidate for Common/BRDF-family material semantics but should not be synthesized for unknown/legacy families without shader evidence.</p>
+<h2 id="6-common-light-emission-important-conflict-boundary">6. Common_Light / emission: important conflict boundary</h2>
+<p>Guide general statement:</p>
+<p><code>specular_accumulate = pre_emission_color * light_color * emission</code></p>
+<p>with packed light mask channel inferred from the packed texture family.</p>
+<p>R18 exact Common_Light proof:</p>
+<p><code>SV_TARGET6.rgb = sampled(param_r_m_light_hr).b * light_color.rgb</code></p>
+<p>for the pinned main Common_Light pixel shader window. R18 did <strong>not</strong> prove an albedo/color multiply in that target write.</p>
+<p>Decision: <code>CONFLICT_HOLD</code>.</p>
+<p>Implementation rule:</p>
+<ul>
+<li>for the known R18 Common_Light path, preserve the exact R18 output arithmetic;</li>
+<li>do not insert a base-color multiply into that MRT solely because the general guide says so;</li>
+<li>the compositor may later combine that accumulation with material color through another lane/pass, but that must be established rather than assumed.</li>
+</ul>
+<p>This is exactly the kind of place where the guide is useful semantically but cannot override hash-pinned program evidence.</p>
+<h2 id="7-viewxyz-id-and-normal-magnitude">7. viewXYZ_id and normal magnitude</h2>
+<p>Guide:</p>
+<ul>
+<li>RGB = view-space position;</li>
+<li>A = floating object/system ID;</li>
+<li>compositor reconstructs world position using inverse view;</li>
+<li><code>length(normalXYZ)</code> is semantically relevant and contributes to lighting;</li>
+<li>near-zero normal length takes a simplified path.</li>
+</ul>
+<p>This is consistent with prior R18/Field findings that system/view-position data is not an ordinary Godot material property.</p>
+<p>Decision: <code>SOURCE_GUIDE</code>, architecturally compatible with retained exact output structure.</p>
+<h2 id="8-direct-lighting-brdf-compositor">8. Direct lighting / BRDF compositor</h2>
+<p>Guide provides a GGX-like distribution/geometry and Schlick-like Fresnel path, including:</p>
+<p><code>F0 = specularRGB * (0.04 + 0.96 * metallic)</code></p>
+<p>and the unusual diffuse split:</p>
+<p><code>light_accumulate + pointDiffuse + (1-metallic)*normalLength*(ambient+directionalDiffuse)</code>.</p>
+<p>This is important because a stock Godot PBR material cannot be assumed to reproduce the same routing: point diffuse and <code>light_accumulate</code> are not suppressed by the same metallic factor as ambient/directional diffuse.</p>
+<p>Decision: <code>SOURCE_GUIDE</code> and implementation-worthy in a dedicated EDF6 native-preview compositor, not as a claim about Godot StandardMaterial3D equivalence.</p>
+<h2 id="9-environment-reflection">9. Environment reflection</h2>
+<p>Guide gives the roughness-&gt;mip expression:</p>
+<p><code>mipFactor = max(0, 1-(1-roughness)^2)</code></p>
+<p>R18 Water R9/R10 independently recovered the same environment mip-factor shape from the pinned Water shader, which is strong corroboration.</p>
+<p>The guide writes <code>reflect(1, N)</code>. Do <strong>not</strong> encode that literal expression as authority. R18 Water R10 has a pinned reflection vector equivalent to the conventional normalized reflection of the incident/eye vector around the surface normal.</p>
+<p>Decision:</p>
+<ul>
+<li>roughness/mip shape: <code>RECONCILED</code>;</li>
+<li>reflection input vector: use family-specific exact evidence where available; generic guide literal is <code>UNRESOLVED/TYPO_SUSPECTED</code>.</li>
+</ul>
+<h2 id="10-fog-ordering">10. Fog ordering</h2>
+<p>Guide order:</p>
+<ol>
+<li>brightness fog computes a lower RGB bound via componentwise <code>max</code>;</li>
+<li>ordinary colored fog then lerps toward fog color;</li>
+<li>distance fading follows.</li>
+</ol>
+<p>R18 Water had exact static terminal dependencies on EDF6 brightness-fog/fog parameters, but not complete scene-wide final compositing.</p>
+<p>Decision: use guide ordering in the new preview compositor as <code>SOURCE_GUIDE</code>, while retaining R18 parameter/dependency facts.</p>
+<h2 id="11-tonemapping-and-bloom">11. Tonemapping and bloom</h2>
+<p>The guide supplies a practical pipeline:</p>
+<ul>
+<li>repeated 2x2 downsample to 1/8;</li>
+<li>high-pass + 15-tap (-7..+7) Gaussian blur for B1;</li>
+<li>further 4x4 downsample and second high-pass/blur for B2;</li>
+<li>central crop brightness estimate;</li>
+<li>vector-length cap;</li>
+<li>reduction to 1x1;</li>
+<li>temporal exposure update;</li>
+<li>final <code>T*C + b1*B1 + b2*B2</code>, then clamp to UNORM.</li>
+</ul>
+<p>This is new relative to R18. Treat it as <code>SOURCE_GUIDE</code>, not exact until shader/runtime evidence closes kernel weights, bindings/formats, timing and profile source values.</p>
+<p>The guide does not provide exact Gaussian weights. Do not invent &quot;native&quot; weights. The implementation contract therefore exposes the kernel as a configurable input and labels any default preview kernel as approximation.</p>
+<h2 id="12-legacy-specular-pow-non-brdf-shaders">12. Legacy <code>specular_pow</code> / non-BRDF shaders</h2>
+<p>No answer is promoted for <code>SND_CHARA_BASIC</code> or other old/non-BRDF families.</p>
+<p>Existing project evidence already shows that legacy ABI can coexist in EDF6 and that blindly renaming a legacy shader to a BRDF family can create an invalid shader/material ABI. Therefore:</p>
+<ul>
+<li>absence of <code>BRDF</code> in a name is not enough to classify the compositor path;</li>
+<li>presence of <code>specular_pow</code> is not enough to translate to metallic/roughness;</li>
+<li>keep legacy families on a separate research lane until their actual output targets and downstream compositor usage are proven.</li>
+</ul>
+<p>See <code>LEGACY_SHADER_LANE.md</code>.</p>
+<h2 id="native-dxbc-oracle-census-and-the-five-bounded-rendering-families">Native DXBC oracle census and the five bounded rendering families</h2>
+<p>An archived exact-shader reconciliation reports <strong>485 native <code>DX11.cpk</code> entries and 3,449 DXBC programs</strong> in its EDF6 shader oracle. These are two different count units: <em>archive entries</em> and <em>compiled shader programs</em>. Neither count alone measures distinct material families, nor does it prove that every program was observed in a frame. The counts are <strong>retained reconciliation evidence</strong>, not a new byte-level recount of the complete CPK in this wiki release.</p>
+<p>The retained isolated analysis covers five practical family groups. The following matrix deliberately separates the kind of contract observed from the still missing frame-level proof:</p>
+<table>
+<thead>
+<tr>
+  <th>Family group</th>
+  <th>Established or bounded static observation</th>
+  <th>Do not infer without a frame capture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>Common</code></td>
+  <td>Ordinary MDB material and reflected shader/parameter routes; per-material ordered ABI is separately observed</td>
+  <td>Universal metallic/roughness mapping, final scene lighting or every historical Common variant</td>
+</tr>
+<tr>
+  <td><code>Common_Clip</code></td>
+  <td>Exact sampled-albedo-alpha cutout predicates in <strong>two</strong> pinned pixel-shader paths; map-model cutout MDB profiles have their own texture and parameter order</td>
+  <td>Transparency blending, depth write policy or universal <code>alpha_clip</code> value from the presence of <code>Clip</code> alone</td>
+</tr>
+<tr>
+  <td><code>Common_Light</code></td>
+  <td>On one pinned pixel shader, <code>SV_TARGET6.rgb = sample(param_r_m_light_hr).b * light_color.rgb</code></td>
+  <td>An additional albedo multiplier in that same target write, the compositor's later mixing order or identical routing for other light profiles</td>
+</tr>
+<tr>
+  <td><code>Water</code></td>
+  <td>Three normal samplers with R/A–G normal-channel reconstruction, plus a recovered roughness-dependent reflection mip-factor shape</td>
+  <td>Correct in-game scroll, depth/refraction, bubble behavior, underwater/wet gameplay or blending for a newly authored asset</td>
+</tr>
+<tr>
+  <td><code>FieldRender</code></td>
+  <td>A distinct FMEP/FMB terrain/resource path and bounded terrain shader/configuration evidence</td>
+  <td>Treating a Godot preview's local RGBA slot packing or reconstructed normal expression as the native EDF6 GPU ABI</td>
+</tr>
+</tbody>
+</table>
+<p>This static catalog is valuable for locating candidate programs and validating shader resource/constant-buffer contracts, but it is <strong>not an exhaustive list of runtime draw permutations</strong>. The last necessary verification chain for a specific scene is:</p>
+<ol>
+<li>Identify the exact game build and material/MDB or FMEP/FMB resource.</li>
+<li>Resolve the <strong>actual bound shader bytecode</strong> and resource-view identities at the draw.</li>
+<li>Read SRV and sampler slots, raw constants, vertex declarations and render-state/depth settings.</li>
+<li>Record the bound render targets, blend state, write masks and the pixel-shader outputs.</li>
+<li>Follow the downstream compositor pass and compare final pixels with the native game under controlled inputs.</li>
+</ol>
+<p>A failed visual comparison should be classified against the relevant step. An ABI-correct material that draws too shiny can have an R/M/O-versus-reflect/spec binding mismatch even when all files load; a correct terrain preview can still be wrong in the final compositor. Neither failure authorizes global shader-name remapping.</p>
+<p><strong>Evidence boundary:</strong> The reported five-group static R18 analysis passed its offline qualification (<strong>483/483</strong> checks). This does <strong>not</strong> mean 483 in-game rendering captures or a completed renderer parity test. No new EDF6 shader-runtime captures were produced for this page. Source authority: 25 October Shader Fidelity reconciliation, plus the separately retained native MDB and Island4 RenderDoc reports.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF6_SHADER_PIPELINE_GODOT_INTEGRATION_R1_2026-11-13.zip::EDF6_SHADER_PIPELINE_GODOT_INTEGRATION_R1_2026-11-13/Docs/RECONCILIATION.md</li><li>/EDF5_EDF6_RESEARCH/research/active/A2Z/SHADER_FIDELITY_MERGE_RECONCILIATION_2026-10-25.md</li><li>Library: /EDF_FULL_KNOWLEDGE_WIKI/incoming/EDF6_FieldRender_Ground_Shader_2026-11-17_WIKI_INTAKE.md</li><li>Library: EDF6 R4/R6 FieldRender exact checkpoints (2026-09-17)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#evidence-labels">Evidence labels</a><a href="#1-pipeline-structure">1. Pipeline structure</a><a href="#2-albedo-and-color-masks">2. Albedo and color masks</a><a href="#3-normal-decoding">3. Normal decoding</a><a href="#4-metallic-roughness-packing">4. Metallic / roughness packing</a><a href="#5-specularrgb">5. specularRGB</a><a href="#6-common-light-emission-important-conflict-boundary">6. Common_Light / emission: important conflict boundary</a><a href="#7-viewxyz-id-and-normal-magnitude">7. viewXYZ_id and normal magnitude</a><a href="#8-direct-lighting-brdf-compositor">8. Direct lighting / BRDF compositor</a><a href="#9-environment-reflection">9. Environment reflection</a><a href="#10-fog-ordering">10. Fog ordering</a><a href="#11-tonemapping-and-bloom">11. Tonemapping and bloom</a><a href="#12-legacy-specular-pow-non-brdf-shaders">12. Legacy specular_pow / non-BRDF shaders</a><a href="#native-dxbc-oracle-census-and-the-five-bounded-rendering-families">Native DXBC oracle census and the five bounded rendering families</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-reconciliation-edf6-shader-pipeline"};</script><script src="../assets/site.js" defer></script></body></html>

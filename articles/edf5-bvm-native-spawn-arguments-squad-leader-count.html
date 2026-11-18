@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A count in a squad call usually counts followers, not leaders Several observed EDF5 custom-call layouts differ from names inferred from older disassemblers. Thi"><title>EDF5 BVM enemy spawns: group, squad, transport and drop-boat call layouts | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Missions / spawning</div><h1>EDF5 BVM enemy spawns: group, squad, transport and drop-boat call layouts</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Missions / spawning</span></div><div class="referencebadge">Technical reference · EDF5 source static analysis; no new runtime qualification</div><div id="articleBody"><p>Several observed EDF5 custom-call layouts differ from names inferred from older disassemblers. This is important for reading enemy numbers: the <strong>leader SGO</strong>, <strong>follower SGO</strong>, <strong>count</strong>, <strong>active flag</strong>, <strong>spawn point</strong> and <strong>HP scalar</strong> occupy distinct argument positions.</p>
+<table>
+<thead>
+<tr>
+  <th>Call</th>
+  <th>Native source meaning (ordered arguments)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>2009</code></td>
+  <td>Area ground enemy group: shape, SGO, count, HP scale, active, extra float (6)</td>
+</tr>
+<tr>
+  <td><code>2011</code></td>
+  <td>Enemy at spawn: spawn point, SGO, HP scale, active, extra float (5)</td>
+</tr>
+<tr>
+  <td><code>1022</code> / <code>1023</code></td>
+  <td>Transporter: spawn point, drop route, carrier SGO, string, cargo vehicle SGO, float (6)</td>
+</tr>
+<tr>
+  <td><code>1013</code></td>
+  <td>Friendly squad: ID, spawn point, radius, semicolon-joined follower SGOs, count, HP scale</td>
+</tr>
+<tr>
+  <td><code>2020</code> / <code>2021</code></td>
+  <td>Start with object ID, then spawn point, radius, SGO, count, HP scale</td>
+</tr>
+<tr>
+  <td><code>2030</code></td>
+  <td>Enemy squad: spawn point, radius, leader SGO, leader HP, follower SGO, follower count, follower HP, active</td>
+</tr>
+<tr>
+  <td><code>2200</code></td>
+  <td>Drop-boat crew: drop-boat object ID, leader SGO, leader HP, follower SGO, follower count, follower HP, active</td>
+</tr>
+</tbody>
+</table>
+<p><code>2200</code> uses the boat as its first argument and the leader's <strong>SGO as its second</strong>. For example DLC mission <code>DM003</code> uses one <code>e503_armorfrog_sg_leader</code> and <strong>three <code>e503_armorfrog_af</code> followers</strong>. The first SGO does not become a spawn point. Similarly <code>M044</code>'s <code>2030</code> creates <strong>one <code>e506_biggrey_sg_leader</code> and three <code>e506_biggrey_af</code></strong>. Mistaking the follower count for a leader count would triple the leader population in that example.</p>
+<p>A repeated generator's <code>amount</code> has still different semantics: it can cap live instances in a wave rather than count the total enemies created over the entire mission. <a href="edf5-bvm-setgenerator-20100-message-owners-waves.html">Native generator mechanics</a> documents that boundary.</p>
+<p><strong>Evidence:</strong> EDF5 BVM argument/corpus interpretation <code>bvm-spawn-call-layouts-2</code>, <code>bvm-call-2200-dropboat-squad</code>, <code>bvm-squad-leader-once</code>, <code>bvm-generator-calls-2100-2101</code>. Source static; runtime spawn scheduling also depends on event conditions.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14, edf5/mission-vm.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-bvm-native-spawn-arguments-squad-leader-count"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Archived cross-topic research index This page preserves the pre-documentation research summary as archival detail. Start at EDF Modding Documentation for subjec"><title>Archived cross-topic research index | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-troubleshooting.html">Troubleshooting</a></div><h1>Archived cross-topic research index</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Start / Quick Reference</span><span class="chip">Troubleshooting</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Curated research overview</div><div id="articleBody"><p>This page preserves the pre-documentation research summary as archival detail. Start at <a href="../index.html">EDF Modding Documentation</a> for subject-oriented reference pages.</p>
+<h2 id="edf6-team-relations-and-safe-per-actor-online-control">EDF6 team relations and safe per-actor online control</h2>
+<p><a href="engine-re-%26-networking-edf6-native-team-manager-relation-matrix-and-reset.html">The native TeamManager and relation matrix</a> explains the seven stock team roles and why a 16-team PvP overlay is a custom exact-build patch, not native support. <a href="engine-re-%26-networking-edf6-controlled-pvp-object-tree-restoration-and-spawn-ownership.html">Controlled actor tree, emitters and restoration</a> explains why changing an actor's team requires tracing real weapon emitters, recording exact baselines and adopting newborn children before publication.</p>
+<h2 id="edf4-1-mission-execution-and-damage-paths">EDF4.1 mission execution and damage paths</h2>
+<p><a href="missions-%26-scripting-edf41-bvm-3025-multiply-current-hp-native-call-abi.html">Command 3025 / current health</a> documents the percentage operation and its native AngelScript registration boundary. <a href="missions-%26-scripting-edf41-before-bvm-black-screen-ui-order.html">BEFORE.BVM and the black UI fade</a> explains why audio and subtitles can run under the old menu screen. <a href="maps-%26-navigation-edf6-area-damage-hit-layer-versus-direct-bullet.html">Area-damage hit layers</a> explains why direct bullets can damage a panel but explosions do not reach its collision bodies.</p>
+<h2 id="edf4-1-composite-bosses-and-animation-lifecycle">EDF4.1 composite bosses and animation lifecycle</h2>
+<p><a href="cross-game-conversion-edf41-ufomother301-part-state-generators-and-damage.html">UfoMother301 and its part state machine</a> explains generators, open hatches, weak-point damage and staged death. <a href="cross-game-conversion-edf41-ufomother401-earth-eater-panel-grid-online.html">Earth Eater / UfoMother401</a> explains the 19×19 hex panel grid, part identity and online attack ownership. <a href="animation-edf41-boss-constructor-cas-rest-pose-vs-target-auto-play.html">CAS constructor rest poses</a> shows why a new class may auto-play an animation that EDF4.1 expected to start later. <a href="cross-game-conversion-edf41-dragon-knockdown-ragdoll-wake-gate.html">Dragon knockdown wake conditions</a> covers settling thresholds and the target-native 60-second cap.</p>
+<h2 id="edf4-1-enemies-native-class-compatibility-beyond-geometry">EDF4.1 enemies — native class compatibility beyond geometry</h2>
+<p><a href="cross-game-conversion-edf41-queen-bee-nephila-needle-and-thread-spread.html">Queen Bee and Nephila projectiles</a> compares level-dependent needle speed and named-versus-positional web scatter. <a href="cross-game-conversion-edf41-deiroi-airborne-landing-null-havok-world.html">Airborne Deiroi landing</a> traces a null-world Havok raycast reached by source mission spawning. <a href="cross-game-conversion-edf41-four-legged-fortress-action-generator-and-gait.html">The four-legged fortress contract</a> explains the start state, core generator and incompatible <code>ObjectAction</code> opcodes. <a href="cross-game-conversion-edf41-uforobo-attack-leg-timers-and-death-state.html">UfoRobo AI and death states</a> explains how an incorrectly advanced attack timer prevents walking and why death must remain terminal on remote copies.</p>
+<h1>EDF 4.1–6 — Research findings, explained</h1>
+<h2 id="edf4-1-terrain-vegetation-and-actor-behaviour-newly-reconciled">EDF4.1 terrain, vegetation and actor behaviour — newly reconciled</h2>
+<p><a href="maps-%26-navigation-edf41-sk-heightfield-shfb-to-edf6-fmb-mad.html">SK heightfield terrain conversion</a> explains the source <code>.shfb</code> samples, field layers, FMB meshing, MAD collision and the 9753-mesh shader-table index correction. <a href="maps-%26-navigation-edf41-fmex-vegetation-cable-wire-resource-links.html">Native vegetation and power-line resource wiring</a> covers FMB FMEX vegetation grids, MAPO heights, trees and the still-unresolved cause of missing EDF4.1 wire rendering. <a href="missions-%26-scripting-edf41-hector-aim-walk-backoff-and-native-animation.html">Hector actor control</a> explains how EDF4.1 range selection, retreats, gait changes and arm-bone aiming differ from the EDF6 Berserker donor class.</p>
+<h2 id="edf4-1-vehicle-classes-and-edf6-multiplayer-authority">EDF4.1 vehicle classes and EDF6 multiplayer authority</h2>
+<p><a href="cross-game-conversion-edf4-1-vehicles-v301-v408-v406-runtime-abi.html">EDF4.1 tank, sidecar and Begaruta compatibility</a> explains native runtime constraints beyond file parsing: static barrel rest tracks, per-wheel/pose data, driver IK and retained six-mount weapon layouts. <a href="engine-re-%26-networking-edf6-per-object-online-authority-and-local-copies.html">Per-object online authority</a> distinguishes the owner of a registered object from a plugin-created local copy. <a href="engine-re-%26-networking-edf6-vehicle-optics-fov-zeroing-and-aim-surfaces.html">Vehicle optics, camera FOV and ballistic range drums</a> separates studied engine camera behavior from an optional custom sight system.</p>
+<h2 id="newly-reconciled-mab-and-edf4-1-audio-actor-mechanics">Newly reconciled MAB and EDF4.1 audio/actor mechanics</h2>
+<p>The <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">MAB v15 binary guide</a> now correctly distinguishes EDF4.1/5 absolute-in-block pointer fields from EDF6's struct-relative MAB pointers and includes the validated 1,318-pair comparison. For actions or sounds triggered <em>during</em> an animation, see <a href="animation-mab-event-clock-and-audio-channel-ownership.html">MAB event timing</a>. For cue-name collisions, CRI path routing and shutdown lifetime see <a href="audio-edf4-1-se-and-voice-bank-lookup-and-lifetime.html">EDF4.1 audio bank semantics</a>. For a concrete gameplay mismatch between imported assets and an EDF6 donor class, see <a href="missions-%26-scripting-edf4-1-dragonbig401-flame-windows-and-attack-states.html">DragonBig401 flame and glide</a>.</p>
+<h2 id="animation-and-controller-reverse-engineering">Animation and controller reverse engineering</h2>
+<p>For precise CAS/CANM decoding (versions, key compression, quaternions, track IDs, static-versus-animated channels, and why some target quaternion bytes cannot be recreated from quantized source files), read <a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">the measured CAS/CANM conversion</a>. For an EDF4.1 object that crashes under an EDF6 class despite valid animation files, read <a href="animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">CAS player groups, missing vcontrols and trackless grafts</a>.</p>
+<h2 id="newer-edf4-1-edf6-reverse-engineering-notes">Newer EDF4.1 → EDF6 reverse-engineering notes</h2>
+<p>For writing map importers, <a href="maps-%26-navigation-edf41-mapo-core-relayout-vs-whole-mac-size.html">the source-to-target MAPO object-row relayout</a> explains the <code>0x58→0x60</code> header and <code>0x38→0x3C</code> object rows without confusing whole-MAC and embedded resource sizes. <a href="maps-%26-navigation-edf41-r1d-active-body-eligibility-and-oracle-diagnostics.html">Body eligibility and the 4,971-footprint oracle</a> explains why reproducing 65 groups and 1,405 placements does not complete native navigation generation.</p>
+<p>For conversion fidelity, <a href="cross-game-conversion-edf-4-1-vehicle404-target-runtime-contract.html">Vehicle402/403/404 object and weapon differences</a> now includes the later pairwise weapon SGO comparison; <a href="missions-%26-scripting-edf-4-1-m210-starship-object-action-boundary.html">M210 weak-point damage gating</a> documents why a failed rigid-body lookup must not accept arbitrary damage.</p>
+<h2 id="weapon-firing-and-underground-mission-behavior">Weapon firing and underground mission behavior</h2>
+<p>If you are tracing shots that behave differently on two machines, read <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">EDF6 weapon RNG and batched fire</a>. It distinguishes deterministic direct fire, locally reconstructed batched shots, reliable NetworkBullet updates and random projectile-class internals. For Barga/vehicle cannons, <a href="engine-re-%26-networking-vehicle-swing-shoot-dynamic-direction-mode.html">dynamic direction mode 2</a> explains the per-shot runtime override that a static SGO cannot reveal.</p>
+<p>For an underground Air Raider restriction, <a href="missions-%26-scripting-underground-mission-flags-and-weapon-condition.html">Mission flags and WeaponCondition</a> explains <code>0x20</code>, <code>0x200</code>, the difference between red equipment and disabled support, and the three runtime-positive custom-pack controls.</p>
+<h2 id="native-lod-and-havok-collision-reference">Native LOD and Havok collision reference</h2>
+<p>If you are creating a reduced-detail model, consult <a href="models-%26-mdb-edf6-lod-farmap-real-material-and-mesh-options.html">native LOD shader and mesh evidence</a>. For native Havok compressed-mesh validity, see <a href="maps-%26-navigation-havok-broadphase-tombstones-and-float32-validation.html">Havok broadphase validation</a>. For intact→debris physics schema see <a href="maps-%26-navigation-native-destructible-havok-static-dynamic-body-profiles.html">native destructible static/dynamic Havok bodies</a>; cross-module T50 collapse graph generation remains unresolved.</p>
+<h2 id="mdb-shaders-and-material-editing">MDB shaders and material editing</h2>
+<p>Wondering what metallic or roughness means for an MDB? Start with <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">the explanation of EDF6 shading inputs</a>, then <a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">How to read and write native MDB materials</a> for parameters, sampler slots, defaults, and safe editing. These articles explain recovered behavior without requiring access to our tools or conversations.</p>
+<p>This is a community-facing notebook of <strong>technical findings about Earth Defense Force 4.1, 5 and 6</strong>. It explains what our analysis of game files, binaries, rendering behavior and conversion experiments has established. It is <strong>not</strong> a complete reference for every feature in the games, and it is not a changelog of the tools used to investigate them.</p>
+<p>If you arrived with a specific question, start with the subject rather than a project name. The most useful findings are organized below; detailed case studies and parameter tables remain searchable.</p>
+<h2 id="find-an-answer-by-subject">Find an answer by subject</h2>
+<p>A few especially useful technical questions have dedicated explanations: <a href="missions-%26-scripting-bvm-bytecode-custom-calls-and-api-translation-explained.html">How BVM custom-call IDs are decoded</a>, <a href="maps-%26-navigation-havok-mad-wire-layout-primitive-indexing-and-type-alignment.html">why a Havok MAD may be physically invalid despite correct geometry</a>, and <a href="formats-%26-containers-sgo-dsgo-and-resource-schema-boundaries.html">how SGO/DSGO mission resources differ</a>.</p>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>Start here</th>
+  <th>Continue into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>How do MDB meshes and materials work?</td>
+  <td><a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB models: geometry and materials</a></td>
+  <td><a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB shader parameters</a>; <a href="materials-%26-shaders-native-structural-profile-reference-blender-addon.html">Native material profiles</a></td>
+</tr>
+<tr>
+  <td>What do metallic, roughness, packed textures and normal maps mean?</td>
+  <td><a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB shaders: parameters and equations</a></td>
+  <td><a href="textures-dds-packed-channels-fpr-and-runtime-binding-contracts.html">Textures and FPR</a>; <a href="materials-%26-shaders-legacy-shader-lane-edf6-shader-pipeline.html">Legacy shaders</a></td>
+</tr>
+<tr>
+  <td>How are maps stored, rendered and collided?</td>
+  <td><a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">Map formats and render/collision separation</a></td>
+  <td><a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender terrain texture transport</a>; <a href="maps-%26-navigation-havok-mad-shkt-collision-contracts.html">MAD/SHKT</a></td>
+</tr>
+<tr>
+  <td>What did we learn about EDF4.1 navigation and collision?</td>
+  <td><a href="maps-%26-navigation-edf41-navigation-and-collision-discoveries-explained.html">EDF4.1 navigation findings</a></td>
+  <td><a href="maps-%26-navigation-edf-4-1-navigation-native-geometry-mapo-binding-and-r1d.html">MAPO/NAV technical details</a></td>
+</tr>
+<tr>
+  <td>How are missions represented and executed?</td>
+  <td><a href="missions-%26-scripting-how-missions-events-and-rmpa-work.html">BVM, mission scripts and mission RMPA</a></td>
+  <td><a href="missions-%26-scripting-r37-event-model-current-contract.html">Event model</a>; <a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">Mission RMPA</a></td>
+</tr>
+<tr>
+  <td>How do archive containers and resource paths work?</td>
+  <td><a href="formats-%26-containers-resource-archives-and-lookup-explained.html">Archive formats and resource lookup</a></td>
+  <td><a href="formats-%26-containers-cpk-toc-crilayla-vfs-resource-catalog-freshness.html">CPK and CriLAYLA</a></td>
+</tr>
+<tr>
+  <td>How are textures packed and how do cutout mips behave?</td>
+  <td><a href="textures-edf-texture-packing-cutouts-and-fpr-explained.html">Texture packing, BC1 and FPR</a></td>
+  <td><a href="textures-dds-packed-channels-fpr-and-runtime-binding-contracts.html">DDS/FPR research</a></td>
+</tr>
+<tr>
+  <td>What changes between game generations?</td>
+  <td><a href="cross-game-conversion-edf41-edf5-edf6-generation-and-version-matrix.html">EDF generation/version matrix</a></td>
+  <td><a href="cross-game-conversion-curated-conversion-supersession-rule-ledger.html">Format-specific conversion findings</a></td>
+</tr>
+<tr>
+  <td>What is known about animations?</td>
+  <td><a href="animation-canm-cas-and-mab-formats-explained.html">CANM, CAS and MAB explained</a></td>
+  <td><a href="animation-cas-canm-cross-generation-structure-and-key-conversion.html">Detailed CANM/CAS research</a></td>
+</tr>
+<tr>
+  <td>What did we learn about network behavior?</td>
+  <td><a href="engine-re-networking-packets-ownership-and-reconnect-explained.html">Network state and reconnect explained</a></td>
+  <td><a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">Native RUDP</a></td>
+</tr>
+<tr>
+  <td>Can EDF6 render above 60 Hz without speeding up gameplay?</td>
+  <td><a href="performance-high-fps-presentation-vs-simulation-explained.html">High-FPS presentation vs simulation</a></td>
+  <td><a href="performance-safe120-presentation-cadence-and-runtime-boundaries.html">Safe120 evidence</a></td>
+</tr>
+<tr>
+  <td>What should a modder not assume?</td>
+  <td><a href="known-traps-critical-negative-evidence-and-provenance.html">Important negative findings</a></td>
+  <td><a href="open-questions.html">Open technical questions</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="new-cross-checked-subject-references">New cross-checked subject references</h2>
+<p>The following pages present the established findings without assuming familiarity with any tool or research revision.</p>
+<table>
+<thead>
+<tr>
+  <th>If you want to understand…</th>
+  <th>Open…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>What an EDF6 shader parameter and texture actually do</td>
+  <td><a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">Native MDB shader family reference</a></td>
+</tr>
+<tr>
+  <td>Why converting an EDF5 model needs more than changing a header</td>
+  <td><a href="cross-game-conversion-what-changes-between-edf5-and-edf6.html">EDF5 → EDF6 conversion by subsystem</a></td>
+</tr>
+<tr>
+  <td>How event registration and <code>multi</code> affect mission timing</td>
+  <td><a href="missions-%26-scripting-event-registration-scheduling-and-state.html">Mission event scheduling and state</a></td>
+</tr>
+<tr>
+  <td>How map objects, Havok bodies and navigation interact</td>
+  <td><a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Collision and navigation explained</a></td>
+</tr>
+<tr>
+  <td>How a mission uses a reusable map and a bundle</td>
+  <td><a href="missions-%26-scripting-mission-bundles-maps-and-resources-explained.html">Maps, missions and Mission Bundles</a></td>
+</tr>
+<tr>
+  <td>What is known about voice/audio banks and localization</td>
+  <td><a href="audio-audio-banks-cues-dialogue-and-subtitles-explained.html">Audio and dialogue explained</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="recently-reconciled-technical-findings">Recently reconciled technical findings</h2>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>Detailed explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Why does a jump sometimes correct another player's view while walking stays desynchronized?</td>
+  <td><a href="engine-re-edf5-edf6-player-state-packet-lanes.html">Player-state packet lanes: 0x3300, 0x3400, 0x3500, EOS and RUDP</a></td>
+</tr>
+<tr>
+  <td>How does the EDF5-content Fencer armor cap interact with selected HP and permanent progression in EDF6?</td>
+  <td><a href="engine-re-fencer-armor-limits-gameplay-and-progression.html">Mission-entry armor cap versus crate rewards</a></td>
+</tr>
+<tr>
+  <td>Can two mods safely merge independent assets in RAB/MRAB?</td>
+  <td><a href="formats-%26-containers-rab-marc-cmpl-archive-contracts.html">Named-entry SSA archive semantics</a></td>
+</tr>
+<tr>
+  <td>Can two whole-file CONFIG.SGO overrides be composed?</td>
+  <td><a href="formats-%26-containers-sgo-dsgo-and-resource-schema-boundaries.html">SGO/DSGO baseline-relative semantic merging</a></td>
+</tr>
+<tr>
+  <td>What is the modern EDF6 HKT TYPE envelope?</td>
+  <td><a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">Modern TYPE wire records versus legacy-compatible envelopes</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-you-will-find-here">What you will find here</h2>
+<p>Articles distinguish <strong>native observations</strong> (game assets/binaries), <strong>runtime-tested behavior</strong>, <strong>source-level or offline reconstruction</strong>, and <strong>external reference descriptions</strong>. This matters: a binary structure identified exactly in a sample is not necessarily a general rule for every game version, and a valid output file is not necessarily accepted during gameplay.</p>
+<p>Where a result depends on a particular shader family, resource, platform, build or sample, the article says so. Some systems remain only partly understood; those limits are documented rather than filled with guesses.</p>
+<p><strong>Navigation tip:</strong> search for concrete names such as <code>snd_BRDF_Map_Common</code>, <code>TEXCOORD</code>, <code>type=4</code>, <code>FieldRender</code>, <code>MAPO</code>, <code>RegisterEvent</code>, or <code>CANM</code>. Every article is indexed by its full text. In the interface, <code>Ctrl+K</code> or <code>/</code> focuses search.</p>
+<h2 id="reading-the-supporting-notes">Reading the supporting notes</h2>
+<p>Some older articles were originally written as converter, add-on or editor research notes. Their exact observations remain available because they can contain valuable numbers and edge cases. <strong>Their project names and revision labels are not prerequisites for understanding the main findings</strong>. Use the subject guides first; consult supporting notes for deeper evidence, troubleshooting examples and native parameter tables.</p>
+<p>Source labels, when present, identify the research material behind a page. They are traceability hints, <strong>not</strong> a requirement to access private handoffs. Raw game assets, proprietary SDK fragments, and private source archives are not redistributed in this wiki.</p>
+<h2 id="a-useful-failure-analysis-case">A useful failure-analysis case</h2>
+<p><a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Why a parseable MDB can still crash</a> covers two independently verified pitfalls from a real map port: wrong resource-type dispatch (<code>.trb</code> versus <code>.mdb</code>) and compression that preserves the header while corrupting the model body.</p>
+<h2 id="quick-answers-from-source-research">Quick answers from source research</h2>
+<p>For a reader investigating concrete binary/gameplay questions:</p>
+<ul>
+<li><a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">RAB/MRAB header, entry-record and name-offset layout</a></li>
+<li><a href="maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">Why an enemy can aim through a solid wall even when collision exists</a></li>
+<li><a href="missions-%26-scripting-event-registration-scheduling-and-state.html">How event registration and handler state work in BVM</a></li>
+<li><a href="missions-%26-scripting-bvm-bytecode-custom-calls-and-api-translation-explained.html">How to decode a BVM custom call and preserve its stack effects</a></li>
+</ul>
+<p>These are technical findings rather than instructions for using our private test infrastructure. Each article distinguishes directly observed behavior from offline inferences and unresolved mechanics.</p>
+<h2 id="direct-binary-format-answers-mapb-fmb-and-weather">Direct binary-format answers: MAPB, FMB and weather</h2>
+<ul>
+<li><a href="maps-%26-navigation-mapb-binary-header-records-and-cross-game-rebasing.html">MAPB header and model/placement record layout</a> — offsets, T1/T2 source-to-target strides, relative pointers and validation.</li>
+<li><a href="maps-%26-navigation-fmb-binary-container-wrappers-tree-and-unknowns.html">FMB binary container and terrain tree</a> — compressed wrapper locations, file-local shader configs and why universal FMB conversions are unsafe.</li>
+<li><a href="maps-%26-navigation-mae-weather-dsgo-envmap-rmpa-binding.html">MAE/DSGO atmosphere binding</a> — how <code>_envMap</code> resolves a named embedded RMPA and how to detect broken resource identity.</li>
+</ul>
+<p>These are technical descriptions intended for an external reader; the details do not require access to our test harnesses.</p>
+<h2 id="more-direct-answers-for-format-implementers">More direct answers for format implementers</h2>
+<ul>
+<li><strong>How do I parse an NVMD?</strong> See <a href="maps-%26-navigation-nvmd-dmvn-binary-format-version-0120-to-0130.html">NVMD / DMVN format</a> for all header fields, section strides and the unresolved target float.</li>
+<li><strong>How is mission RMPA actually serialized?</strong> See <a href="missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">mission RMPA binary records</a> for endianness, route lists, global identities and string references.</li>
+<li><strong>Why does a custom mission have no image?</strong> See <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">mission menu resource identity</a> for observed loader lookup and LIST/TXT/IMAGE coupling.</li>
+</ul>
+<p>These are explanatory technical articles, not instructions to open historical project artifacts.</p>
+<h2 id="more-independently-usable-engine-reference-tables">More independently usable engine reference tables</h2>
+<p>The latest reconciliation provides full reader-facing explanations of the <a href="maps-%26-navigation-havok-compressed-mesh-shape-keys-section-records-and-failure-modes.html">compressed-mesh section/key ABI</a>, the <a href="missions-%26-scripting-bvm-engine-call-and-factor-reference-table.html">BVM custom-call/factor ID table</a> and <a href="maps-%26-navigation-map-prop-sgo-crashtype-compatibility.html">MAPB-linked prop SGO compatibility</a>. They document measured bytes, concrete effects, rejected generalizations and known unresolved areas, without requiring a project-specific ZIP.</p>
+<h2 id="native-map-behavior-beyond-file-headers">Native map behavior beyond file headers</h2>
+<p>Reverse-engineering map authoring recovered actual resource/consumer relationships for <a href="maps-%26-navigation-mapo-t50-crashmodel-collapse-graph-explained.html">T50 cross-module collapse</a>, <a href="maps-%26-navigation-native-grass-grass-merge-grb-and-map-classes.html">native GRB grass regions</a> and <a href="materials-%26-shaders-edf6-static-water-material-corpus-findings.html">water shader resource ownership</a>. These descriptions distinguish original native sample findings from constructed-source offline features whose EDF6 runtime behavior is not yet proven.</p>
+<p><strong>Updated map authoring reference:</strong> <a href="maps-%26-navigation-map-rmpa-native-structure-cave501-cave503-and-conversion-profiles.html">Map RMPA: binary layout and CAVE501/CAVE503 profiles</a>. The six <code>SetAiSearchRadius</code> calls are an accepted, documented portability waiver—not an outstanding wiki blocker.</p>
+<p><strong>Legacy mod coexistence:</strong> Read <a href="formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">SGO/DSGO semantic merging</a>, <a href="formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">RAB/MRAB entry merging</a> and <a href="tooling-%26-editors-edf6-legacy-missionpack-07-08-runtime-parity-and-save-isolation.html">tested MissionPack07/08 namespace rebasing</a>. These preserve the critical difference between a <em>game-tested narrow legacy rebase</em> and an untested universal mod-composition claim.</p>
+<p><strong>Newly recovered source contracts:</strong> <a href="missions-%26-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry.html">Mission thumbnail lookup from LIST field2</a> supersedes an old image-name uncertainty in RAB research. <a href="maps-%26-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure.html">MAPB/MAPO placement cloning</a> explains why moving one map object requires coordinated pointer, GUID and child-graph changes.</p>
+<p>A complementary <a href="engine-re-%26-networking-edf6-native-event-protocol-registry-and-damage-object-route.html">EDF6 EventController protocol reference</a> documents damage, mission and object-event identities separately from outer network packet classes. The <a href="engine-re-%26-networking-edf5-edf6-desync-differential-evidence-vs-false-leads.html">cross-version network comparison</a> lists binary-confirmed differences and rejected desync explanations; neither text claims a runtime-proven universal repair.</p>
+<p>A recovered full EDF6 A-to-Z runtime case documents <a href="tooling-%26-editors-edf6-missionpack06-selection-zero-count-crash-request-identity.html">why MissionPack06 crashed during selection</a> and <a href="formats-%26-containers-edf6-alias-free-vfs-provider-root-vs-list-mission-path.html">why a correctly loaded MissionPack07 LIST still could not launch its mission</a>. The later exact-build offline test reached <strong>Mission Cleared</strong> with 10 enemies and restored the map payload. This is stronger evidence than a static PackView gate, but only for the tested mission/loader environment; multiplayer remains a distinct qualification.</p>
+<p>EDF4.1→EDF6 vehicle and NPC adaptations also expose <strong>per-class invariants</strong> beyond format versioning: <a href="cross-game-conversion-edf41-nereid-v302-helicopter-on-v506-native-class-abi.html">Nereid V302 helicopter rig and fuel records</a> and <a href="animation-edf41-friendly-soldier-spine-axis-grip-ik-and-climb-states.html">friendly-soldier spine axes, weapon IK, and ledge-climb deadlocks</a>. These are bounded source-inspection results, not new in-game compatibility proofs.</p>
+<p>For Havok object authors, the distinction between <strong>valid binary structure</strong> and <strong>coherent physics links</strong> is documented in <a href="maps-%26-navigation-object-shkt-havok-validation-joints-derived-shapes-and-collision-filters.html">SHKT body/joint/filter validation</a>. For edited vehicle skeletons, <a href="cross-game-conversion-edf6-vehicle-ragdoll-shkt-bind-pose-refit-and-cas-rebasing.html">MDB↔SHKT↔SGO+CAS refitting</a> explains why moving visible bones alone can break physics.</p>
+<p>Cross-game mission compatibility requires more than an API name table. The <a href="missions-%26-scripting-edf41-bvm-container-bytecode-and-edf5-script-recompilation.html">EDF4.1 BVM binary/recompile guide</a> specifies instruction layout, EDF5 handler rewrites and runtime-binding boundaries; the <a href="formats-%26-containers-edf41-dlc-cpk-mount-namespaces-and-object-path-collisions.html">DLC CPK namespace guide</a> explains why identical SGO names across campaign, DLC1, DLC2 and EDF6 cannot share one target path.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R47 reconciled research articles</li><li>November 2026 community-oriented editorial reconciliation</li><li>R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md — 2026-08-10 source handoff, sections on T1 resource dispatch and CMPL LZ corruption</li><li>R55 groupwise source-checked reconciliation from R6 ledger and maintained binary parsers</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#edf6-team-relations-and-safe-per-actor-online-control">EDF6 team relations and safe per-actor online control</a><a href="#edf4-1-mission-execution-and-damage-paths">EDF4.1 mission execution and damage paths</a><a href="#edf4-1-composite-bosses-and-animation-lifecycle">EDF4.1 composite bosses and animation lifecycle</a><a href="#edf4-1-enemies-native-class-compatibility-beyond-geometry">EDF4.1 enemies — native class compatibility beyond geometry</a><a href="#edf4-1-terrain-vegetation-and-actor-behaviour-newly-reconciled">EDF4.1 terrain, vegetation and actor behaviour — newly reconciled</a><a href="#edf4-1-vehicle-classes-and-edf6-multiplayer-authority">EDF4.1 vehicle classes and EDF6 multiplayer authority</a><a href="#newly-reconciled-mab-and-edf4-1-audio-actor-mechanics">Newly reconciled MAB and EDF4.1 audio/actor mechanics</a><a href="#animation-and-controller-reverse-engineering">Animation and controller reverse engineering</a><a href="#newer-edf4-1-edf6-reverse-engineering-notes">Newer EDF4.1 → EDF6 reverse-engineering notes</a><a href="#weapon-firing-and-underground-mission-behavior">Weapon firing and underground mission behavior</a><a href="#native-lod-and-havok-collision-reference">Native LOD and Havok collision reference</a><a href="#mdb-shaders-and-material-editing">MDB shaders and material editing</a><a href="#find-an-answer-by-subject">Find an answer by subject</a><a href="#new-cross-checked-subject-references">New cross-checked subject references</a><a href="#recently-reconciled-technical-findings">Recently reconciled technical findings</a><a href="#what-you-will-find-here">What you will find here</a><a href="#reading-the-supporting-notes">Reading the supporting notes</a><a href="#a-useful-failure-analysis-case">A useful failure-analysis case</a><a href="#quick-answers-from-source-research">Quick answers from source research</a><a href="#direct-binary-format-answers-mapb-fmb-and-weather">Direct binary-format answers: MAPB, FMB and weather</a><a href="#more-direct-answers-for-format-implementers">More direct answers for format implementers</a><a href="#more-independently-usable-engine-reference-tables">More independently usable engine reference tables</a><a href="#native-map-behavior-beyond-file-headers">Native map behavior beyond file headers</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"start-what-we-learned-and-how-to-use-this-wiki"};</script><script src="../assets/site.js" defer></script></body></html>

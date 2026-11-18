@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Copying an EDF6 map object means moving an entire identity graph A new MAPB placement is not only another (x,y,z) triplet. The studied EDF6 map.mapb and map.map"><title>EDF6 map placement cloning: MAPB/MAPO relative pointers, GUIDs and child references | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF6 map placement cloning: MAPB/MAPO relative pointers, GUIDs and child references</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Technical reference · Source-code algorithm cross-checked with retained build-specific fixup routines; no new in-game validation</div><div id="articleBody"><p>A new MAPB placement is not only another <code>(x,y,z)</code> triplet. The studied EDF6 <code>map.mapb</code> and <code>map.mapo</code> represent the same ordered placement set through <strong>parallel indexed tables</strong>, relative references, stable/unique identifiers and parent-child relationships. A retained map-tile duplication utility demonstrates the minimum identity work needed when a placement is cloned or relocated.</p>
+<h2 id="parallel-placement-tables">Parallel placement tables</h2>
+<p>The studied <code>MAPB</code> v2 format has a <strong>0x48-byte placement record</strong> and <strong>0x3C-byte definition row</strong>; the <code>MAPO</code> profile has a <strong>0x1C-byte placement-linked entry</strong> and a <strong>0x0C-byte named placement row</strong>. For the implemented profile, the three counts must agree:</p>
+<pre><code class="language-text">MAPB +0x24 placement count
+MAPO +0x0C per-placement entry count
+MAPO +0x54 named-object row count
+</code></pre>
+<p>A record's definition reference at <code>MAPB record +0x00</code> is <strong>signed and relative to the record base</strong>. Its position starts at record <code>+0x04</code>. The record's child-list reference is at <code>+0x2C</code> and likewise uses the record's base. The 16-byte GUID occupies <code>+0x34..+0x43</code>.</p>
+<p>The MAPO entry array uses record-relative offsets at <code>+0x00</code>, <code>+0x04</code>, <code>+0x10</code>, <code>+0x14</code>, <code>+0x18</code>; named rows use <code>+0x00</code> (name) and <code>+0x04</code> (sub-list). <strong>Copying a raw record without correcting these offsets moves its targets</strong>, often pointing at the wrong model/strings or outside the file.</p>
+<h2 id="the-studied-duplication-algorithm">The studied duplication algorithm</h2>
+<ol>
+<li>Select <code>(source_record_index, dx, dy, dz)</code> placements; optionally traverse all children recursively using the <code>+0x2C</code> child-list relation, preventing duplicate <code>(index,offset)</code> copies.</li>
+<li>Rebuild/relocate the <strong>entire MAPB placement-record array</strong> and rebase the old references so originals continue pointing to exactly the same definitions and child lists.</li>
+<li>Append cloned records with offset positions and fresh GUIDs, then rewrite cloned child indices to refer to the <strong>matching cloned children at the same offset</strong>.</li>
+<li>Add corresponding MAPO entries and named rows; the studied profile names each row by its <strong>decimal placement index</strong>. Rebase all MAPO relative references and update both placement-table header offsets and counts.</li>
+<li>Rebuild the outer MARC archive, changing <code>map.mapb</code> and <code>map.mapo</code> while preserving every unrelated member payload.</li>
+<li>Reparse the output and check bounds, references, counts, preexisting semantics, no unintentionally modified archived members, and no new GUID collision.</li>
+</ol>
+<p>The utility generates a reproducible UUIDv5-style identifier from the source GUID, new index, displacement and a collision salt. <strong>That generation formula is a tool-side identity policy</strong>, not proof that the EDF6 engine itself creates GUIDs this way. It deliberately does not require that <em>all original</em> native placements have unique GUIDs: one retained native map (<code>NW_DLCMAP601</code>) reportedly contains duplicates. New duplicated placements must not add collisions.</p>
+<h2 id="child-references-are-the-subtle-trap">Child references are the subtle trap</h2>
+<p>The <code>+0x2C</code> list points to <code>{relative index-array offset, count}</code>, then to <strong>placement indices</strong>. When cloning a parent and children together, parent references should point at the <strong>new</strong> child records. If only the parent is copied, the retained tool preserves references to the <strong>original</strong> children and emits a warning; this may be structurally parseable but semantically wrong for a coherent relocated assembly. It should not be silently treated as a valid object hierarchy.</p>
+<p>Likewise, if the source MAPO string pool is not the last block, new names cannot simply be counted as an extension of that pool. The retained utility warns rather than inventing a global pool rewrite.</p>
+<h2 id="format-correctness-does-not-complete-the-map">Format correctness does not complete the map</h2>
+<p>This tool proves a <strong>bounded MAC/MAPB/MAPO placement-copy approach</strong>. It does not independently rebake an object's collision body in <code>MAD</code>, native navmesh HKT/NVMD, terrain FMB, occlusion or any dependency introduced by a new placement. A map can have perfectly valid pointers and still produce missing physical collision or bad AI routes. Those systems have their own authorities and runtime qualifications.</p>
+<p><strong>Evidence boundary:</strong> <code>bigmap.py</code> names the observed EDF6 MAPB/MAPO endian/fixup functions and reconstructs the record fields in Python. This description derives from that retained implementation. It is not evidence that a new large map generated by this tool was accepted in the target game's runtime in this release.</p>
+<p>See <a href="maps-%26-navigation-mapb-binary-header-records-and-cross-game-rebasing.html">MAPB record layout</a>, <a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">map format consumers</a> and <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Havok navigation/collision architecture</a>.</p>
+<h2 id="original-edf4-1-linked-group-census">Original EDF4.1 linked-group census</h2>
+<p>The <a href="maps-edf41-seven-sk-terrain-object-contacts-source-census-r24-r28.html">seven-map contact and placement analysis</a> reports <strong>193 child references across 18 linked groups</strong> in a 16-map original EDF4.1 source group list. A correctly linked child placement may be rejected by a flat walker and accepted when its parentage is recognized (R26 → R27 valley case). The count is of source references, not an inventory of independently simulated bodies; no runtime proof follows.</p>
+<h2 id="exact-source-mapb-group-records-versus-actual-transform-inheritance">Exact source MAPB group records versus actual transform inheritance</h2>
+<p>The later nine-map <strong>non-SK original EDF4.1</strong> census contains <strong>39,252 MAPB records</strong>, <strong>17 group owners</strong> and <strong>169 child-index references</strong>. There are <strong>169 unique referenced children</strong>, no child owned by multiple groups and no nested group owner in this sampled scope. The grouping is concentrated in <code>NW_HILLYCITY_LIGHT</code> (5 owners / 40 children), <code>NW_KASENJIKI01</code> (2 / 3) and <code>NW_KOUSOUBLD01</code> (10 / 126). Of these, <strong>7 group owners</strong> and <strong>16 child records</strong> have matching static-mesh collision <em>candidates</em>.</p>
+<p>This is a <strong>different denominator</strong> from the earlier <strong>18 groups / 193 references across a 16-map source scope</strong> described above. Those results must not be added together or described as contradictory. In the studied EDF4.1 MAPB records, the <code>+0x2C</code> link acts as a <strong>record-index relation</strong>. It does not, by itself, establish child collision activation, <code>parent_matrix × child_matrix</code> composition or native EDF4.1 actor transform behavior. Unknown auxiliary integer fields are likewise not automatically scale or collision flags.</p>
+<h3 id="mapo-visual-model-explicit-hkt-resource-and-mad-body-are-different-identities">MAPO visual model, explicit <code>.hkt</code> resource and MAD body are different identities</h3>
+<p>For the same nine original maps, the source collision-routing audit partitions the 39,252 MAPB records into these <em>record-level</em> categories:</p>
+<table>
+<thead>
+<tr>
+<th>Source association</th>
+<th style="text-align:right">MAPB records</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Explicit MAPO <code>.hkt</code> name matched a decoded <strong>mesh</strong> MAD body</td>
+<td style="text-align:right"><strong>5,944</strong></td>
+<td>A named candidate, not confirmed active Havok collision</td>
+</tr>
+<tr>
+<td>Definition model matched a source MAD body without an explicit MAPO HKT route</td>
+<td style="text-align:right"><strong>5,469</strong></td>
+<td>A fallback <em>candidate</em>, not a verified game lookup</td>
+</tr>
+<tr>
+<td>Explicit <code>.hkt</code> reference outside the mesh-only MAD census</td>
+<td style="text-align:right"><strong>145</strong></td>
+<td><strong>Later resolved as compact-shape MAD bodies</strong>, not absent game files</td>
+</tr>
+<tr>
+<td>No directly matched MAD collision binding in this limited census</td>
+<td style="text-align:right"><strong>27,694</strong></td>
+<td>Does <strong>not</strong> prove an object is non-colliding</td>
+</tr>
+</tbody>
+</table>
+<p>The 145 cases were subsequently traced to <strong>five original fixed MAD rigid bodies across four maps</strong>, using just three distinct model names. They were missed because the earlier source census restricted itself to mesh geometry and excluded <code>hkpBoxShape</code> and <code>hkpListShape</code>. Thus “145 missing HKT files” is <strong>incorrect</strong>; the accurate statement is “145 originally unmatched <em>mesh-route associations</em>, now reconciled to compact MAD collision shapes”.</p>
+<table>
+<thead>
+<tr>
+<th>Collision resource stem</th>
+<th>Original map</th>
+<th style="text-align:right">MAPO <code>.hkt</code> references</th>
+<th>Original rigid-body shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ym_so_gairojubass01</code></td>
+<td><code>NW_HILLYCITY_LIGHT</code></td>
+<td style="text-align:right">70</td>
+<td><code>hkpBoxShape</code></td>
+</tr>
+<tr>
+<td><code>ym_so_gairojubass01</code></td>
+<td><code>NW_KOUSOUBLD01</code></td>
+<td style="text-align:right">38</td>
+<td><code>hkpBoxShape</code></td>
+</tr>
+<tr>
+<td><code>ym_so_sou_gate01base10m</code></td>
+<td><code>NW_SINSUIKOUEN</code></td>
+<td style="text-align:right">7</td>
+<td><code>hkpListShape</code> containing a box primitive</td>
+</tr>
+<tr>
+<td><code>ym_so_sou_gate01base10m</code></td>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">12</td>
+<td><code>hkpListShape</code> containing a box primitive</td>
+</tr>
+<tr>
+<td><code>ym_so_sou_gate01base20m</code></td>
+<td><code>NW_SOUKOGAI01</code></td>
+<td style="text-align:right">18</td>
+<td><code>hkpListShape</code> containing a box primitive</td>
+</tr>
+</tbody>
+</table>
+<p>For those five bodies, the source collision normalizer recovered one compact primitive and <strong>12 triangulated hull faces per body</strong> for bounded geometric analysis. These synthetic hull faces are <strong>not automatically another active collision copy</strong>, not authored NAV walkability, and not proof of an EDF6 HKT loader dispatch. The original <code>hkp</code> (Havok 2014) and target <code>hknp</code>/<code>hkai</code> (Havok 2020) systems have different contracts.</p>
+<p><strong>Evidence:</strong> original EDF4.1 MAC/MAD source identity and R41/R42/R45 reconciliation, especially <code>R42_REAL_NONSK_9_MAPO_COLLISION_ROUTES.json</code>, <code>R45_REAL_NINE_NONSK_MAPO_COMPACT_HKT_RESOLUTION.json</code> and <code>R45_NAV_INTEGRATION_DECISIONS.md</code>. Exact per-map associations: <code>data/R168_MAPO_145_COMPACT_HKT_5_SOURCE_BODIES.csv</code>.</p>
+
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R9: components/maps/pylib/bigmap.py (full retained source)</li><li>Related: native MAPB/MAPO header/record layouts in converter/mac/mac_tool.py</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R41_MAPB_OWNER_RECONCILIATION/EDF41_R41_DELTA_ON_R40_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R42_MAPO_HKT_COLLISION_ROUTING/EDF41_R42_DELTA_ON_R41_2026-11-16.zip</li><li>/EDF41_EDF6_RESEARCH/CHECKPOINT_2026-11-16_R13_FUNCTIONALITY_WIP_R45_GROUP_COMPACT_HKT_RESOLUTION/EDF41_R45_DELTA_ON_R44_2026-11-16.zip</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#parallel-placement-tables">Parallel placement tables</a><a href="#the-studied-duplication-algorithm">The studied duplication algorithm</a><a href="#child-references-are-the-subtle-trap">Child references are the subtle trap</a><a href="#format-correctness-does-not-complete-the-map">Format correctness does not complete the map</a><a href="#original-edf4-1-linked-group-census">Original EDF4.1 linked-group census</a><a href="#exact-source-mapb-group-records-versus-actual-transform-inheritance">Exact source MAPB group records versus actual transform inheritance</a><a href="#mapo-visual-model-explicit-hkt-resource-and-mad-body-are-different-identities">　MAPO visual model, explicit .hkt resource and MAD body are different identities</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-mapb-mapo-duplicate-placement-pointer-guid-child-closure"};</script><script src="../assets/site.js" defer></script></body></html>

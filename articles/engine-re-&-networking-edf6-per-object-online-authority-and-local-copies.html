@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 multiplayer object authority — registered objects, local copies and projectile ownership Why running identical code on every peer can be wrong The examined"><title>EDF6 multiplayer object authority — registered objects, local copies and projectile ownership | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-networking.html">Networking</a></div><h1>EDF6 multiplayer object authority — registered objects, local copies and projectile ownership</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Networking</span></div><div class="referencebadge">Technical reference · Source-level authority policy plus historical exact-build binary evidence</div><div id="articleBody"><h2 id="why-running-identical-code-on-every-peer-can-be-wrong">Why running identical code on every peer can be wrong</h2>
+<p>The examined EDF6 modding layer models objects on all peers, but not all instances represent <strong>one registered network object</strong>. A vehicle with a registered network identity has a machine responsible for its core simulation. A plugin-created aircraft, drone or summoned creature may be <strong>unregistered</strong> and exist separately on each peer. The first category requires single-authority decisions; the second may require per-peer simulation <strong>while allowing the damage result to count only once</strong>.</p>
+<p>This article describes the <strong>specific researched EDF6 engine/version and compatibility adapter</strong>. It is not a universal law saying EDF6 never replicates any spawn, nor does it replace direct network protocol analysis.</p>
+<h2 id="network-flags-and-authority-inputs">Network flags and authority inputs</h2>
+<p>In the retained <code>online_authority.h</code> model, the network-object word at object <code>+0x128</code> includes:</p>
+<table>
+<thead>
+<tr>
+  <th>Bits</th>
+  <th>Meaning in the examined path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>bit <code>0</code> (<code>0x01</code>)</td>
+  <td>Object is remote/operated elsewhere</td>
+</tr>
+<tr>
+  <td>bit <code>1</code> (<code>0x02</code>)</td>
+  <td>Object is locally operated</td>
+</tr>
+<tr>
+  <td>neither</td>
+  <td>No registered network identity — a local copy</td>
+</tr>
+</tbody>
+</table>
+<p>A vehicle's native operator resolver uses seat-0's current rider, then possibly the previous rider, then host fallback. This can be wrong for <strong>additional plugin work</strong> when seat 0 is now empty: after a client leaves, native “last driver” state may still select that client, while the host's NPC controller would also run its work. The bounded adapter assigns host authority when there is <strong>no live registered seat-0 rider</strong>.</p>
+<p>For an unregistered object, each peer can continue simulating its local copy. A separate <code>CopyOwner</code> marker (<code>host</code>, <code>here</code>, <code>elsewhere</code>) records the player who created that logical entity so the authoritative damage result is not multiplied across peers. This owner marker is adapter-owned metadata, not a magic bit stored by the original game for every spawn.</p>
+<h2 id="four-decisions-that-must-not-be-collapsed-into-one-boolean">Four decisions that must not be collapsed into one boolean</h2>
+<table>
+<thead>
+<tr>
+  <th>Question</th>
+  <th>Relevant behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Who simulates the object?</strong></td>
+  <td>Registered object: its authority; unregistered local copy: every peer simulates its copy</td>
+</tr>
+<tr>
+  <td><strong>Who performs host-only actions?</strong></td>
+  <td>One host handles room-wide operations, such as assigning certain NPC drivers</td>
+</tr>
+<tr>
+  <td><strong>Where does its damage count?</strong></td>
+  <td>Registered vehicle: its authority for NPC/vehicle-owned weapons; unregistered copy: the recorded copy owner</td>
+</tr>
+<tr>
+  <td><strong>Who is the attacker of a locally fired gun?</strong></td>
+  <td>Online, a player firing a registered vehicle's gun may need to be named as attacker so hit authority resolves to that player's machine</td>
+</tr>
+</tbody>
+</table>
+<p>A player firing a registered vehicle's local gun is a special case: the player's input and the vehicle simulation may be owned by <strong>different machines</strong>. Treating “vehicle is remote” as “this player cannot fire” breaks that use case. Conversely, every peer applying an NPC turret's damage independently doubles or triples damage.</p>
+<p>For online rounds whose attacker is named as the player, the mod also had to preserve the native rule that a vehicle-mounted gun does <strong>not immediately damage its own ridden vehicle</strong>. Merely ignoring the attacker pointer is insufficient when the player and the player's current vehicle are distinct objects; explosive splash has a separate filter and is not automatically solved by a single direct-hit exclusion.</p>
+<h2 id="lifecycle-and-safety-rules">Lifecycle and safety rules</h2>
+<ul>
+<li>In offline sessions, normal local behavior can remain enabled; in online sessions with unknown build-specific session hooks, fail closed rather than declare each peer authoritative.</li>
+<li>Do not use a <strong>stale former seat-0 rider</strong> as authority for added NPC/vehicle behavior.</li>
+<li>For local copies, separate simulation from <strong>who owns the outcome</strong>; spawning on every peer is not the same as counting the result on every peer.</li>
+<li>Ensure weak identity/control blocks are checked across object destruction and recreation. Object addresses can be reused; a stale raw pointer is not durable identity.</li>
+<li>Verify host/client, enter/exit seat, NPC seat adoption, local player gunner, unregistered summon/drone and restart/rejoin paths independently.</li>
+</ul>
+<h2 id="evidence-and-limits">Evidence and limits</h2>
+<p>The retained source includes pure <code>Authority</code>, <code>RunsHere</code>, <code>ShotCounts</code>, <code>ShooterIsAttacker</code>, <code>SparesRide</code> and <code>MaySeatNpc</code> decisions and historical exact-build native-address research. It documents an actual class of desynchronization/double-damage risks. It does <strong>not</strong> show that every such path was runtime qualified for every multiplayer configuration in R64.</p>
+<p><strong>Source:</strong> EDF4.1→EDF6 R10 HF4 R9 <code>components/compatibility/src/online_authority.h</code>, supported by the preserved <code>edf41net.cpp</code> network-object identity discussion. The addresses and hooks are build-specific; the semantics are the transferable findings.</p>
+<h2 id="team-identity-is-not-projectile-authority">Team identity is not projectile authority</h2>
+<p>An actor's native TeamManager relation and a controlled-boss PvP lease are separate from per-peer object simulation and damage ownership. <a href="engine-re-%26-networking-edf6-native-team-manager-relation-matrix-and-reset.html">Native team roles and relation overlays</a> explain target/hazard roles, while <a href="engine-re-%26-networking-edf6-controlled-pvp-object-tree-restoration-and-spawn-ownership.html">typed emitter team propagation and spawn rollback</a> explains why changing a root's team alone may leave bullets and newborn parts in the wrong faction.</p>
+<p>For a worked example of a custom, bounded per-object event envelope that reuses native NetworkObject send/receive slots without redefining stock messages, see <a href="engine-re-%26-networking-edf41-per-object-event-wire-tag12-and-native-child-identities.html">EDF4.1 tag-12 event wire and native child identities</a>.</p>
+<h2 id="related-native-edf6-networking-systems">Related native EDF6 networking systems</h2>
+<ul>
+<li><a href="edf6-air-raider-online-delivery-transporters-and-derived-network-identity.html">Transporter508 online vehicle delivery</a></li>
+<li><a href="edf6-enemy-network-ai-ownership-pose-updates-and-insect-rng.html">Native enemy AI authority and RNG</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9: components/compatibility/src/online_authority.h</li><li>EDF41 R10 HF4 R9: components/compatibility/src/edf41net.cpp</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-running-identical-code-on-every-peer-can-be-wrong">Why running identical code on every peer can be wrong</a><a href="#network-flags-and-authority-inputs">Network flags and authority inputs</a><a href="#four-decisions-that-must-not-be-collapsed-into-one-boolean">Four decisions that must not be collapsed into one boolean</a><a href="#lifecycle-and-safety-rules">Lifecycle and safety rules</a><a href="#evidence-and-limits">Evidence and limits</a><a href="#team-identity-is-not-projectile-authority">Team identity is not projectile authority</a><a href="#related-native-edf6-networking-systems">Related native EDF6 networking systems</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf6-per-object-online-authority-and-local-copies"};</script><script src="../assets/site.js" defer></script></body></html>

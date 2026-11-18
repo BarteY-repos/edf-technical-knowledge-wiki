@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Systemic FLAG index parity repair — 21 affected missions Patch 1.0.6 identified a converter-wide enum identity defect, not 21 unrelated mission bugs. Root cause"><title>Systemic FLAG index parity repair — 21 affected missions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Systemic FLAG index parity repair — 21 affected missions</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · M050 runtime-proven; 20 peers source/static-qualified</div><div id="articleBody"><p>Patch 1.0.6 identified a <strong>converter-wide enum identity defect</strong>, not 21 unrelated mission bugs.</p>
+<h2 id="root-cause">Root cause</h2>
+<p>EDF5 source logic can combine numeric flag producers such as:</p>
+<pre><code class="language-text">FlagOn(n)
+FlagOff(n)
+</code></pre>
+<p>with symbolic factor consumers such as:</p>
+<pre><code class="language-text">Factor_FlagOn(FLAG_n)
+Factor_FlagOff(FLAG_n)
+</code></pre>
+<p>The broken conversion path assigned generated symbolic flag enum ordinals by <strong>first-use order</strong> instead of preserving the source flag index. A producer could therefore set numeric flag <code>n</code> while a consumer named <code>FLAG_n</code> actually referred to a different generated ordinal.</p>
+<p>The required invariant is:</p>
+<pre><code class="language-text">FLAG_n == n
+</code></pre>
+<p>for the source flag identity domain.</p>
+<h2 id="runtime-discriminator-m050-displayed-mission-59">Runtime discriminator — M050 / displayed Mission 59</h2>
+<p>M050 exposed the defect as a real softlock. Restoring source flag indices while retaining the source <code>AllEnemyDestroy</code> logic produced a user-confirmed runtime PASS in RC6. Easy/Hard correctly skip the high-difficulty wave and still reach final dialogue + Mission Clear.</p>
+<p>M050 therefore proves the mechanism at runtime.</p>
+<h2 id="full-affected-set">Full affected set</h2>
+<p>The systemic repair applies to exactly these 21 missions in the retained 1.0.6 ledger:</p>
+<pre><code class="language-text">M004
+M005
+M007_5
+M009
+M014
+M020_5
+M027
+M029
+M030
+M034
+M039
+M041
+M042_5
+M045
+M046_3
+M047_2
+M050
+M072_2
+M091_4
+M098
+M099
+</code></pre>
+<p>For the 20 missions other than M050, the RC7 repair is intentionally <strong>enum-only</strong>: no function/event/gameplay text outside the flag enum is meant to change.</p>
+<h2 id="qualification-boundary">Qualification boundary</h2>
+<ul>
+<li>M050 mechanism: <strong>runtime PASS</strong> on an earlier RC;</li>
+<li>remaining 20 repairs: <strong>source/static-qualified</strong> in the 1.0.6 build lineage;</li>
+<li>exact finalized 11 October 1.0.6 package: per-mission runtime remains pending unless separately documented.</li>
+</ul>
+<p>High-value regression targets include M098, M099, M047_2, M004, M005, M041, M045 and M046_3.</p>
+<h2 id="converter-rule">Converter rule</h2>
+<p>Do not assign semantic enum identities according to encounter order when the source domain already has stable numeric identities. Generated symbolic names must preserve the source numeric identity exactly.</p>
+<p>This lesson generalizes beyond flags: whenever numeric producers and symbolic consumers meet, prove that the symbolic target domain is identity-preserving before using generated ordinal order.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_1_0_6_RUNTIME_LEDGER_2026-10-08.md</li><li>Library: EDF5_EDF6_PATCH_1_0_6_RUNTIME_LEDGER_CORRECTED_2026-10-11.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#root-cause">Root cause</a><a href="#runtime-discriminator-m050-displayed-mission-59">Runtime discriminator — M050 / displayed Mission 59</a><a href="#full-affected-set">Full affected set</a><a href="#qualification-boundary">Qualification boundary</a><a href="#converter-rule">Converter rule</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-systemic-flag-index-parity-repair"};</script><script src="../assets/site.js" defer></script></body></html>

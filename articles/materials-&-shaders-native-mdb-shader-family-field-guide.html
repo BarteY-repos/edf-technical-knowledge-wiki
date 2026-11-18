@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Native MDB shader families: parameters, textures and practical interpretation Overview A shader family is a contract between MDB mesh attributes, ordered native"><title>Native MDB shader families: practical parameter and sampler reference | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>Native MDB shader families: practical parameter and sampler reference</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Technical reference · Mixed: sampled native MDB corpus and supplied guide</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>A shader family is a <strong>contract</strong> between MDB mesh attributes, ordered native material parameters, sampler slots and render state. A shader identifier alone is not enough to reproduce the original material, and shader-reflection order cannot be assumed to be serialization order.</p>
+<h2 id="material-workflow">Material workflow</h2>
+<ol>
+<li>Identify the actual shader family and required vertex attributes.</li>
+<li>Read parameters in native MDB order, preserving their stored types.</li>
+<li>Keep texture samplers in their native slot order.</li>
+<li>Preserve blend, alpha and family-specific render state.</li>
+<li>Validate visually in the target renderer, not just by parsing the MDB.</li>
+</ol>
+<p>See <a href="docs-shaders.html">Shaders</a> for the central reference and the <code>snd_BRDF_Map_Common</code> example.</p>
+<hr />
+<h2 id="starting-from-a-real-material">Starting from a real material</h2>
+<p>For a self-contained implementation guide, read <a href="materials-%26-shaders-reading-writing-native-mdb-material-profiles.html">How to read and write native MDB materials</a>. It explains why these observed sampler and parameter tables are not interchangeable with shader reflection and demonstrates Common metallic/roughness channels and integer controls.</p>
+<p>An MDB material is not defined by its shader name alone. The shader family, the <strong>ordered parameter records</strong>, the <strong>ordered sampler bindings</strong>, their states, and the mesh vertex declaration form a contract. Changing only the shader identifier can create an apparently valid file that renders incorrectly.</p>
+<p>This page describes <strong>ordinary EDF6 MDB materials</strong>, including map props and building models. It does <strong>not</strong> describe the separate FMEP/FieldRender terrain pipeline.</p>
+<h2 id="common-brdf-material-the-basic-interpretation">Common BRDF material: the basic interpretation</h2>
+<p>For sampled <code>snd_BRDF_Map_Common</code> materials, the useful logical model is:</p>
+<table>
+<thead>
+<tr>
+  <th>Input</th>
+  <th>Meaning in the observed/common guide-backed path</th>
+  <th>Important caveat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>diffuse</code></td>
+  <td>Multiplies sampled albedo RGB</td>
+  <td>Colour customization can interpolate in additional colours first</td>
+</tr>
+<tr>
+  <td><code>metallic</code></td>
+  <td>Scales the packed metallic channel</td>
+  <td>Typically <code>packed.G × metallic</code>, then clamped downstream</td>
+</tr>
+<tr>
+  <td><code>roughness</code></td>
+  <td>Scales the packed roughness channel</td>
+  <td>Typically <code>packed.R × roughness</code>; <code>_hr</code> can multiply alpha too</td>
+</tr>
+<tr>
+  <td><code>normal_amount</code></td>
+  <td>Multiplies normal-map tangent-plane perturbation</td>
+  <td>Affects normal direction <strong>before</strong> normalization, not stored normal length</td>
+</tr>
+<tr>
+  <td><code>specular_color</code></td>
+  <td>Participates in the specular/Fresnel term</td>
+  <td>Not equivalent to tinting the final diffuse colour</td>
+</tr>
+<tr>
+  <td><code>specular_diffuse_blend</code></td>
+  <td>Mixes specular colour behaviour as metallic increases</td>
+  <td>Formula is based on a supplied rendering guide; not independently established for every shader</td>
+</tr>
+</tbody>
+</table>
+<p>The retained guide models the packed channels as:</p>
+<pre><code class="language-text">metallic  = clamp(packed.G × material.metallic,  0, 1)
+roughness = clamp(packed.R × material.roughness, 0, 1)
+roughness_hr = clamp(packed.R × packed.A × material.roughness, 0, 1)
+</code></pre>
+<p>These formulas apply to the identified <strong>common packed R/M path</strong>. They do not license a universal channel reinterpretation of arbitrary EDF5/EDF6 textures. The same shader guide describes a Fresnel baseline resembling <code>specularRGB × (0.04 + 0.96 × metallic)</code>; use it as a <strong>reference-derived compositor model</strong>, not as a proven exact fragment-program identity for every material.</p>
+<h2 id="normal-textures-packed-channels-and-occlusion">Normal textures: packed channels and occlusion</h2>
+<p>For the common-model path described by the supplied guide:</p>
+<pre><code class="language-text">nx = (R × A × 2) - 1
+ny = (G × 2) - 1
+nz = sqrt(max(0.00001, 1 - nx² - ny²))
+</code></pre>
+<p>The tangent-space perturbation is scaled by <code>normal_amount</code>, transformed through the tangent/binormal/geometric-normal frame, then normalized. <strong>Normal-map strength</strong> and <strong>stored normal-vector length</strong> are separate concepts. The guide describes a later <code>normalXYZ = normalizedNormal × occlusion</code> operation. Its author subsequently clarified that normal length enters diffuse/specular/compositor lighting in different ways; those detailed downstream rules are <strong>guide-derived</strong> and should not be generalized across every shader family without more binary evidence.</p>
+<h2 id="what-native-material-sampling-establishes">What native material sampling establishes</h2>
+<p>The audited ordinary MDB map-model corpora contained the following material samples. Counts are <strong>sampled occurrences</strong>, not global EDF6 usage statistics.</p>
+<table>
+<thead>
+<tr>
+  <th>EDF6 shader family</th>
+  <th style="text-align:right">Studied occurrences</th>
+  <th>Notable verified structure / use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>snd_BRDF_Map_Common</code></td>
+  <td style="text-align:right">101</td>
+  <td>Albedo, normal and packed R/M sampler set; six familiar BRDF parameters</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Common_Clip</code></td>
+  <td style="text-align:right">44</td>
+  <td>Common parameters plus <code>alpha_clip</code>; sampled 60-byte mesh profile</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Common_Light</code></td>
+  <td style="text-align:right">5</td>
+  <td>Includes <code>light_color</code>; sampled packed light mask and dedicated emissive path</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Basic_NC</code></td>
+  <td style="text-align:right">28</td>
+  <td>Five samplers including occlusion and dirt; sampled 76-byte profile and three UV uses</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_Para_NC</code></td>
+  <td style="text-align:right">9</td>
+  <td>Parallax parameters; sampled 76-byte material/mesh ABI</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Build_DirtScroll</code></td>
+  <td style="text-align:right">7</td>
+  <td>Dirt-scroll controls, sampled 76-byte profile</td>
+</tr>
+<tr>
+  <td><code>snd_BRDF_Map_Signboard_Pattern</code></td>
+  <td style="text-align:right">1</td>
+  <td>Animated/switching controls including integer-bit (<code>type=4</code>) lanes; sampled 68-byte profile</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>Build_Basic_NC</code>, sampled geometry uses <code>TEXCOORD0</code> for close-range sampling, <code>TEXCOORD1</code> for occlusion and <code>TEXCOORD2</code> for macro/dirt data. A generic renderer that feeds every sampler from UV0 discards that relationship.</p>
+<h2 id="alpha-cutout-is-not-general-transparency">Alpha cutout is not general transparency</h2>
+<p>In the sampled Common_Clip path, fragments are discarded when sampled albedo alpha falls below the material's <code>alpha_clip</code> threshold. Within the <strong>44</strong> sampled Common_Clip materials, <code>alpha_clip</code> was <strong>0.5 in 42</strong> and <strong>0.3435 in 2</strong>. These are observed defaults, not a game-wide invariant.</p>
+<p>A native foliage texture (<code>sk_pShrub003-df.dds</code>) demonstrated actual BC1/DXT1 one-bit transparency. BC1 cutout is therefore a valid native example, not the sole permitted cutout encoding.</p>
+<h2 id="common-light-is-a-real-exception-to-generic-emission-assumptions">Common_Light is a real exception to generic emission assumptions</h2>
+<p>An exact inspected <code>snd_BRDF_Map_Common_Light</code> path wrote an emission accumulation equivalent to:</p>
+<pre><code class="language-text">emissionAccum.rgb = packedLightMask.B × light_color.rgb
+</code></pre>
+<p>No base-colour multiply was established <strong>for that exact write</strong>. Do not turn a guide's more general emissive model into a compulsory rule for Common_Light, or claim that this exact write describes every emissive family.</p>
+<h2 id="raw-integer-parameter-lanes-type-4">Raw integer parameter lanes (<code>type=4</code>)</h2>
+<p>Some material parameters occupy a four-byte lane but represent a <strong>raw 32-bit integer</strong>, not a numeric float. An unmodified bit-preserving round trip may happen to work through a float container; creation/editing through float arithmetic is not safe. Preserve the declared type and raw bits; expose known fields as integer/flag controls. For example, reinterpreting raw <code>0x00000001</code> as IEEE float produces a subnormal number, <strong>not</strong> the numeric value <code>1.0</code>.</p>
+<h2 id="what-a-model-viewer-or-exporter-should-do">What a model viewer or exporter should do</h2>
+<ol>
+<li>Identify the model's actual shader family, parameter list and sampler order.</li>
+<li>Decode the <strong>material-specific</strong> texture packing, not a global RGBA assumption.</li>
+<li>Use the mesh's actual semantic streams, including extra UVs and tangent/binormal data.</li>
+<li>Preserve unknown fields and <code>type=4</code> raw bits.</li>
+<li>Label a stock Principled/glTF preview <strong>approximate</strong> when it does not reproduce EDF's compositor and lighting rules.</li>
+<li>When converting EDF5 materials, use a compatible <strong>full target profile</strong>; a shader-name substitution is not a complete migration.</li>
+</ol>
+<h2 id="further-details">Further details</h2>
+<ul>
+<li><a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB model structure and vertex layouts</a></li>
+<li><a href="materials-%26-shaders-mdb-shading-parameters-explained.html">How roughness, metallic, normals and emission work</a></li>
+<li><a href="materials-%26-shaders-observed-native-map-model-shader-material-families-blender-addon.html">Observed native MDB shader/material families</a></li>
+<li><a href="textures-edf-texture-packing-cutouts-and-fpr-explained.html">Texture packing and DDS cutouts</a></li>
+</ul>
+<p><strong>Evidence status:</strong> native EDF6 MDB corpus for shader/material counts, sampled layouts, Common_Clip and Common_Light exceptions; supplied shader guide for several general compositor and packed-channel equations; separate author clarification for normal-length lighting. Do not merge these evidence classes.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/02_NATIVE_MDB_PROFILES.md</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/03_RENDERING_SEMANTICS.md</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/05_TYPE4_RAW_U32.md</li><li>EDF6_EDFMODELUTILITY_INTEROP_RESEARCH_R4_2026-11-13/11_ADDITIONAL_MODEL_TEXTURE_NOTES.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#material-workflow">Material workflow</a><a href="#starting-from-a-real-material">Starting from a real material</a><a href="#common-brdf-material-the-basic-interpretation">Common BRDF material: the basic interpretation</a><a href="#normal-textures-packed-channels-and-occlusion">Normal textures: packed channels and occlusion</a><a href="#what-native-material-sampling-establishes">What native material sampling establishes</a><a href="#alpha-cutout-is-not-general-transparency">Alpha cutout is not general transparency</a><a href="#common-light-is-a-real-exception-to-generic-emission-assumptions">Common_Light is a real exception to generic emission assumptions</a><a href="#raw-integer-parameter-lanes-type-4">Raw integer parameter lanes (type=4)</a><a href="#what-a-model-viewer-or-exporter-should-do">What a model viewer or exporter should do</a><a href="#further-details">Further details</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-native-mdb-shader-family-field-guide"};</script><script src="../assets/site.js" defer></script></body></html>

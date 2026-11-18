@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 ↔ EDF6 vehicle weapon data: a role-aware SGO comparison Why same-name file comparison can mislead This catalog decodes a bounded source asset sample for"><title>EDF 4.1 / EDF6 vehicle 402–404 weapon SGO role-aware atlas | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Vehicle weapons &amp; source asset data</div><h1>EDF 4.1 / EDF6 vehicle 402–404 weapon SGO role-aware atlas</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">Vehicle weapons &amp; source asset data</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Static exact raw SGO/DSGO decode; R2 role-matched SHA-256 verified; game runtime not checked</div><div id="articleBody"><h2 id="why-same-name-file-comparison-can-mislead">Why same-name file comparison can mislead</h2>
+<p>This catalog decodes a <strong>bounded source asset sample</strong> for friendly vehicles 402 (Naegling-style rocket carrier), 403 (railgun tank) and 404 (heavy multi-weapon tank). The archived sample contains <strong>19 original EDF 4.1 weapon SGO files</strong> and <strong>24 EDF6 weapon DSGO files</strong>. There are <strong>19 identical-filename pairs</strong> and five target-only file names in this <em>sample</em>. This is not a full inventory of all weapons in either game.</p>
+<p>Original EDF 4.1 records in this sample use SGO version <strong><code>0x102</code></strong>. The paired EDF6 entries use <strong><code>DSGO</code></strong>. Byte-by-byte diffs or direct re-use of offsets would confuse a format migration with a gameplay change; the tables below compare <strong>decoded named fields</strong>.</p>
+<p><strong>Crucial identity trap:</strong> the later role-aware R2 report compares original <code>V_402ROCKET_ROCKETCANNON.SGO</code> with EDF6 <strong><code>V_402ROCKET_ROCKETCANNON_AI.SGO</code></strong> for the <em>mission AI launcher</em>. Their <code>AmmoCount</code> is <strong>100 versus 200</strong>. Comparing the same-named <code>V_402ROCKET_AI_ROCKETCANNON.SGO</code> on both sides instead yields <strong>50 versus 50</strong>; it is a different file pairing, not a contradiction. Do not derive game AI loadouts from filename equality alone.</p>
+<h2 id="r2-mission-role-crosswalk-11-verified-pairs">R2 mission-role crosswalk: 11 verified pairs</h2>
+<p>Every source and target SHA-256 in the 11 role pairs matches the preserved raw files. <code>PATCH</code> here refers to a source-only compatibility finding, <strong>not</strong> an in-game-qualified fix.</p>
+<table>
+<thead>
+<tr>
+<th>Vehicle</th>
+<th>Role</th>
+<th>EDF4.1 weapon SGO</th>
+<th>EDF6 weapon DSGO</th>
+<th>R2 outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>402</td>
+<td>mission</td>
+<td><code>V_402ROCKET_ROCKETCANNON.SGO</code></td>
+<td><code>V_402ROCKET_ROCKETCANNON_AI.SGO</code></td>
+<td>PATCH</td>
+</tr>
+<tr>
+<td>402</td>
+<td>player</td>
+<td><code>V_402ROCKET_ROCKETCANNON.SGO</code></td>
+<td><code>V_402ROCKET_ROCKETCANNON.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+<tr>
+<td>403</td>
+<td>mission</td>
+<td><code>V_403TANK_AI_CANNON01.SGO</code></td>
+<td><code>V_403TANK_AI_CANNON01.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+<tr>
+<td>403</td>
+<td>player</td>
+<td><code>V_403TANK_CANNON01.SGO</code></td>
+<td><code>V_403TANK_CANNON01.SGO</code></td>
+<td>PATCH</td>
+</tr>
+<tr>
+<td>403</td>
+<td>gunner</td>
+<td><code>V_403TANK_MACHINEGUN.SGO</code></td>
+<td><code>V_403TANK_MACHINEGUN.SGO</code></td>
+<td>PATCH</td>
+</tr>
+<tr>
+<td>404</td>
+<td>mission</td>
+<td><code>V_404BIGTANK_AI_MAINCANNON.SGO</code></td>
+<td><code>V_404BIGTANK_AI_MAINCANNON.SGO</code></td>
+<td>PATCH</td>
+</tr>
+<tr>
+<td>404</td>
+<td>player</td>
+<td><code>V_404BIGTANK_MAINCANNON.SGO</code></td>
+<td><code>V_404BIGTANK_MAINCANNON.SGO</code></td>
+<td>PATCH</td>
+</tr>
+<tr>
+<td>404</td>
+<td>gunner</td>
+<td><code>V_404BIGTANK_SUBCANNON.SGO</code></td>
+<td><code>V_404BIGTANK_SUBCANNON.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+<tr>
+<td>404</td>
+<td>gunner</td>
+<td><code>V_404BIGTANK_GATLING.SGO</code></td>
+<td><code>V_404BIGTANK_GATLING.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+<tr>
+<td>404</td>
+<td>utility</td>
+<td><code>V_404BIGTANK_SIDEGRENADE_L.SGO</code></td>
+<td><code>V_404BIGTANK_SIDEGRENADE_L.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+<tr>
+<td>404</td>
+<td>utility</td>
+<td><code>V_404BIGTANK_SIDEGRENADE_R.SGO</code></td>
+<td><code>V_404BIGTANK_SIDEGRENADE_R.SGO</code></td>
+<td>KEEP_EDF6_PARITY</td>
+</tr>
+</tbody>
+</table>
+<p>The five role pairs requiring evidence-backed gameplay field changes are:</p>
+<table>
+<thead>
+<tr>
+<th>Vehicle / role</th>
+<th>Field</th>
+<th style="text-align:right">EDF4.1</th>
+<th style="text-align:right">EDF6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>402 / mission</td>
+<td><code>AmmoCount</code></td>
+<td style="text-align:right">100</td>
+<td style="text-align:right">200.0</td>
+</tr>
+<tr>
+<td>403 / player</td>
+<td><code>AmmoDamage</code></td>
+<td style="text-align:right">900.0</td>
+<td style="text-align:right">600.0</td>
+</tr>
+<tr>
+<td>403 / player</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">6.0</td>
+<td style="text-align:right">13.5</td>
+</tr>
+<tr>
+<td>403 / player</td>
+<td><code>AmmoHitSizeAdjust</code></td>
+<td style="text-align:right">0.25</td>
+<td style="text-align:right">1.0</td>
+</tr>
+<tr>
+<td>403 / gunner</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">4.0</td>
+<td style="text-align:right">6.0</td>
+</tr>
+<tr>
+<td>404 / mission</td>
+<td><code>AmmoDamage</code></td>
+<td style="text-align:right">1500.0</td>
+<td style="text-align:right">750.0</td>
+</tr>
+<tr>
+<td>404 / mission</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">0.1</td>
+<td style="text-align:right">8.0</td>
+</tr>
+<tr>
+<td>404 / mission</td>
+<td><code>AmmoAlive</code></td>
+<td style="text-align:right">2400</td>
+<td style="text-align:right">300.0</td>
+</tr>
+<tr>
+<td>404 / mission</td>
+<td><code>ReloadTime</code></td>
+<td style="text-align:right">2400</td>
+<td style="text-align:right">1200.0</td>
+</tr>
+<tr>
+<td>404 / player</td>
+<td><code>AmmoDamage</code></td>
+<td style="text-align:right">1500.0</td>
+<td style="text-align:right">750.0</td>
+</tr>
+<tr>
+<td>404 / player</td>
+<td><code>AmmoSpeed</code></td>
+<td style="text-align:right">0.1</td>
+<td style="text-align:right">8.0</td>
+</tr>
+<tr>
+<td>404 / player</td>
+<td><code>AmmoAlive</code></td>
+<td style="text-align:right">2400</td>
+<td style="text-align:right">300.0</td>
+</tr>
+</tbody>
+</table>
+<p>Even identical numeric fields do not establish identical runtime semantics when the class, physics, animation or event consumer differs. <code>Ammo_CustomParameter</code>, audio, animation and display paths are deliberately <em>not</em> counted as proven gameplay deltas. Source and target files can differ in many non-gameplay fields.</p>
+<h2 id="same-filename-field-atlas-all-19-shared-names">Same-filename field atlas: all 19 shared names</h2>
+<p>This comparison answers a <strong>different question</strong> from the role crosswalk. It tracks the same weapon file name in both archives, regardless of which file a mission actor actually equips. The compact table below lists selected decoded gameplay keys that differ; the CSV includes all 14 audited fields for both generations, including unchanged values.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Source <code>AmmoClass</code></th>
+<th>Selected differing fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>V_402ROCKET_AI_ROCKETCANNON.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_402ROCKET_ROCKETCANNON.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_402ROCKET_ROCKETCANNON02.SGO</code></td>
+<td><code>MissileBullet02</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_402ROCKET_ROCKETCANNON03.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_403TANK_AI_CANNON01.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_403TANK_CANNON01.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>AmmoDamage; AmmoSpeed; AmmoHitSizeAdjust</td>
+</tr>
+<tr>
+<td><code>V_403TANK_CANNON02.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>AmmoDamage; AmmoSpeed; AmmoHitSizeAdjust</td>
+</tr>
+<tr>
+<td><code>V_403TANK_CANNON02B.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>AmmoCount; AmmoDamage; AmmoSpeed; AmmoHitSizeAdjust</td>
+</tr>
+<tr>
+<td><code>V_403TANK_CANNON03.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>AmmoDamage; AmmoSpeed; AmmoHitSizeAdjust</td>
+</tr>
+<tr>
+<td><code>V_403TANK_MACHINEGUN.SGO</code></td>
+<td><code>SolidBullet01</code></td>
+<td>AmmoSpeed</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_AI_MAINCANNON.SGO</code></td>
+<td><code>RocketBullet01</code></td>
+<td>AmmoDamage; AmmoSpeed; AmmoAlive; ReloadTime</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_GATLING.SGO</code></td>
+<td><code>SolidBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_MAINCANNON.SGO</code></td>
+<td><code>RocketBullet01</code></td>
+<td>AmmoDamage; AmmoSpeed; AmmoAlive</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SIDEGRENADE_L.SGO</code></td>
+<td><code>GrenadeBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SIDEGRENADE_R.SGO</code></td>
+<td><code>GrenadeBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SIDEMISSILE_L.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SIDEMISSILE_R.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SUBCANNON.SGO</code></td>
+<td><code>RocketBullet01</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_SUBCANNONSOLID.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+<td>None of 14 selected fields</td>
+</tr>
+</tbody>
+</table>
+<p>The same-name dataset reveals additional <strong>variant-specific numeric deltas</strong> not itemized in the narrower R2 mission-role patch list: <code>V_403TANK_CANNON02.SGO</code> has <code>AmmoSpeed</code> <strong>10 → 22.5</strong>; <code>V_403TANK_CANNON02B.SGO</code> has <code>AmmoCount</code> <strong>60 → 64</strong>, <code>AmmoDamage</code> <strong>300 → 200</strong>, and <code>AmmoSpeed</code> <strong>10 → 22.5</strong>; <code>V_403TANK_CANNON03.SGO</code> has <code>AmmoSpeed</code> <strong>15 → 33.75</strong>. These are decoded source-data facts. <strong>They are not automatically additional required patches</strong>, because the R2 role-specific evidence and actual runtime usage were not established for every variant.</p>
+<h2 id="edf6-only-filenames-in-the-bounded-sample">EDF6-only filenames in the bounded sample</h2>
+<table>
+<thead>
+<tr>
+<th>Additional EDF6 file</th>
+<th>Projectile class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>V_402ROCKET_DLC2_ROCKETCANNON.SGO</code></td>
+<td><code>HomingLaserBullet01</code></td>
+</tr>
+<tr>
+<td><code>V_402ROCKET_ROCKETCANNON_AI.SGO</code></td>
+<td><code>MissileBullet01</code></td>
+</tr>
+<tr>
+<td><code>V_403TANK_DLC2_CANNON03.SGO</code></td>
+<td><code>SolidBullet01Rail</code></td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_DLC_MAINCANNON.SGO</code></td>
+<td><code>RocketBullet01</code></td>
+</tr>
+<tr>
+<td><code>V_404BIGTANK_DLC_MELTCANNON.SGO</code></td>
+<td><code>AcidBullet01</code></td>
+</tr>
+</tbody>
+</table>
+<p>Only <strong>five</strong> target-only names are present in this <em>particular</em> 402/403/404 raw comparison collection. Other unexamined vehicle assets may exist; this does not imply these are the only new weapon files introduced across the whole game.</p>
+<h2 id="reference-datasets-and-evidence-limits">Reference datasets and evidence limits</h2>
+<ul>
+<li><code>data/EDF41_EDF6_VEHICLE_WEAPONS_19_SAME_NAME_DECODED_R147.csv</code> — 19 exact-filename pairs with 14 selected source/target fields.</li>
+<li><code>data/EDF41_EDF6_VEHICLE_WEAPONS_11_ROLE_PAIRS_R147.csv</code> — 11 R2 mission-role pairs with exact file hashes and bounded material gameplay deltas.</li>
+<li><code>data/EDF6_VEHICLE_WEAPONS_5_TARGET_ONLY_R147.csv</code> — five target-only filenames in the archived raw collection.</li>
+</ul>
+<p><strong>Sources:</strong> Library <code>/EDF41_EDF6_RESEARCH/FRIEND_VEHICLE_402_404_RAW_2026-11-04/WEAPON_402_404_EDF41_EDF6_RAW_2026-11-04.zip</code>; and <code>/EDF41_EDF6_RESEARCH/FULL_R10_HF4_FRIENDLY_FIDELITY_WIP_2026-11-04/EDF41_R10_HF4_FRIENDLY_GAMEPLAY_FIDELITY_WIP_R9_2026-11-05_SOURCE_ONLY.zip</code>, member <code>reports/FRIEND_VEHICLE_WEAPON_FIDELITY_R2.json</code>. The latter provides <strong>the authoritative mission-role pairing within this bounded source investigation</strong>, not an independent retail gameplay trial.</p>
+<p>Read with <a href="cross-game-conversion-edf-4-1-vehicle404-target-runtime-contract.html">EDF 4.1 vehicle native compatibility contracts</a>, <a href="edf41-edf5-edf6-native-vehicle-seats-boarding-and-class-masks.html">vehicle seat/class masks</a> and <a href="edf5-ai-vehicle-weapon-stats-and-firing-intervals.html">EDF5 NPC vehicle weapon reference</a>.</p>
+<p><strong>Not verified:</strong> installed game behavior, effect appearance, complete original EDF4.1 retail mission use, or multiplayer synchronization. The data tables are derived metadata, not redistributed game files.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: /EDF41_EDF6_RESEARCH/FRIEND_VEHICLE_402_404_RAW_2026-11-04/WEAPON_402_404_EDF41_EDF6_RAW_2026-11-04.zip</li><li>Library: /EDF41_EDF6_RESEARCH/FULL_R10_HF4_FRIENDLY_FIDELITY_WIP_2026-11-04/EDF41_R10_HF4_FRIENDLY_GAMEPLAY_FIDELITY_WIP_R9_2026-11-05_SOURCE_ONLY.zip :: reports/FRIEND_VEHICLE_WEAPON_FIDELITY_R2.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-same-name-file-comparison-can-mislead">Why same-name file comparison can mislead</a><a href="#r2-mission-role-crosswalk-11-verified-pairs">R2 mission-role crosswalk: 11 verified pairs</a><a href="#same-filename-field-atlas-all-19-shared-names">Same-filename field atlas: all 19 shared names</a><a href="#edf6-only-filenames-in-the-bounded-sample">EDF6-only filenames in the bounded sample</a><a href="#reference-datasets-and-evidence-limits">Reference datasets and evidence limits</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf6-vehicle402-403-404-weapon-sgo-role-pairs-and-native-fields-atlas"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5-derived MissionPack03–05 shared-progress and metadata contract The flag bits and activation semantics For the exact native comparison of flags=8/9/40/520/5"><title>EDF5-derived MissionPack03–05 shared-progress and metadata contract | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF5-derived MissionPack03–05 shared-progress and metadata contract</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Runtime-proven / reconciled</div><div id="articleBody"><h2 id="the-flag-bits-and-activation-semantics">The flag bits and activation semantics</h2>
+<p>For the exact native comparison of <code>flags=8/9/40/520/552</code>, the two independent NO_SUPPORT-capable bits <code>0x20</code> and <code>0x200</code>, and the distinction between red loadout UI versus gameplay activation, see <a href="missions-%26-scripting-underground-mission-flags-and-weapon-condition.html">Underground mission flags and WeaponCondition</a>. Three later runtime tests confirmed native-like <code>flags=40</code> behavior in M000, M001 and DM019. Earlier claims that those missions required injection hacks are superseded.</p>
+<p><strong>Current authority:</strong> the MissionPack semantic ledger created 2026-09-03 and updated through 2026-09-11. This supersedes older attempts that copied EDF5 OFFLINE/ONLINE list asymmetry directly into EDF6 or normalized progression by target row count.</p>
+<h2 id="audited-converted-list-order-versus-the-later-shared-index-target">Audited converted LIST order versus the later shared-index target</h2>
+<p>A historical <strong>EDF5-content converted MissionPack LIST</strong> audit (R41) preserves the order derived from original EDF5 mission tables and a previously working converted-list reference. The numbers below are <strong>directly verified for that converted package</strong>; the source does not independently re-enumerate the original shipping EDF5 OFFLINE <code>LIST.SGO</code> as a separate binary authority.</p>
+<table>
+<thead>
+<tr>
+  <th>Audited converted LIST profile</th>
+  <th style="text-align:right">Recorded rows</th>
+  <th>Source-order relationship</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MissionPack03 OFFLINE</td>
+  <td style="text-align:right">112</td>
+  <td>Tutorial <code>M000</code> followed by the studied EDF5 ONLINE mission sequence</td>
+</tr>
+<tr>
+  <td>MissionPack03 ONLINE</td>
+  <td style="text-align:right">111</td>
+  <td>No <code>M000</code>; <code>M082</code> and <code>M083</code> occur before <code>M098</code> and <code>M099</code></td>
+</tr>
+<tr>
+  <td>MissionPack04 OFFLINE / ONLINE</td>
+  <td style="text-align:right">15 each</td>
+  <td>Matching DLC1 sequence, <code>DM011</code> to <code>DM015</code> (not numeric-sorted)</td>
+</tr>
+<tr>
+  <td>MissionPack05 OFFLINE / ONLINE</td>
+  <td style="text-align:right">14 each</td>
+  <td>Matching DLC2 sequence, <code>DM005_2</code> to <code>DM016</code></td>
+</tr>
+</tbody>
+</table>
+<p>This historical <strong>112/111 converted profile</strong> differs from the later <strong>EDF6-compatible 112/112</strong> shared-progress schema below. The latter intentionally unifies both modes' row ordinals. It would be inaccurate to label 112/111 as a universally correct EDF6 target or to assert that the R41 converted OFFLINE file is itself the untouched original EDF5 shipping LIST.</p>
+<p>In one historically audited converted LIST build, timeline/style fields 6/7 were changed from a dystopia-associated <code>2,1</code> pair (brown menu) to <code>0,0</code> for the original EDF5-era blue menu, with flags <code>8</code> for ordinary rows. This is an <strong>observed bounded menu-profile pairing</strong>; it does not mean <code>field6=0</code> is the universal correct value for every later metadata policy. The maintained target schema below has its own field6 translation and underground flags.</p>
+<p>The same audited LIST build regenerated localized TXT rows in <strong>exact corresponding ordinal order</strong> for EN, JA, KR, CN and SC. An ordinal mismatch can display the wrong mission title and description even when both resources independently parse and all underlying mission scripts exist.</p>
+<h2 id="canonical-target-allocation">Canonical target allocation</h2>
+<table>
+<thead>
+<tr>
+  <th>Target pack</th>
+  <th>Content</th>
+  <th>Source gameplay profiles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MissionPack03</td>
+  <td>EDF5 base campaign</td>
+  <td>EDF5 base OFFLINE / ONLINE</td>
+</tr>
+<tr>
+  <td>MissionPack04</td>
+  <td>EDF5 DLC1</td>
+  <td>EDF5 DLC1 OFFLINE / ONLINE</td>
+</tr>
+<tr>
+  <td>MissionPack05</td>
+  <td>EDF5 DLC2</td>
+  <td>EDF5 DLC2 OFFLINE / ONLINE</td>
+</tr>
+</tbody>
+</table>
+<p>EDF6 uses one shared mission-progress/index axis per campaign. Therefore OFFLINE and ONLINE must expose the <strong>same target mission sequence</strong> inside each converted pack even though their gameplay profile trees remain mode-specific.</p>
+<p>Canonical counts:</p>
+<pre><code class="language-text">MissionPack03: 112 OFFLINE / 112 ONLINE
+MissionPack04:  15 OFFLINE /  15 ONLINE
+MissionPack05:  14 OFFLINE /  14 ONLINE
+</code></pre>
+<p>MissionPack03 uses <code>M000 + full EDF5 ONLINE sequence</code>. This intentionally places offline-only tutorial <code>M000</code> and online-only <code>M082</code>/<code>M083</code> on the same EDF6-compatible sequence. Do not remove them merely to make one mode resemble the original EDF5 list: that would change save ordinals and discard content without improving gameplay scaling.</p>
+<h2 id="complete-converted-list-reference">Complete converted LIST reference</h2>
+<p>The exact historical R41 converted LIST order has a dedicated <a href="missions-edf5-content-r41-converted-mission-list-order-141-campaign-reference.html">141-entry campaign reference</a>, including all 112 base OFFLINE IDs, 111 ONLINE IDs and both DLC sequences, plus the six-profile 281-row CSV. Its converted source-order provenance must remain distinct from untouched EDF5 shipping binaries and from the later 112/112 target progress-index allocation.</p>
+<h2 id="three-independent-semantic-layers">Three independent semantic layers</h2>
+<p>Do not conflate these fields:</p>
+<ol>
+<li><strong>Save/progress identity</strong> — MissionPack namespace plus the shared zero-based LIST ordinal. OFFLINE and ONLINE must agree.</li>
+<li><strong>Mission progression position</strong> — LIST <code>field9</code>, copied <strong>exactly</strong> from the EDF5 source mission's progression float.</li>
+<li><strong>Mode/difficulty gameplay profile</strong> — CONFIG/ModeList profile tree selected by OFFLINE/ONLINE and difficulty.</li>
+</ol>
+<p>This is why a 112-row target list does not stretch EDF5 progression into 112 equal intervals. Never compute LIST <code>field9</code> as <code>ordinal/(count-1)</code> and never restore the historical bad global value <code>0.2</code>.</p>
+<h2 id="list-row-contract">LIST row contract</h2>
+<p>For the maintained converted packs:</p>
+<ul>
+<li>root DSGO variable name is <strong><code>table</code></strong>;</li>
+<li><code>field0</code> is the zero-based target row;</li>
+<li><code>field1</code> is the target mission path;</li>
+<li><code>field2</code> retains the EDF5 display/thumbnail key;</li>
+<li><code>field3</code> follows the established next/pointer wrapper semantics;</li>
+<li><code>field4</code> is the native-style zero-based row ordinal;</li>
+<li><code>field5 = 0</code> in the current schema;</li>
+<li><code>field6</code> carries the translated EDF5 player/resource selector;</li>
+<li><code>field7 = 0</code> under the established EDF5/blue menu-timeline policy;</li>
+<li><code>field8</code> uses the established EDF5 HQ BGM key;</li>
+<li><code>field9</code> is the source-exact EDF5 progression float;</li>
+<li><code>field10</code> carries mission flags, normally <code>8</code> and <code>40</code> for the audited underground set.</li>
+</ul>
+<p>The old V1 meta fix that omitted the named LIST root <code>table</code> produced <code>missionCount=0</code> and an EasyClearRatio divide-by-zero in EDF6. Preserve the complete target container/root structure, not merely the row payloads.</p>
+<h2 id="config-profile-contract">CONFIG profile contract</h2>
+<p>Target CONFIG remains EDF6-native structurally, but custom ModeList rows receive exact EDF5 gameplay profile families:</p>
+<pre><code class="language-text">MP03 OFFLINE &lt;- EDF5 base OFFLINE
+MP03 ONLINE  &lt;- EDF5 base ONLINE
+MP04 OFFLINE &lt;- EDF5 DLC1 OFFLINE
+MP04 ONLINE  &lt;- EDF5 DLC1 ONLINE
+MP05 OFFLINE &lt;- EDF5 DLC2 OFFLINE
+MP05 ONLINE  &lt;- EDF5 DLC2 ONLINE
+</code></pre>
+<p>The profile trees include mission scaling, player-count scaling, weapon drops, enemy/NPC/vehicle scaling, online weapon limits and online armor limits. Identical OFFLINE/ONLINE LISTs therefore do <strong>not</strong> imply identical balance. Do not mutate native EDF6 mode rows <code>0..5</code> simply to register the converted packs.</p>
+<h2 id="indexed-resource-family-must-move-together">Indexed resource family must move together</h2>
+<p>A list-order/count change is not a LIST-only edit. The reconciled runtime overlay carried:</p>
+<ul>
+<li>CONFIG;</li>
+<li>six LIST files;</li>
+<li>all localized TXT companions (<code>EN/JA/KR/CN/SC</code>, OFFLINE+ONLINE, all three packs);</li>
+<li>the indexed mission-image archives.</li>
+</ul>
+<p>Title, description and image indices must follow the same shared ordinal. Rebuilding LIST while leaving stale TXT/image companions is an invalid partial migration.</p>
+<h2 id="underground-semantic-flags-40">Underground semantic: <code>flags=40</code></h2>
+<p>Audited underground missions:</p>
+<pre><code class="language-text">MP03: M000 M001 M014 M027 M028 M029 M056 M057 M062 M072_2 M204
+MP04: DM001 DM007 DM019
+MP05: DM007_2
+</code></pre>
+<p>Use <code>flags=40</code> (<code>8 | 0x20</code>) for these; ordinary surface rows use <code>8</code>.</p>
+<p>Runtime correction: vanilla-like EDF6 underground handling still allows red/incompatible Air Raider equipment to be selected before mission start. The restriction is enforced when the support/vehicle action is attempted. Therefore <strong>being able to equip it is not a failure</strong>. <code>M000</code>, <code>M001</code> and <code>DM019</code> were runtime-confirmed with the native-like <code>flags=40</code> behavior. Earlier proposals for global <code>512/520/552</code> or per-mission weapon-condition workarounds are superseded.</p>
+<h2 id="m000-compatibility-exception">M000 compatibility exception</h2>
+<p>Do not globally change opcode semantics to solve the tutorial.</p>
+<p>Source mapping remains:</p>
+<pre><code class="language-text">1001 -&gt; CreatePlayer_NoWeapon
+1002 -&gt; CreatePlayer_InitWeapon
+</code></pre>
+<p>But the <strong>first</strong> M000 player creation is a target-specific compatibility exception: <code>CreatePlayer_NoWeapon(&quot;プレイヤー&quot;)</code> caused broken first Wing Diver vertical movement in EDF6; changing only that first construction to normal <code>CreatePlayer(&quot;プレイヤー&quot;)</code> restored normal small-jump and flight behavior at runtime. Visible opening weapons are an accepted compatibility cost. Later NoWeapon/InitWeapon lifecycle calls remain source-authentic.</p>
+<p>Keep class-specific tutorial guards, query-expression ordering, polling-loop exit semantics, and the source-authentic Wing Diver sequence (<code>COMMON_JUMP x2</code> before the flying gate). Current shooting tutorial runtime is positive. Dialogue/event parity work retained 96 <code>Talk_AddSingle</code> + 6 <code>Voice2</code> executable callsites; do not invent missing dialogue without source evidence.</p>
+<h2 id="runtime-evidence-boundary">Runtime evidence boundary</h2>
+<p>Meta-parity V3 was accepted by the user for campaigns, maps, limits, outfits/resource behavior and drops. The later reconciled metadata/resource overlay received positive menu/runtime smoke. These results validate the semantic model, but they are not an exhaustive replay of every mission/difficulty combination.</p>
+<h2 id="fail-closed-rules">Fail-closed rules</h2>
+<p>Reject or flag builds that diverge from the shared sequence, lose root <code>table</code>, renormalize LIST <code>field9</code>, inherit EDF6 DLC profile trees by accident, desynchronize TXT/image indices, reset the audited underground set to <code>8</code>, remove M082/M083 only to mimic old OFFLINE, or globally redefine opcode <code>1001</code> because of M000.</p>
+<h2 id="retained-static-parity-acceptance-fixture">Retained static parity acceptance fixture</h2>
+<p>The R4 indexed-resource audit recorded 112/15/14 OFFLINE and ONLINE LIST rows, 30 localized TXT combinations across EN/JA/KR/CN/SC, and shared image RABs expanded from 286 entries to 288 by adding <code>EDF5_M082.dds</code> and <code>EDF5_M083.dds</code>. The source fixture deliberately left CONFIG unchanged because the studied R43 routing was already qualified; other deployments need their own loader/CONFIG evidence. See <a href="missions-edf5-indexed-resource-parity-evidence.html">exact cross-resource audit</a>.</p>
+<h2 id="source-verified-early-campaign-resource-selector-field6-vs-field7">Source-verified early-campaign resource selector (<code>field6</code> vs <code>field7</code>)</h2>
+<p>The original metadata generator made two independent mistakes: it emitted an unnamed DSGO root variable instead of the named <code>table</code> root, and it placed the EDF5 civilian/prototype resource selector in <strong>target <code>field7</code></strong> while clearing <strong>target <code>field6</code></strong>. The corrected EDF6 target schema preserves the complete named <code>table</code> container, puts the <strong>EDF5 source selector in <code>field6</code></strong>, and sets <code>field7=0</code> for the retained EDF5 blue-timeline profile. A structurally valid DSGO with the wrong root name can produce <code>missionCount=0</code>; a valid-looking LIST with the selector swapped can silently load the wrong player resource.</p>
+<p>The exact source-derived early selector <code>1</code> applies to MP03 <code>M000</code>, <code>M001</code>, <code>M003</code>, <code>M004</code>, <code>M005</code>, <code>M006</code>, <code>M006_5</code>, <code>M009</code>, <code>M013</code>, <code>M018</code>, <code>M015_2</code> and <code>M008</code>. The next unified entry <code>M015</code> is at <strong>zero-based index 12</strong>, with selector <code>0</code>, in both OFFLINE and ONLINE. The DLC1/DLC2 source lists were asserted semantically identical across modes rather than assumed.</p>
+<p>These are <strong>source-corpus and converter invariant checks</strong>, not an instruction to copy the same flags to unrelated EDF6 campaigns. The metadata generator's later <code>v5</code> variant also constructs the unified MP03 list as <code>M000 + EDF5 ONLINE sequence</code> for both modes. The older <code>v4</code> generator still had 112 OFFLINE / 111 ONLINE, which is invalid for this EDF6 shared-progress target.</p>
+<p><strong>Source:</strong> <code>R1/build_edf5_missionpack_meta.py</code> → <code>R1/build_edf5_meta_parity_v3.py</code> → <code>R2_UNDERGROUND/build_edf5_meta_parity_v4_underground.py</code> → <code>R3_SHARED_PROGRESS/build_edf5_meta_parity_v5_edf6_shared_progress.py</code> and its exact R2 audit under the <code>MISSION_META</code> research root.</p>
+<h2 id="metadata-and-underground-weapon-research-later-updates-supersede-the-document-s-opening-status">Metadata and underground weapon research: later updates supersede the document's opening status</h2>
+<p>The original <code>META_PARITY_CORRECTION_LEDGER_R1_2026-08-31.json</code> explicitly invalidates two earlier candidate fixes. <strong>V1</strong> omitted the named DSGO LIST root <code>table</code> and the EDF6 reader obtained <code>missionCount=0</code>, then faulted while evaluating its EasyClearRatio. <strong>V2</strong> proposed forcing LIST <code>field4=1</code>, but native EDF6 uses the <strong>zero-based row ordinal</strong> there; V2 was rejected before testing. The retained V3 contract preserves the full <code>table</code>, puts EDF5 source resource selector in target <code>field6</code>, clears <code>field7=0</code>, places progression in <code>field9</code>, and preserves target difficulty profile structure with source gameplay values.</p>
+<p>The focused underground weapon investigation is <strong>not still open simply because its opening paragraphs say unresolved</strong>: sections added later on 3 September record direct user runtime <strong>PASS</strong> for <code>M000</code>, <code>M001</code> and <code>DM019</code> with <code>flags=40</code>, and correct the acceptance criterion. Native EDF6 can allow equipment selection before launch yet refuse underground support <em>when used</em>. The earlier <code>512/520/552</code> flag alternative, injected diagnostics and global <code>WeaponCondition</code> patches should therefore not be promoted as the tested solution. This resolved <em>underground support-use semantics</em> is separate from the historical <strong>DM019 AI-vs-NPC through-wall targeting/pathing</strong> concern, which the later 1.0.2 runtime-state ledger still lists as needing current-revision retest.</p>
+<p>The broad semantic authority ledger was also <strong>appended later</strong> with the M014 mission-18 source-derived production behavior: do not infer its current state from only its 3 September opening section. This evidence is about selected modified-game compatibility cases and native schema, not exhaustive multiplayer/mission-clear certification. Sources: <code>META_PARITY_CORRECTION_LEDGER_R1_2026-08-31.json</code>, <code>EDF5_EDF6_MISSIONPACK_SEMANTIC_AUTHORITY_LEDGER_2026-09-03.md</code>, <code>EDF5_EDF6_MISSIONPACK_UNDERGROUND_WEAPON_RESTRICTION_LEDGER_2026-09-03.md</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/ledgers/EDF5_EDF6_MISSIONPACK_SEMANTIC_AUTHORITY_LEDGER_2026-09-03.md (updated 2026-09-11)</li><li>/EDF5_EDF6_RESEARCH/research/audits/runtime/R54_RUNTIME_STATE_2026-09-01.json</li><li>/EDF5_EDF6_RESEARCH/research/session_snapshots/2026-08-31/EDF5_MISSIONPACK03_04_05_META_PARITY_FIX_V3_2026-08-31.zip</li><li>EDF5_EDF6_MISSIONPACK_UNDERGROUND_WEAPON_RESTRICTION_LEDGER_2026-09-03.md (final sections 18–19)</li><li>data/R167_REMAINING_39_SOURCE_CLAIM_DISPOSITIONS.csv</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-flag-bits-and-activation-semantics">The flag bits and activation semantics</a><a href="#audited-converted-list-order-versus-the-later-shared-index-target">Audited converted LIST order versus the later shared-index target</a><a href="#canonical-target-allocation">Canonical target allocation</a><a href="#complete-converted-list-reference">Complete converted LIST reference</a><a href="#three-independent-semantic-layers">Three independent semantic layers</a><a href="#list-row-contract">LIST row contract</a><a href="#config-profile-contract">CONFIG profile contract</a><a href="#indexed-resource-family-must-move-together">Indexed resource family must move together</a><a href="#underground-semantic-flags-40">Underground semantic: flags=40</a><a href="#m000-compatibility-exception">M000 compatibility exception</a><a href="#runtime-evidence-boundary">Runtime evidence boundary</a><a href="#fail-closed-rules">Fail-closed rules</a><a href="#retained-static-parity-acceptance-fixture">Retained static parity acceptance fixture</a><a href="#source-verified-early-campaign-resource-selector-field6-vs-field7">Source-verified early-campaign resource selector (field6 vs field7)</a><a href="#metadata-and-underground-weapon-research-later-updates-supersede-the-document-s-opening-status">Metadata and underground weapon research: later updates supersede the document&#39;s opening status</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-edf5-derived-missionpack03-05-shared-progress-metadata-contract"};</script><script src="../assets/site.js" defer></script></body></html>

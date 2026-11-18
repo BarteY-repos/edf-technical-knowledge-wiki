@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Textures Overview EDF textures commonly use DDS-family payloads, but format, channel meaning, alpha behavior and sampler binding must all be inspected. A DDS fi"><title>Textures | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Textures</a></div><h1>Textures</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Textures</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>EDF textures commonly use DDS-family payloads, but <strong>format, channel meaning, alpha behavior and sampler binding</strong> must all be inspected. A DDS file with valid dimensions can still be incompatible with a shader or a specific resource slot.</p>
+<h2 id="reference">Reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Subject</th>
+  <th>Relevant detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Packed material masks</td>
+  <td><a href="textures-edf-texture-packing-cutouts-and-fpr-explained.html">DDS and packed-channel observations</a></td>
+</tr>
+<tr>
+  <td>Native foliage cutouts</td>
+  <td><a href="textures-dds-packed-channels-fpr-and-runtime-binding-contracts.html">BC1/DXT1 cutout and mip evidence</a></td>
+</tr>
+<tr>
+  <td>MDB sampler order</td>
+  <td><a href="materials-%26-shaders-native-mdb-shader-family-field-guide.html">Native MDB shader families: practical parameter and sampler reference</a></td>
+</tr>
+<tr>
+  <td>Mission thumbnails</td>
+  <td><a href="missions-%26-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry.html">Mission LIST → DDS identity</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="practical-constraints">Practical constraints</h2>
+<p>For BC1/DXT1 cutouts, maintain alpha coverage across mip levels when the source asset depends on a binary transparency edge. Do <strong>not</strong> globally convert all alpha assets to BC1. For mission previews, a valid DDS has to be stored under the named entry derived from LIST field 2 in the <strong>base</strong> offline/online IMAGE.RAB archives for the studied target profile.</p>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="textures-edf-texture-packing-cutouts-and-fpr-explained.html">EDF texture observations: DDS, packed masks, BC1 cutouts and FPR</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#reference">Reference</a><a href="#practical-constraints">Practical constraints</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-textures"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Havok compressed-mesh primitives: shape keys, section records and failure modes Native broadphase checker: inactive keys and rounding Do not treat every 4-byte "><title>Havok compressed-mesh primitives: shape keys, section records and failure modes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>Havok compressed-mesh primitives: shape keys, section records and failure modes</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; Physics</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Scoped: binary decoder, section ABI and runtime case</div><div id="articleBody"><h2 id="native-broadphase-checker-inactive-keys-and-rounding">Native broadphase checker: inactive keys and rounding</h2>
+<p>Do not treat every 4-byte primitive row as a live shape key: the examined native NW map uses <strong><code>DE AD DE AD</code> tombstones</strong>. A faulty validator counted ten false missing keys until those inactive slots were excluded. The same checker formerly used a fixed <code>1e-4</code> world-bound tolerance, which was too strict for float32 at this map's scale. See <a href="maps-%26-navigation-havok-broadphase-tombstones-and-float32-validation.html">Havok broadphase validation</a> for the exact ULP-based budget and a deliberate +0.01 negative test. These tombstones are distinct from <code>0xFFFFFFFF</code> encoded invalid key sentinels discussed above.</p>
+<p>A collision mesh in EDF6 is not simply an array of triangles. The examined Havok 2020 compressed-mesh representation carries <strong>packed/shared vertices, primitives, per-section prefixes and a hierarchy of keys</strong> used by runtime collision queries. A generated mesh can render or even parse correctly while producing invalid contacts when one of these structures is inconsistent.</p>
+<p>This article describes fields independently identified in the inspected EDF6/Havok-2020 wire representation and their observed consequences. <strong>Offsets below are specific to that inspected <code>hkcdStaticMeshTree::Section</code> layout; they are not interchangeable with generic HKX/MAD file offsets.</strong></p>
+<h2 id="primitive-storage-triangles-quads-and-keys">Primitive storage: triangles, quads and keys</h2>
+<p>The examined four-index primitive representation distinguishes two cases:</p>
+<table>
+<thead>
+<tr>
+  <th>Primitive index relation</th>
+  <th>Meaning in the measured writer</th>
+  <th style="text-align:right">Physical primitive keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>c == d</code></td>
+  <td>Degenerate fourth corner: one triangle</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>c != d</code></td>
+  <td>Four-corner quad, expanded as two triangles</td>
+  <td style="text-align:right">2</td>
+</tr>
+</tbody>
+</table>
+<p>A scene may therefore have many more <em>expanded triangles</em> than primitive records. The conversion must count <strong>expanded primitive keys</strong>, not merely quad records or source triangles, when computing the next section's prefix.</p>
+<p>The <code>firstPrimitiveIndex</code> in a section is a <strong>mesh-global accumulated prefix</strong> for previous sections. It is not a per-section zero-based count. The accepted Desert sample's independent audit checked <strong>11,873 sections in 387 section arrays</strong> with <strong>zero</strong> prefix mismatches. These counts describe that sample, not universal file constraints.</p>
+<h2 id="measured-section-record-abi">Measured section record ABI</h2>
+<p>A target section occupies <strong><code>0x60</code> bytes (96 B)</strong> in the audited structure. Selected member offsets are:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Section-relative offset</th>
+  <th>Member</th>
+  <th>Implementation consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>+0x48</code></td>
+  <td><code>firstPackedVertexIndex</code></td>
+  <td>Start index into the section's packed-vertex data</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x4C</code></td>
+  <td><code>firstSharedVertexIndex</code></td>
+  <td>Start index for shared vertices</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x50</code></td>
+  <td><code>firstPrimitiveIndex</code></td>
+  <td>Primitive-prefix index across preceding sections</td>
+</tr>
+</tbody>
+</table>
+<p>A reader should first determine the exact version/schema that owns these fields, validate section indices and array bounds, then resolve the section's primitive and vertex references. Do not treat bytes that happen to resemble these offsets in an older Havok generation as compatible.</p>
+<h2 id="why-an-invalid-key-can-crash-long-after-loading">Why an invalid key can crash long after loading</h2>
+<p>One investigated EDF6 crash had an exact decoder-side failure path:</p>
+<pre><code class="language-text">invalid compressed-mesh shape key = 0xFFFFFFFF
+       -&gt; decoded section index = 0xFFFFFF
+       -&gt; section address = base + 0x80 + 0xFFFFFF * 0x60
+       -&gt; attempted read of Section.firstPackedVertexIndex at +0x48
+       -&gt; out-of-bounds memory access
+</code></pre>
+<p>The failing instruction, constructed address and recorded access violation matched in that audited build. This establishes <strong>how the invalid key causes the observed failure</strong>, not necessarily <em>where the invalid key came from</em>.</p>
+<p>In the same investigation a source-built compressed-mesh representation had a separately proven defect involving inactive SIMD lanes. <strong>The causal link from that defect to the exact <code>0xFFFFFFFF</code> key was not closed.</strong> Do not present the candidate as a proven universal root cause. Both are useful independent checks: initialize inactive vector lanes correctly <em>and</em> reject invalid section/shape keys before dereferencing them.</p>
+<h2 id="sparse-triangleisinterior-indexing">Sparse <code>triangleIsInterior</code> indexing</h2>
+<p>The interior-edge/triangle bitfield is indexed by <strong>shape-key space</strong>. For the measured compact-mesh path, the span is driven by <code>maxShapeKey + 1</code>, not directly by the number of source input triangles. Sparse keys and two-key quad expansion can make those quantities different.</p>
+<p>A correct <code>triangleIsInterior</code> bitfield does not automatically make triangle winding, primitive shape type or section prefix correct. Likewise, zero-valued interior bits are not a guarantee of contact parity. The bitfield, topology and key mapping should be validated independently.</p>
+<h2 id="the-flat-convex-conversion-trap">The flat/convex conversion trap</h2>
+<p>In one runtime-qualified Desert compatibility branch, geometric reclassification that freely converted both <strong>flat→split and split→flat</strong> improved floor appearance/collision but crashed in the compressed-mesh primitive decode path. A control with <strong>zero interior bits</strong> and the same unsafe topology also crashed. That observation falsified the claim that the crash required <code>triangleIsInterior</code> to be nonzero.</p>
+<p>The stable local profile preserved deterministic source-backed primitive order and permitted only <strong>geometry-justified flat→split</strong>, never an unproven reverse synthesis. This is an <strong>observed safe conversion policy for the investigated family</strong>, not proof that every EDF6 mesh can or should use all-zero interior bits.</p>
+<h2 id="shape-type-dispatch-type-and-body-motion-are-different-domains">Shape type, dispatch type and body motion are different domains</h2>
+<p>Do not confuse a model's shape-type identity, the collision dispatch enum, and the body's motion type. The measured target shape taxonomy includes convex (<code>0</code>), cylinder (<code>3</code>), box (<code>5</code>), compressed mesh (<code>8</code>) and compound (<code>11</code>); one working compressed-mesh profile separately required <strong><code>numShapeKeyBits=14</code> at <code>+0x04</code></strong>, while retaining <strong><code>dispatchType=3</code> at <code>+0x01</code></strong>. An old crash report incorrectly called the <code>+0x04</code> value &quot;dispatchType=14&quot;. <strong>Those numerals are not the same enum or field.</strong> Do not put a bit-count in a dispatch-type field and do not force shape-key bit-count <code>14</code> on all meshes.</p>
+<p>The original EDF5→EDF6 research also caught a <strong>lossy motion-type mapping</strong> of source values <code>{5:0, 2:2, 3:2}</code>. Any unknown source value silently defaulted to target static <code>0</code>. This is not a safe universal translation: preserve the source meaning, reject unrecognized types, and require target-class evidence before mapping.</p>
+<h2 id="useful-validation-checks">Useful validation checks</h2>
+<ol>
+<li>Reparse the generated target TYPE/ITEM/DATA graph, but don't stop at successful parsing.</li>
+<li>Verify each section's packed/shared-vertex and primitive spans and all mesh-global prefixes.</li>
+<li>Verify the true quad expansion: <code>c == d</code> versus <code>c != d</code>, and each resulting shape key.</li>
+<li>Validate sparse-key-dependent bitfields against <strong>actual key maxima</strong>, not input-triangle counts.</li>
+<li>Reject the <code>0xFFFFFFFF</code> sentinel when it is not a valid key and verify section-index bounds before access.</li>
+<li>Check dispatch/shape/motion enums <strong>as separate fields</strong>, never by matching numeric values by coincidence.</li>
+<li>Separate game-runtime collision and AI contact results from byte-structural writer validation.</li>
+</ol>
+<p>See <a href="maps-%26-navigation-havok-mad-wire-layout-primitive-indexing-and-type-alignment.html">MAD wire ABI and primitive indexing</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Havok collision architecture</a> and <a href="maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">physical walls versus AI target selection</a>.</p>
+<p><em>Evidence provenance:</em> independent analysis of the EDF6 target compressed-mesh decoder and measured section ABI; source-only MAD comparisons; 2026-08-23 collision runtime controls; R11 invalid-lane diagnostic. Runtime behavior is build- and sample-scoped.</p>
+<h2 id="the-native-interior-bit-evidence-is-substantial-not-decorative">The native interior-bit evidence is substantial, not decorative</h2>
+<p>The retained native EDF6 collision analysis reported:</p>
+<table>
+<thead>
+<tr>
+  <th>Native map family</th>
+  <th style="text-align:right">Compressed meshes with nonzero interior data</th>
+  <th style="text-align:right">Approximate set bits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CAVE</td>
+  <td style="text-align:right">102 / 102</td>
+  <td style="text-align:right">320,000</td>
+</tr>
+<tr>
+  <td>HEIGEN</td>
+  <td style="text-align:right">415 / 767</td>
+  <td style="text-align:right">1,090,000</td>
+</tr>
+<tr>
+  <td>EUROPE</td>
+  <td style="text-align:right">83 / 102</td>
+  <td style="text-align:right">33,000</td>
+</tr>
+<tr>
+  <td>Historical working Desert control</td>
+  <td style="text-align:right">reported nonzero</td>
+  <td style="text-align:right">5,290,000</td>
+</tr>
+<tr>
+  <td>Source-built Desert R5</td>
+  <td style="text-align:right">0 / 387</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>reported counts from a historical paired-file audit</strong>, not new runtime measurements. The zero-filled compatibility path was successful under a particular conservative topology; it is not exact native interior-edge semantics. Suppressing interior-edge contacts affects collision response and may alter seams or edge behavior.</p>
+<p>The classifier work identified <strong>vertex identity rather than just floating-point position</strong> as important. Per-section packed vertices must be decoded with section-local <code>codecParms</code>; using a section AABB as the codec or welding coincident coordinates across deliberate seams corrupts adjacency. Classification is related to <em>local edge adjacency/concavity</em> and exterior boundary status, rather than a direct copy of EDF5 <code>weldingType</code> (the sampled EDF5 maps reported <code>WELDING_TYPE_NONE</code>). A reference-aware method reached approximately <strong>98% F1 on one CAVE sample</strong> when it was allowed to consult target-neighbor information. This is promising evidence for the mechanism but <strong>does not constitute a source-only exact-bit generator</strong>.</p>
+<p>The related <code>numShapeKeyBits</code> is a per-shape key-space budget, <strong>not a universal <code>14</code></strong>: the historical census observed CAVE 11–14, HEIGEN 1–14, and some EUROPE values up to about 18. Allocate against actual maximum encoded keys and keep it distinct from the size of the <code>triangleIsInterior</code> sparse bitfield.</p>
+<p><strong>Current state:</strong> native semantics strongly indicated; exact source-only reconstruction for every map still open. Keep zero-policy acceptance and native-bit parity as <em>different statements</em>. The source paper trail is the 2026-08-22/23 MAD research material retained in <code>R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md</code> (detailed <code>hknpCompressedMeshShape</code> member table, interior audit and shape-key audit).</p>
+<h2 id="a-derived-bit-width-rule-that-reserves-the-all-ones-sentinel">A derived bit-width rule that reserves the all-ones sentinel</h2>
+<p>For the independently audited EDF5→EDF6 <strong>MAD compressed-mesh R12</strong> serializer profile, the correct field width is:</p>
+<pre><code class="language-python">numShapeKeyBits = (maxShapeKey + 1).bit_length()
+</code></pre>
+<p>This is <em>not</em> the same as <code>maxShapeKey.bit_length()</code> when <code>maxShapeKey</code> ends an all-ones binary range. The old expression could encode a valid largest shape key as <strong>all ones</strong>, colliding with the representation's reserved invalid/sentinel key pattern. Sample values from the audited corpus:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Maximum legitimate shape key</th>
+  <th style="text-align:right">Old width</th>
+  <th style="text-align:right">Correct R12 width</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">4</td>
+</tr>
+</tbody>
+</table>
+<p>The retained R12 audit records <strong>61 compressed-mesh instances</strong> with this collision, and <strong>122 mirrored field updates</strong> (122 changed bytes in the studied file delta). After applying the corrected rule, its recorded all-ones collisions dropped from <strong>61 to 0</strong>. A separate validation entry reports <strong>1,628/1,628</strong> native compressed meshes across BASE502, HEIGEN507, CAVE503 and NW_EUROPE01 for that investigated rule.</p>
+<p><strong>Implementation rule:</strong> derive bit width from the actual maximum <em>encoded source shape key</em> and its reserved invalid-pattern convention, not from source triangle count, an assumed universal <code>14</code>, or only the number of mesh sections. This audit is specific to the studied Havok/MAD variant; it does not prove a version-independent law for every <code>hknpCompressedMeshShape</code> producer. The structural key-width fix is <strong>source/byte audited</strong>, not a claim of newly observed game collision runtime.</p>
+<p><strong>Source:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MAD/R12/R12_KEYWIDTH_FIX.json</code> — complete per-mesh source audit and exact changed-field census.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_MAD_R11_SIMD_INVALID_LANES_HANDOFF_2026-08-26.md</li><li>MAD_WIRE_ABI_CORRECTION_2026-08-22.md</li><li>2026-08-23 Desert flat/split runtime evidence</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-broadphase-checker-inactive-keys-and-rounding">Native broadphase checker: inactive keys and rounding</a><a href="#primitive-storage-triangles-quads-and-keys">Primitive storage: triangles, quads and keys</a><a href="#measured-section-record-abi">Measured section record ABI</a><a href="#why-an-invalid-key-can-crash-long-after-loading">Why an invalid key can crash long after loading</a><a href="#sparse-triangleisinterior-indexing">Sparse triangleIsInterior indexing</a><a href="#the-flat-convex-conversion-trap">The flat/convex conversion trap</a><a href="#shape-type-dispatch-type-and-body-motion-are-different-domains">Shape type, dispatch type and body motion are different domains</a><a href="#useful-validation-checks">Useful validation checks</a><a href="#the-native-interior-bit-evidence-is-substantial-not-decorative">The native interior-bit evidence is substantial, not decorative</a><a href="#a-derived-bit-width-rule-that-reserves-the-all-ones-sentinel">A derived bit-width rule that reserves the all-ones sentinel</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-havok-compressed-mesh-shape-keys-section-records-and-failure-modes"};</script><script src="../assets/site.js" defer></script></body></html>

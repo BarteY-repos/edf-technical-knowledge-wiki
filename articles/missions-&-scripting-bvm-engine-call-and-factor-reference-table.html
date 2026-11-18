@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="BVM custom-call and factor reference: decoded engine actions The EDF5 mission VM stores numeric custom-call identifiers; EDF6 mission authoring exposes many of "><title>BVM custom-call and factor reference: decoded engine actions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-scripting.html">Scripting</a></div><h1>BVM custom-call and factor reference: decoded engine actions</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Scoped: native source/target exact-pair semantic mapping</div><div id="articleBody"><p>The EDF5 mission VM stores numeric custom-call identifiers; EDF6 mission authoring exposes many of the same <strong>effects</strong> as named AngelScript operations. The tables below are a <strong>reverse-engineered reference for the inspected EDF5 shipping mission corpus</strong>, not a guarantee that every name can be called on every object type or that each conversion has been runtime-certified.</p>
+<p>An instruction such as <code>AC D0 07</code> means the <code>cuscall0</code> instruction with a little-endian custom-call ID <code>0x07D0</code> (<code>2000</code>). The call ID does <strong>not</strong> change the VM opcode or its operand width. A correct converter must reconstruct stack ownership, arguments, control flow and timing before mapping an API.</p>
+<h2 id="object-enemy-and-group-operations">Object, enemy and group operations</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Custom-call ID</th>
+  <th>Interpreted effect / target form</th>
+  <th>Important distinction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1013</code></td>
+  <td>Create/attach follower group and <code>SetAiFollow</code> transaction</td>
+  <td>A compound transaction; not the same source event as direct <code>3152</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1024</code></td>
+  <td><code>RideVehicle</code></td>
+  <td>Vehicle setup/ride order matters</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1027</code></td>
+  <td><code>SetupVehicle</code></td>
+  <td>Initialization is separate from riding</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>1028</code></td>
+  <td><code>Vehicle_SetRideEnable</code></td>
+  <td>Receiver is an object</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2000</code></td>
+  <td><code>CreateEnemy</code></td>
+  <td>Default enemy-creation path</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2001</code></td>
+  <td><code>CreateEnemy2</code></td>
+  <td>Distinct and confirmed for wall-anchored spawners</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2004</code></td>
+  <td><code>CreateEnemyGroup_Spawn</code></td>
+  <td>Group transaction with immediate side effect</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2005</code></td>
+  <td><code>CreateEnemyGroupUG_Spawn</code></td>
+  <td>Underground-family variant</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2006</code></td>
+  <td><code>CreateFlyingEnemyGroup_Area</code></td>
+  <td><strong>Opcode-defined</strong>; no SGO heuristic</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2007</code></td>
+  <td><code>CreateFlyingEnemyGroup_Area_Route</code></td>
+  <td>Route-bearing flying-area variant</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2008</code></td>
+  <td><code>CreateEnemyGroup_Area</code></td>
+  <td>Also used with a <em>flying</em> SGO in an official sample; not inherently flying-only</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2009</code></td>
+  <td><code>CreateEnemyGroup_Area_Spawn</code></td>
+  <td>Dedicated target operation, <strong>not</strong> <code>.Spawn()</code> on <code>CreateEnemyGroup_Area</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2201</code></td>
+  <td><code>SetDropBoatDrop</code></td>
+  <td>Drop boat behavior</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2203</code></td>
+  <td><code>SetDropBoatAutoCruise</code></td>
+  <td>Drop boat behavior</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3000</code></td>
+  <td>Delete object</td>
+  <td>Source argument/ownership must be retained</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3018</code></td>
+  <td><code>SetObjectInvincible</code></td>
+  <td>Object-state operation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3020</code></td>
+  <td><code>SetObjectDurabilityMin</code></td>
+  <td>Earlier labels may use different names</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3021</code></td>
+  <td><code>SetIgnoreDamageEventMode</code></td>
+  <td>Separate from invincibility</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3022</code></td>
+  <td><code>SetEncount(Object)</code></td>
+  <td><strong>One object argument</strong> in the measured signature</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3023</code></td>
+  <td><code>SendTeamEncount</code></td>
+  <td>Team-ID interpretation must be checked</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3052</code></td>
+  <td><code>SetTeamID</code></td>
+  <td>Source team IDs: <code>1</code> enemy, <code>2</code> friend, <code>3</code> neutral</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3400</code></td>
+  <td><code>leader.Follower(index)</code></td>
+  <td>Method form, specific owner</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3500</code></td>
+  <td><code>AddGroupObjectBegin</code></td>
+  <td>Opens group transaction</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3501</code></td>
+  <td><code>AddGroupObjectEnd</code></td>
+  <td>Closes group transaction</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3502</code></td>
+  <td><code>GetGroupObjectCount</code></td>
+  <td>Reads group state</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source-vm-pause-object-removal-and-vehicle-setup">Source VM: pause, object removal and vehicle setup</h2>
+<p>These six entries have source-stack arity and target API signature independently checked for the inspected EDF5 BVM corpus. <strong>Call bank and receiver ownership matter</strong>, rather than just the numeric ID:</p>
+<table>
+<thead>
+<tr>
+  <th>Source BVM call</th>
+  <th style="text-align:right">Source-stack arguments</th>
+  <th>Verified target-side signature</th>
+  <th>Important constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>cuscall0 52</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>void SetEnablePause(bool)</code></td>
+  <td>Use source boolean value, not forced <code>true</code></td>
+</tr>
+<tr>
+  <td><code>cuscall0 910</code></td>
+  <td style="text-align:right">0</td>
+  <td><code>void DeleteMob()</code></td>
+  <td>No invented object argument</td>
+</tr>
+<tr>
+  <td><code>cuscall3 1000</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>void SetMoveArea(string)</code></td>
+  <td><strong>Different call bank</strong>; one area string</td>
+</tr>
+<tr>
+  <td><code>cuscall0 1024</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>void RideVehicle(Object)</code></td>
+  <td>Vehicle argument is an object</td>
+</tr>
+<tr>
+  <td><code>cuscall0 1027</code></td>
+  <td style="text-align:right">1</td>
+  <td><code>void SetupVehicle(Object)</code></td>
+  <td>Setup is distinct from RideVehicle</td>
+</tr>
+<tr>
+  <td><code>cuscall0 1028</code></td>
+  <td style="text-align:right">2</td>
+  <td><code>Object&amp; Vehicle_SetRideEnable(bool)</code></td>
+  <td>Object <strong>receiver is below the bool</strong> on the source VM stack; target is a method, not a global function</td>
+</tr>
+</tbody>
+</table>
+<p>These are source/API signature and stack-contract observations, <strong>not</strong> proof that every gameplay path using each call has been separately tested in EDF6. They do not justify changing mappings for unrelated call IDs <code>5020</code>, <code>5150</code>, <code>1301</code> or <code>1100</code>.</p>
+<h2 id="navigation-movement-and-ai">Navigation, movement and AI</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">ID</th>
+  <th>Target effect</th>
+  <th>Important constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>3100</code></td>
+  <td><strong>global</strong> <code>SetAiMoveSpeed(obj, speed)</code></td>
+  <td>Older <code>SetAiRouteSpeed</code> label retired</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3101</code></td>
+  <td><strong>global</strong> <code>SetAiRoute(obj, route)</code></td>
+  <td>Assign route, not path</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3102</code></td>
+  <td><strong>global</strong> <code>SetAiPath(obj, path)</code></td>
+  <td>Separate call, not a 3101 alias</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3103</code></td>
+  <td><code>IsAiMoveEnd</code></td>
+  <td>Previously called <code>ObjectNotOnRoute</code> in a legacy reference</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3107</code></td>
+  <td><code>EnableHumanExplosionDown</code></td>
+  <td>Source-specific flag</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3108</code></td>
+  <td><code>SetSoldierBattleMoveSpeelMultiply</code></td>
+  <td>Spelling follows researched target symbol</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3111</code></td>
+  <td><code>SetAiNavMesh_CostModifierEnable</code></td>
+  <td>Applied to AI navigation configuration</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3150</code></td>
+  <td><code>SetAiFormationRadius</code></td>
+  <td><strong>Not</strong> a substitute for custom-call <code>3450</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3152</code></td>
+  <td><code>SetAiFollow</code></td>
+  <td>Direct call, unlike <code>1013</code> transaction</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3172</code></td>
+  <td><code>SetAiObjectDirection_Point</code></td>
+  <td>Aim/heading toward a point</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3173</code></td>
+  <td><code>SetAiObjectDirection_Object</code></td>
+  <td>Aim/heading toward an object</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>3450</code></td>
+  <td><code>SetAiSearchRadius</code>: object search/encounter radius</td>
+  <td><strong>Native effect proven; no safe AngelScript binding; six DM006_2 writes explicitly waived in a playable tested branch</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The examined 44-mission comparison contained <strong>708 global route calls</strong> and <strong>514 global speed calls</strong>, with no corresponding method-form calls in that sample. These are corpus observations, not language-wide forbidden syntax rules.</p>
+<h2 id="voice-lighting-animation-and-visual-effects">Voice, lighting, animation and visual effects</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">ID</th>
+  <th>Target effect</th>
+  <th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>4000</code></td>
+  <td>Direct <code>Voice(string)</code></td>
+  <td>Not <code>PlaySe</code> for the direct source call</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4004</code> / <code>4005</code></td>
+  <td><code>EnableAiRandomTalk</code> / <code>DisableAiRandomTalk</code></td>
+  <td>Distinct boolean effects</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4010</code>, mode <code>8</code></td>
+  <td>Underground sound reverb/talk condition</td>
+  <td>Source mode matters</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4100</code>–family</td>
+  <td>Talk/voice transaction</td>
+  <td>Preserve sequence and speaker ownership</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4120</code></td>
+  <td><code>AppealAnimation</code></td>
+  <td>Target animation action</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4121</code></td>
+  <td><code>AppealAnimation_Loop</code></td>
+  <td>Loop variant</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4122</code></td>
+  <td><code>AppealAnimationEnd</code></td>
+  <td>Terminates appeal animation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5010</code></td>
+  <td>Event light-group color behavior</td>
+  <td>Lighting context required</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5012</code></td>
+  <td><code>EventLightTool_EnvMode</code></td>
+  <td>Environment mode</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5013</code></td>
+  <td><code>EventLightTool_EnvFadeAnimation</code></td>
+  <td>Fade animation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5014</code></td>
+  <td><code>EventLightTool_RevertEnvFadeAnimation</code></td>
+  <td>Restores previous fade state</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5015</code></td>
+  <td><code>EventLightTool_RevertAllEnvFadeAnimation</code></td>
+  <td>Restores all</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5020</code></td>
+  <td><code>EventLightTool_RotateLightDirection</code></td>
+  <td>Directional light rotation</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5030</code></td>
+  <td><code>EventSe</code></td>
+  <td>Event sound effect</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>5150</code></td>
+  <td><code>SceneEffect_StartFade</code></td>
+  <td>Scene fade effect</td>
+</tr>
+</tbody>
+</table>
+<p>Source <code>1301</code> can explicitly request <code>SetFullLightWeightMode</code>; <strong>do not inject it into every generated mission</strong>. The same applies to other apparently helpful setup calls. A converter's task is to preserve source-specific behavior.</p>
+<h3 id="scalar-group-tokens-are-not-object-references">Scalar group tokens are not object references</h3>
+<p><code>AddGroupObjectBegin</code>, <code>GetGroupObjectCount</code> and the group-count/encounter factors work with <strong>integer group IDs or counts</strong>, not automatically with AngelScript <code>Object</code> handles. An exact 141-mission source audit corrected 22 declarations in 12 scripts plus one <code>IsAiMoveEnd(...) == 1</code> comparison in <code>M004</code>, giving 13 affected scripts. See <a href="missions-edf5-bvm-group-id-count-and-bool-domain-reference.html">group IDs, counts and bool domains</a> for examples and the verified limits of this inference.</p>
+<h2 id="event-factors-and-conditions">Event factors and conditions</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">ID</th>
+  <th>Meaning</th>
+  <th>Critical distinction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>9001</code></td>
+  <td><code>Factor_Timer</code></td>
+  <td>Timed condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9050</code> / <code>9051</code></td>
+  <td><code>Factor_FlagOn</code> / <code>Factor_FlagOff</code></td>
+  <td>Different flag polarities</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9100</code></td>
+  <td><code>Factor_AllEnemyDestroy</code></td>
+  <td>Enemy state condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9110</code></td>
+  <td><code>Factor_TeamObjectCount</code></td>
+  <td>Team-wide count</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9112</code></td>
+  <td><code>Factor_AreaTeamObjectCount</code></td>
+  <td>Area-scoped count</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9113</code></td>
+  <td><code>Factor_TeamBigObjectCount</code></td>
+  <td>Big-object family</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9114</code></td>
+  <td><code>Factor_GeneratorEnemyCount</code></td>
+  <td>Generator condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9116</code></td>
+  <td><code>Factor_GroupObjectCount</code></td>
+  <td>Group count</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9117</code></td>
+  <td><code>Factor_GroupObjectEncount</code></td>
+  <td>Group encounter</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9120</code> / <code>9121</code></td>
+  <td><code>Factor_TeamEncount</code> / <code>Factor_TeamNotEncount</code></td>
+  <td>Separate conditions</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9201</code></td>
+  <td><code>Factor_ObjectDestroy</code></td>
+  <td><strong>Not</strong> encounter</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9202</code></td>
+  <td><code>Factor_ObjectEncount</code></td>
+  <td><strong>Not</strong> destroy</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9204</code></td>
+  <td><code>Factor_ObjectAlive</code></td>
+  <td>Object alive condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9205</code></td>
+  <td><code>Factor_RideVehicle</code></td>
+  <td>Vehicle ride</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9300</code></td>
+  <td><code>Factor_AiMoveEnd</code></td>
+  <td>Route traversal condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9301</code></td>
+  <td><code>Factor_AiMoveEndOrDie</code></td>
+  <td>Includes death condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9310</code></td>
+  <td><code>Factor_AiFollow</code></td>
+  <td>Follower condition</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>9400</code></td>
+  <td><code>Factor_PlayerAreaIn</code></td>
+  <td>Player area entry</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vm-scaffolding-is-not-gameplay-scripting">VM scaffolding is not gameplay scripting</h2>
+<p>The inspected BVM stream also uses <code>cuscall0 9</code> and <code>cuscall1 1/2</code> for VM progress/resume or coroutine framing. The former is <strong>not</strong> <code>Wait(seconds)</code> in this source context. Treat them as control-flow scaffolding, not invented gameplay calls. A separate, narrowly verified pattern containing <code>9000</code> before an event registration <strong>can</strong> represent an in-body wait; the context determines which rule applies.</p>
+<p><strong>Important:</strong> Group creation operations that consume arguments and have side effects must be emitted in their original order even if an AngelScript helper returns an object. Retaining the target's return expression on the reconstructed source VM stack caused out-of-order enemy groups in the inspected port. Reconstructing the <em>source</em> stack effect and side-effect timing is essential.</p>
+<h2 id="how-far-has-this-mapping-been-verified">How far has this mapping been verified?</h2>
+<p>The R37 inspected source corpus comprised <strong>141 shipping missions</strong> with an additional four-mission stress set. Its source/target correspondence gates are <strong>static or exact-pair comparisons</strong>, not automatically fresh gameplay tests. A subset of mappings such as the wall-spawner <code>2001</code> has direct runtime-positive evidence. <code>3450</code> is specifically <strong>not</strong> safe for generic AngelScript emission: it writes to Object <code>+0x2E0</code> (EDF5) or <code>+0x470</code> (EDF6), but the equivalent callable target setter was not demonstrated. Do not substitute <code>3024</code> or <code>3150</code>. The accepted <code>3450-OFF</code> route is a <strong>documented, mission-specific fidelity waiver</strong>, not proof the radius write was reproduced or an active blocker to publication.</p>
+<p>Use this table alongside <a href="missions-%26-scripting-bvm-bytecode-custom-calls-and-api-translation-explained.html">BVM bytecode and operands</a> and <a href="missions-%26-scripting-event-registration-scheduling-and-state.html">event registration/scheduling</a>. The IDs are grounded in inspected game builds and paired scripts, not a complete registry of every possible native call.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_MISSION_TRANSPILER_R37_FULL_SESSION_HANDOFF_2026-08-26.md</li><li>R37_BINARY_MISSION_RUNTIME_CONTRACT_2026-08-26.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#object-enemy-and-group-operations">Object, enemy and group operations</a><a href="#source-vm-pause-object-removal-and-vehicle-setup">Source VM: pause, object removal and vehicle setup</a><a href="#navigation-movement-and-ai">Navigation, movement and AI</a><a href="#voice-lighting-animation-and-visual-effects">Voice, lighting, animation and visual effects</a><a href="#scalar-group-tokens-are-not-object-references">　Scalar group tokens are not object references</a><a href="#event-factors-and-conditions">Event factors and conditions</a><a href="#vm-scaffolding-is-not-gameplay-scripting">VM scaffolding is not gameplay scripting</a><a href="#how-far-has-this-mapping-been-verified">How far has this mapping been verified?</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-bvm-engine-call-and-factor-reference-table"};</script><script src="../assets/site.js" defer></script></body></html>

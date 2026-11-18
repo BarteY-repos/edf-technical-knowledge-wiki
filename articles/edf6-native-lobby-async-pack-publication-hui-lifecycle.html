@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 asynchronous MissionPack publication and HUi room-state lifecycle An EDF6 online room can contain three different representations of a selected mission pac"><title>EDF6 asynchronous room/mode publication and HUi lifetime | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Lobby and MissionPack identity</div><h1>EDF6 asynchronous room/mode publication and HUi lifetime</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Lobby and MissionPack identity</span></div><div class="referencebadge">Technical reference · EDF6 build-specific static state-store and HUi callflow; modded-runtime conditions explicitly separated</div><div id="articleBody"><p>An EDF6 online room can contain <strong>three different representations of a selected mission pack</strong>: the local UI/ModeList selection, the request sent through the room-mode change path, and the pack committed back to the central manager after a response. These do not necessarily update simultaneously.</p>
+<p>This distinction was recovered while investigating custom pack selection in a studied EDF6 build. The <strong>native call and field observations</strong> below are distinct from the <strong>room restrictions created by third-party extensions</strong>: nothing here proves that stock EDF6 imposes the exact same modded-room family rules.</p>
+<h2 id="build-specific-state-references">Build-specific state references</h2>
+<p>The binary examined in the retained analysis is the same EDF.dll documented in <a href="edf6-native-missionmgr-mode-lookup-package-memory.html">native ModeList and Package memory</a>. The global manager pointer was referenced through <code>EDF+0x20B2890</code>; its active physical MissionPack field was at <code>manager+0x14FD0</code>.</p>
+<p>An audited <strong>response callback</strong> near <code>EDF+0x8ED980</code> contained this sequence (image-relative instruction addresses):</p>
+<pre><code class="language-asm">0x8ED9C3  mov r8, [manager_global]
+0x8ED9CE  mov rdx, [r8+0x148]
+0x8ED9D5  movsxd rcx, dword [rdx+0x8]
+0x8ED9D9  mov edx, [rdx+rcx+0x74]
+0x8ED9DD  mov [r8+0x14FD0], edx
+</code></pre>
+<p>The instructions use the selected row of a ModeList-like object to <strong>republish the active pack ID later in the request/response lifecycle</strong>. Consequently, observing the earlier menu/request value or filtering one earlier store is not sufficient proof of the final active MissionPack. The source study enumerated <strong>nine direct stores</strong> to the active pack field in that binary:</p>
+<pre><code class="language-text">+0x708A06  +0x70C331  +0x791567
++0x8ED9DD  +0x90090A  +0x904B65
++0x91AA62  +0x925A32  +0x925CF7
+</code></pre>
+<p>The nine addresses are a <strong>direct-store census for that build</strong>; they should not be presented as nine separate online room transitions, and no undocumented meaning is assigned to an individual store here.</p>
+<h2 id="distinguishing-the-stages">Distinguishing the stages</h2>
+<table>
+<thead>
+<tr>
+  <th>Stage</th>
+  <th>Typical evidence to inspect</th>
+  <th>What that evidence does <strong>not</strong> establish</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Requested mode</td>
+  <td>UI selection, request arguments, selected outer-mode index</td>
+  <td>That the server/room has accepted the change</td>
+</tr>
+<tr>
+  <td>Selected ModeList row</td>
+  <td>Row fields including mode type (<code>+0x80</code>) and MissionPack (<code>+0x74</code>)</td>
+  <td>That the manager's active pack and the loaded mission resources match</td>
+</tr>
+<tr>
+  <td>Async response</td>
+  <td>The response callback and currently selected row</td>
+  <td>That an earlier local state filter remains authoritative</td>
+</tr>
+<tr>
+  <td>Committed pack</td>
+  <td>Manager's <code>+0x14FD0</code> after response processing</td>
+  <td>That the resource pathname, mission count, package and save namespace are consistent</td>
+</tr>
+<tr>
+  <td>Resolved content</td>
+  <td>Actual <code>MISSIONLIST_MISSIONPACKNN...</code> request, mission <code>table</code> and <code>Package</code></td>
+  <td>That remote peers selected identical content or that progression is safe</td>
+</tr>
+</tbody>
+</table>
+<p>For an independently observed resource-request-first failure in MP06, see <a href="edf6-native-missionpack-mode-and-lobby-identity.html">MissionPack identity and mission count</a>. In that case the requested <code>MISSIONLIST_MISSIONPACK06.OFFLINE.LIST.SGO</code> pathname already identified the content while the manager's active pack field was still <code>-1</code>.</p>
+<h2 id="native-room-ui-object-lifetime-is-not-room-lifetime">Native room/UI object lifetime is not room lifetime</h2>
+<p>A HUiRoom destructor-like wrapper was located around <code>EDF+0x8F7510</code>; it calls code around <code>+0x8F5950</code>, which installs the examined HUiRoom vtable (<code>0x18180AC40</code>) and operates on an object of size <code>0xCA0</code>. These data support a <strong>class identity and destructor-like operation</strong>. They do <strong>not</strong> show that destroying or rebuilding a HUiRoom UI object always means an online room was closed. The UI may outlive or be recreated independently of a lobby session.</p>
+<p>Other researched lifecycle seams were Room Exit near <code>EDF+0x9049BE</code> and RoomCreate_Join near <code>+0x8E69A0</code>. Their applicability as room-ownership reset points was established in a specific extension analysis; they should <strong>not</strong> be treated as general-purpose stock API functions without checking their native callsites.</p>
+<h2 id="ui-visibility-and-room-publication-presentation">UI visibility and room-publication presentation</h2>
+<p>In the same source study a native HUiRoom synchronous refresh function occupied <code>EDF+0x902B30..0x90315D</code>. Its public-visibility code lay near <code>+0x902F8B</code>; the researcher identified a direct caller at <code>+0x8FFE67</code>. This explains how a UI presentation event could lag behind an already-normalized visibility state in the tested extension. It does not establish a stock EDF6 warning-message policy for custom content.</p>
+<p>A separate native room attribute named <code>DLC</code> was observed to carry the selected ModeList's MissionPack ID, not a generic Boolean 'user owns DLC' flag. That field is therefore useful for comparing published room state to local selection, while license/entitlement checks remain separate. See <a href="edf6-native-missionpack-mode-and-lobby-identity.html">native MissionPack room identity</a>.</p>
+<h2 id="diagnostic-reading-order">Diagnostic reading order</h2>
+<p>When an offline mission appears but online room selection behaves differently, determine which value diverges before attributing the failure to packet transport:</p>
+<ol>
+<li><strong>Source row</strong> — does the intended ModeList row exist and have the expected MissionPack and type?</li>
+<li><strong>Request</strong> — is the selected mode/pack being requested, or is the previous value still being sent?</li>
+<li><strong>Response commit</strong> — was a later callback allowed to republish a different active pack?</li>
+<li><strong>Resource identity</strong> — does the subsequent LIST/CONFIG/Package selection use the same pack?</li>
+<li><strong>Remote peer</strong> — has a real second participant joined and loaded the same mission, rather than merely observing that a host lobby can be created?</li>
+</ol>
+<p><strong>Evidence boundary:</strong> The native field addresses and assembly come from build-specific static analysis. The public/private room safeguards, warning timing and save-loss incidents used to discover these paths occurred in a <strong>modified runtime</strong>. They are not asserted to be native policies or bugs of unmodified EDF6. There is no new multiplayer capture or in-game validation in this wiki release.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MPPP_BUNDLE_RUNTIME/EDF6_MPPP_BUNDLE_RUNTIME_FULL_SESSION_HANDOFF_FIX19_M2_V1_OFFLINE_CLOSEOUT_2026-09-22.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#build-specific-state-references">Build-specific state references</a><a href="#distinguishing-the-stages">Distinguishing the stages</a><a href="#native-room-ui-object-lifetime-is-not-room-lifetime">Native room/UI object lifetime is not room lifetime</a><a href="#ui-visibility-and-room-publication-presentation">UI visibility and room-publication presentation</a><a href="#diagnostic-reading-order">Diagnostic reading order</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-lobby-async-pack-publication-hui-lifecycle"};</script><script src="../assets/site.js" defer></script></body></html>

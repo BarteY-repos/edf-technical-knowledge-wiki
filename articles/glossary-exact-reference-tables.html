@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Glossary / Exact Reference Tables This page is a compact implementation reference for high-value identifiers, versions, counts and evidence labels used througho"><title>Glossary / Exact Reference Tables | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-troubleshooting.html">Troubleshooting</a></div><h1>Glossary / Exact Reference Tables</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Glossary / Exact Reference Tables</span><span class="chip">Troubleshooting</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p>This page is a compact implementation reference for high-value identifiers, versions, counts and evidence labels used throughout the wiki. Values are included only where the retained corpus supports a stable current statement. Build-specific addresses and hashes are explicitly scoped.</p>
+<h2 id="evidence-labels">Evidence labels</h2>
+<table>
+<thead>
+<tr>
+  <th>Label</th>
+  <th>Meaning</th>
+  <th>Does <strong>not</strong> imply</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Runtime</td>
+  <td>Observed in the exact game/candidate/environment</td>
+  <td>automatic inheritance by later builds</td>
+</tr>
+<tr>
+  <td>Exact native</td>
+  <td>Exact binary/native asset/paired-corpus evidence</td>
+  <td>gameplay parity by itself</td>
+</tr>
+<tr>
+  <td>Reconciled</td>
+  <td>Current rule selected after comparing multiple retained sources</td>
+  <td>runtime proof unless separately stated</td>
+</tr>
+<tr>
+  <td>Reference</td>
+  <td>Useful external/historical/tooling evidence</td>
+  <td>native Sandlot authority</td>
+</tr>
+<tr>
+  <td>Unresolved</td>
+  <td>Known question/boundary intentionally left open</td>
+  <td>permission to guess</td>
+</tr>
+</tbody>
+</table>
+<h2 id="core-generation-version-reference">Core generation/version reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th style="text-align:right">EDF 4.1</th>
+  <th style="text-align:right">EDF 5</th>
+  <th style="text-align:right">EDF 6</th>
+  <th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CAS wrapper generation</td>
+  <td style="text-align:right"><code>0x00020000</code></td>
+  <td style="text-align:right"><code>0x03020000</code></td>
+  <td style="text-align:right"><code>0x04020000</code></td>
+  <td>wrapper generation and embedded CANM generation are separate axes</td>
+</tr>
+<tr>
+  <td>CANM</td>
+  <td style="text-align:right">older/related generation</td>
+  <td style="text-align:right"><code>0x200</code> (512)</td>
+  <td style="text-align:right"><code>0x300</code> (768)</td>
+  <td>semantic conversion; EDF6 channel record is larger and rotation representation changes</td>
+</tr>
+<tr>
+  <td>MDB header gate in retained converter work</td>
+  <td style="text-align:right">older generation</td>
+  <td style="text-align:right"><code>0x14</code></td>
+  <td style="text-align:right"><code>0x20</code></td>
+  <td>header rewrite alone is not canonical conversion</td>
+</tr>
+<tr>
+  <td>NVMD</td>
+  <td style="text-align:right">older generation</td>
+  <td style="text-align:right"><code>0x120</code> measured source path</td>
+  <td style="text-align:right"><code>0x130</code> canonical target path</td>
+  <td>structural/version migration, not a blind constant patch</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="cross-game-conversion-edf41-edf5-edf6-generation-and-version-matrix.html">Generation and version matrix</a>.</p>
+<h2 id="model-material-implementation-reminders">Model/material implementation reminders</h2>
+<table>
+<thead>
+<tr>
+  <th>Topic</th>
+  <th>Current rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Vertex indices</td>
+  <td>respect observed <code>uint16</code> index constraints in relevant MDB paths</td>
+</tr>
+<tr>
+  <td>Seams</td>
+  <td>split vertices/corners where UV/normal/tangent continuity requires it</td>
+</tr>
+<tr>
+  <td>Material migration</td>
+  <td>match shader family, parameter order/type/size, sampler order/state and vertex layout together</td>
+</tr>
+<tr>
+  <td>Type-4 material parameter</td>
+  <td>raw <code>u32</code> bits may live in float-sized lanes; do not numerically reinterpret without profile evidence</td>
+</tr>
+<tr>
+  <td>Legacy shader lane</td>
+  <td><code>SND_CHARA_BASIC</code> and unresolved legacy compositor behavior remain unresolved</td>
+</tr>
+<tr>
+  <td>FieldRender</td>
+  <td>terrain-specific path; do not generalize to ordinary MDB models</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fieldrender-projected-texture-reference">FieldRender projected texture reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Item</th>
+  <th style="text-align:right">Reconciled value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Local material slots</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td>Projected ID layers</td>
+  <td style="text-align:right">3 RGBA8 textures</td>
+</tr>
+<tr>
+  <td>Projected weight layers</td>
+  <td style="text-align:right">3 RGBA8 textures</td>
+</tr>
+<tr>
+  <td>Transport</td>
+  <td style="text-align:right">texture-array/local-slot contract, separate from ordinary MDB material sampling</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender texture arrays and local-slot transport</a>.</p>
+<h2 id="mission-corpus-reference">Mission corpus reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Term</th>
+  <th>Count / meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>shipping mission gate</td>
+  <td>141 rows in the reconciled EDF5→EDF6 patch/release corpus</td>
+</tr>
+<tr>
+  <td>full retained BVM inventory</td>
+  <td>335 BVM consumers in the broader mission inventory referenced by the mission corpus work</td>
+</tr>
+<tr>
+  <td>EDF4.1 raw mission pipeline</td>
+  <td>138-mission source pipeline in the current EDF4.1→EDF6 reconstruction lineage</td>
+</tr>
+<tr>
+  <td><code>EDF5_NEW_SCRIPT</code> exact native provenance guard</td>
+  <td>preserve the exact official/native corpus distinction from the larger third-party mission set</td>
+</tr>
+</tbody>
+</table>
+<p>Counts have different scopes. Do not substitute one for another.</p>
+<h2 id="r1c-r1d-hillycity-exact-reference">R1C / R1D HillyCity exact reference</h2>
+<h3 id="r1c-byte-exact-baseline">R1C byte-exact baseline</h3>
+<table>
+<thead>
+<tr>
+  <th>Property</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>vertices</td>
+  <td>1,562</td>
+</tr>
+<tr>
+  <td>triangles</td>
+  <td>2,928</td>
+</tr>
+<tr>
+  <td>tiles</td>
+  <td>4</td>
+</tr>
+<tr>
+  <td>LOW HKT size</td>
+  <td>421,684 B</td>
+</tr>
+<tr>
+  <td>LOW SHA-256</td>
+  <td><code>aabcc26f982c4d9d78697ebc0bb32ab239366cdeeadedf362f748cbeb9842bd2</code></td>
+</tr>
+<tr>
+  <td>HIGH SHA-256</td>
+  <td><code>e144ff813c965b4477001d552390c6b656d16a2fa0228731a749ff66b2422326</code></td>
+</tr>
+<tr>
+  <td>LOW/HIGH NVMD SHA-256</td>
+  <td><code>9285880fbece6169120e6559f84a21439eeeb88b2796f728d18f7194e6b3b2c6</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="r1d-historical-oracle">R1D historical oracle</h3>
+<table>
+<thead>
+<tr>
+  <th>Property</th>
+  <th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>vertices</td>
+  <td>1,562</td>
+</tr>
+<tr>
+  <td>triangles</td>
+  <td>2,651</td>
+</tr>
+<tr>
+  <td>removed triangles</td>
+  <td>277</td>
+</tr>
+<tr>
+  <td>LOW HKT size</td>
+  <td>381,512 B</td>
+</tr>
+<tr>
+  <td>LOW SHA-256</td>
+  <td><code>87f8b3594f081c9dc758e41a7149971061d0bf6dad41867a6d342507507fc5fb</code></td>
+</tr>
+<tr>
+  <td>HIGH SHA-256</td>
+  <td><code>c4878388bca0f41555762667e4eb7c10a5f4d9fa1f9a08b7200001e9f8d206f0</code></td>
+</tr>
+<tr>
+  <td>NVMD SHA-256</td>
+  <td><code>9285880fbece6169120e6559f84a21439eeeb88b2796f728d18f7194e6b3b2c6</code></td>
+</tr>
+<tr>
+  <td>source-static groups</td>
+  <td>65</td>
+</tr>
+<tr>
+  <td>selected placements</td>
+  <td>1,405</td>
+</tr>
+<tr>
+  <td>exact-zero / yaw-only / mixed-XZ</td>
+  <td>251 / 1,153 / 1</td>
+</tr>
+<tr>
+  <td>active body-level footprints target</td>
+  <td>4,971</td>
+</tr>
+<tr>
+  <td>retained body-classifier evidence</td>
+  <td><code>max_xz &gt;= 5.75</code></td>
+</tr>
+</tbody>
+</table>
+<p>The 65-group placement/rotation census is naturally reproduced. The 4,971-footprint pre-classifier builder remains the blocker before exact carve regeneration.</p>
+<h2 id="mapo-resolver-current-closure">MAPO resolver current closure</h2>
+<table>
+<thead>
+<tr>
+  <th>Stage</th>
+  <th style="text-align:right">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>strict dual base+collision identity</td>
+  <td style="text-align:right">27,018 refs</td>
+</tr>
+<tr>
+  <td>literal <code>.hkt</code> / base-only recovery</td>
+  <td style="text-align:right">+420</td>
+</tr>
+<tr>
+  <td>StationWindow fallback</td>
+  <td style="text-align:right">+12</td>
+</tr>
+<tr>
+  <td>Fix A structural recovery</td>
+  <td style="text-align:right">+1,945 refs / 24 groups</td>
+</tr>
+<tr>
+  <td>Fix B natural retained set</td>
+  <td style="text-align:right">+3,988 refs / 16 groups / 26 source bodies</td>
+</tr>
+<tr>
+  <td>final resolved</td>
+  <td style="text-align:right">33,383</td>
+</tr>
+<tr>
+  <td>final unresolved</td>
+  <td style="text-align:right">7,537</td>
+</tr>
+<tr>
+  <td>collision-reference universe</td>
+  <td style="text-align:right">40,920</td>
+</tr>
+</tbody>
+</table>
+<p>Fix B is not count-fitted: the natural dual matcher yields 25 groups / 5,846 refs, then 9 MOPP→StorageExtendedMesh residual-alias groups / 1,858 refs are fail-closed, leaving the historical 16-group / 3,988-ref set.</p>
+<h2 id="current-edf4-1-authority-identities">Current EDF4.1 authority identities</h2>
+<table>
+<thead>
+<tr>
+  <th>Role</th>
+  <th>File / identity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>product/source authority</td>
+  <td><code>EDF41_FULL_MISSIONBUNDLE_R10_HF3_2026-11-02_SOURCE_ONLY.zip</code></td>
+</tr>
+<tr>
+  <td>product/source SHA-256</td>
+  <td><code>d2cfee7b70d9d6d47ed03ccce89e3e190e7df95d5c1159d2d7c6bb9cf6032825</code></td>
+</tr>
+<tr>
+  <td>latest Friendly Gameplay Fidelity candidate</td>
+  <td><code>EDF41_R10_HF4_FRIENDLY_GAMEPLAY_FIDELITY_WIP_R13_2026-11-06_SOURCE_ONLY.zip</code></td>
+</tr>
+<tr>
+  <td>candidate SHA-256</td>
+  <td><code>ac2b73c2381a0c6b04651c5adeb70875d84d5c4647d682c1b3c7108506fa1691</code></td>
+</tr>
+<tr>
+  <td>current NAV/collision WIP</td>
+  <td><code>EDF41_R13_NAV_COLLISION_RECON_WIP_R2_2026-11-08_SOURCE_ONLY.zip</code></td>
+</tr>
+<tr>
+  <td>WIP SHA-256</td>
+  <td><code>3e5c95fcdf888ee1e8154e05fcfb3c84ff3b370998cb4435b467cda35d7d66f3</code></td>
+</tr>
+</tbody>
+</table>
+<p>Newer WIP does not supersede product authority automatically.</p>
+<h2 id="safe120-profiler-build-specific-reference">Safe120 / profiler build-specific reference</h2>
+<p>These RVAs are <strong>version-specific</strong> to the retained EDF6 binary research. They are not portable engine API addresses.</p>
+<table>
+<thead>
+<tr>
+  <th>Site</th>
+  <th>Retained meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>EDF+0x111CC20</code></td>
+  <td>synchronous graphics-worker fence</td>
+</tr>
+<tr>
+  <td><code>EDF+0x11B5A70</code></td>
+  <td>BigA callback → <code>Umbra::Camera::processVisibility(Commander*)</code></td>
+</tr>
+<tr>
+  <td><code>EDF+0x11B6AA0</code></td>
+  <td>type0 primary producer</td>
+</tr>
+<tr>
+  <td><code>EDF+0x11B6F90</code></td>
+  <td>type2 auxiliary producer</td>
+</tr>
+</tbody>
+</table>
+<p>Canonical expected original <code>EDF.dll</code> SHA-256 for the retained Modernization/Safe120 line: <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>.</p>
+<p>R33 Checkpoint 003 is the last strong runtime-positive camera fallback. R35-R3 camera, actor A2, foliage F1 and material/XGL X1 are separate branches. R35-R3-V1R-D1-U1 is linked/PE-qualified but its authorized VFX control remains runtime-pending.</p>
+<h2 id="event-invocation-quick-reference">Event invocation quick reference</h2>
+<table>
+<thead>
+<tr>
+  <th>Policy / shape</th>
+  <th>Current rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>once</code></td>
+  <td>ordinary single-invocation policy</td>
+</tr>
+<tr>
+  <td><code>repeat</code></td>
+  <td>re-armable; no counter-threshold guard</td>
+</tr>
+<tr>
+  <td><code>nth</code></td>
+  <td>shared target counter with exact <code>m_counter != N</code> guard</td>
+</tr>
+<tr>
+  <td>multiple <code>once</code> registrations</td>
+  <td>source-backed OR fan-in</td>
+</tr>
+<tr>
+  <td>Factor AND/OR</td>
+  <td>local to one Registration</td>
+</tr>
+<tr>
+  <td>cross-registration Factor AND</td>
+  <td>unresolved / fail-closed</td>
+</tr>
+<tr>
+  <td>direct self-registration</td>
+  <td>fail-closed</td>
+</tr>
+<tr>
+  <td>Start/Main re-entry</td>
+  <td>fail-closed</td>
+</tr>
+</tbody>
+</table>
+<p>One target Event owns one handler/state/counter; R36R39 registrations own their own Factor set, delay and check mode.</p>
+<h2 id="resource-container-glossary">Resource/container glossary</h2>
+<table>
+<thead>
+<tr>
+  <th>Term</th>
+  <th>Meaning / boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>CPK</td>
+  <td>CRI archive/VFS layer; resolve case-insensitive virtual path <strong>plus archive origin</strong>, fail closed on duplicate origins, and invalidate stale catalog state when the backing archive changes</td>
+</tr>
+<tr>
+  <td>RAB / MRAB</td>
+  <td>shared SSA/archive grammar does <strong>not</strong> imply copy-safe parity; target archive conventions, internal resource identity/order and each embedded payload ABI still matter</td>
+</tr>
+<tr>
+  <td>MARC</td>
+  <td>archive/container layer retained in resource-packaging research</td>
+</tr>
+<tr>
+  <td>CMPL</td>
+  <td>resource/package list family; treat embedded identities rather than extensions alone</td>
+</tr>
+<tr>
+  <td>MAC</td>
+  <td>map container/orchestration layer</td>
+</tr>
+<tr>
+  <td>MAPB</td>
+  <td>map binary/data layer; later structural corrections supersede older guesses</td>
+</tr>
+<tr>
+  <td>MAPO</td>
+  <td>map object/reference layer; source collision identity is important in EDF4.1 R1D reconstruction</td>
+</tr>
+<tr>
+  <td>MAD</td>
+  <td>map collision/physics data layer in the Havok-derived path</td>
+</tr>
+<tr>
+  <td>SHKT</td>
+  <td>object/physics collision resource family; target generation differs from older source Havok generation</td>
+</tr>
+<tr>
+  <td>HKT</td>
+  <td>Havok-derived collision/navigation binary family depending context; never infer subsystem from extension alone</td>
+</tr>
+<tr>
+  <td>NVMD</td>
+  <td>navigation metadata companion in the reconstructed NAV path</td>
+</tr>
+<tr>
+  <td>FMB</td>
+  <td>map/field bundle resource in the map stack</td>
+</tr>
+<tr>
+  <td>FMEP</td>
+  <td>FieldRender/field terrain path; experimental/source-only boundaries remain subsystem-specific</td>
+</tr>
+<tr>
+  <td>RMPA</td>
+  <td>route/area/path data family; <strong>mission RMPA and map RMPA are separate subsystems</strong></td>
+</tr>
+<tr>
+  <td>SGO / DSGO</td>
+  <td>typed tree/resource schema families; shared grammar does not imply shared schema</td>
+</tr>
+<tr>
+  <td>BVM</td>
+  <td>mission bytecode/script artifact in the mission conversion lineage</td>
+</tr>
+<tr>
+  <td>AC</td>
+  <td>AngelScript source representation used by the reconstructed mission tooling</td>
+</tr>
+<tr>
+  <td>CANM</td>
+  <td>animation channel data; EDF5/EDF6 generations differ structurally</td>
+</tr>
+<tr>
+  <td>CAS</td>
+  <td>animation wrapper/control container; wrapper version is independent from embedded CANM version</td>
+</tr>
+<tr>
+  <td>MAB</td>
+  <td>partially understood animation-related format; no universal cross-game conversion law</td>
+</tr>
+</tbody>
+</table>
+<h2 id="fail-closed-reference">Fail-closed reference</h2>
+<p>When exact semantics are not known:</p>
+<ul>
+<li>preserve unknown data where safe;</li>
+<li>refuse destructive rewrite where preservation is impossible;</li>
+<li>keep third-party behavior explicitly attributed;</li>
+<li>keep source-only/offline evidence distinct from runtime evidence;</li>
+<li>record negative evidence so rejected treatments are not rediscovered as “new” fixes.</li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Current reconciled domain articles through R47</li><li>SESSION_CLOSE_2026-11-14_R1D_CLASSIFIER_FRONTIER</li><li>EDF6 Authoring Suite R2 frontier</li><li>EDF6 Modernization Safe120 handoff</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#evidence-labels">Evidence labels</a><a href="#core-generation-version-reference">Core generation/version reference</a><a href="#model-material-implementation-reminders">Model/material implementation reminders</a><a href="#fieldrender-projected-texture-reference">FieldRender projected texture reference</a><a href="#mission-corpus-reference">Mission corpus reference</a><a href="#r1c-r1d-hillycity-exact-reference">R1C / R1D HillyCity exact reference</a><a href="#r1c-byte-exact-baseline">　R1C byte-exact baseline</a><a href="#r1d-historical-oracle">　R1D historical oracle</a><a href="#mapo-resolver-current-closure">MAPO resolver current closure</a><a href="#current-edf4-1-authority-identities">Current EDF4.1 authority identities</a><a href="#safe120-profiler-build-specific-reference">Safe120 / profiler build-specific reference</a><a href="#event-invocation-quick-reference">Event invocation quick reference</a><a href="#resource-container-glossary">Resource/container glossary</a><a href="#fail-closed-reference">Fail-closed reference</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"glossary-exact-reference-tables"};</script><script src="../assets/site.js" defer></script></body></html>

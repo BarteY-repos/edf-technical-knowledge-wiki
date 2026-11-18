@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="CONFIG.SGO three-way semantic merge: Air Raider and EDF5 mission port Evidence: September 1, 2026 offline merge audit. Status OFFLINE_THREE_WAY_SEMANTIC_MERGE_P"><title>CONFIG.SGO three-way semantic merge: Air Raider and EDF5 mission port | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>CONFIG.SGO three-way semantic merge: Air Raider and EDF5 mission port</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Formats &amp; Containers</span><span class="chip">File Formats</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Observed</div><div id="articleBody"><p><strong>Evidence:</strong> September 1, 2026 offline merge audit. Status <code>OFFLINE_THREE_WAY_SEMANTIC_MERGE_PASS__RUNTIME_TEST_RECOMMENDED</code>. This is a reproducible <strong>case study</strong>, not a universal SGO conflict-resolution algorithm or successful game-runtime qualification.</p>
+<h2 id="inputs-identity-and-output">Inputs, identity and output</h2>
+<table>
+<thead>
+<tr>
+  <th>File role</th>
+  <th style="text-align:right">Size</th>
+  <th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Baseline recompiled</td>
+  <td style="text-align:right">27,826 B</td>
+  <td>JSON-level canonical baseline</td>
+</tr>
+<tr>
+  <td>Air Raider original/recompiled</td>
+  <td style="text-align:right">27,938 B</td>
+  <td>Exact <code>sgott</code> round-trip; binary identity preserved</td>
+</tr>
+<tr>
+  <td>EDF5-missions port</td>
+  <td style="text-align:right">41,592 B</td>
+  <td>Adds mission pack modes while retaining baseline weapon-category scopes</td>
+</tr>
+<tr>
+  <td>Merged SGO</td>
+  <td style="text-align:right"><strong>41,704 B</strong></td>
+  <td>Port + 112 B, the same independent Air Raider delta</td>
+</tr>
+</tbody>
+</table>
+<p>The observed Air Raider delta and port delta occupy disjoint semantic scopes. The merger reported <strong>zero conflicts and zero warnings</strong>, exact JSON round-trip, and preservation of top-level field ordering from the port.</p>
+<h2 id="field-ownership-do-not-blindly-pick-one-whole-file">Field ownership: do not blindly pick one whole file</h2>
+<p><strong>Port-owned <code>ModeList</code>:</strong> six additions: offline and online modes for MissionPack03, MissionPack04 and MissionPack05.</p>
+<p><strong>Air Raider-owned <code>SoldierInit</code>:</strong> appends class/weapon category values to its existing arrays:</p>
+<ul>
+<li><code>eLimpetGun01</code>, <code>eDrone_attacker01</code> and <code>eDrone_airstrike01</code>: add <code>302, 331</code> after the original <code>310, 311, 312, 313, 314, 303, 305</code>.</li>
+<li><code>eVehicleNone</code>: add <code>8, 9, 10</code> after the original <code>306, 307, 308, 309, 320</code>.</li>
+</ul>
+<p>The audit confirms that <code>PackageName</code>, <code>SoldierWeaponCategory</code>, <code>WeaponTable</code> and <code>WeaponText</code> agree with both inputs. <code>ModeList</code> is exactly the port version and <code>SoldierInit</code> exactly the Air Raider version.</p>
+<h2 id="merge-algorithm-contract-demonstrated-by-this-case">Merge algorithm contract demonstrated by this case</h2>
+<ol>
+<li>Parse baseline, feature A, feature B as the same known SGO schema; validate exact structural round-trip before transformation.</li>
+<li>Compute <em>semantic deltas relative to baseline</em>, not whole-file byte differences.</li>
+<li>Detect field ownership conflicts at record and array level. <strong>No generic append/union rule</strong> is justified for arbitrary SGO arrays.</li>
+<li>Apply nonoverlapping deltas in a deterministic order; retain target port's ordered names and mode list where documented.</li>
+<li>Recompile, reparse and assert exact expected fields, order and delta. Preserve the source and output hashes in the evidence ledger.</li>
+<li>Run EDF6 game tests separately; successful parse/round-trip is not gameplay qualification.</li>
+</ol>
+<h2 id="why-this-matters">Why this matters</h2>
+<p>Replacing the target <code>CONFIG.SGO</code> wholesale with either mod's file would lose the other feature. Conversely, treating all SGO arrays as commutative merges could produce syntactically valid but semantically wrong output. The observed +112 B exact difference is <strong>evidence for this specific pair of changes</strong>, not a size-based merge technique.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/AIR_RAIDER_EDF5PORT_CONFIG_MERGE_AUDIT_2026-09-01.json</li><li>/CONFIG.MERGED.AIRRAIDER_EDF5PORT.SGO</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#inputs-identity-and-output">Inputs, identity and output</a><a href="#field-ownership-do-not-blindly-pick-one-whole-file">Field ownership: do not blindly pick one whole file</a><a href="#merge-algorithm-contract-demonstrated-by-this-case">Merge algorithm contract demonstrated by this case</a><a href="#why-this-matters">Why this matters</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"formats-&-containers-config-sgo-three-way-air-raider-mission-pack-merge"};</script><script src="../assets/site.js" defer></script></body></html>

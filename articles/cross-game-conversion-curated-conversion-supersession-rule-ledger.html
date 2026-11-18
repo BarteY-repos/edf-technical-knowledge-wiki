@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Format-by-format conversion rules and exceptions Evidence level: Reconciled assertion ledger plus later domain-specific research. The ledger is a provenance/sea"><title>Format-by-format conversion rules and exceptions | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-conversion.html">Conversion</a></div><h1>Format-by-format conversion rules and exceptions</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p><strong>Evidence level:</strong> Reconciled assertion ledger plus later domain-specific research. The ledger is a provenance/search layer, not a flat truth table.</p>
+<p><strong>Observed ledger state:</strong> <code>R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json</code> contains 48,938 deduplicated assertions from 61,542 raw records. It intentionally preserves reference, historical, negative and superseded statements alongside current rules. Only claims with an appropriate current evidence status are promoted below.</p>
+<p><strong>Implementation rule:</strong> Never count a preserved assertion as current merely because it is present in the ledger. <code>PRESERVED_REFERENCE</code>, <code>PRESERVED_POST_EVIDENCE</code>, historical and open statuses remain evidence/provenance until a current domain authority promotes them.</p>
+<p>The following includes current, conditional, profile-specific and explicitly superseded rules. Superseded entries are deliberately retained so old handoffs can be interpreted correctly.</p>
+<h3 id="bvd">BVD</h3>
+<ul>
+<li><code>BVD_32_CURRENT</code> — <strong>CURRENT_RULE</strong> — Current compound BVD slice measurement is 32 B at +0x5C.</li>
+<li><code>BVD_36_OLD</code> — <strong>SUPERSEDED</strong> — Older 36-byte BVD slice is superseded by measured 32-byte slice.</li>
+<li><code>BVD_SOLE_ROOT_CAUSE_OLD</code> — <strong>SUPERSEDED_CAUSAL_CLAIM</strong> — BVD correctness matters structurally but BVD-only fixes did not recover floor collision.</li>
+</ul>
+<h3 id="bvm">BVM</h3>
+<ul>
+<li><code>BVM_CREATE_DISPATCH_CURRENT</code> — <strong>CURRENT_RULE</strong> — Use the corrected AC/6C dispatch examples; 6C D0/6C F2 are not CreateEnemy/CreateFriend.</li>
+<li><code>BVM_CUSCALL_2000_ENCODING</code> — <strong>CURRENT_RULE</strong> — AC is the BVM cuscall0 opcode and D0 07 is the little-endian integer 2000; decimal custom-call IDs were not hallucinated.</li>
+<li><code>MISSION_INVALID_OPCODE_RANGE</code> — <strong>CURRENT_RULE</strong> — Retained invalid/crashing BVM opcode range is 0x39-0x3F; older 0x3A-0x3F range was incomplete.</li>
+</ul>
+<h3 id="canm">CANM</h3>
+<ul>
+<li><code>CANM_VERSION_ONLY_UNSAFE</code> — <strong>CURRENT_RULE</strong> — CANM requires structural/channel semantic conversion, not a version bump.</li>
+</ul>
+<h3 id="cas">CAS</h3>
+<ul>
+<li><code>CAS_UNKNOWN</code> — <strong>UNRESOLVED</strong> — CAS remains incompletely understood; do not infer universal passthrough.</li>
+</ul>
+<h3 id="cmpl">CMPL</h3>
+<ul>
+<li><code>CMPL_TOKEN_CURRENT</code> — <strong>CURRENT_RULE</strong> — Current CMPL token decode formula.</li>
+<li><code>CMPL_TOKEN_OLD</code> — <strong>SUPERSEDED</strong> — Old high-nibble-length CMPL formula is wrong; use len=(tok&amp;0xF)+3, pos=tok&gt;&gt;4.</li>
+</ul>
+<h3 id="cpk">CPK</h3>
+<ul>
+<li><code>CPK_UNPACKED_DIR</code> — <strong>CURRENT_RULE</strong> — *.cpk_unpacked is a source directory in this workflow; raw CPK parsing is peripheral.</li>
+</ul>
+<h3 id="dsgo">DSGO</h3>
+<ul>
+<li><code>DSGO_LIST</code> — <strong>CURRENT_RULE</strong> — EDF6 mission LIST resources use DSGO; lossless round-trip uses block pipeline.</li>
+</ul>
+<h3 id="fmb">FMB</h3>
+<ul>
+<li><code>FMB_ASIS_SCOPE</code> — <strong>PROFILE_SPECIFIC_NOT_UNIVERSAL</strong> — EDF5 FMB passthrough is observed for particular shared/render-side cases; it is not a universal source-only FMB container rule.</li>
+<li><code>FMB_PHYSICS_CAUSAL_OLD</code> — <strong>SUPERSEDED_CAUSAL_CLAIM</strong> — FMB terrain render/spatial data is established; FMB alone is not established as universal floor-physics source.</li>
+<li><code>FMB_PLUS5_UNIVERSAL_OLD</code> — <strong>SUPERSEDED_AS_UNIVERSAL</strong> — No universal +5 rule; 0x58/chunk index mapping is map/content specific.</li>
+<li><code>FMB_VALUE5_CANDIDATE</code> — <strong>CANDIDATE_SPECIFIC_CURRENT</strong> — Value 5 is recorded for the 2026-08-21 Desert clean candidate; it is not a universal format law.</li>
+<li><code>R6_NO_FMB_IG</code> — <strong>CURRENT_CORRECTION</strong> — IG_EDFROOM01/02 do not have FMB; do not request it for exact-pair RoomB research.</li>
+</ul>
+<h3 id="mab">MAB</h3>
+<ul>
+<li><code>MAB_UNKNOWN</code> — <strong>HISTORICALLY UNRESOLVED / NOW PARTLY SUPERSEDED</strong> — The R6 ledger predates later bounded MAB research. For validated <code>MAB\0</code> v15, EDF4.1/EDF5 internal offsets use flag <code>0x03</code> and EDF6 uses struct-relative flag <code>0x83</code>, with a measured 1,318-pair comparison. This is a known pointer-encoding migration, <strong>not</strong> a universal model/weapon retargeting law. See <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">MAB source-backed binary contract</a>.</li>
+</ul>
+<h3 id="mac">MAC</h3>
+<ul>
+<li><code>MAC_OUTPUT_CLEAN_PROVENANCE</code> — <strong>PROVENANCE_QUALIFIED</strong> — Clean MAC output can still be reference-assisted through Base502-derived SGO templates; output cleanliness is not source-only provenance.</li>
+</ul>
+<h3 id="mad">MAD</h3>
+<ul>
+<li><code>MAD_BITFIELD_HKUINT32</code> — <strong>CURRENT_RULE</strong> — Canonical tested serializer emits the bitfield array item as hkUint32.</li>
+<li><code>MAD_CONVEX_RADIUS</code> — <strong>CONDITIONAL</strong> — Native/candidate evidence contains both 0.00 and 0.01; choose by shape/profile, not globally.</li>
+<li><code>MAD_DESCRIPTOR_FLAGS_CURRENT</code> — <strong>CURRENT_RULE</strong> — hknpMaterialDescriptor flags are uint32 0x0000ffff in the corrected serializer; 0xffff0000 was a serialization mistake.</li>
+<li><code>MAD_DISPATCH14_LABEL_CONFLICT</code> — <strong>CONDITIONAL</strong> — Late notes use the label dispatchType for value 14 at +0x04; earlier detailed layouts put dispatchType=3 at +0x01. Do not overwrite +0x01 solely from this label; distinguish byte offset from semantic field name.</li>
+<li><code>MAD_DISPATCH_BYTE1_3</code> — <strong>CURRENT_RULE</strong> — Detailed 52-byte hknpCompressedMeshShape layouts identify +0x01 dispatchType=3.</li>
+<li><code>MAD_MOTION104_CURRENT</code> — <strong>CURRENT_RULE</strong> — Havok 2020 hknpMotionProperties is a 104-byte record; never copy EDF5 hkpMotion bytes into it.</li>
+<li><code>MAD_NAMEDVARIANT65_PROFILE</code> — <strong>PROFILE_SPECIFIC_NOT_UNIVERSAL</strong> — 65 NamedVariants belong to the historical Base502 carrier profile; root/name lookup is important but count 65 is not universal.</li>
+<li><code>MAD_OFFSET4_14_LATE</code> — <strong>CURRENT_RULE</strong> — Late crash-forensics measures +0x04=14 for the tested compressed-mesh carrier family. It called this dispatchType, but earlier member-layout evidence calls +0x04 numShapeKeyBits; preserve the byte rule while treating the member-name conflict as unresolved.</li>
+<li><code>MAD_OUTPUT_CLEAN_PROVENANCE</code> — <strong>PROVENANCE_QUALIFIED</strong> — Output-clean/zero-graft is not equivalent to build-time SOURCE_ONLY while EDF6 registry/template metadata is imported.</li>
+<li><code>MAD_PRIMITIVE_KEYS_CURRENT</code> — <strong>CURRENT_RULE</strong> — Primitive records with c==d contribute one key/triangle; c!=d contributes two keys/triangles.</li>
+<li><code>MAD_PROFILE128_UNIVERSAL_OLD</code> — <strong>SUPERSEDED_AS_UNIVERSAL</strong> — 128 is a tested profile, not a universal native limit.</li>
+<li><code>MAD_SDK_STRING_ONLY_OLD</code> — <strong>SUPERSEDED_OR_PARTIAL</strong> — SDK string patching alone is not hkp2015-&gt;hknp2020 conversion.</li>
+<li><code>MAD_SHAPE_TYPE_IDS</code> — <strong>CURRENT_RULE</strong> — Corrected EDF6 hknp shape-type IDs: convex 0, cylinder 3, box 5, mesh/compressed mesh 8, compound 11.</li>
+<li><code>R6_DESERT_R10C</code> — <strong>CURRENT_RUNTIME_CONFIRMED</strong> — Accepted source-only Desert MAD/R10C baseline: 86,835,336 bytes, SHA eb1f...; clean source+reconstructed-schema rebuild reproduces it byte-for-byte and runtime is accepted.</li>
+<li><code>R6_MAD_FPI_GATES</code> — <strong>CURRENT_RULE</strong> — Accepted Desert MAD gates: 11,873/11,873 FPI sections; 1,100,848 unique primitive keys reachable exactly once; 0 missing/extra/duplicate/AABB violations; 181 bodies, 370 terrain meshes, 2,045,747 terrain triangles, 16,132 direct-mesh triangles.</li>
+<li><code>R6_MAD_TOPOLOGY_POLICY</code> — <strong>CURRENT_RULE</strong> — Runtime-safe Desert compressed-mesh policy: baseline split topology is preserved; flat→split only when final quantized geometry disqualifies flat; never synthesize split→flat in compatibility mode; production triangleIsInterior is zero.</li>
+<li><code>R6_OLD_262M</code> — <strong>HISTORICAL_RUNTIME_CONTROL</strong> — The older 262 MB Desert deployment is historical runtime-control evidence, not current architecture or source-only proof.</li>
+<li><code>R6_OLD_CLEAN_SUITE</code> — <strong>SUPERSEDED_OR_PROVENANCE_QUALIFIED</strong> — The Aug-21 ~85 MB clean-suite candidate is historical/reference-assisted provenance and is superseded by the later runtime-accepted source-only R10C baseline.</li>
+</ul>
+<h3 id="mae">MAE</h3>
+<ul>
+<li><code>MAE_NO_EDF5</code> — <strong>CURRENT_RULE</strong> — MAE is EDF6-side synthesis/reference-assisted construction because EDF5 has no direct MAE.</li>
+</ul>
+<h3 id="mapb">MAPB</h3>
+<ul>
+<li><code>MAPB_INSERT_0X20_CURRENT</code> — <strong>CURRENT_RULE</strong> — EDF6 T1 adds zero dword at +0x20; old +0x20 moves to +0x24.</li>
+<li><code>MAPB_INSERT_0X24_OLD</code> — <strong>SUPERSEDED</strong> — Old T1 insertion-at-+0x24 claim is superseded.</li>
+</ul>
+<h3 id="mapo">MAPO</h3>
+<ul>
+<li><code>MAPO_AUX_FLOOR_CAUSAL_OLD</code> — <strong>SUPERSEDED_CAUSAL_CLAIM</strong> — MAPO layout/registration is important, but auxiliary-table validity alone is not a floor-collision solution.</li>
+<li><code>MAPO_STRIDE1C_CURRENT</code> — <strong>CURRENT_RULE</strong> — MAPO +0x08 object-table element stride is 0x1C/28 B in the reconciled runtime-resource audit.</li>
+<li><code>MAPO_STRIDE8_OLD</code> — <strong>SUPERSEDED</strong> — MAPO +0x08 object-table 8-byte stride interpretation is superseded by 0x1C/28 B.</li>
+</ul>
+<h3 id="map-resource-refs">MAP_RESOURCE_REFS</h3>
+<ul>
+<li><code>MAP_RESOURCE_TRB_CAPACITY</code> — <strong>CANDIDATE_SPECIFIC_CURRENT</strong> — Latest clean Desert handoff reports a per-resource T2/TRB capacity mismatch (218 instances vs 2 transforms); this is not a suffix conversion law.</li>
+<li><code>MAP_RESOURCE_TRB_RENAME_OLD</code> — <strong>SUPERSEDED_AS_UNIVERSAL</strong> — Do not globally rename .trb to .mdx; the historical crash attribution was later entangled/superseded by the corrected CMPL decoder.</li>
+</ul>
+<h3 id="marc">MARC</h3>
+<ul>
+<li><code>MARC_U1_DELTA</code> — <strong>CURRENT_RULE</strong> — Shared MARC grammar; measured map-entry u1 differs EDF5=2 vs EDF6=0.</li>
+</ul>
+<h3 id="mdb">MDB</h3>
+<ul>
+<li><code>MDB_FMT1_16_CURRENT</code> — <strong>CURRENT_RULE</strong> — MDB format/type 1 = 16 B float32[4].</li>
+<li><code>MDB_FMT1_4_OLD</code> — <strong>SUPERSEDED</strong> — MDB format/type 1 = 4 B is superseded; current width is 16 B float32[4].</li>
+<li><code>MDB_VERSION_ONLY_OLD</code> — <strong>SUPERSEDED_OR_PARTIAL</strong> — Version/header gate patch is a loader experiment only, not native parity.</li>
+</ul>
+<h3 id="mission-ac">MISSION_AC</h3>
+<ul>
+<li><code>MISSION_ISVALIDITY_BAN_OLD</code> — <strong>SUPERSEDED</strong> — Blanket .IsValidity() bans are superseded by retained human/in-game evidence.</li>
+<li><code>MISSION_MOVE_SPEED_CURRENT</code> — <strong>CURRENT_RULE</strong> — Use SetAiMoveSpeed for the reconciled speed-call case; older SetAiRouteSpeed mapping is stale there.</li>
+<li><code>MISSION_RADIO_HELPERS</code> — <strong>CURRENT_RULE</strong> — RadioBegin/RadioEnd are defined in ASCOMMON.H in the retained reference; do not model them as built-ins solely from native call style.</li>
+<li><code>MISSION_RANDOM_TALK_CURRENT</code> — <strong>CURRENT_RULE</strong> — 4004/4005 map to EnableAiRandomTalk/DisableAiRandomTalk respectively.</li>
+<li><code>MISSION_RELEASE_READY_OLD</code> — <strong>SUPERSEDED_OR_OVERCLAIM</strong> — Syntax/build success does not establish semantic/runtime parity.</li>
+<li><code>MISSION_ROUTE_OMIT_OLD</code> — <strong>SUPERSEDED</strong> — Blanket route omission is superseded; preserve route behavior and convert the relevant calls.</li>
+<li><code>MISSION_ROUTE_SPEED_OLD</code> — <strong>SUPERSEDED</strong> — SetAiRouteSpeed is superseded for the reconciled 3100 case by SetAiMoveSpeed.</li>
+<li><code>MISSION_TIMING_SCALE_OLD</code> — <strong>SUPERSEDED</strong> — Global 1.5x timing scaling is superseded; preserve ASM timing values unless a call-specific rule is proven.</li>
+<li><code>R6_2006_2008</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — 2006 and 2008 are opcode-defined lowerings: 2006→CreateFlyingEnemyGroup_Area; 2008→CreateEnemyGroup_Area. Do not choose via SGO flying/ground heuristics.</li>
+<li><code>R6_2009</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — 2009 maps to dedicated CreateEnemyGroup_Area_Spawn; old nested .Spawn construction is superseded.</li>
+<li><code>R6_3023</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — 3023(1) lowers to SendTeamEncount(TEAM_ID_ENEMY); historical 1.Delete() artifact is wrong.</li>
+<li><code>R6_3100_3102</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — 3100→global SetAiMoveSpeed, 3101→SetAiRoute, 3102→SetAiPath; route/path must not be merged.</li>
+<li><code>R6_3450</code> — <strong>ACCEPTED_FIDELITY_WAIVER, NOT A CURRENT PORT/WIKI BLOCKER</strong> — <code>SetAiSearchRadius(Object,float)</code> writes EDF5 object+0x2E0 / EDF6 object+0x470; all six shipping occurrences are in DM006_2. The direct AngelScript binding is not proven. The deliberately omitted 3450-OFF runtime candidate spawned frogs and completed the mission; document the loss of source-specific search radii rather than mislabeling it a current blocker. Strict <em>exact-parity</em> conversion can still fail closed; never substitute 3024/3150.</li>
+<li><code>R6_API_SEQ</code> — <strong>CURRENT_GATE_CONFIRMED</strong> — R37 semantic gates: 1560/1560 anchored API name/sequence parity; 8088 direct calls with only nonblocking M001 alias residual; 58/58 compound semantic tokens.</li>
+<li><code>R6_CREATEENEMY2</code> — <strong>CURRENT_RUNTIME_CONFIRMED</strong> — Source opcode 2001 maps to CreateEnemy2; runtime-confirmed for DM019 wall anthill/spawner orientation. Do not merge with 2000 CreateEnemy.</li>
+<li><code>R6_DM019_FRIENDS</code> — <strong>CURRENT_SOURCE_SEMANTICS</strong> — DM019 creates three recruitable friend squads and immediately assigns routes/speeds; idle-until-recruited behavior is inconsistent with source intent.</li>
+<li><code>R6_DM019_GOLDANT</code> — <strong>CURRENT_SOURCE_SEMANTICS</strong> — DM019 source semantics: enemy02 has ordinary GiantAnt04×3 below higher-difficulty branch and GoldAnt×3 in higher branch; enemy03 unconditionally creates GiantAnt04×70, GiantAnt04sb×30, GoldAnt×5 in that order.</li>
+<li><code>R6_DM019_LIGHT</code> — <strong>CURRENT_RUNTIME_CONFIRMED</strong> — DM019 lighting omission was a mission transpiler bug; restoring source lighting calls fixed runtime lighting.</li>
+<li><code>R6_DM020_TANKS</code> — <strong>CURRENT_SOURCE_SEMANTICS</strong> — DM020 source constructs tank01_1..4 only; tank01_5/6 are read later without source constructors. Do not synthesize them; solve declaration/type inference.</li>
+<li><code>R6_EVENT_SENTINEL</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — Exact44 end-event sentinel: source end registration delay 100.0 maps narrowly to EDF6 target 100000000.00; this is not blanket time scaling.</li>
+<li><code>R6_EVENT_SLOTS</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — One target event state per unique reachable source target: exact44 has 2214 registrations and 2106 unique targets; official MAX_EVENT_ID sum is 2106. IDs use first-registration order, not Func_N numbers.</li>
+<li><code>R6_FACTOR_9201_9202</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — 9201=Factor_ObjectDestroy and 9202=Factor_ObjectEncount; old merged interpretation is wrong.</li>
+<li><code>R6_FIFO</code> — <strong>CURRENT_RULE</strong> — Contiguous source side effects must emit in source execution order/FIFO; old LIFO pending-expression behavior was a corpus-wide semantic bug.</li>
+<li><code>R6_GLOBAL_RW</code> — <strong>CURRENT_GATE_CONFIRMED</strong> — R37 global dataflow gate: exact44 4618 reads/2106 writes/0 missing; shipping141 9898 reads/4864 writes/0 missing.</li>
+<li><code>R6_GROUP3500</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — ObjectGroup family is exact-pair confirmed: 3500 AddGroupObjectBegin, 3501 AddGroupObjectEnd with no fake pop, 3502 GetGroupObjectCount expression.</li>
+<li><code>R6_M001_ALIAS</code> — <strong>OPEN_NONBLOCKING</strong> — M001 ap111 vs official npc_ap025_surprise remains a nonblocking target-compatibility/alias question; preserve source unless runtime/resource evidence proves a narrow alias.</li>
+<li><code>R6_M041</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — M041 pre-registration 9000 is a narrow compiler idiom lowered as in-body Wait, not child factor; the old R20 event-order warning is resolved.</li>
+<li><code>R6_M098_REFERENCE</code> — <strong>CURRENT_CORRECTION</strong> — Historically named M098/OFFICIAL.AC is reference/reconstructed material, not one of the 44 exact official pairs; source BVM wins for recoverable counts/timing/booleans.</li>
+<li><code>R6_MULTI_EVENTTYPE</code> — <strong>CURRENT_BINARY_CONFIRMED</strong> — Binary-confirmed source-faithful mapping: BVM multi==1 → EVENT_TYPE_ASYNC; otherwise EVENT_TYPE_SYNC. EDF5/EDF6 BVM and EDF6 AngelScript scheduling policies are semantically isomorphic.</li>
+<li><code>R6_MULTI_NEQ_OLD</code> — <strong>SUPERSEDED</strong> — Old multi!=0 lowering is superseded; runtime checks equality to 1.</li>
+<li><code>R6_NO_SHELL_INJECTION</code> — <strong>CURRENT_RULE</strong> — Do not inject SetFullLightWeightMode or ragdoll settings unconditionally; emit source semantics only.</li>
+<li><code>R6_NO_TIME_SCALE</code> — <strong>CURRENT_RULE</strong> — Preserve source timing; no blanket ×1.5 conversion.</li>
+<li><code>R6_PROVENANCE_COMMENTS</code> — <strong>CURRENT_RULE</strong> — Keep machine-readable EDF5_CUSCALL provenance comments for nontrivial/direct lowerings so direct and compound target API emissions can be distinguished.</li>
+<li><code>R6_R20_LATEST</code> — <strong>SUPERSEDED</strong> — R20/R30 are historical research checkpoints. Continue mission work from R37, not R20/R30.</li>
+<li><code>R6_R20_OPEN_CFG</code> — <strong>SUPERSEDED</strong> — R20 six backward CFG cases and M041 warning are resolved in R37; do not reopen from R20 handoff.</li>
+<li><code>R6_R37_STATUS</code> — <strong>CURRENT_RESEARCH_STATE</strong> — R37 is the latest mission research candidate and supersedes R20/R30 as research continuation point, but remains blocked from canonical promotion.</li>
+<li><code>R6_REACHABLE_EVENTS</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — Exact44: 2233 raw RegisterEvent calls reduce to 2214 reachable registrations, matching 2214 official internal_CreateEvent calls. Dead compiler Func_N branches must be excluded by source reachability.</li>
+<li><code>R6_SOURCE_VOID</code> — <strong>CURRENT_CORPUS_CONFIRMED</strong> — Source-void operations must emit immediately and never pollute the VM stack; group transaction family and 902 CreateMob_Path are confirmed source-void.</li>
+<li><code>R6_SWITCHES</code> — <strong>CURRENT_GATE_CONFIRMED</strong> — R37 control-flow gate is green for shipping141; the six old R20 backward-layout cases are recognized as switches and there are zero fallbacks/warnings/leaked CFG markers.</li>
+<li><code>R6_TEST21</code> — <strong>CURRENT_REPRODUCED</strong> — R37 packaged checkpoint portable regression suite is independently reproduced at 21/21 PASS.</li>
+<li><code>R6_VM_SCAFFOLD</code> — <strong>CURRENT_CORPUS_CONFIRMED</strong> — cuscall0 9 and cuscall1 1/2 are VM scaffold/progress semantics, not gameplay waits. Real waits are source opcodes 200/201.</li>
+<li><code>R6_VOICE4000</code> — <strong>CURRENT_EXACT_PAIR_CONFIRMED</strong> — Direct source cuscall0 4000 maps to Voice(string); old direct PlaySe interpretation is wrong. Higher-level RadioVoice wrappers remain separate abstractions.</li>
+</ul>
+<h3 id="mission-scope">MISSION_SCOPE</h3>
+<ul>
+<li><code>R6_145_OLD_FULL</code> — <strong>SUPERSEDED</strong> — Earlier “145 = full corpus” wording is superseded. 145 remains a stress corpus; shipping gate is 141 and total supplied BVM inventory is 335.</li>
+<li><code>R6_DEPLOY_139</code> — <strong>CURRENT_BINARY_CONFIRMED</strong> — Current mod Pack03 ONLINE LIST.SGO is byte-identical to OFFLINE, exposing 139 unique shipping missions, omitting M082/M083 and exposing M000 online. This is a deployment-list bug, not transpiler scope.</li>
+<li><code>R6_SCOPE_141</code> — <strong>CURRENT_BINARY_CONFIRMED</strong> — Primary completeness gate is 141 shipping-required EDF5 missions; 145 is a secondary stress corpus, not the full source corpus.</li>
+<li><code>R6_SCOPE_335</code> — <strong>CURRENT_BINARY_CONFIRMED</strong> — Supplied EDF5 tree contains 335 MISSION.BVM files: 141 shipping-required, 10 source orphans, 126 EDF4.1 subtree, 56 TEST, 2 TGS.</li>
+</ul>
+<h3 id="navmesh-hkt">NAVMESH_HKT</h3>
+<ul>
+<li><code>NAV_HKT_GENERATION</code> — <strong>CURRENT_RULE</strong> — Navmesh HKT requires Havok 2015/64-bit -&gt; 2020/32-bit re-encoding.</li>
+<li><code>R6_CLEARANCE</code> — <strong>DEPRIORITIZED</strong> — Clearance ABI/seeding mismatch is strongly deprioritized by exact-pair/version-contract evidence.</li>
+<li><code>R6_DEEP_CONVEX</code> — <strong>CURRENT_STRUCTURAL_FINDING</strong> — A real high-only source streaming bridge penetrates a closed RoomB convex collider (~1.1083 m, fraction ~0.9947); generic detector reproduces R2O, but runtime-negative result prevents treating it as behavioral root cause.</li>
+<li><code>R6_DEEP_THRESH</code> — <strong>CURRENT_RESEARCH_RULE</strong> — Current deep-convex source-consistency detector uses closed convex primitives, ≥0.05 m solid penetration and ≥0.90 fraction; it is a research sanitizer candidate, not a universal native exporter rule.</li>
+<li><code>R6_FILTER_CLOSED</code> — <strong>FALSIFIED_OR_CLOSED</strong> — RoomB collision filter/query-mask hypothesis is closed; source/native metadata do not expose a missing mask explaining NPC-only behavior.</li>
+<li><code>R6_GRAPH_DECODER</code> — <strong>CURRENT_CORRECTION</strong> — Historical graph decoder read narrow ints/hkHalf16 incorrectly; canonical graph decoders were fixed. Serializer output was unaffected because raw ITEM data was preserved.</li>
+<li><code>R6_INVERSE_BAKE</code> — <strong>CURRENT_RULE</strong> — Exact native HKT parity is an inverse-bake/rebake problem, not a simple version patch: native EDF6 often changes topology and runtime HKT does not serialize every generation setting.</li>
+<li><code>R6_PHYSICAL_WALL</code> — <strong>CURRENT_RUNTIME_CONFIRMED</strong> — Physical wall collision exists; web projectiles stop at the wall and actors cannot cross. The remaining symptom is primarily AI-vs-AI targeting/perception/query semantics.</li>
+<li><code>R6_R2O_NEGATIVE</code> — <strong>CURRENT_RUNTIME_NEGATIVE</strong> — R2O high-only removal of the deep-convex streaming stitch is runtime-negative for the AI wall symptom. The stitch remains a structural consistency finding but is not sufficient behavioral root cause.</li>
+<li><code>R6_STATIC_TREE</code> — <strong>DEPRIORITIZED</strong> — DM019 static-tree defect is strongly deprioritized after all 10 low + 10 high tiles passed reachability/permutation/AABB/domain checks.</li>
+</ul>
+<h3 id="nvmd">NVMD</h3>
+<ul>
+<li><code>NVMD_CONVERSION</code> — <strong>CURRENT_RULE</strong> — NVMD requires measured 0x120-&gt;0x130 / record0 expansion conversion.</li>
+</ul>
+<h3 id="provenance">PROVENANCE</h3>
+<ul>
+<li><code>R6_HAVOK_PRIVATE</code> — <strong>CURRENT_RULE</strong> — Private Havok SDK material may inform research only; distributable outputs must not reproduce exact/distinctive SDK source/fragments.</li>
+<li><code>R6_SOURCE_ONLY</code> — <strong>CURRENT_RULE</strong> — Generic source-only converter/transpiler remains the production target; native EDF6 assets are research oracles only, never production carriers/templates/donors.</li>
+</ul>
+<h3 id="rab">RAB</h3>
+<ul>
+<li><code>R6_RAB_PALM</code> — <strong>CURRENT_RUNTIME_CONFIRMED</strong> — Palm/high-LOD leaf rendering issue was fixed by RAB/MDB simple-clip material ABI work; retain as runtime-positive regression knowledge.</li>
+<li><code>RAB_LITERAL_ONLY_OLD</code> — <strong>SUPERSEDED</strong> — Literal-only CMPL is no longer the only safe method; corrected exact encoder supersedes that conclusion.</li>
+</ul>
+<h3 id="rmpa">RMPA</h3>
+<ul>
+<li><code>RMPA_BYTE_COPY_OLD</code> — <strong>SUPERSEDED</strong> — EDF5 RMPA passthrough is superseded; structural conversion is required.</li>
+<li><code>RMPA_TYPE_HEADER_0X18</code> — <strong>CURRENT_RULE</strong> — RMPA type header uses +0x18 string pointer; +0x1C belongs to enumeration subheaders, not the type header.</li>
+</ul>
+<h3 id="sgo">SGO</h3>
+<ul>
+<li><code>SGO_E2_OVERRIDE_DSGO_SCOPE</code> — <strong>PROFILE_SPECIFIC_NOT_UNIVERSAL</strong> — Normal pack TXT is classic SGO-258, while deployed E2 base-override TXT files were observed as DSGO; whether the game loads that override is untested.</li>
+<li><code>SGO_PROP_33_34</code> — <strong>CANDIDATE_SPECIFIC_CURRENT</strong> — Latest clean Desert handoff reports a resource-specific prop-template 33-&gt;34 variable conversion with 0x682 record at index 17; not a global SGO law.</li>
+<li><code>SGO_TXT_CLASSIC</code> — <strong>CURRENT_RULE</strong> — EDF6 TXT name/description tables remain classic SGO v258.</li>
+</ul>
+<h3 id="weather">WEATHER</h3>
+<ul>
+<li><code>R6_WEATHER_R2F</code> — <strong>REFERENCE_ASSISTED_DIAGNOSTIC</strong> — Reference-assisted FINE.MAE removed EDFROOM loader blocker at EDF+0x161AE2; this is diagnostic/reference-assisted evidence, not a final source-only weather conversion rule.</li>
+</ul>
+<h3 id="weather-dsgo">WEATHER_DSGO</h3>
+<ul>
+<li><code>WEATHER_NOT_DERIVABLE</code> — <strong>CURRENT_RULE</strong> — Weather DSGO semantic values are profile-specific; no blind scaling/copy law.</li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json</li><li>CURRENT_STATE_R20_2026-08-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#bvd">　BVD</a><a href="#bvm">　BVM</a><a href="#canm">　CANM</a><a href="#cas">　CAS</a><a href="#cmpl">　CMPL</a><a href="#cpk">　CPK</a><a href="#dsgo">　DSGO</a><a href="#fmb">　FMB</a><a href="#mab">　MAB</a><a href="#mac">　MAC</a><a href="#mad">　MAD</a><a href="#mae">　MAE</a><a href="#mapb">　MAPB</a><a href="#mapo">　MAPO</a><a href="#map-resource-refs">　MAP_RESOURCE_REFS</a><a href="#marc">　MARC</a><a href="#mdb">　MDB</a><a href="#mission-ac">　MISSION_AC</a><a href="#mission-scope">　MISSION_SCOPE</a><a href="#navmesh-hkt">　NAVMESH_HKT</a><a href="#nvmd">　NVMD</a><a href="#provenance">　PROVENANCE</a><a href="#rab">　RAB</a><a href="#rmpa">　RMPA</a><a href="#sgo">　SGO</a><a href="#weather">　WEATHER</a><a href="#weather-dsgo">　WEATHER_DSGO</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"cross-game-conversion-curated-conversion-supersession-rule-ledger"};</script><script src="../assets/site.js" defer></script></body></html>

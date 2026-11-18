@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="MAE and weather — generic source-only boundary and the Desert508 exception A generic EDF5→EDF6 weather/MAE conversion law is not globally closed. However, that "><title>MAE and weather — generic source-only boundary and the Desert508 exception | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-maps.html">Maps</a></div><h1>MAE and weather — generic source-only boundary and the Desert508 exception</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Generic open; Desert508 shipping runtime-closed</div><div id="articleBody"><p>A generic EDF5→EDF6 weather/MAE conversion law is <strong>not</strong> globally closed. However, that generic uncertainty must not erase a narrower result: <strong>Desert508 weather is runtime-closed for every retained shipping mission that actually consumes it.</strong></p>
+<h2 id="why-generic-mae-weather-remains-a-separate-problem">Why generic MAE/weather remains a separate problem</h2>
+<p>MAE is an EDF6-side map/environment role without a trivial one-to-one EDF5 twin. Target runtime weather is a composition of map/profile environment state, MAE data, RAB resources and script-side calls. A reference-assisted MAE that removes one loader blocker does not establish a lawful universal converter.</p>
+<p>Likewise, profile values cannot be blindly copied or scaled across all maps. Paired evidence and runtime behavior remain necessary when promoting a generic rule.</p>
+<h2 id="desert508-is-a-qualified-source-derived-exception">Desert508 is a qualified source-derived exception</h2>
+<p>The retained EDF5 corpus was exhaustively decompiled/scanned for <code>ig_desert508</code> use:</p>
+<ul>
+<li><strong>335</strong> retained <code>MISSION.BVM</code> files scanned;</li>
+<li>exactly <strong>2</strong> consumers found;</li>
+<li><code>DLC/DM018</code> uses <code>evening</code>;</li>
+<li><code>DLC/DM020</code> uses <code>sunset</code>;</li>
+<li>no retained mission BVM uses Desert508 <code>fine</code>, <code>cloudy</code>, <code>cloudy2</code> or <code>finecloud</code>.</li>
+</ul>
+<p>The production weather architecture is source-derived and port-owned:</p>
+<ul>
+<li>standard target names <code>IG_DESERT508_&lt;PRESET&gt;.MAE/.RAB</code>;</li>
+<li>target <code>ig_desert508.rmpa</code> plus source-derived modern <code>weathers.dsgo</code> in the MAE construction;</li>
+<li>EDF5 Desert weather RAB payloads retained byte-exact;</li>
+<li>no native EDF6 weather donor/template/carrier in the production path.</li>
+</ul>
+<h2 id="runtime-matrix-for-actual-shipping-consumers">Runtime matrix for actual shipping consumers</h2>
+<table>
+<thead>
+<tr>
+  <th>Preset</th>
+  <th>Status</th>
+  <th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>EVENING</code></td>
+  <td><strong>RUNTIME PASS</strong></td>
+  <td>DLC1 #4 / DM018 after restoring source-authentic <code>evening</code></td>
+</tr>
+<tr>
+  <td><code>SUNSET</code></td>
+  <td><strong>RUNTIME PASS</strong></td>
+  <td>DLC1 #6 / DM020, whose source and current AC already agree on <code>sunset</code></td>
+</tr>
+<tr>
+  <td><code>FINE</code></td>
+  <td>offline/source PASS; no retained BVM consumer</td>
+  <td>optional asset completeness only</td>
+</tr>
+<tr>
+  <td><code>CLOUDY</code></td>
+  <td>offline/source PASS; no retained BVM consumer</td>
+  <td>optional asset completeness only</td>
+</tr>
+<tr>
+  <td><code>CLOUDY2</code></td>
+  <td>offline/source PASS; no retained BVM consumer</td>
+  <td>optional asset completeness only</td>
+</tr>
+<tr>
+  <td><code>FINECLOUD</code></td>
+  <td>offline/source PASS; no retained BVM consumer</td>
+  <td>optional asset completeness only</td>
+</tr>
+</tbody>
+</table>
+<p>Therefore the four untested presets are <strong>not shipping blockers</strong>. They are optional technical/map-asset completeness tests because no retained mission actually selects them.</p>
+<h2 id="dm018-source-drift-correction">DM018 source drift correction</h2>
+<p>The EDF5 source BVM uses:</p>
+<pre><code class="language-text">ig_desert508 + evening
+</code></pre>
+<p>A reconciled EDF6 AC had drifted to <code>sunset</code> in both <code>PreloadMap</code> and <code>Map</code>. The accepted correction changes exactly those two strings back to <code>evening</code> and leaves mission RMPA unchanged.</p>
+<p>Accepted AC SHA-256:</p>
+<pre><code class="language-text">a1100f07bc4d0fc7605af397216f789d920ce8772aedc186f9a00990ec269eb4
+</code></pre>
+<p>Direct runtime: <strong>PASS</strong>.</p>
+<h2 id="correct-evidence-boundary">Correct evidence boundary</h2>
+<p>Two statements can simultaneously be true:</p>
+<ol>
+<li><strong>generic</strong> source-only weather/MAE synthesis across arbitrary maps remains an open research problem;</li>
+<li><strong>Desert508 shipping weather</strong> is closed because every retained consumer is runtime-positive on its source-authentic preset.</li>
+</ol>
+<p>Do not downgrade the Desert508 release state merely because the generic converter remains imperfect, and do not generalize Desert508's success into a universal weather transform without new paired evidence.</p>
+<h2 id="a-practical-weather-resource-completeness-check">A practical weather-resource completeness check</h2>
+<p>A studied EDF4.1→EDF6 map-port workflow had a specific failure class when the target environment record omitted required fields, including <strong><code>_brightnessFog</code></strong>. Its conservative weather-resource validator required the following names to exist:</p>
+<pre><code class="language-text">_lights       _ambient        _sky           _envMap
+_tone         _sun            _lowBloom      _highBloom
+_fog          _brightnessFog  _farClipZ      _shadowOffset
+_wind
+</code></pre>
+<p>It also required a <strong>non-empty, parseable weather RMPA</strong> and a <strong>non-empty RAB</strong> companion. These are a <strong>measured validation envelope for that source-to-target map workflow</strong>, not a claim that every game mode always needs every field in precisely the same way. Supplying these fields can prevent a known loader failure without proving that an independently synthesized weather scene looks or behaves like native EDF6 weather.</p>
+<p>Some early EDF4.1 map ports reused native EDF6 donor weather/nav. Those resources can permit a map to load, but are not evidence of source-derived weather conversion, and donor NAV geometry may be incompatible with the source terrain. Treat environment acceptance and visual fidelity as separate checks.</p>
+<h2 id="fine-archive-dependencies-and-cpk-visibility-are-separate-problems">FINE archive dependencies and CPK visibility are separate problems</h2>
+<p>The studied EDF5-derived Desert508 <strong>FINE</strong> pair contains an MAE (weather DSGO plus local-area RMPA) and a separate large RAB with four exact DDS resources. A later host-side search could not find those <strong>specific</strong> resources in the scanned vanilla EDF6 CPKs, even though their previously qualified identity existed in a preserved local weather RAB. This shows why a game resource path should not be equated with a directly discoverable CPK entry. The <a href="maps-edf6-desert-fine-mae-rab-weather-archive-dependencies-and-cpk-limits.html">FINE MAE/RAB case study</a> provides the bounded filenames and hashes; it does <strong>not</strong> establish generic native-FINE reconstruction.</p>
+<h2 id="checking-the-environment-binding-independently-of-the-visual-profile">Checking the environment binding independently of the visual profile</h2>
+<p>A correctly packaged MAE can still reference a missing environment area. The <a href="maps-%26-navigation-mae-weather-dsgo-envmap-rmpa-binding.html">MAE/DSGO <code>_envMap</code> binding guide</a> gives the measured <code>_envMap[0]</code> RMPA name lookup rule and validator contract. This is a structural identity check and does <strong>not</strong> establish that a borrowed or independently synthesized weather profile looks native.</p>
+<h2 id="the-edf5-to-edf6-exposure-tone-contract-is-three-named-lanes-not-a-guessed-color-grade">The EDF5-to-EDF6 exposure-tone contract is three named lanes, not a guessed color grade</h2>
+<p>An exact source/target shader and weather-manager comparison recovered the EDF5 <strong><code>v2_Brightness</code> / <code>v2_BrightnessLerp</code> / <code>v2_ToneIntensity</code></strong> triple as active exposure controls. In the audited EDF5 weather manager, these map into the active renderer singleton at <code>+0x68</code> / <code>+0x6C</code> / <code>+0x70</code>; the source-side defaults are <code>0.5 / 0.5 / 0.9</code>. The same <code>ComputeToneLerpSetting</code> shader has a different constant-buffer layout across generations:</p>
+<table>
+<thead>
+<tr>
+  <th>Constant-buffer byte offset</th>
+  <th>EDF5 (16-byte buffer)</th>
+  <th>EDF6 (16-byte buffer)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0x00</code></td>
+  <td><code>g_tone_lerp_brightness_target</code></td>
+  <td><code>g_tone_lerp_brightness_center</code></td>
+</tr>
+<tr>
+  <td><code>+0x04</code></td>
+  <td><code>g_tone_lerp_brightness_lerp</code></td>
+  <td><code>g_tone_lerp_brightness_target</code></td>
+</tr>
+<tr>
+  <td><code>+0x08</code></td>
+  <td><code>g_tone_power</code></td>
+  <td><code>g_tone_lerp_brightness_lerp</code></td>
+</tr>
+<tr>
+  <td><code>+0x0C</code></td>
+  <td>padding</td>
+  <td><code>g_tone_power</code></td>
+</tr>
+</tbody>
+</table>
+<p>The EDF6 shader <strong>inserts the center-brightness lane at the front</strong>, shifting the three inherited meanings by four bytes. This, together with the exact source and target named-reader/renderer contract, supports the following <em>semantic</em> mapping in the studied source-only weather bridge:</p>
+<table>
+<thead>
+<tr>
+  <th>EDF5 authored property</th>
+  <th>EDF6 authored property</th>
+  <th>Target runtime meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v2_Brightness</code></td>
+  <td><code>v3_brightness</code></td>
+  <td><code>EVENT_LIGHT_ENV_FADE_TONE_BRIGHTNESS</code></td>
+</tr>
+<tr>
+  <td><code>v2_BrightnessLerp</code></td>
+  <td><code>v3_lerp</code></td>
+  <td><code>EVENT_LIGHT_ENV_FADE_TONE_BRIGHTNESS_LERP</code></td>
+</tr>
+<tr>
+  <td><code>v2_ToneIntensity</code></td>
+  <td><code>v3_intensity</code></td>
+  <td><code>EVENT_LIGHT_ENV_FADE_TONE_POWER</code></td>
+</tr>
+</tbody>
+</table>
+<p>The target-only <code>v3_brightness_max=10.0</code> and <code>v3_center_brightness=0.5</code> use the measured target constructor defaults. For an <em>absent</em> EDF5 old property, use its <strong>source</strong> constructor default; e.g. source brightness-lerp defaults to <strong>0.5</strong>, whereas native target <code>v3_lerp</code> defaults to <strong>0.2</strong>. A mixed old/new tone family in one source profile is ambiguous and must not be silently merged.</p>
+<p>Across <strong>18 source profiles in three map families</strong>, the audited source-only bridge introduced <code>_tone</code> as the only newly converted modern family in the comparison and reported <strong>0 failures</strong>. The specific original <code>IG_2000MCITY / Evening</code> profile yielded <code>_tone = [0.45, 10.0, 0.5, 0.85, 0.5]</code> in the observed target serialization order. These are <strong>binary/source and offline mapping results</strong>, not a new visual-runtime PASS. The independent verifier reported <strong>34/34</strong> source/target checks, and its target-side predecessor <strong>65/65</strong> checks.</p>
+<p><code>GroundColorR/G/B</code> is a useful negative boundary: all three names <strong>are parsed</strong> into the original EDF5 profile at <code>+0x140/+0x144/+0x148</code>, but the examined active-profile consumers do <strong>not</strong> read those offsets. This supports omission in the limited conversion path; it does <strong>not</strong> prove that an undiscovered alias/hash-based consumer cannot exist. The old DOF, RGBC, SkyModelColor, <code>ToneAdjust</code>, and older bloom/color field names likewise lack exact named-reader matches in the examined executable. A missing name is not proof that a whole rendering feature disappeared.</p>
+<p><strong>Evidence scope:</strong> source-only exposure lineage and named-field analysis: <code>EDF5_EDF6_TONE_LINEAGE_R71_OFFLINE_AUDIT_2026-09-05.md</code>, its exact-build binary gate and <code>EDF5_EDF6_GROUNDCOLOR_CONSUMER_AUDIT_R71_2026-09-05.json</code>. See <a href="kh-edf5-photo-mode.html">EDF5 exposure pipeline</a> and <a href="kh-edf6-photo-mode.html">EDF6 exposure pipeline</a> for per-version shader behavior.</p>
+<h2 id="source-rab-inventory-is-distinct-from-mae-source-serialization">Source RAB inventory is distinct from MAE source serialization</h2>
+<p>For the sampled <code>IG_DESERT508</code> weather archive family, the six recovered EDF5 RAB files are source-side <strong>SSA version 272</strong> records. The exact source inventory must not be collapsed into one four-texture law: it yields <strong>four entries for <code>FINE</code>, <code>FINECLOUD</code> and <code>SUNSET</code></strong>, but <strong>five</strong> for <code>CLOUDY</code>, <code>CLOUDY2</code> and <code>EVENING</code>. The original sky-cube names differ across the six variants. The primary reason to preserve these native DDS names is resource resolution; their existence does not provide an EDF6 shader/visual parity claim.</p>
+<p>The independent five-effective-MAE release audit later closed <code>_envMap</code> named-record <strong>binding</strong>, but it did not rerun all six original RABs in game. The practical evidence layers therefore remain: <strong>source RAB identity → target MAE serialization → embedded-name resolution → mission selection → visual runtime</strong>. Do not promote results across layers. See <a href="maps-%26-navigation-desert508-source-weather-shipping-closure.html">the Desert508 consumer and binding case</a>.</p>
+<h2 id="target-weather-tone-name-order-is-not-the-native-c-member-order">Target weather <code>_tone</code> name order is not the native C++ member order</h2>
+<p>The exact-build EDF6 audit measured the serialized five-node tone field order as:</p>
+<pre><code class="language-text">v3_brightness, v3_brightness_max, v3_center_brightness, v3_intensity, v3_lerp
+</code></pre>
+<p>But native named readers place those values in a different order in the target weather-manager object:</p>
+<table>
+<thead>
+<tr>
+  <th>Authored key</th>
+  <th style="text-align:right">Observed target runtime member offset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>v3_brightness_max</code></td>
+  <td style="text-align:right"><code>+0x308</code></td>
+</tr>
+<tr>
+  <td><code>v3_center_brightness</code></td>
+  <td style="text-align:right"><code>+0x30C</code></td>
+</tr>
+<tr>
+  <td><code>v3_brightness</code></td>
+  <td style="text-align:right"><code>+0x310</code></td>
+</tr>
+<tr>
+  <td><code>v3_lerp</code></td>
+  <td style="text-align:right"><code>+0x314</code></td>
+</tr>
+<tr>
+  <td><code>v3_intensity</code></td>
+  <td style="text-align:right"><code>+0x318</code></td>
+</tr>
+</tbody>
+</table>
+<p>Native event-kind evidence also distinguishes center brightness <strong>24</strong>, target brightness <strong>25</strong>, brightness interpolation <strong>26</strong> and tone power <strong>27</strong>. This means an implementation cannot derive the order of native object members directly from the order of serialized DSGO values, or infer that all five properties existed in the EDF5 source. The exact target reader audit was <strong>65/65 static gates PASS</strong>, not a new rendered-image or gameplay test. Source: <code>EDF5_EDF6_EDF6_TONE_RUNTIME_CONTRACT_R69_OFFLINE_AUDIT_2026-09-05.json</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_DESERT508_WEATHER_RUNTIME_STATUS_LEDGER_2026-09-06.md</li><li>Library: EDF5_EDF6_DM018_EVENING_RUNTIME_ACCEPTANCE_2026-09-06.md</li><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_R67_WEATHER_BRIDGE_FRONTIER_2026-09-05.md</li><li>EDF41 MAPS_R4_2026-11-01/README.md</li><li>Library: /EDF5_EDF6_RESEARCH/converter/weather/weather_mae_binding.py</li><li>/EDF5_EDF6_RESEARCH/research/audits/weather/EDF5_EDF6_TONE_LINEAGE_R71_OFFLINE_AUDIT_2026-09-05.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/weather/EDF5_EDF6_TONE_LINEAGE_R71_BINARY_GATE_2026-09-05.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/weather/EDF5_EDF6_GROUNDCOLOR_CONSUMER_AUDIT_R71_2026-09-05.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/weather/EDF5_EDF6_DESERT508_WEATHER_SOURCE_RABS_RECOVERY_2026-09-06.json</li><li>data/R166_TARGETED_SOURCE_CLAIM_DISPOSITIONS.csv</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-generic-mae-weather-remains-a-separate-problem">Why generic MAE/weather remains a separate problem</a><a href="#desert508-is-a-qualified-source-derived-exception">Desert508 is a qualified source-derived exception</a><a href="#runtime-matrix-for-actual-shipping-consumers">Runtime matrix for actual shipping consumers</a><a href="#dm018-source-drift-correction">DM018 source drift correction</a><a href="#correct-evidence-boundary">Correct evidence boundary</a><a href="#a-practical-weather-resource-completeness-check">A practical weather-resource completeness check</a><a href="#fine-archive-dependencies-and-cpk-visibility-are-separate-problems">FINE archive dependencies and CPK visibility are separate problems</a><a href="#checking-the-environment-binding-independently-of-the-visual-profile">Checking the environment binding independently of the visual profile</a><a href="#the-edf5-to-edf6-exposure-tone-contract-is-three-named-lanes-not-a-guessed-color-grade">The EDF5-to-EDF6 exposure-tone contract is three named lanes, not a guessed color grade</a><a href="#source-rab-inventory-is-distinct-from-mae-source-serialization">Source RAB inventory is distinct from MAE source serialization</a><a href="#target-weather-tone-name-order-is-not-the-native-c-member-order">Target weather _tone name order is not the native C++ member order</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-mae-weather-source-only-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

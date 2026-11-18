@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 — why blood, scorch and bullet-mark decals disappear EDF5 uses a DecalManager and several DecalBase-derived objects for splashes, projected stains, bullet "><title>EDF5 decals: blood, acid, bullet marks, lifetime, stacking and view culling | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Effects and rendering</div><h1>EDF5 decals: blood, acid, bullet marks, lifetime, stacking and view culling</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Effects and rendering</span></div><div class="referencebadge">Technical reference · Source-declared grades; this edition does not add native game runtime testing</div><div id="articleBody"><p>EDF5 uses a <code>DecalManager</code> and several <code>DecalBase</code>-derived objects for splashes, projected stains, bullet marks and explosion marks. These are <strong>world-space render volumes</strong>, not paint permanently stored on map geometry. Their removal rules explain why a mark can vanish long before the nominal lifespan expires.</p>
+<h2 id="different-decal-families">Different decal families</h2>
+<table>
+<thead>
+<tr>
+  <th>Native class</th>
+  <th>Typical effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>Decal_Splash</code></td>
+  <td>Ground or death-pool-like aligned decal</td>
+</tr>
+<tr>
+  <td><code>Decal_SplashProjection</code></td>
+  <td>Hit blood or acid projected into world geometry</td>
+</tr>
+<tr>
+  <td><code>Decal_BulletMark</code></td>
+  <td>Bullet impact mark, including glowing/smouldering transition</td>
+</tr>
+<tr>
+  <td><code>Decal_ExplosionMarks</code></td>
+  <td>Blast/smoulder marks</td>
+</tr>
+<tr>
+  <td><code>FullScreen_Rain</code>, <code>Dust</code>, <code>Fog</code></td>
+  <td>Fullscreen classes in the broader decal family, not identical to a wall mark</td>
+</tr>
+</tbody>
+</table>
+<p>The studied constructors receive an <code>InitParam</code> with lifetime and strength. <code>DecalBase</code> separately tracks <strong>age</strong>, time spent <strong>undrawn</strong>, fade/dissolve and bounds. The reported ordinary duration is <strong>20 seconds</strong>, but that number is not a guarantee a particular decal remains visible for 20 seconds.</p>
+<h2 id="the-rules-that-remove-marks-early">The rules that remove marks early</h2>
+<ol>
+<li><strong>Out of view:</strong> the examined update logic deletes a decal after approximately <strong>one second not drawn</strong>, irrespective of the remaining nominal lifetime. The researcher verified this effect in game by changing the comparisons and seeing decals persist much longer.</li>
+<li><strong>Global capacity:</strong> the ordinary pool has a limit of roughly <strong>100</strong> managed decals, with eviction when more arrive.</li>
+<li><strong>Stacking/overlap:</strong> about <strong>6 overlapping marks</strong> can cause fading and <strong>8</strong> can cause removal in the observed configuration. A new bullet mark can thus evict an older blood stain on the same wall. This overlap behavior was also tested by the source investigator.</li>
+<li><strong>Normal age and fading:</strong> an older decal loses importance and ultimately ends its own lifetime, with special glow/fade curves for some mark classes.</li>
+</ol>
+<p>The manager ranks living candidates using a factor of remaining lifetime, decal strength and time undrawn. It compares general and overlapping candidates before deciding what to demote or remove. The source notes that one hard-removal path may unlink a decal from the manager without proving immediate visual destruction; that distinction remains <strong>unverified</strong>.</p>
+<h2 id="projection-and-attachment">Projection and attachment</h2>
+<p>The hit-blood spawner raycasts forward and creates a <strong>perspective-projected volume</strong> only after finding a surface. Its ray reach, projection depth and weight are partly linked, which means changing range can change stain appearance as well as distance. The acid spawner follows a different, simpler distance/depth path. A decal is registered in world space and <strong>is not dynamically attached to the specific wall chunk or enemy limb it struck</strong>. Consequently, a building fragment moving or disappearing does not imply the decal will move with it.</p>
+<h2 id="performance-and-evidence">Performance and evidence</h2>
+<p>Each decal is submitted individually, and inserting one requires considering the manager's tracked set. High decal counts therefore have real CPU and rendering costs; the game does not treat 10,000 projected marks as an ordinary budget. The contributor reported a test in which many decals survived after changing removal rules, but <strong>that is not proof of normal performance or memory safety at such counts</strong>.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf5-decals</code> facts <code>decal-classes</code>, <code>decal-fields</code>, <code>decal-life-cycle</code>, <code>decal-undrawn-in-game</code>, <code>decal-eviction</code>, <code>decal-stacking-in-game</code>, <code>decal-cost</code>, <code>decal-spawners</code>, <code>acid-reach</code>, <code>decal-world-space</code>, <code>decal-game-values</code>; novae (ajane). Static findings and source-reported gameplay tests are distinguished here; this edition ran no game test.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf5-drop-items, kh-edf5-decals and kh-edf5-stingers-webs (steam-5d11de53), curator novae/ajane and credited contributors</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#different-decal-families">Different decal families</a><a href="#the-rules-that-remove-marks-early">The rules that remove marks early</a><a href="#projection-and-attachment">Projection and attachment</a><a href="#performance-and-evidence">Performance and evidence</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-decals-blood-acid-marks-visibility-eviction-and-stacking"};</script><script src="../assets/site.js" defer></script></body></html>

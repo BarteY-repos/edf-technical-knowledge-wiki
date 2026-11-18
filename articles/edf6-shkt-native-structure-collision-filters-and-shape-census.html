@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 SHKT: Havok system layout, collision filters and measured shapes A native EDF6 .SHKT contains Havok Physics 2020 objects for character and vehicle hitboxes"><title>EDF6 SHKT: Havok system layout, collision filters and measured shapes | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Physics</div><h1>EDF6 SHKT: Havok system layout, collision filters and measured shapes</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Physics</span></div><div class="referencebadge">Technical reference · Original source reports static binary/file analysis, with separately labelled contributor in-game tests; no new tests this release</div><div id="articleBody"><p>A native EDF6 <code>.SHKT</code> contains <strong>Havok Physics 2020</strong> objects for character and vehicle hitboxes, joints and rigid bodies. Its class format differs from the legacy <code>hkp</code> structures used in EDF4.1/EDF5: the studied EDF6 files use an <code>hknpPhysicsSystemData</code>, or a <code>hknpRagdollData</code> wrapper where a skeleton field is present but not shown to drive the game's binding.</p>
+<h2 id="core-records">Core records</h2>
+<table>
+<thead>
+<tr>
+  <th>Area</th>
+  <th>Native meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>bodyCinfos</code></td>
+  <td>Body transforms, masses, motion and material references</td>
+</tr>
+<tr>
+  <td><code>constraintCinfos</code></td>
+  <td>Joint relationships, with <code>bodyA</code> the child and <code>bodyB</code> its parent</td>
+</tr>
+<tr>
+  <td>Materials</td>
+  <td>Friction and restitution; their encoded <code>hkHalf16</code> is the upper half of an IEEE float32</td>
+</tr>
+<tr>
+  <td>Motion properties</td>
+  <td>Limits, damping and related rigid-body simulation fields</td>
+</tr>
+<tr>
+  <td>Shapes</td>
+  <td>Spheres, capsules, boxes, cylinders, convex hulls, compounds and compressed meshes</td>
+</tr>
+</tbody>
+</table>
+<p><code>motionType</code> values observed: <strong>0 static, 1 keyframed, 2 dynamic</strong>. <code>materialId</code> and <code>motionPropertiesId</code> refer to local tables; <code>65535</code> can mean absent/none (including static-body cases). A source census found <strong>one physics system per SHKT</strong> in all 316 files in that survey. The largest surveyed system had <strong>111 bodies</strong>; a ragdoll example had <strong>94 bodies and 93 constraints</strong>.</p>
+<h2 id="packed-collision-filter-field">Packed collision filter field</h2>
+<p>The body-side <strong><code>collisionFilterInfo</code></strong> encodes subsystem exclusions separately from the <em>runtime collision layer</em>:</p>
+<table>
+<thead>
+<tr>
+  <th>Bits</th>
+  <th>Field</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0–4</td>
+  <td>Layer slot (game can override)</td>
+</tr>
+<tr>
+  <td>5–9</td>
+  <td>Subsystem ID</td>
+</tr>
+<tr>
+  <td>10–14</td>
+  <td>Subsystem ID to exclude</td>
+</tr>
+<tr>
+  <td>15–30</td>
+  <td>System group</td>
+</tr>
+</tbody>
+</table>
+<p>The game derives the effective layer during registration; the source found the serialized layer slot <strong>0 for all 4,954 surveyed bodies</strong>, though actual player, enemy and map layers differ at runtime. Ragdoll body exclusions commonly refer to the parent body's subsystem ID; when the character contains over 31 bodies, 5-bit subsystem IDs are necessarily reused. Do not interpret a serialized layer zero as “this body collides with nothing.”</p>
+<p>The code's <code>CollisionFilter::CollisionFilter</code> path uses a fixed layer-pair matrix. Some examples from the investigator's table: <strong>player/vehicle layer 1</strong> collides with map-prop layer <strong>20</strong>; <strong>enemy layer 2</strong> collides with terrain layer <strong>17</strong>, but not generally with prop layer 20. <strong>Layer 26</strong> is a special bullet-penetrable map category: it collides with several character/query layers, not the listed bullet layers 10–13. These statements refer to code and surveyed modded-runtime observations; see the separate <a href="edf6-native-bullet-filters-stop-vs-hit-and-collision-layers.html">32×32 collision matrix</a> if available in the published edition.</p>
+<h2 id="shape-census-from-317-surveyed-shkt-hkt-files">Shape census from 317 surveyed SHKT/HKT files</h2>
+<table>
+<thead>
+<tr>
+  <th>Shape type</th>
+  <th style="text-align:right">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Convex</td>
+  <td style="text-align:right">8,034</td>
+</tr>
+<tr>
+  <td>Compound</td>
+  <td style="text-align:right">1,925</td>
+</tr>
+<tr>
+  <td>Capsule</td>
+  <td style="text-align:right">1,033</td>
+</tr>
+<tr>
+  <td>Box</td>
+  <td style="text-align:right">559</td>
+</tr>
+<tr>
+  <td>Compressed mesh</td>
+  <td style="text-align:right">439</td>
+</tr>
+<tr>
+  <td>Sphere</td>
+  <td style="text-align:right">71</td>
+</tr>
+<tr>
+  <td>Cylinder</td>
+  <td style="text-align:right">59</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>12,120</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Across that same census: <strong>4,954 bodies, 4,444 materials, 4,230 motion-property entries and 3,059 constraints</strong>. All values are corpus counts, not global limits for arbitrary expansions. The source identifies <code>simdTree</code> in compound shapes as a <strong>four-way BVH</strong>; <code>aabbTree</code> is empty in the examined files. The largest source-observed convex hull has <strong>252 vertices</strong>; up to <strong>250</strong> were separately reported working in the game, while 253–256 remained unqualified. Do not confuse the maximum observed size with a universally validated engine limit.</p>
+<p><strong>Sources and credit:</strong> EDF Knowledge Hub <code>kh-edf6-physics-shkt</code>, facts <code>shkt-system-structure</code>, <code>collision-filter-info-bits</code>, <code>collision-layers</code>, <code>shkt-shape-statistics</code>, <code>shkt-size-limits</code>, <code>map-prop-layers</code>; ktaro/BarteY, 2026-10. Binary addresses are build scoped and no game was run for this revision.</p>
+<h2 id="native-game-reference-guides">Native game reference guides</h2>
+<ul>
+<li><a href="edf6-native-walk-controller-support-velocity-and-gravity.html">EDF6 walk support state and velocity</a></li>
+<li><a href="edf6-cling-controller-insect-robot-attachment-and-launch.html">EDF6 cling movement</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub, export of 2026-11-14; original contributors ktaro (EDF6 SHKT research) and hajisensai / All Forces; EDF6 examined build steam-678ccb46</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#core-records">Core records</a><a href="#packed-collision-filter-field">Packed collision filter field</a><a href="#shape-census-from-317-surveyed-shkt-hkt-files">Shape census from 317 surveyed SHKT/HKT files</a><a href="#native-game-reference-guides">Native game reference guides</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-shkt-native-structure-collision-filters-and-shape-census"};</script><script src="../assets/site.js" defer></script></body></html>

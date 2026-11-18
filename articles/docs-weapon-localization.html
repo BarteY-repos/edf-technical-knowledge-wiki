@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Weapon Stat Text &amp; Localization EDF6 weapon statistics have a display/localization layer separate from the underlying weapon SGO parameter. For star-upgradeable"><title>Weapon Stat Text &amp; Localization | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>Weapon Stat Text &amp; Localization</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Documentation</span><span class="chip">File Formats</span></div><div class="referencebadge">Technical reference · Community-provided Japanese memo; source-specific and not independently rerun</div><div id="articleBody"><p>EDF6 weapon statistics have a display/localization layer separate from the underlying weapon SGO parameter. For star-upgradeable values, the source describes placeholders such as <code>$0</code>, accompanied by the same upgrade parameter record used by the weapon.</p>
+<h2 id="what-must-agree">What must agree</h2>
+<ol>
+<li><strong>Weapon SGO:</strong> technical value, star-upgrade record and its <strong>position index</strong>.</li>
+<li><strong>WEAPONTABLE:</strong> internal resource name/path, category, level, eligibility and star caps in matching position order.</li>
+<li><strong>WEAPONTEXT language variant:</strong> human-facing title, description and stat label/formatter, sometimes with a <code>$0</code> substitution backed by the seven-field star record.</li>
+</ol>
+<p>Translation of the visible label does not change gameplay. Conversely, changing a gameplay statistic but leaving a hardcoded display string unchanged can mislead players.</p>
+<h2 id="localized-labels-examples-from-the-contributor-s-comparison-table">Localized labels — examples from the contributor's comparison table</h2>
+<table>
+<thead>
+<tr>
+  <th>Japanese</th>
+  <th>English label</th>
+  <th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>弾数</td>
+  <td>Capacity</td>
+  <td>Magazine capacity</td>
+</tr>
+<tr>
+  <td>連射速度</td>
+  <td>ROF</td>
+  <td>Rate of fire</td>
+</tr>
+<tr>
+  <td>ダメージ</td>
+  <td>Damage</td>
+  <td>Damage</td>
+</tr>
+<tr>
+  <td>リロード時間</td>
+  <td>Reload Time</td>
+  <td>Reload duration</td>
+</tr>
+<tr>
+  <td>有効射程距離</td>
+  <td>Range</td>
+  <td>Effective range</td>
+</tr>
+<tr>
+  <td>弾速</td>
+  <td>Shot Speed</td>
+  <td>Projectile speed</td>
+</tr>
+<tr>
+  <td>精度</td>
+  <td>Accuracy</td>
+  <td>Dispersion/accuracy</td>
+</tr>
+<tr>
+  <td>効果範囲</td>
+  <td>AOE</td>
+  <td>Area of effect</td>
+</tr>
+<tr>
+  <td>爆破範囲</td>
+  <td>Blast Area</td>
+  <td>Blast effect</td>
+</tr>
+<tr>
+  <td>ロック時間</td>
+  <td>Lock-on Time</td>
+  <td>Lock time</td>
+</tr>
+<tr>
+  <td>誘導性能</td>
+  <td>Homing Capability</td>
+  <td>Homing behavior</td>
+</tr>
+<tr>
+  <td>起爆条件</td>
+  <td>Detonates by</td>
+  <td>Trigger condition</td>
+</tr>
+</tbody>
+</table>
+<p>The source sheet also contains <strong>Korean, Traditional Chinese and Simplified Chinese</strong> columns. It is a <em>working comparison table</em>, not a complete localization file; repeated strings, punctuation and numeric interpolation tokens must be preserved when building text resources.</p>
+<h2 id="evidence-and-reuse">Evidence and reuse</h2>
+<p>Source <code>翻訳用!A1:O194</code>, especially rows 2–30, plus <code>星システム!B69:L235</code>. The R84 <strong>private maintainer audit</strong> includes a full export of its rows for reconciliation. The workbook and embedded screenshots are <strong>not redistributed in the public documentation package</strong> until reuse/attribution permission is clarified.</p>
+<h2 id="full-source-table-index-without-duplicating-contributor-translations">Full source-table index without duplicating contributor translations</h2>
+<p>The original workbook's translation sheet contains <strong>192 rows with numeric source IDs</strong> (<code>翻訳用!A3:O194</code>), covering weapon-description labels and formatting tokens across JP, EN, KR and Chinese columns; the full sheet is not an official global game-string registry. <code>reference/R154_WEAPON_TEXT_TRANSLATION_ID_DIRECTORY.csv</code> identifies each source row/ID, populated language columns and English short label. It is a <strong>navigation/index aid</strong>, not wholesale redistribution of the workbook's multilingual text. Placeholder and formatting strings such as <code>$0</code> remain exact when modifying actual game resources. The 192 count describes <strong>numeric-ID sheet entries</strong>, not unique labels or guaranteed live <code>WEAPONTEXT</code> keys.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Community Japanese workbook: `mod製作メモ.xlsx` (supplied 2026-11-15; publication rights to be confirmed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-must-agree">What must agree</a><a href="#localized-labels-examples-from-the-contributor-s-comparison-table">Localized labels — examples from the contributor&#39;s comparison table</a><a href="#evidence-and-reuse">Evidence and reuse</a><a href="#full-source-table-index-without-duplicating-contributor-translations">Full source-table index without duplicating contributor translations</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-weapon-localization"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 MissionPack identification: native verification, ModeList and online room DLC field An EDF6 MissionPack has several distinct identities. The selected numer"><title>EDF6 MissionPack identification: native verification, ModeList and online room DLC field | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-missions.html">Missions</a></div><h1>EDF6 MissionPack identification: native verification, ModeList and online room DLC field</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span></div><div class="referencebadge">Technical reference · Per-build native EDF.dll path tracing plus historical offline custom-pack tests; no new two-peer verification</div><div id="articleBody"><p>An EDF6 MissionPack has <strong>several distinct identities</strong>. The selected numeric MissionPack row, the native validation-name family, the network-room field named <code>DLC</code>, and license/entitlement checks are not interchangeable. The following facts come from a specific studied EDF6 binary and historical custom-pack diagnostics, <strong>not</strong> from a universal rule across all builds.</p>
+<h2 id="native-membership-and-validation-name-paths">Native membership and validation-name paths</h2>
+<p>The retained binary study identified these build-relative entry points:</p>
+<table>
+<thead>
+<tr>
+  <th>Studied native function</th>
+  <th style="text-align:right">EDF.dll-relative address</th>
+  <th>Observed role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MissionPack membership/verification lookup</td>
+  <td style="text-align:right"><code>+0xD92B0</code></td>
+  <td>Resolves the native DLC/pack membership check</td>
+</tr>
+<tr>
+  <td>MissionPack validation-name mapper</td>
+  <td style="text-align:right"><code>+0xE3F80</code></td>
+  <td>Uses the <code>MissionPackName1</code> and <code>MissionPackName2</code> classes</td>
+</tr>
+</tbody>
+</table>
+<p>These <strong>offsets are build-specific</strong>. Neither implies that every custom MissionPack is natively licensed, or that the correct solution is a global DLC-check bypass. Official MP01 and MP02 follow their native paths.</p>
+<p>Historical compatibility extensions used odd/even <code>MissionPackName1</code>/<code>MissionPackName2</code> classification for higher custom slots. That is an <strong>observed extension requirement</strong>, not evidence that the unmodified game natively supports arbitrary packs 03–99.</p>
+<h2 id="why-the-room-attribute-dlc-does-not-mean-entitlement">Why the room attribute <code>DLC</code> does not mean entitlement</h2>
+<p>The native room-attribute table includes <code>SEARCH_TYPE</code>, <code>DLC</code>, <code>MISSION_NO</code>, <code>DIFFICULTY</code>, <code>ARMOR_LIMIT</code> and <code>WEAPON_LIMIT</code>. In the studied path, the published <code>DLC</code> value is the <em>selected ModeList row's MissionPack ID</em>. A room using custom MP03 therefore publishes <code>DLC=3</code>, even when the custom mission is not paid DLC.</p>
+<p>The corresponding room lookup compares the requested MissionPack ID and online mode type. No 0–2 clamp was found on <strong>this specific path</strong>. This proves only how that lobby-field path is interpreted; it does <strong>not</strong> prove successful two-peer joining or universal native custom-pack entitlement.</p>
+<h2 id="resource-path-identity-can-precede-active-mode-identity">Resource path identity can precede active-mode identity</h2>
+<p>During one MP06 custom-pack selection, the game requested <code>/cri_bind/MISSION/MISSIONLIST_MISSIONPACK06.OFFLINE.LIST.SGO</code> while <code>MissionMgr+0x14FD0</code> still read <code>-1</code>. A lookup using only the currently active manager slot therefore missed a resource whose exact request path already contained <code>MissionPack06</code>. The resulting UI later tried to divide by an effective mission count of zero and raised <code>0xC0000094</code> at <code>EDF.dll+0xDD2A9</code> in that binary. See <a href="tooling-%26-editors-edf6-missionpack06-selection-zero-count-crash-request-identity.html">the full native failure case</a>.</p>
+<h2 id="reported-two-pc-incompatibility-in-a-custom-extension">Reported two-PC incompatibility in a custom extension</h2>
+<p>The contributor Knowledge Hub records a reported HF5.48 custom-MissionBundle two-computer test in which peers loaded <strong>different missions/cutscenes</strong>. This is negative evidence for that <strong>specific extension and custom mission setup</strong>, not proof of a native vanilla EDF6 lobby defect. A local successful offline or host-only launch cannot substitute for a successful remote-peer join and synchronized mission start.</p>
+<h2 id="observed-config-modelist-and-cross-file-reference-fields">Observed CONFIG ModeList and cross-file reference fields</h2>
+<p>In the studied EDF5-port / EDF6 custom-MissionPack <code>CONFIG</code> schema, the static research identified:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Observed interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0</td>
+  <td><code>GameMode_Offline/Online_MissionPackNN</code> class identity</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>MissionPackNN.MST</code> save/progression namespace</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td>companion <code>LIST</code>/localized <code>TXT</code>/<code>IMAGE</code> references</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>offline <code>0</code>, online <code>1</code></td>
+</tr>
+<tr>
+  <td>9</td>
+  <td>logical MissionPack ID, shared by offline/online pair</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td>retained profile shape in official and custom rows; exact meaning is not asserted</td>
+</tr>
+</tbody>
+</table>
+<p>The generic CONFIG ModeList loader read the runtime row count dynamically in the studied binary. This observation does <strong>not</strong> establish that arbitrary custom packs bypass license checks or that any pack number is universally supported. The network-room <code>DLC</code> field and the ModeList pack ID should be compared with actual LIST resource identity rather than inferred from a directory name.</p>
+<h2 id="later-tested-custom-pack-boundaries">Later tested custom-pack boundaries</h2>
+<p>In September 2026 modded-game checks, MP03→MP07 and MP04→MP08 custom relocations reached an offline mission. MP08 progression was separate from MP04 and MP08 permitted creating an online host. <strong>A real second-peer join/start was not tested</strong>. An earlier MP07 black screen was traced to an incomplete AC-only fixture; it was not evidence of a numerical pack-ID ceiling. These findings concern the tested extensions, <strong>not stock EDF6</strong>.</p>
+<h2 id="what-cannot-be-inferred">What cannot be inferred</h2>
+<ul>
+<li>A game lobby field called <code>DLC</code> is <strong>not sufficient evidence of paid ownership</strong>.</li>
+<li>A valid on-disk LIST is <strong>not sufficient evidence</strong> that the selected runtime ModeList references it.</li>
+<li>An online host creation result does <strong>not</strong> establish a remote-peer join.</li>
+<li>One extension's parity rules do <strong>not</strong> automatically describe stock EDF6.</li>
+</ul>
+<p><strong>Source boundary:</strong> The native offsets and room-field relationship were audited statically for the retained binary. The custom-slot workaround and later MP07 result belong to separate historical modded runtime tests, not a new validation performed for this wiki.</p>
+<h2 id="native-manager-versus-network-room-identity-deeper-detail">Native manager versus network-room identity — deeper detail</h2>
+<p>The studied native <code>FindOuterMode(manager, modeType, MissionPack)</code> lookup uses the selected ModeList row's <code>+0x74</code> MissionPack and <code>+0x80</code> mode-type fields and returns an <strong>outer mode index</strong>. This is distinct from the room attribute named <code>DLC</code> and the currently committed pack stored at manager <code>+0x14FD0</code>. For the exact build-specific offsets and call chain, see <a href="edf6-native-missionmgr-mode-lookup-package-memory.html">native mode selection and Package memory</a> and <a href="edf6-native-lobby-async-pack-publication-hui-lifecycle.html">async response pack publication</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>HF27/HF28 native EDF6 membership/name mapper and room attribute research; original source record: Mod Platform BASE_OWNED entitlement/lobby identity</li><li>EDF6 MP06/MP07 recorded native request-path diagnostics</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-membership-and-validation-name-paths">Native membership and validation-name paths</a><a href="#why-the-room-attribute-dlc-does-not-mean-entitlement">Why the room attribute DLC does not mean entitlement</a><a href="#resource-path-identity-can-precede-active-mode-identity">Resource path identity can precede active-mode identity</a><a href="#reported-two-pc-incompatibility-in-a-custom-extension">Reported two-PC incompatibility in a custom extension</a><a href="#observed-config-modelist-and-cross-file-reference-fields">Observed CONFIG ModeList and cross-file reference fields</a><a href="#later-tested-custom-pack-boundaries">Later tested custom-pack boundaries</a><a href="#what-cannot-be-inferred">What cannot be inferred</a><a href="#native-manager-versus-network-room-identity-deeper-detail">Native manager versus network-room identity — deeper detail</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-native-missionpack-mode-and-lobby-identity"};</script><script src="../assets/site.js" defer></script></body></html>

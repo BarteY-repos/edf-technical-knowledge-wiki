@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Direct BVM → AC audit across all 141 missions: reachability, spawn pairing and value-flow boundaries Evidence level: Reconciled static/source audit over all 141"><title>Direct BVM → AC audit across all 141 missions: reachability, spawn pairing and value-flow boundaries | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-scripting.html">Scripting</a></div><h1>Direct BVM → AC audit across all 141 missions: reachability, spawn pairing and value-flow boundaries</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p><strong>Evidence level:</strong> Reconciled static/source audit over all 141 original BVM missions and the reconstructed 1.0.6 AC corpus. This is not a 141/141 gameplay-runtime certification.</p>
+<h2 id="why-this-audit-matters">Why this audit matters</h2>
+<p>A mission port can look convincing if only aggregate API counts or generated AngelScript are compared. The R3 direct audit instead decompiled and inspected <strong>every original BVM</strong> and compared source-side event/spawn structure against the effective AC corpus.</p>
+<p>The result is useful precisely because it separates what was actually demonstrated from what remained open.</p>
+<h2 id="corpus-coverage">Corpus coverage</h2>
+<ul>
+<li>original BVM decompilation: <strong>141 / 141</strong>, zero decode failures;</li>
+<li>effective AC corpus: <strong>141 / 141</strong>;</li>
+<li>independent comparison material included the 1.501 mod lineage and Sandlot exact44 subset;</li>
+<li>source-event graph was built from BVM <code>RegisterEvent</code> and compared with AC <code>internal_CreateEvent</code> reachability.</li>
+</ul>
+<h3 id="event-graph">Event graph</h3>
+<p>Source BVM reachable registrations from the Main-root model:</p>
+<pre><code class="language-text">5112
+</code></pre>
+<p>Effective AC reachable registrations:</p>
+<pre><code class="language-text">5114
+</code></pre>
+<p>Three missions required case-specific interpretation rather than treating a raw edge-count delta as a bug.</p>
+<p>The audit also found <strong>195 omitted source functions</strong>, but none was reachable from the modeled <code>Main → RegisterEvent</code> graph. This is a strong example of why “function missing from the port” is not automatically “active gameplay removed”.</p>
+<p>For the later binary-confirmed scheduler semantics, see the current R37 event-model article; this page is about source-to-port structural evidence.</p>
+<h2 id="named-spawn-pairing">Named spawn pairing</h2>
+<p>The direct audit found <strong>3213 reachable source BVM named spawn sites</strong>.</p>
+<ul>
+<li><strong>3209</strong> paired to the same effective AC function family;</li>
+<li><strong>4</strong> used a different function family and required semantic interpretation rather than name equality.</li>
+</ul>
+<p>Examples of legitimate transformations include transporter/dropboat source calls becoming neutral/transport-specific target helpers, or route-bearing source spawns becoming an area spawn followed by explicit <code>.SetAiRoute(...)</code>.</p>
+<p>Therefore <strong>API-name equality is not the migration invariant</strong>. Actor/resource identity, target behavior and subsequent control calls matter together.</p>
+<h2 id="parameter-audit-useful-but-deliberately-incomplete">Parameter audit: useful but deliberately incomplete</h2>
+<p>For <strong>2353</strong> paired sites, at least one simple literal operand could be compared safely between BVM and AC. No confirmed literal differences were found in that bounded subset.</p>
+<p>This does <strong>not</strong> mean 2353 fully verified spawns. Another <strong>860</strong> sites lacked a safe literal comparison in this method, including:</p>
+<ul>
+<li>728 unmapped opcodes;</li>
+<li>43 non-trivial stack/value flows;</li>
+<li>71 sites without a simple same-function API pair;</li>
+<li>12 custom AC signatures;</li>
+<li>6 cases without a comparable literal.</li>
+</ul>
+<p>Even within the 2353 compared sites, variable arguments, branch conditions, difficulty-dependent values and downstream engine effects remain outside the proof.</p>
+<h2 id="the-m039-bug-proves-why-value-flow-matters">The M039 bug proves why value flow matters</h2>
+<p>The direct audit found a concrete gameplay-relevant defect in <code>MissionPack03/M039</code> (displayed mission 89).</p>
+<p>Source BVM difficulty branches use fractional ally level scales such as approximately <code>0.8</code>, <code>0.85</code> and <code>0.9</code>. The target AC had correct global <code>float</code> declarations, but two local temporaries in separate execution paths were declared as <code>int</code> before feeding <code>CreateFriendSquad</code> / <code>CreateFriend</code> calls.</p>
+<p>The fractional value therefore truncated to zero through the local variable path. Nine allied-NPC calls were affected by the problematic level flow.</p>
+<p>This bug survived an earlier “global scalar typing” audit because checking the declaration at the origin is insufficient. <strong>Type/value parity must be followed through intermediate locals and the call path.</strong></p>
+<p>The final 1.0.6 line changes the affected locals to <code>float</code>; exact-release runtime remains a separate qualification tier.</p>
+<h2 id="important-false-alarms-withdrawn-by-reachability-semantics">Important false alarms withdrawn by reachability/semantics</h2>
+<h3 id="m059-func-4">M059 / <code>Func_4</code></h3>
+<p>The source function contains 12 dragons and is absent from the target AC, but the function has no entry from the reconstructed source <code>RegisterEvent</code> graph. This is not proven loss of an active wave.</p>
+<h3 id="m033-func-15">M033 / <code>Func_15</code></h3>
+<p>The source contains ten <code>CreateEnemy2</code> calls, but the function is likewise not reachable from Main in the modeled registration graph. Raw call-count comparison alone would falsely classify it as missing gameplay.</p>
+<h3 id="m070-m083-m098-dm015">M070 / M083 / M098 / DM015</h3>
+<p>Source <code>CreateEnemy</code> calls for transporters/dropboats were intentionally represented by target-specific neutral/transport semantics, with associated object/crew/control calls retained. Function-name mismatch is not by itself a regression.</p>
+<h3 id="m038-m063-m078">M038 / M063 / M078</h3>
+<p>Source route-bearing spawns are lowered through an area/group helper plus explicit route assignment. Whether motion is perfectly engine-equivalent is a runtime/consumer question, but the route operation is not simply absent.</p>
+<h2 id="open-cases-from-this-audit">Open cases from this audit</h2>
+<p>The direct pass deliberately left unresolved cases rather than forcing parity claims:</p>
+<ul>
+<li><code>DM001</code>: one source edge and callback mapping required special compatibility interpretation; later DM001-specific runtime work is the stronger authority for that mission;</li>
+<li><code>M065</code> / <code>M067</code>: the AC has more generated event edges because source logic was split across difficulty branches; path conditions/factors must be compared, not just event counts;</li>
+<li>general float/int/value-range propagation, counters and generator tempo still require dataflow/CFG or runtime evidence;</li>
+<li>RMPA, weather/MAE, movement/flight, transporters, physics and navigation remain separate engine/format gates.</li>
+</ul>
+<h2 id="what-this-audit-does-not-prove">What this audit does not prove</h2>
+<p>It is <strong>not</strong> a symbolic interpreter for both BVM and AngelScript. It does not prove:</p>
+<ul>
+<li>all branches execute identically;</li>
+<li>all variable values are equivalent;</li>
+<li>every Factor/Action has identical runtime side effects;</li>
+<li>navigation/physics/resource consumers behave identically;</li>
+<li>141/141 missions are gameplay-qualified.</li>
+</ul>
+<p>Use the audit as a strong structural/value-flow evidence layer below exact runtime qualification.</p>
+<h2 id="practical-conversion-rule">Practical conversion rule</h2>
+<p>When reconciling BVM → AC, prefer this order:</p>
+<ol>
+<li>establish source reachability before treating a missing function/call as a bug;</li>
+<li>pair semantic actor/resource identity, not only API names;</li>
+<li>trace value types through intermediate locals, especially float/int and difficulty branches;</li>
+<li>compare event conditions and factors when generated edge counts differ;</li>
+<li>keep format/engine consumers (RMPA, MAE, movement, NAV, physics) in their own evidence lanes;</li>
+<li>promote to gameplay parity only with appropriate runtime evidence.</li>
+</ol>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><code>REPORT_DIRECT_BVM_R3_PL.md</code></li>
+<li><code>BVM_EVENT_REACHABILITY_141.json</code></li>
+<li><code>BVM_VS_1_0_6_LIVE_EVENT_EDGES_141.json</code></li>
+<li><code>BVM_TO_AC_NAMED_SPAWN_141.json</code></li>
+<li><code>BVM_TO_AC_SPAWN_PARAMETERS_141.json</code></li>
+</ul>
+<h2 id="how-the-historical-r1-byte-parity-gate-differs-from-this-direct-audit">How the historical R1 byte-parity gate differs from this direct audit</h2>
+<p>An older, independent <strong>source-only pipeline</strong> generated historical R43-era <code>MISSION.AC</code> and R1 mission <code>MISSION.RMPA</code> from EDF5 BVM/RMPA for <strong>141/141</strong> shipping missions, then reproduced those <em>historical outputs</em> with a portable gate on 4 September 2026. Its 141/141 hash matches are exact <strong>against those retained historical candidate bytes</strong>, not against the later 1.0.6 effective runtime port analyzed in this article. They cannot be used to erase the M039 local-float regression, reachability differences, or other later semantic issues discussed above.</p>
+<p>The portable result accepted one missing <strong>zero-byte</strong> checkpoint package file (<code>mission_util/__init__.py</code>), while remaining exact on 141 mission output pairs and four optional resource variants. It did <strong>not</strong> promote the old R44 transpiler to current authority. <code>DM006_2</code> object specialization in that historical reproduction is superseded as a practical gameplay route by the separately tested six-call <code>3450-OFF</code> compatibility decision. See <a href="missions-%26-scripting-mission-rmpa-source-only-profile.html">source-only RMPA pipeline boundary</a> and <a href="missions-%26-scripting-canonical-blocker-cuscall0-3450.html">the <code>3450</code> compatibility waiver</a>.</p>
+
+<h2 id="historical-3-471-transaction-audit-distinguish-source-sites-from-port-equivalent-calls">Historical 3,471-transaction audit: distinguish source sites from port-equivalent calls</h2>
+<p>An earlier <strong>R42</strong> scan of the 141-mission EDF5 source extracted <strong>3,471 source-side spawn/generator transactions</strong> across <strong>19 BVM call IDs</strong>. The subsequent <em>source-order</em> matcher paired <strong>3,465</strong>, reported <strong>zero ordering failures</strong>, and left <strong>six</strong> mismatches, <strong>all</strong> from source <code>CreateEnemy</code> call ID <strong>2000</strong> in the same DLC <code>DM006_2/Main</code> handler. In its target AC, those six source-expected literal constructors were inside a compatibility branch using customized armored-frog objects and receiver behavior. Therefore the old <code>6 missing</code> finding was <strong>not</strong> proof that six enemy actors failed to appear in live EDF6 gameplay; it was a precise <em>source-code-to-target-transaction matching failure</em> of that candidate.</p>
+<table>
+<thead>
+<tr>
+  <th>Source BVM call</th>
+  <th style="text-align:right">Source transactions</th>
+  <th style="text-align:right">Paired by historical source-order matcher</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>2000</code></td>
+  <td style="text-align:right">664</td>
+  <td style="text-align:right">658</td>
+</tr>
+<tr>
+  <td><code>2001</code></td>
+  <td style="text-align:right">722</td>
+  <td style="text-align:right">722</td>
+</tr>
+<tr>
+  <td><code>2100</code></td>
+  <td style="text-align:right">571</td>
+  <td style="text-align:right">571</td>
+</tr>
+<tr>
+  <td><code>2101</code></td>
+  <td style="text-align:right">270</td>
+  <td style="text-align:right">270</td>
+</tr>
+<tr>
+  <td>Other 15 source call IDs</td>
+  <td style="text-align:right">1,244</td>
+  <td style="text-align:right">1,244</td>
+</tr>
+<tr>
+  <td><strong>Total</strong></td>
+  <td style="text-align:right"><strong>3,471</strong></td>
+  <td style="text-align:right"><strong>3,465</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The earlier raw R42 API-name/argument audit had <strong>60 reported mismatches in 28 of 141 missions</strong> before the later source-order matching and authoring fixes; the two R42 statistics describe <strong>different comparison stages</strong>, not contradictory mission runtime results. Later R44/R65 work regenerated source-derived AC corpora with better structural pairing, and the subsequent 1.0.6 direct source audit uses its own reachable <strong>3,213 named spawn sites</strong> and function-pair methodology. Do <strong>not</strong> add the 3,471 transaction total to 3,213 named-spawn-site count or claim either denominator is an exhaustive gameplay parity certificate.</p>
+<p><strong>Evidence:</strong> <code>R42_ENEMY_SPAWN_SOURCE_PARITY_AUDIT.json</code>, <code>R42_ENEMY_SPAWN_PARITY_V2.json</code>; later <code>EDF5_EDF6_MISSION_TRANSPILER_R65_OFFLINE_PROMOTION_AUDIT_2026-09-04.md</code>. The R42 negative is historical and bounded to its inspected candidate.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>REPORT_DIRECT_BVM_R3_PL.md</li><li>BVM_EVENT_REACHABILITY_141.json</li><li>BVM_VS_1_0_6_LIVE_EVENT_EDGES_141.json</li><li>BVM_TO_AC_NAMED_SPAWN_141.json</li><li>BVM_TO_AC_SPAWN_PARAMETERS_141.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission_spawn/R42_ENEMY_SPAWN_PARITY_V2.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission_spawn/R42_ENEMY_SPAWN_SOURCE_PARITY_AUDIT.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/EDF5_EDF6_MISSION_TRANSPILER_R65_OFFLINE_PROMOTION_AUDIT_2026-09-04.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#why-this-audit-matters">Why this audit matters</a><a href="#corpus-coverage">Corpus coverage</a><a href="#event-graph">　Event graph</a><a href="#named-spawn-pairing">Named spawn pairing</a><a href="#parameter-audit-useful-but-deliberately-incomplete">Parameter audit: useful but deliberately incomplete</a><a href="#the-m039-bug-proves-why-value-flow-matters">The M039 bug proves why value flow matters</a><a href="#important-false-alarms-withdrawn-by-reachability-semantics">Important false alarms withdrawn by reachability/semantics</a><a href="#m059-func-4">　M059 / Func_4</a><a href="#m033-func-15">　M033 / Func_15</a><a href="#m070-m083-m098-dm015">　M070 / M083 / M098 / DM015</a><a href="#m038-m063-m078">　M038 / M063 / M078</a><a href="#open-cases-from-this-audit">Open cases from this audit</a><a href="#what-this-audit-does-not-prove">What this audit does not prove</a><a href="#practical-conversion-rule">Practical conversion rule</a><a href="#sources">Sources</a><a href="#how-the-historical-r1-byte-parity-gate-differs-from-this-direct-audit">How the historical R1 byte-parity gate differs from this direct audit</a><a href="#historical-3-471-transaction-audit-distinguish-source-sites-from-port-equivalent-calls">Historical 3,471-transaction audit: distinguish source sites from port-equivalent calls</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"missions-&-scripting-direct-bvm-to-ac-141-mission-audit-and-value-flow-boundaries"};</script><script src="../assets/site.js" defer></script></body></html>

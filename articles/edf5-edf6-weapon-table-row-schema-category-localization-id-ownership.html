@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Why weapon table order matters in EDF5 and EDF6 Weapons are not identified in saves merely by a unique text name. In both generations, the loaded WEAPON/WEAPONT"><title>EDF5 versus EDF6 weapon-table schemas, row identity, categories and localization | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Weapon resource formats</div><h1>EDF5 versus EDF6 weapon-table schemas, row identity, categories and localization</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Weapon resource formats</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>Weapons are not identified in saves merely by a unique text name. In both generations, the loaded <strong><code>WEAPON/WEAPONTABLE.SGO</code> row order</strong> is a critical identity: the row index is the weapon ID. Corresponding <code>WEAPONTEXT.&lt;language&gt;.SGO</code> entries stay in the same order. The HQ UI may sort what it displays by category or level, but that does not change the underlying save identity.</p>
+<h2 id="edf5-uses-eight-fields-edf6-uses-nine">EDF5 uses eight fields; EDF6 uses nine</h2>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Position</th>
+  <th>EDF5 table</th>
+  <th>EDF6 table</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right">0</td>
+  <td>Weapon identifier / name</td>
+  <td>Weapon name / identifier</td>
+</tr>
+<tr>
+  <td style="text-align:right">1</td>
+  <td>Weapon SGO path</td>
+  <td>Weapon SGO path</td>
+</tr>
+<tr>
+  <td style="text-align:right">2</td>
+  <td>Weapon category</td>
+  <td>Weapon category</td>
+</tr>
+<tr>
+  <td style="text-align:right">3</td>
+  <td>Rarity / acquisition weight</td>
+  <td>Rarity / acquisition weight</td>
+</tr>
+<tr>
+  <td style="text-align:right">4</td>
+  <td>Stored level float</td>
+  <td>Stored level float</td>
+</tr>
+<tr>
+  <td style="text-align:right">5</td>
+  <td>Acquisition class</td>
+  <td>Acquisition class</td>
+</tr>
+<tr>
+  <td style="text-align:right">6</td>
+  <td>Star-rating specification</td>
+  <td>Star-rating specification</td>
+</tr>
+<tr>
+  <td style="text-align:right">7</td>
+  <td>Content/source pack</td>
+  <td>Availability/display flag for underground/wasteland</td>
+</tr>
+<tr>
+  <td style="text-align:right">8</td>
+  <td>—</td>
+  <td>Content/source pack</td>
+</tr>
+</tbody>
+</table>
+<p>The EDF5 study counted <strong>1187</strong> table records; the examined EDF6 table contains <strong>1564</strong> records. Counts are <em>build and data-set specific</em>. The EDF6 engine reads its table as a collection of rows, with row-name lookup case-sensitive in UTF-16. Table pointers are populated when a game mode loads its configuration; callers should not assume the table exists earlier.</p>
+<h2 id="categories-starting-equipment-and-dlc">Categories, starting equipment and DLC</h2>
+<p>EDF5 encodes a class/category family as approximately <code>100 × class + kind</code>, with classes Ranger 0, Wing Diver 1, Fencer 2 and Air Raider 3. EDF6 category numbers are also defined by <code>DEFAULTPACKAGE/CONFIG.SGO</code>; the category name shown on-screen comes from a localized text-table key, not from the numeric category itself.</p>
+<p>In the EDF6 table, acquisition value <strong>0</strong> means a normally rollable item, <strong>1</strong> starting equipment and <strong>3</strong> DLC-granted equipment. The source-pack code <strong>0</strong> identifies the main-game pool, <strong>1</strong> DLC1 and <strong>2</strong> DLC2 for normal random acquisitions. The underground/wasteland cell is a <strong>display indicator</strong>, not the whole authority for whether equipment can actually be used in a given mission.</p>
+<h2 id="a-stored-weapon-level-is-not-the-screen-number">A stored weapon level is not the screen number</h2>
+<p>For EDF5, the weapon's displayed level follows approximately <code>floor(float32(table_level × 25))</code>. The single-precision conversion matters: the stored <code>2.12f</code> can display as <strong>level 52</strong>, not 53. A comparison with Japanese community tables matched the rule in 1178 unambiguous cases. This detail should not be replaced by a simple decimal multiplication and rounding formula.</p>
+<h2 id="identity-and-compatibility-risks">Identity and compatibility risks</h2>
+<p>Inserting a new row in the middle shifts the IDs of all later weapons. Removing a row referenced by equipped or owned save data can cause a load or menu crash. Likewise, the game does not automatically register an arbitrary weapon SGO simply because it exists in an archive. EDF6's implementation iterates up to a hard-coded <strong>0x800 record slots</strong> in several save routines; exceeding that bound cannot be assumed safe.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf5-file-formats</code> (<code>weapon-table-sgo</code>, <code>weapon-table-loading</code>, <code>weapon-level-times-25</code>); <code>kh-edf6-weapons</code> (<code>weapon-table-ids</code>, <code>weapon-table-entry</code>, <code>weapon-table-access</code>), plus the earlier game-data guide by ktaro / EDF Modding Wiki.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf5-file-formats</li><li>EDF Knowledge Hub: kh-edf6-weapons</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#edf5-uses-eight-fields-edf6-uses-nine">EDF5 uses eight fields; EDF6 uses nine</a><a href="#categories-starting-equipment-and-dlc">Categories, starting equipment and DLC</a><a href="#a-stored-weapon-level-is-not-the-screen-number">A stored weapon level is not the screen number</a><a href="#identity-and-compatibility-risks">Identity and compatibility risks</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-weapon-table-row-schema-category-localization-id-ownership"};</script><script src="../assets/site.js" defer></script></body></html>

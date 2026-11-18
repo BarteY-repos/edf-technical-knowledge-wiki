@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Havok compressed-mesh broadphase: tombstones, shape keys and float32 bounds The MAD/Havok collision pipeline stores compressed mesh primitives, keys and SIMD br"><title>Havok compressed-mesh broadphase: tombstones, shape keys and float32 bounds | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>Havok compressed-mesh broadphase: tombstones, shape keys and float32 bounds</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; Physics</span></div><div class="referencebadge">Technical reference · Native NW/HEIGEN MAD structural oracle; no fresh in-game test</div><div id="articleBody"><p>The <code>MAD</code>/Havok collision pipeline stores compressed mesh primitives, keys and SIMD broadphase bounds. A reverse-engineered validator must distinguish <strong>real invalid geometry</strong> from unused primitive slots and unavoidable float32 rounding. Otherwise it can falsely condemn an unmodified native EDF6 map.</p>
+<h2 id="0xdeaddead-primitive-rows-are-inactive-markers"><code>0xDEADDEAD</code> primitive rows are inactive markers</h2>
+<p>In the native NW_EUROPE01 collision data, an older validator expected every 4-byte <code>hkcdStaticMeshTree::Primitive</code> row to produce a reachable BVH leaf key. This included rows whose four bytes are:</p>
+<pre><code class="language-text">DE AD DE AD
+</code></pre>
+<p>These represent <strong>inactive primitive/tombstone entries</strong>, not reachable geometry. In the checked native file, seven occurred in compressed-mesh item 656 and three in item 1054. Their keys were correctly absent from reachable SIMD leaves.</p>
+<table>
+<thead>
+<tr>
+  <th>Check</th>
+  <th style="text-align:right">Before treating tombstones correctly</th>
+  <th style="text-align:right">With inactive rows excluded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Expected shape keys</td>
+  <td style="text-align:right">82,686</td>
+  <td style="text-align:right">82,676</td>
+</tr>
+<tr>
+  <td>Reachable unique keys</td>
+  <td style="text-align:right">82,676</td>
+  <td style="text-align:right">82,676</td>
+</tr>
+<tr>
+  <td>Missing keys</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right"><strong>0</strong></td>
+</tr>
+<tr>
+  <td>Extra keys</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>Duplicate leaf keys</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Practical rule:</strong> when building the expected-key set, recognize these inactive rows. Do not create synthetic faces or change the native map simply to make the count equal.</p>
+<h2 id="why-a-fixed-bound-tolerance-can-be-wrong">Why a fixed bound tolerance can be wrong</h2>
+<p>Compressed vertices and SIMD bounding boxes may be reconstructed at different numerical precision. The original validator compared them using a global absolute bound tolerance <code>1e-4</code> (0.0001), regardless of map scale.</p>
+<p>In the native large NW field mesh, the worst apparent bound underflow was approximately <strong>0.00023284967483050423</strong>. Yet one float32 ULP at the relevant maximum coordinate magnitude was <strong>0.000244140625</strong>—already larger than the observed difference. Calling the native shape corrupt in that case confuses representational uncertainty with a meaningful geometric error.</p>
+<p>For each tested axis, the corrected validator used:</p>
+<pre><code class="language-text">allowed_bound_error = max(
+    1e-4,
+    float32_ULP(max(abs(min), abs(max), abs(max - min)))
+)
+</code></pre>
+<p>Here ULP means the distance between neighboring float32 representable numbers at the chosen magnitude. This is a <strong>rounding budget for structural validation</strong>, not permission to move vertices or relax collision geometry arbitrarily.</p>
+<h2 id="controls-on-actual-native-and-authored-data">Controls on actual native and authored data</h2>
+<table>
+<thead>
+<tr>
+  <th>Input</th>
+  <th style="text-align:right">Compressed meshes</th>
+  <th style="text-align:right">Missing keys</th>
+  <th style="text-align:right">Bound violations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Native NW_EUROPE01.MAD</td>
+  <td style="text-align:right">102</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>Native IG_HEIGEN507.MAD</td>
+  <td style="text-align:right">767</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>Authored destructible/native-physics MAD</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>Authored multi-T50/native-reuse MAD</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>The most adverse measured HEIGEN bound difference was roughly <strong>0.00006373971700668335</strong>. To check that the new test was not simply too permissive, a leaf's minimum X value was deliberately shifted inward by <strong>+0.01</strong> in a read-only in-memory negative test. The checker flagged <strong>one genuine violation</strong>.</p>
+<h2 id="what-this-does-not-establish">What this does not establish</h2>
+<p>A correct broadphase test means the analyzed collision structure is internally consistent <strong>under this particular validator</strong>. It does not alone prove that the map loads, that dynamic debris behaves correctly, that AI will navigate it, or that the game accepts any arbitrary authored Havok shape.</p>
+<p>The underlying failure mode is a <strong>validator mistake</strong>, not a license to replace bad collision with placeholder data. Do not mistake other special key encodings, such as a <code>0xFFFFFFFF</code> shape-key sentinel, for the same <code>DE AD DE AD</code> primitive tombstone. See <a href="maps-%26-navigation-havok-compressed-mesh-shape-keys-section-records-and-failure-modes.html">compressed-mesh shape key and section formats</a>.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>This explanation comes from a bounded audit of native NW_EUROPE01 and HEIGEN507 assets plus specific authored control MAD files. The checker was validated offline, including a deliberate negative test. No new EDF6 runtime collision or gameplay test is implied.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R44_BROADPHASE_ORACLE_CORRECTION_2026-10-16.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#0xdeaddead-primitive-rows-are-inactive-markers">0xDEADDEAD primitive rows are inactive markers</a><a href="#why-a-fixed-bound-tolerance-can-be-wrong">Why a fixed bound tolerance can be wrong</a><a href="#controls-on-actual-native-and-authored-data">Controls on actual native and authored data</a><a href="#what-this-does-not-establish">What this does not establish</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-havok-broadphase-tombstones-and-float32-validation"};</script><script src="../assets/site.js" defer></script></body></html>

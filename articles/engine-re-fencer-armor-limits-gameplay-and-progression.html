@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Fencer armor limits: mission-entry caps versus earned armor EDF separates the armor value selected by the player, the maximum permitted on mission entry, and pe"><title>Fencer armor limits: mission-entry caps versus earned armor | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Fencer armor limits: mission-entry caps versus earned armor</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Runtime-positive for the tested EDF5-port campaign families; exact-binary for no-cap path</div><div id="articleBody"><p>EDF separates <strong>the armor value selected by the player</strong>, <strong>the maximum permitted on mission entry</strong>, and <strong>persistent armor growth earned by collecting crates</strong>. A mod that brings EDF5 campaigns into EDF6 must not confuse these mechanisms. The values below are <strong>observed in the tested EDF5-content port running under EDF6</strong>, not a universal table for every installation or arbitrary mission.</p>
+<h2 id="what-the-mission-entry-cap-does">What the mission-entry cap does</h2>
+<p>When armor limits are enabled, the observed Fencer mission-entry behavior is:</p>
+<pre><code class="language-text">mission_start_armor_raw = min(selected_armor_raw, translated_mission_cap_raw)
+</code></pre>
+<p>A selected amount <em>below</em> the mission cap remains unchanged. The cap is an upper bound; it does not fill armor up to the cap. Selecting more than the cap clamps the value before entry. The same cap was observed both in the user interface and in actual gameplay in the tested cases.</p>
+<table>
+<thead>
+<tr>
+  <th>EDF5-content campaign hosted in EDF6</th>
+  <th>Tested mission/difficulty</th>
+  <th style="text-align:right">Observed Fencer mission cap</th>
+  <th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Base</td>
+  <td>Mission 47, Easy</td>
+  <td style="text-align:right"><strong>1069 HP</strong></td>
+  <td>UI and gameplay; below/above-cap controls</td>
+</tr>
+<tr>
+  <td>DLC1</td>
+  <td>Mission 11, Easy</td>
+  <td style="text-align:right"><strong>1644 HP</strong></td>
+  <td>Gameplay; below-cap preservation</td>
+</tr>
+<tr>
+  <td>DLC2</td>
+  <td>Mission 3, Easy</td>
+  <td style="text-align:right"><strong>2034 HP</strong></td>
+  <td>Gameplay cap</td>
+</tr>
+</tbody>
+</table>
+<p>On base Mission 47, deliberately selecting 250 HP entered at 250 HP; selecting approximately 900 HP entered at that selection; selecting above 1069 entered at 1069. A Wing Diver control remained at <strong>559 HP</strong> in both the UI and mission, showing that the tested Fencer-specific translation did not inadvertently change that class.</p>
+<p>For comparison, independently checked <strong>native EDF6</strong> control values were <strong>1382 HP</strong> (main campaign Mission 116, Easy), <strong>2012 HP</strong> (DLC1 Mission 18, Easy), and <strong>2286 HP</strong> (DLC2 Mission 38, Easy). These native controls are separate from the EDF5-port translation and must not be substituted for the port's limits.</p>
+<h2 id="armor-limit-off-is-a-different-branch">Armor Limit OFF is a different branch</h2>
+<p>The native EDF6 MissionSync path uses a <strong>negative cap sentinel <code>-1</code></strong> for an unrestricted room. In the examined binary, the mission cap candidate is initially <code>0xFFFFFFFF</code>; it is replaced with a normal nonnegative cap only when cap-lock conditions apply.</p>
+<p>At the gameplay serializer, selected raw armor is loaded from <code>loadout+0x24</code>. The cap sign is tested (<code>test ebx,ebx</code>); the <code>js</code> branch skips clamping when the cap is negative. Thus the <em>native</em> behavior for <code>cap = -1</code> is to preserve the selected armor value.</p>
+<p>The examined Fencer translation path explicitly ignores negative caps and therefore preserves this branch. This is <strong>exact static evidence</strong>, not a separately completed runtime test of Armor Limit OFF for every lobby topology. A safe translator must never silently turn an unrestricted room into a restricted one.</p>
+<h2 id="armor-crates-and-saved-progression-are-not-mission-caps">Armor crates and saved progression are not mission caps</h2>
+<p>A runtime test credited <strong>seven Fencer armor crates</strong> and observed a maximum-armor gain of <strong>4 HP</strong>. This is consistent with the EDF6 Fencer growth factor retained in the research (<strong>0.595 HP per credited armor crate</strong>, versus <strong>0.80</strong> for EDF5 Fencer), subject to the game's normal accumulation/rounding. The intended port behavior was to keep <strong>EDF6-native persistent armor progression</strong>, even while translating the <em>mission-entry cap</em> for EDF5 campaign content.</p>
+<p>In other words, changing <code>SoldierInit</code>, armor-box rewards or save progression merely to imitate EDF5 armor gains would be a separate behavioral change, not a required part of fixing the Fencer mission limit.</p>
+<h2 id="why-a-shared-raw-cap-cannot-reproduce-all-edf5-class-hp-limits">Why a shared raw cap cannot reproduce all EDF5 class HP limits</h2>
+<p>For the examined difficulty profile, the native engine computes a <strong>common raw cap</strong> from mission position, then applies class-specific armor conversion. The useful simplified relationship is:</p>
+<pre><code class="language-text">cap_hp(class) = base_hp(class) + floor(common_raw_cap * class_growth(class))
+</code></pre>
+<p>The measured class conversion parameters are:</p>
+<table>
+<thead>
+<tr>
+  <th>Class</th>
+  <th style="text-align:right">EDF5 base HP</th>
+  <th style="text-align:right">EDF5 growth</th>
+  <th style="text-align:right">EDF6 base HP</th>
+  <th style="text-align:right">EDF6 growth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ranger</td>
+  <td style="text-align:right">200</td>
+  <td style="text-align:right">0.64</td>
+  <td style="text-align:right">200</td>
+  <td style="text-align:right">0.56</td>
+</tr>
+<tr>
+  <td>Air Raider</td>
+  <td style="text-align:right">200</td>
+  <td style="text-align:right">0.64</td>
+  <td style="text-align:right">200</td>
+  <td style="text-align:right">0.56</td>
+</tr>
+<tr>
+  <td>Wing Diver</td>
+  <td style="text-align:right">150</td>
+  <td style="text-align:right">0.40</td>
+  <td style="text-align:right">150</td>
+  <td style="text-align:right">0.35</td>
+</tr>
+<tr>
+  <td>Fencer</td>
+  <td style="text-align:right">250</td>
+  <td style="text-align:right">0.80</td>
+  <td style="text-align:right">250</td>
+  <td style="text-align:right">about 0.595</td>
+</tr>
+</tbody>
+</table>
+<p>For Ranger, Air Raider and Wing Diver, the EDF5/EDF6 growth ratio is the same: <code>8/7 ≈ 1.142857</code>. Fencer instead requires <code>0.80 / 0.595 ≈ 1.344538</code>. Therefore <strong>one shared change to the raw <code>armor_limit</code> curve cannot recreate all four EDF5 class caps</strong> while keeping native EDF6 <code>SoldierInit</code> growth. This is a structural consequence of the class parameters, not an arbitrary tuning preference.</p>
+<p>A retained source-profile example demonstrates the difference. The observed raw cap came from <strong>mission index divided by <code>mission_count - 1</code></strong>, not from the LIST source's progression float (<code>field9</code>). With profile endpoints <code>[4500,8000]</code>:</p>
+<pre><code class="language-text">EDF5 original: 4500 + 3500 * 5/110 ~= 4659 raw
+Port layout:    4500 + 3500 * 6/111 ~= 4689 raw
+</code></pre>
+<p>The one-row offset is associated with preserving the technical tutorial mission <code>M000</code> in the installed port's LIST. It is a <strong>small independent ordinal shift</strong>; changing or removing <code>M000</code> to hide it can break saved mission identity and is not a legitimate fix for the Fencer class-growth mismatch.</p>
+<p>At approximately <strong>4689 raw</strong>, EDF6 class conversion gives <strong>2825 HP Ranger/Air Raider</strong>, <strong>1791 HP Wing Diver</strong>, <strong>3039 HP Fencer</strong>. With the original EDF5 raw value around <strong>4659</strong>, EDF5 class conversion gives <strong>3181 HP Ranger/Air Raider</strong>, <strong>2013 HP Wing Diver</strong>, <strong>3977 HP Fencer</strong>. These numbers belong to this specific profile/mission example and must not be mixed with the separate 1069/1644/2034 gameplay-cap controls above.</p>
+<p><strong>Important boundary:</strong> the synchronized MissionSync message carries a <strong>common raw cap</strong>, not a hidden Fencer-only network cap field. The observed class difference is due to later class conversion, so changing network packet shape is not a justified cure. The class field and player slot identity must also be kept distinct: an earlier interpretation of <code>NetworkUser+0x48</code> as SoldierType was withdrawn; the more complete dataflow identified a <strong>player/slot index</strong> instead.</p>
+<h2 id="implementation-boundary">Implementation boundary</h2>
+<ul>
+<li>Apply a class-specific cap translation only where the pack identity and requested cap are proven; do not rewrite all classes.</li>
+<li>Preserve player-selected armor below the cap and preserve <code>cap &lt; 0</code> unchanged.</li>
+<li>Keep mission-entry clamping separate from persistent armor growth and rewards.</li>
+<li>Do not infer that a user-interface-only success guarantees gameplay behavior; the observed cases were checked inside missions.</li>
+<li>Do not infer multiplayer safety or foreign MissionPack/namespace collision safety from single-player or isolated online checks.</li>
+</ul>
+<p><strong>Still unqualified in the retained evidence:</strong> cross-provider namespace rebasing, unrelated third-party MissionPack false-positive controls, and the full two-peer host/client/rejoin/transition matrix. The underlying arithmetic for the tested three EDF5-port campaign families is runtime-positive.</p>
+<h2 id="native-game-reference-guides">Native game reference guides</h2>
+<ul>
+<li><a href="edf41-online-weapon-armor-cap-enforcement-and-spawn.html">EDF4.1 online cap enforcement</a></li>
+<li><a href="edf5-online-weapon-armor-cap-selection-and-start-message.html">EDF5 online cap enforcement</a></li>
+<li><a href="edf6-online-caps-interpolation-yellow-red-and-armor-start.html">EDF6 knot-based limits</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5-port base/DLC1/DLC2 in-game armor tests (2026-09-04)</li><li>Exact EDF6 MissionSync and Soldier armor serialization disassembly</li><li>FENCER_ARMOR_LIMIT_HYBRID_R6_RUNTIME_GAMEPLAY_PASS_2026-09-04.md</li><li>EDF5_EDF6_FULL_SESSION_HANDOFF_FENCER_ARMOR_LIMIT_RUNTIME_STATE_2026-09-04.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-mission-entry-cap-does">What the mission-entry cap does</a><a href="#armor-limit-off-is-a-different-branch">Armor Limit OFF is a different branch</a><a href="#armor-crates-and-saved-progression-are-not-mission-caps">Armor crates and saved progression are not mission caps</a><a href="#why-a-shared-raw-cap-cannot-reproduce-all-edf5-class-hp-limits">Why a shared raw cap cannot reproduce all EDF5 class HP limits</a><a href="#implementation-boundary">Implementation boundary</a><a href="#native-game-reference-guides">Native game reference guides</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-fencer-armor-limits-gameplay-and-progression"};</script><script src="../assets/site.js" defer></script></body></html>

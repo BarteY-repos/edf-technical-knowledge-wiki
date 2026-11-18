@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 fire-sync: four controlled weapon discriminators EDF6 can use direct subtype0 or deferred, receiver-reconstructed subtype1 for a weapon shot. The decisive "><title>EDF6 fire-sync: four controlled weapon discriminators | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 fire-sync: four controlled weapon discriminators</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Exact native static / shipped WEAPONTABLE evaluation; read-only live tests proposed, not recorded</div><div id="articleBody"><p>EDF6 can use direct subtype0 or deferred, receiver-reconstructed subtype1 for a weapon shot. The decisive variable is the <em>evaluated runtime policy</em>, not simply the weapon name or its base SGO. The following four-weapon matrix comes from exact binary inspection and correlated shipped-weapon star evaluation. It is a <strong>read-only test design</strong>, not a claim that the probe has passed on two live PCs.</p>
+<p><strong>Build scope:</strong> canonical EDF6 <code>EDF.dll</code> SHA-256 <code>0d5092393a1b9d8f1b75b0c93d8a8f65615a36a92c46e40349c2b66c733d0916</code>. RVAs must not be transplanted blindly to another game build.</p>
+<h2 id="four-high-value-comparisons">Four high-value comparisons</h2>
+<table>
+<thead>
+<tr>
+  <th>Weapon / source asset</th>
+  <th>Static policy prediction</th>
+  <th>Why this case isolates a failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>M2 Raven</strong> — <code>AWEAPON016.SGO</code></td>
+  <td>Always batched subtype1; <code>sync_level=-1</code>, bit4=1; <code>SolidBullet01</code>, spread type 0</td>
+  <td>Baseline for receiver-local projectile construction without random initial spread</td>
+</tr>
+<tr>
+  <td><strong>MR114 Fang</strong> — <code>AWEAPON108.SGO</code></td>
+  <td>Always direct subtype0, full sender transform (<code>sync_level=1</code>, bit4=0); spread type 0</td>
+  <td>Control for direct sender transform authority</td>
+</tr>
+<tr>
+  <td><strong>Penetrator F</strong> — <code>AWEAPON104.SGO</code></td>
+  <td>Can be subtype1, direct sync0 or direct sync1 solely as correlated upgrade stars change</td>
+  <td>Strongest same-weapon three-state test of policy selection</td>
+</tr>
+<tr>
+  <td><strong>Wide Acid Gun</strong> — <code>AWEAPON194.SGO</code></td>
+  <td>Always subtype1 (<code>sync_level=-1</code>, bit4=1); <code>AcidBullet01</code>, spread type 1</td>
+  <td>Tests receiver-local random spread when the subtype1 packet lacks pre-spread seed restoration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exact-penetrator-f-star-discriminators">Exact Penetrator F star discriminators</h3>
+<p>The source evaluation identified these three <strong>representative correlated star states</strong> (key = star slot index):</p>
+<table>
+<thead>
+<tr>
+  <th>Star slots</th>
+  <th>Expected network path</th>
+  <th>Transform authority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>{0:0, 2:0, 4:0, 5:3}</code></td>
+  <td>subtype1; sync -1, bit4 set</td>
+  <td>deferred receiver-local</td>
+</tr>
+<tr>
+  <td><code>{0:0, 2:0, 4:0, 5:0}</code></td>
+  <td>direct subtype0; sync 0, bit4 clear</td>
+  <td>sender orientation, receiver-local translation</td>
+</tr>
+<tr>
+  <td><code>{0:0, 2:1, 4:0, 5:0}</code></td>
+  <td>direct subtype0; sync 1, bit4 clear</td>
+  <td>full sender transform</td>
+</tr>
+</tbody>
+</table>
+<p>These are derived <strong>source-config states</strong>, not a guarantee that a tester can select each exact combination with a standard in-game inventory UI. The relevant state must be established and read back before comparing traffic.</p>
+<h2 id="read-only-trace-checkpoints">Read-only trace checkpoints</h2>
+<p>The historical probe kit was built and statically checked but had <strong>runtime pending</strong>. Its entry probes are observational: it was not designed to edit fields, packet bytes or scheduling. Record at least:</p>
+<table>
+<thead>
+<tr>
+  <th>Function RVA</th>
+  <th>Event</th>
+  <th>Distinguishing observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0x767150</code></td>
+  <td>Policy synthesis</td>
+  <td><code>Weapon+0x153C</code> flags, <code>+0x1540</code> sync level, star-evaluated parameters</td>
+</tr>
+<tr>
+  <td><code>0x694910</code></td>
+  <td>Direct sender</td>
+  <td>Bit4 early suppression vs actual subtype0 packet</td>
+</tr>
+<tr>
+  <td><code>0x695F20</code></td>
+  <td>Batched sender</td>
+  <td><code>+0x1544</code> target count, <code>+0x154C</code> delay, <code>+0x1550</code> dirty state</td>
+</tr>
+<tr>
+  <td><code>0x690420</code></td>
+  <td>Batched receiver</td>
+  <td>Accepted target and owner/proxy role</td>
+</tr>
+<tr>
+  <td><code>0x6947E0</code></td>
+  <td>Deferred remote realization</td>
+  <td>local count, target, cadence, count catch-up</td>
+</tr>
+<tr>
+  <td><code>0x698500</code> / <code>0x6969A0</code></td>
+  <td>Shot selection/transform</td>
+  <td>named-node transform provenance and selected muzzle/source entry</td>
+</tr>
+</tbody>
+</table>
+<p>Optional short timing samples: <code>SoldierBase::OnUpdate</code> <code>0x59ABB0</code> and common Weapon <code>OnUpdate</code> <code>0x6934F0</code>. Do not turn a short ordering comparison into a permanent per-frame logging load.</p>
+<p>The read-only probe instructions use F8 to arm and lock the next weapon event, F9 to reset/unlock and F10 to toggle a short Soldier/Weapon ordering sample. These are <strong>tool controls</strong>, not EDF gameplay mechanics.</p>
+<h2 id="expected-interpretation">Expected interpretation</h2>
+<ul>
+<li>M2 Raven: direct-sender function may execute but should take the bit4 suppression path; eventual subtype1 TX and later remote count-based reconstruction are expected.</li>
+<li>MR114 Fang: the direct packet should contain the full sender transform; ordinary shots should not follow the delayed subtype1 realization path.</li>
+<li>Penetrator F: one source weapon should demonstrate all three effective policies if the exact source star states can be reproduced and logged. This is an explicit counterexample to a static “one weapon → one network policy” mapping.</li>
+<li>Wide Acid Gun: a later cumulative count can repair the <em>number</em> of reconstructed shots without reconstructing the sender's original per-shot random spread.</li>
+</ul>
+<p>Keep <strong>initial fire</strong> and <strong>later <code>NetworkBullet</code> selector0/1/2</strong> records separate: Sandlot can retransmit the latter while subtype1 initial creation still lacks historical RNG/charge/class-internal state. A matching shot count, player orientation or ACK does not establish full projectile equivalence.</p>
+<p><strong>Qualification boundary:</strong> The historical source documents static/linked/cold-extract probe qualification; no corresponding successful paired runtime trace is contained in the reviewed material. For the underlying formula, RNG progression and individual projectile classes, see <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG and batched fire</a> and <a href="engine-re-%26-networking-shipped-weapon-sync-policy-and-star-envelope.html">star-dependent policy evaluation</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_RUNTIME_DISCRIMINATOR_PLAN_2026-09-28.md</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_FIRE_SYNC_PROBE_V1_CHECKPOINT_2026-09-28.md</li><li>/EDF5_EDF6_RESEARCH/research/active/ENGINE_RE/EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#four-high-value-comparisons">Four high-value comparisons</a><a href="#exact-penetrator-f-star-discriminators">　Exact Penetrator F star discriminators</a><a href="#read-only-trace-checkpoints">Read-only trace checkpoints</a><a href="#expected-interpretation">Expected interpretation</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-edf6-fire-sync-runtime-discriminator-matrix"};</script><script src="../assets/site.js" defer></script></body></html>

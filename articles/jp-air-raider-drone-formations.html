@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Air Raider drones: formation, movement and attack-order SGO fields Resource structure The contributed Japanese workbook analyzes a portable bombing drone whose "><title>Air Raider drones: formation, movement and attack-order SGO fields | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Air Raider drones: formation, movement and attack-order SGO fields</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Community Japanese Workbook</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Translated contributed workbook notes; sample data, negative experiments and explicitly labeled inferences</div><div id="articleBody"><h2 id="resource-structure">Resource structure</h2>
+<p>The contributed Japanese workbook analyzes a portable bombing drone whose object resource string is <code>app:/object/pd605_Drone_grenade.sgo</code>. It transcribes a <code>custom_parameter</code> tree with <strong>drone</strong>, <strong>formation</strong>, <strong>movement</strong> and <strong>order</strong> sections. The worked example is <em>not</em> an exhaustive schema for all Air Raider drones or an assertion that every named field is consumed identically across EDF versions.</p>
+<p>The source distinguishes a drone's <strong>waiting/follow formation</strong> from <strong>attack-order area placement</strong>. Do not combine the two offset lists into one coordinate system.</p>
+<h2 id="formation-idle-follow-data">Formation / idle-follow data</h2>
+<p><code>formation</code> holds a list of per-drone <code>offset</code> vectors, rather than a single offset for the whole swarm. The author notes an example with <strong>24 offsets for a 24-drone formation</strong>, and describes the waiting drones as following the Air Raider.</p>
+<p>For the excerpted first formation member, the source records the triple <code>[1, 2, 1]</code> (stored as doubles). <strong>The exact axis convention of this idle-offset triple is not proven by these cells</strong>; do not assume the attack-area axis descriptions below automatically transfer to it.</p>
+<p><strong>Source:</strong> <code>解析!B893:K925</code>, especially <code>B901</code>, <code>B905:K923</code>.</p>
+<h2 id="movement-aiming-fields">Movement / aiming fields</h2>
+<table>
+<thead>
+<tr>
+  <th>Path or field</th>
+  <th>Worked example</th>
+  <th>Source interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>movement.linear.max</code></td>
+  <td><code>30</code></td>
+  <td>Maximum forward speed, per author</td>
+</tr>
+<tr>
+  <td><code>movement.linear.accele</code></td>
+  <td><code>0.10000000149</code></td>
+  <td>Acceleration parameter; numeric unit unknown</td>
+</tr>
+<tr>
+  <td><code>movement.linear.lerp</code></td>
+  <td><code>0.05000000075</code></td>
+  <td>Interpolation parameter (<code>lerp</code>)</td>
+</tr>
+<tr>
+  <td><code>movement.angular.ratio</code></td>
+  <td><code>0.10000000149</code></td>
+  <td>Angular steering field</td>
+</tr>
+<tr>
+  <td><code>movement.angular.mix</code></td>
+  <td><code>0.94999998808</code></td>
+  <td>Angular mixing field</td>
+</tr>
+<tr>
+  <td><code>aim.speed</code></td>
+  <td><code>0.10000000149</code></td>
+  <td>Source notes question what is being aimed (possibly mounted gun); purpose <strong>not resolved</strong></td>
+</tr>
+<tr>
+  <td><code>equipment</code> / <code>aim_target</code></td>
+  <td><code>1</code> / <code>4</code></td>
+  <td>Numbers visible in this example, but <strong>their enumerations remain unknown</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The field names come from the example SGO tree; the physical units, interpolator timebase and enum mappings have <strong>not</strong> been independently established. See <code>解析!B925:K976</code>.</p>
+<h2 id="attack-order-fields-and-directions">Attack-order fields and directions</h2>
+<p>The sample attack <code>order</code> contains <code>type=4</code>, <code>trigger=1</code>, a flight/attack <code>offset</code>, <code>radius=5</code>, <code>delay</code> with <code>min=0</code> and <code>max=60</code>, an <code>area</code> list and <code>is_end_to_suicide=0</code>.</p>
+<p>The author's directional annotations distinguish two different offsets:</p>
+<ul>
+<li><strong>Aircraft approach offset</strong> relative to a warning zone (<code>order.offset</code>): sample <code>[0, 18, -9]</code>, described as <em>left/right</em>, <em>height</em> and <em>depth</em>. The annotated sign convention is <strong>positive = left</strong>, <strong>positive height = up</strong>, <strong>positive depth = farther inward</strong> (<code>解析!B1009:K1016</code>).</li>
+<li><strong>Individual attack area offset</strong> relative to a specified strike point (<code>order.area[*].offset</code>): sample <code>[40, 0, 0]</code>. The author again describes positive x as left, positive depth as farther inward, positive height as up; a height change can shift landing points because mounted weapons aim at an offset altitude (<code>解析!B1029:K1038</code>).</li>
+</ul>
+<p>For each listed attack area, <code>angle=0</code> changes the fan orientation when modified; a positive change was reported to rotate left. <code>distance=250</code> specifies strike-range length in this example, apparently influencing aircraft motion along with projectile count. This is <strong>author-observed behavior</strong>, not a verified equation for aircraft speed. See <code>解析!B1040:K1047</code>.</p>
+<h2 id="safe-editing-rules">Safe editing rules</h2>
+<ul>
+<li>Preserve the number and pairing of <code>formation</code> entries when changing the drone count; investigate producer/consumer bounds before adding hundreds of offsets.</li>
+<li>Measure values after changing only one field, and separately observe <strong>waiting formation</strong>, <strong>flight to target</strong>, <strong>warning-zone geometry</strong> and <strong>strike position</strong>.</li>
+<li>Do not assert the exact meaning of <code>aim_target=4</code>, <code>type=4</code>, <code>trigger=1</code>, <code>equipment=1</code> or <code>is_end_to_suicide=0</code> without exact-build runtime evidence.</li>
+<li>Cross-game/multiplayer serialization of these fields remains an independent question.</li>
+</ul>
+<p><strong>Source:</strong> <code>mod製作メモ.xlsx</code>, <code>解析!A893:K1059</code>, specifically <code>B901:K1056</code>. Editorial translation of named cells, no new game tests or extracted game assets.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>mod製作メモ.xlsx (Japanese community memo), SHA256 d78ab415bcbce59ac762b415cec087a3d82cd501a006e23d995cf0ec654447c5f5</li><li>Cell ranges cited per article; public permission relayed by user 2026-11-15</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#resource-structure">Resource structure</a><a href="#formation-idle-follow-data">Formation / idle-follow data</a><a href="#movement-aiming-fields">Movement / aiming fields</a><a href="#attack-order-fields-and-directions">Attack-order fields and directions</a><a href="#safe-editing-rules">Safe editing rules</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"jp-air-raider-drone-formations"};</script><script src="../assets/site.js" defer></script></body></html>

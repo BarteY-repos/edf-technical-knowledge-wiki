@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SHKT validation is a physics-graph problem, not only a Havok header check An object SHKT does not merely contain a valid collision shape. Its body names, constr"><title>EDF6 object SHKT validation: joint pivots, mass properties, shape bounds and collision filters | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-collision.html">Collision &amp; Physics</a></div><h1>EDF6 object SHKT validation: joint pivots, mass properties, shape bounds and collision filters</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Collision &amp; Physics</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Retained source validator and native object-corpus measurements; new EDF6 runtime testing not performed</div><div id="articleBody"><p>An object <code>SHKT</code> does not merely contain a valid collision shape. Its <strong>body names, constraint endpoints, mass-property sources, broadphase bounds, filter groups and SGO animation links</strong> must agree. A tagfile that parses successfully can still mis-collide, hold a part at two different pivots, or fail while the game constructs the object.</p>
+<p>This guide describes bounded checks implemented by a retained EDF4.1→EDF6 source validator. The format observations are also cross-checked against the retained <em>EDF6 SHKT Editor</em> analysis (Ktaro, MIT-licensed project); the counts below are historical measurements from that source, not a fresh native-corpus scan.</p>
+<h2 id="physics-body-identities-and-their-sgo-consumers">Physics body identities and their SGO consumers</h2>
+<p>For the target <code>hknpPhysicsSystemData</code>, <code>bodyCinfo.name</code> is the semantic link back to an object's SGO <code>animation_from_ragdoll</code> / <code>ragdoll_from_animation</code> mappings and accessory-part references. A mapping pointing at an absent body is <strong>not a harmless extra entry</strong>: the native code may dereference it during construction. Check all referenced names before loading the mission, and check for duplicate or empty body names.</p>
+<p>Each body's <code>materialId</code> and <code>motionPropertiesId</code> are indices into the containing system's arrays; <code>0xFFFF</code> means no index and is only valid for the studied <strong>static-body</strong> cases. A dynamic body cannot inherit an absent motion-properties row just because the serialized field is representable.</p>
+<p>The older EDF4.1 Havok <strong>2014</strong> tagfiles begin with magic <code>1E0DB0CA CEFA11D0</code>. The port retains a legacy <code>hkpRigidBody</code> reader for these resources; its body names still bind to SGO names, but its shapes use a <strong>different layout</strong> from target <code>hknp</code> and were not covered by the target-shape validator. Never claim identical validation breadth for the two versions.</p>
+<h2 id="joint-pivots-must-meet-in-the-same-world-space-point">Joint pivots must meet in the same world-space point</h2>
+<p>A two-body constraint stores a local pivot in <strong>body A</strong> (<code>transformA</code>) and <strong>body B</strong> (<code>transformB</code>). Their transformed world points should coincide:</p>
+<pre><code class="language-text">pivot_world_from_A = position_A + rotate(orientation_A, pivot_A)
+pivot_world_from_B = position_B + rotate(orientation_B, pivot_B)
+error = distance(pivot_world_from_A, pivot_world_from_B)
+</code></pre>
+<p>A stock validation census reported <strong>3,051 joints</strong> whose dual pivot points agreed within approximately <strong>0.8 mm</strong>. The retained checker uses <strong>1 cm</strong> as a warning threshold, matching the referenced editor policy. A moved bone with an unchanged physics joint can make a rotating turret appear welded or resist rotation; both ends and their parent reference pose need a coherent model-space frame. See <a href="cross-game-conversion-edf6-vehicle-ragdoll-shkt-bind-pose-refit-and-cas-rebasing.html">vehicle ragdoll re-fitting</a>.</p>
+<h2 id="shape-derived-data-are-part-of-the-payload">Shape-derived data are part of the payload</h2>
+<p>Several Havok structures contain bounds or mass information derived from the shape geometry rather than from the object's visible MDB mesh:</p>
+<ul>
+<li>A convex hull's <strong>planes</strong> must contain its vertices (within the source's bounded approximation tolerances). The retained validator uses <code>1e-3 m</code> absolute or <code>2%</code> of the hull extent; an old stock hull could exceed the 1 mm error while staying inside the proportional bound.</li>
+<li>A compound's AABB and <strong>SIMD tree</strong> must enclose the transformed child instances; stale trees lead to incorrect broadphase behavior even when all mesh vertices are valid.</li>
+<li>The shape property key <code>0xF100</code> is the retained Havok mass-property record. A body with <code>massDistribution = null</code> relies on its shape's properties instead. Historical source annotations report <strong>11,281</strong> stock object shapes carrying such data. A body that lacks both sources is unlike the measured stock population; the downstream engine outcome was <strong>not proven</strong> and should be flagged as a warning, not an invented crash certainty.</li>
+<li>A body with explicit <code>massDistribution</code> need not read the shape's fallback mass record. Replacement hulls and their stand-in proxies can therefore legitimately use different mass-distribution policies.</li>
+</ul>
+<p>A zero-error parser, a visually aligned MDB, and a consistent tagfile offset table do <strong>not</strong> prove these invariants.</p>
+<h2 id="collision-filter-bit-fields">Collision-filter bit fields</h2>
+<p>For the examined <code>collisionFilterInfo</code> <code>uint32</code> layout, use the following bit ranges:</p>
+<table>
+<thead>
+<tr>
+  <th>Bit range</th>
+  <th>Consumer meaning in the retained object validator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0..4</code></td>
+  <td>Collision layer; the target game overwrites these bits for the examined runtime path</td>
+</tr>
+<tr>
+  <td><code>5..9</code></td>
+  <td>Subsystem</td>
+</tr>
+<tr>
+  <td><code>10..14</code></td>
+  <td><em>Don't collide with</em> mask/category</td>
+</tr>
+<tr>
+  <td><code>15..30</code></td>
+  <td>System group; all bodies in one native file shared one group in the retained census</td>
+</tr>
+</tbody>
+</table>
+<p>A writer must not flatten the full 32-bit word into a single layer enum. The runtime may replace the low layer while keeping subsystem and group bits.</p>
+<h2 id="practical-qualification-gates">Practical qualification gates</h2>
+<p>Validate <strong>names → body indices → material/motion IDs → joint frames → reference pose → derived shape bounds and mass</strong> in that order. Report any unsupported 2014 shape family or missing tagfile section explicitly. A supported set of structural checks remains different from a <strong>Windows EDF6 runtime result</strong> (physics creation, movement, collisions, damage and cleanup).</p>
+<p>Related: <a href="maps-%26-navigation-havok-mad-shkt-collision-contracts.html">Havok MAD/SHKT contracts</a>, <a href="#article-start">external SHKT editor evidence</a>, and <a href="cross-game-conversion-edf6-vehicle-ragdoll-shkt-bind-pose-refit-and-cas-rebasing.html">vehicle refit algorithm</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF41 R10 HF4 R9 components/objects/pylib/shkt_check.py</li><li>EDF41 R10 HF4 R9 components/objects/pylib/hkfile.py</li><li>EDF41 R9 SHKT Editor-derived format notes (attributed to Ktaro, MIT license)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#physics-body-identities-and-their-sgo-consumers">Physics body identities and their SGO consumers</a><a href="#joint-pivots-must-meet-in-the-same-world-space-point">Joint pivots must meet in the same world-space point</a><a href="#shape-derived-data-are-part-of-the-payload">Shape-derived data are part of the payload</a><a href="#collision-filter-bit-fields">Collision-filter bit fields</a><a href="#practical-qualification-gates">Practical qualification gates</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-object-shkt-havok-validation-joints-derived-shapes-and-collision-filters"};</script><script src="../assets/site.js" defer></script></body></html>

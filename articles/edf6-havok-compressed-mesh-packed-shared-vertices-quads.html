@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 compressed collision meshes encode coordinates with two quantizers A hknpCompressedMeshShapeData.meshTree contains one or more sections. Each section suppl"><title>EDF6 hknpCompressedMeshShape: packed/shared vertices, triangles and quads | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Physics / geometry</div><h1>EDF6 hknpCompressedMeshShape: packed/shared vertices, triangles and quads</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Physics / geometry</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>A <code>hknpCompressedMeshShapeData.meshTree</code> contains one or more sections. Each section supplies packed-vertex and primitive index ranges, a shared-vertex reference range and a local coordinate codec. In the source corpus, two vertex encodings coexist:</p>
+<table>
+<thead>
+<tr>
+  <th>Vertex kind</th>
+  <th>Encoded width</th>
+  <th>Axis allocation</th>
+  <th>Reconstruction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Section packed vertex</td>
+  <td><strong>32 bits</strong></td>
+  <td>X 11, Y 11, Z 10</td>
+  <td><code>offset_xyz + scale_xyz × integer_xyz</code></td>
+</tr>
+<tr>
+  <td>Mesh-wide shared vertex</td>
+  <td><strong>64 bits</strong></td>
+  <td>X 21, Y 21, Z 22</td>
+  <td><code>domain.min + (domain.max-domain.min) × integer/(2^bits-1)</code></td>
+</tr>
+</tbody>
+</table>
+<p>A primitive is a <strong>4-byte four-index record</strong> referring first to the section's own packed vertices, otherwise through an indexed mesh-wide shared-vertex table. If the third and fourth values match, the record is a <strong>triangle</strong>. Otherwise it is a <strong>quad split into two triangles</strong>, <code>(0,1,2)</code> and <code>(0,2,3)</code>. The first equals second sentinel is used in the separate convex-hull compressed-mesh family.</p>
+<p>The source census identifies two <strong>nonmixed classes of compressed mesh</strong> in object/weapon files: <strong>82 convex-only</strong> and <strong>214 triangle-only</strong> (296 total). EDF6 maps contribute many more compressed-mesh sections in the separate map corpus. In triangle-kind sections the observed maxima are <strong>127 primitives</strong>, <strong>107 packed vertices</strong> and <strong>198 shared-vertex references</strong> per section. Mesh-wide shared vertices are frequently reused across sections and support boundaries without duplicating their coordinates independently.</p>
+<p>The source reports <strong>174,419 quad records</strong> and <strong>23,318 triangle records</strong> within the inspected triangle-kind corpus. Those are encoded primitive counts, <em>not</em> a count of distinct physical bodies or on-screen graphics triangles.</p>
+<p><strong>Source:</strong> <code>edf6/havok-format.md</code>, <code>compressed-mesh-encoding</code>, <code>compressed-mesh-kinds</code>, <code>compressed-mesh-triangle-kind</code>. This is serialized collision geometry, not the EDF6 visible FMB render model.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf6/havok-format.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-havok-compressed-mesh-packed-shared-vertices-quads"};</script><script src="../assets/site.js" defer></script></body></html>

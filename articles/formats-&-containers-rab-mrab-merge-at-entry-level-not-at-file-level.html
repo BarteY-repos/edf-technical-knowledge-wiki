@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 RAB and MRAB — merge named entries, not whole archive bytes RAB/MRAB uses the SSA\0 container: its entries have names, types and independent payloads. Two "><title>EDF6 RAB/MRAB composition: named entries, payload identity and cross-file dependencies | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>EDF6 RAB/MRAB composition: named entries, payload identity and cross-file dependencies</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Formats &amp; Containers</span><span class="chip">File Formats</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Byte-identical archive rebuilds + four offline merge tests; cross-file image mapping unresolved</div><div id="articleBody"><p>RAB/MRAB uses the <code>SSA\0</code> container: its entries have names, types and independent payloads. Two mods can add different DDS textures to the same outer <code>RAB</code> path without overwriting each other, but a normal file-level overlay will keep only one provider's archive. The useful merge unit is the <strong>named SSA entry</strong>.</p>
+<h2 id="identity-and-conflict-model">Identity and conflict model</h2>
+<p>A named entry is identified by its exact logical <code>name</code>. Its state includes its <em>type string</em> (rather than only its numeric type-table index), <code>hd</code>, <code>ft1</code>, <code>ft2</code>, <code>z</code>, and its <strong>opaque payload bytes/hash</strong>. Preserve unknown metadata and payloads rather than attempting to interpret the internals of DDS/MDB without a separate proven format-aware merge.</p>
+<table>
+<thead>
+<tr>
+  <th>Two provider deltas</th>
+  <th>Safe action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Different entry names are added or changed</td>
+  <td>Merge both</td>
+</tr>
+<tr>
+  <td>Same entry added/changed to identical final state</td>
+  <td>Deduplicate</td>
+</tr>
+<tr>
+  <td>Same name with different final type, metadata or payload</td>
+  <td><strong>Conflict</strong></td>
+</tr>
+<tr>
+  <td>A deletes an entry that the other edits</td>
+  <td><strong>Conflict</strong></td>
+</tr>
+<tr>
+  <td>A deletes an entry the other leaves unchanged</td>
+  <td>Delete</td>
+</tr>
+<tr>
+  <td>Exact names differ only by case</td>
+  <td>Keep identity distinction but <strong>warn</strong> for likely virtual-path collision</td>
+</tr>
+</tbody>
+</table>
+<p>For type strings, retain the baseline table's order and append genuinely new types. Do not confuse the two mods' numeric type indices: identical integers can point at different strings after independent compilation.</p>
+<h2 id="byte-exact-observed-controls">Byte-exact observed controls</h2>
+<p>A retained <code>rab_tool.py</code> test used <code>preserve_order=True</code> and produced byte-identical parse → rebuild results on these exact files:</p>
+<table>
+<thead>
+<tr>
+  <th>Measured archive</th>
+  <th style="text-align:right">Entries</th>
+  <th style="text-align:right">Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>IG_CAVE503.RAB</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">34,932,784 B</td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507.RAB</code></td>
+  <td style="text-align:right">279</td>
+  <td style="text-align:right">88,866,805 B</td>
+</tr>
+<tr>
+  <td>Accepted <code>IG_DESERT508.RAB</code></td>
+  <td style="text-align:right">424</td>
+  <td style="text-align:right">217,373,434 B</td>
+</tr>
+</tbody>
+</table>
+<p>The studied E506 MRAB controls also used the same archive grammar: <code>E506_BIGGREY</code> contained 71 entries, <code>E506_HA_BIGGREY</code> 47, and <code>E506_HA_WEAPON</code> 28. These are <strong>sample-specific observations</strong>, not promises that any arbitrary RAB round-trips identically under every serializer setting.</p>
+<p>Four offline PoC scenarios checked independent DDS additions, identical addition deduplication, same-name/different-payload conflict, and deletion versus unchanged/edited entries. The resulting archive was stable under another parse/rebuild. The test did <strong>not</strong> run a merged archive inside the game.</p>
+<h2 id="image-archives-are-related-to-mission-metadata">Image archives are related to mission metadata</h2>
+<p><code>MISSIONLIST.*.IMAGE.RAB</code> is a logical companion of <code>CONFIG.ModeList</code>, mission LIST and localized TXT. Treat it as an <strong>entry-merge candidate</strong>, not an opaque last-wins file. But a successful SSA entry merge does <strong>not</strong> prove which preview image a changed LIST row selects. The <strong>later R29 mission-studio contract</strong> resolves that relationship for the studied EDF6 LIST format: <code>LIST field2</code>, with <code>/</code> normalized to <code>_</code> and <code>.dds</code> appended, gives the entry identity. Unknown profiles must not automatically inherit that rule; see <a href="missions-%26-scripting-edf6-mission-thumbnail-list-field2-to-base-rab-entry.html">thumbnail binary and runtime provenance</a>.</p>
+<p>A safe composer must therefore mark mission-image archives <strong><code>cross_file_coupled</code></strong> and validate the resulting LIST/TXT/image relationship after a mission insertion or reorder. An archive can be byte-valid and still show the wrong thumbnail.</p>
+<h2 id="know-when-entry-merge-is-not-the-right-approach">Know when entry merge is not the right approach</h2>
+<p>A pair of complete custom object/map families may need <strong>namespace rebasing of the whole resource closure</strong>, not entry merge at a shared vanilla path. Conversely, two different MDB/MAD/CAS/HKT payloads with the same embedded name cannot be byte-concatenated or patched without a separate schema-level merger. For opaque resources, identical hashes may deduplicate; differing hashes should fail closed.</p>
+<p>See <a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">SSA binary header and entry layout</a>, <a href="missions-%26-scripting-mission-list-images-names-and-deployment-identity.html">mission thumbnails and LIST linkage</a> and <a href="formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">SGO/DSGO semantic composition</a>.</p>
+<p><strong>Evidence boundary:</strong> September 1, 2026 offline RAB/MRAB composition research. Not an unqualified runtime guarantee across all archive families.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>RAB_MRAB_ENTRY_LEVEL_MERGE_RESEARCH_2026-09-01.md</li><li>converter/rab/rab_tool.py (retained source, R53)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#identity-and-conflict-model">Identity and conflict model</a><a href="#byte-exact-observed-controls">Byte-exact observed controls</a><a href="#image-archives-are-related-to-mission-metadata">Image archives are related to mission metadata</a><a href="#know-when-entry-merge-is-not-the-right-approach">Know when entry merge is not the right approach</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"formats-&-containers-rab-mrab-merge-at-entry-level-not-at-file-level"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Specialized map-material ABIs: Window, Object Glass, Parallax, DirtScroll and Signboard Evidence level: Exact native MDB ABI census + source-owned offline write"><title>Specialized map-material ABIs: Window, Object Glass, Parallax, DirtScroll and Signboard | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-shaders.html">Shaders</a></div><h1>Specialized map-material ABIs: Window, Object Glass, Parallax, DirtScroll and Signboard</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Materials &amp; Shaders</span><span class="chip">Shaders</span></div><div class="referencebadge">Source-backed research / case study · Exact native</div><div id="articleBody"><p><strong>Evidence level:</strong> Exact native MDB ABI census + source-owned offline writer qualification. Representative EDF6 rendering/runtime remains pending for these specialized authored profiles.</p>
+<p>The retained <code>NW_EUROPE01.RAB</code> native corpus closes an important research gap: these specialized map-model families are <strong>not shader-name guesses</strong>. Their material ABI, sampler order, flags and vertex declarations were recovered from native MDBs and then reproduced by bounded source-owned writers.</p>
+<p>These are ordinary MDB material profiles used by map models. They must not be confused with FMEP/FieldRender terrain.</p>
+<h2 id="native-census-scope">Native census scope</h2>
+<p>The audited native archive contained:</p>
+<pre><code class="language-text">950 RAB entries
+785 DDS
+165 MDB
+165/165 MDB parsed
+0 parse errors
+</code></pre>
+<p>Specialized-family occurrences:</p>
+<table>
+<thead>
+<tr>
+  <th>Family</th>
+  <th style="text-align:right">Material occurrences</th>
+  <th style="text-align:right">Models</th>
+  <th style="text-align:right">Native shaders</th>
+  <th style="text-align:right">Structural ABI profiles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Glass / Window</td>
+  <td style="text-align:right">57</td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">8</td>
+</tr>
+<tr>
+  <td>Parallax</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>DirtScroll</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>Signboard</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>LOD / FarMap</td>
+  <td style="text-align:right">35</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td>Water</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+</tbody>
+</table>
+<p>The important conclusion is structural: <strong>Glass/Window and LOD are multi-profile families</strong>, not one generic material mode.</p>
+<h2 id="brdf-building-window">BRDF Building Window</h2>
+<p>Canonical bounded profile:</p>
+<pre><code class="language-text">shader: snd_BRDF_Map_Build_Window
+native occurrences: 26
+mesh stride: 68 bytes
+material flags: 3
+priority/layer: 0 / 0
+parameters: 14
+samplers: 5
+</code></pre>
+<p>Sampler order:</p>
+<pre><code class="language-text">interior_texture
+normal
+param_r_m_xxx_hr
+window_frame_texture
+window_normal
+</code></pre>
+<p>The profile contains interior/window controls including <code>interior_wrap_count</code>.</p>
+<h3 id="type-4-raw-integer-correction">Type-4 raw integer correction</h3>
+<p><code>interior_wrap_count</code> is a material parameter with <code>type=4</code>. For the audited native profile its value lane is <strong>raw u32 bits</strong>, not floating-point numeric <code>4.0</code>.</p>
+<p>Correct native representation for value 4:</p>
+<pre><code class="language-text">0x00000004
+</code></pre>
+<p>Incorrect float-serialization interpretation:</p>
+<pre><code class="language-text">float 4.0 -&gt; 0x40800000
+</code></pre>
+<p>This distinction applies to the audited type-4 fields generally: the six value lanes occupy float-sized storage, but selected type-4 values are integer bit patterns.</p>
+<h2 id="legacy-snd-map-build-window">Legacy <code>snd_Map_Build_Window</code></h2>
+<p>Legacy Build Window is a separate ABI from BRDF Window. R43 retains three mesh-backed forms:</p>
+<table>
+<thead>
+<tr>
+  <th>Profile</th>
+  <th>Structural contract</th>
+  <th style="text-align:right">Native evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>legacy_build_window_68</code></td>
+  <td>canonical 68-byte layout</td>
+  <td style="text-align:right">23 structural occurrences; modal full-value defaults observed in 9/23</td>
+</tr>
+<tr>
+  <td><code>legacy_build_window_84</code></td>
+  <td>84-byte layout with float3 form</td>
+  <td style="text-align:right">2 occurrences</td>
+</tr>
+<tr>
+  <td><code>legacy_build_window_uv_swapped_68</code></td>
+  <td>68-byte layout with TEXCOORD stream identities swapped</td>
+  <td style="text-align:right">1 occurrence</td>
+</tr>
+</tbody>
+</table>
+<p>Two additional native <code>snd_Map_Build_Window</code> material records were LOD records without a mesh signature tied to that material. Their material ABI is represented, but no new geometry declaration should be invented for them.</p>
+<p><strong>Implementation rule:</strong> never alias legacy Build Window to BRDF Building Window merely because both represent windows.</p>
+<h2 id="snd-map-object-glass"><code>snd_Map_Object_Glass</code></h2>
+<p>Object Glass is another independent translucent family. Three observed source-owned/native-matched profiles were retained:</p>
+<table>
+<thead>
+<tr>
+  <th>Profile</th>
+  <th style="text-align:right">Priority</th>
+  <th style="text-align:right">Layer</th>
+  <th style="text-align:right">Flags</th>
+  <th style="text-align:right">Parameter count</th>
+  <th style="text-align:right">Native evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>object_glass_full_flags2</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">1 occurrence</td>
+</tr>
+<tr>
+  <td><code>object_glass_light_flags2</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">1 occurrence</td>
+</tr>
+<tr>
+  <td><code>object_glass_full_flags3</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">1 occurrence</td>
+</tr>
+</tbody>
+</table>
+<p>All three were kept distinct because shader name alone does not determine the full material contract.</p>
+<p><strong>Do not collapse the three Object Glass profiles into one generic “glass” profile.</strong> The exact blending/transparency appearance remains an EDF6 runtime/rendering gate even though offline ABI/value parity is closed.</p>
+<h2 id="brdf-parallax">BRDF Parallax</h2>
+<p>Bounded profile:</p>
+<pre><code class="language-text">shader: snd_BRDF_Map_Build_Para_NC
+native occurrences: 9
+stride: 76 bytes
+parameters: 11
+</code></pre>
+<p>Parameter order:</p>
+<pre><code class="language-text">diffuse
+dirt_adjust
+dirt_amount
+dirt_material_adjust
+metallic
+normal_amount
+parallax_amount
+parallax_dent
+roughness
+specular_color
+specular_diffuse_blend
+</code></pre>
+<p>Sampler order:</p>
+<pre><code class="language-text">param_r_m_h
+param_occlusion
+dirt
+albedo
+normal
+</code></pre>
+<p>R41 source-owned writer qualification reproduced the selected native structural ABI, but <strong>parallax depth/appearance quality is runtime-pending</strong>.</p>
+<h2 id="brdf-dirtscroll">BRDF DirtScroll</h2>
+<p>Bounded profile:</p>
+<pre><code class="language-text">shader: snd_BRDF_Map_Build_DirtScroll
+native occurrences: 7
+stride: 76 bytes
+parameters: 11
+</code></pre>
+<p>Parameter order:</p>
+<pre><code class="language-text">change_color
+diffuse
+dirt_adjust
+dirt_amount
+dirt_material_adjust
+dirt_scale
+metallic
+normal_amount
+roughness
+specular_color
+specular_diffuse_blend
+</code></pre>
+<p>Sampler order:</p>
+<pre><code class="language-text">param_occlusion
+dirt
+albedo
+normal
+param_r_m_cm0_hr
+</code></pre>
+<p>Offline ABI/writer parity is closed. Animated dirt/UV behavior in EDF6 remains a runtime appearance gate.</p>
+<h2 id="signboard-pattern">Signboard Pattern</h2>
+<p>Exact retained native consumer:</p>
+<pre><code class="language-text">eu1_nw_dentei01.mdb
+shader: snd_BRDF_Map_Signboard_Pattern
+flags: 3
+priority/layer: 0 / 0
+stride: 68 bytes
+parameters: 20
+samplers: 4
+</code></pre>
+<p>Sampler order:</p>
+<pre><code class="language-text">switching_mask
+param_r_m_occ_light
+albedo
+normal
+</code></pre>
+<p>The parameter set includes switching, animation and scrolling controls. Several controls are <code>type=4</code> raw-u32 fields. Confirmed examples include:</p>
+<pre><code class="language-text">image_split = raw u32 2
+boolean/direction controls = raw u32 0 or 1
+</code></pre>
+<p>Offline writer parity is closed; real sign animation and timing remain runtime/rendering questions.</p>
+<h2 id="water">Water</h2>
+<p>The exact retained native profile remains:</p>
+<pre><code class="language-text">shader: snd_BRDF_Map_Water
+consumer: eu1_nw_field01_water.mdb
+material flags: 3
+layer: 2
+stride: 60 bytes
+parameters: 26
+samplers:
+  bubble_albedo
+  normal_map1
+  normal_map2
+  normal_map3
+</code></pre>
+<p>R40 independently corroborated the earlier recovered Water ABI. It did not create a new runtime claim.</p>
+<h2 id="lod-farmap-is-not-one-shader-replacement">LOD / FarMap is not one shader replacement</h2>
+<p>Native evidence includes multiple LOD families. Important examples include:</p>
+<pre><code class="language-text">snd_BRDF_Map_LOD_CC
+snd_FarMap_Simple
+</code></pre>
+<p><code>snd_FarMap_Simple</code> is a separate 64-byte profile. Manual geometry LOD can also retain the base material shader.</p>
+<p>Therefore:</p>
+<pre><code class="language-text">LOD != replace shader with one universal LOD shader
+</code></pre>
+<p>LOD authoring must preserve asset linkage, geometry/material pairing and the specific target profile.</p>
+<h2 id="source-owned-writer-qualification">Source-owned writer qualification</h2>
+<p>R41 qualified four bounded BRDF profiles offline:</p>
+<pre><code class="language-text">BRDF Window
+BRDF Parallax
+BRDF DirtScroll
+Signboard Pattern
+</code></pre>
+<p>Checks included:</p>
+<ul>
+<li>deterministic double build;</li>
+<li>MDB version <code>0x20</code> parse;</li>
+<li>exact shader/priority/layer/flags;</li>
+<li>exact parameter ABI/order;</li>
+<li>exact sampler ABI/order;</li>
+<li>exact vertex declaration/stride/topology/skinning flags;</li>
+<li>raw-u32 type-4 handling;</li>
+<li>fail-closed unknown/missing/extra parameter and sampler validation;</li>
+<li>RAB → literal-CMPL → MDB round-trip.</li>
+</ul>
+<p>Result: <strong>21/21 PASS</strong> for R41.</p>
+<p>R43 then qualified six bounded legacy Window/Object Glass profiles with exact parameter values, sampler state and mesh declarations against selected native exemplars.</p>
+<p>Result: <strong>54/54 PASS</strong>, including a source-owned ten-profile RAB round-trip.</p>
+<h2 id="runtime-boundary">Runtime boundary</h2>
+<p>Offline native ABI equality does <strong>not</strong> prove:</p>
+<ul>
+<li>correct translucent blending/order for Object Glass;</li>
+<li>exact legacy reflection behavior;</li>
+<li>parallax depth appearance;</li>
+<li>DirtScroll animation/UV speed;</li>
+<li>Signboard animation/switching timing;</li>
+<li>BRDF Window interior appearance;</li>
+<li>generalizing the profiles beyond their audited native MDB vertex/material contracts.</li>
+</ul>
+<p>These profiles are ready for bounded runtime qualification, not for unrestricted shader-family synthesis.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>MAP_STUDIO_R40_NATIVE_SPECIALIZED_MATERIAL_ABI_2026-10-16.md</li><li>MAP_STUDIO_R41_SPECIALIZED_MATERIAL_WRITER_2026-10-16.md</li><li>MAP_STUDIO_R43_WINDOW_GLASS_WRITER_2026-10-16.md</li><li>NW_EUROPE01 native RAB census (private oracle, not redistributed)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-census-scope">Native census scope</a><a href="#brdf-building-window">BRDF Building Window</a><a href="#type-4-raw-integer-correction">　Type-4 raw integer correction</a><a href="#legacy-snd-map-build-window">Legacy snd_Map_Build_Window</a><a href="#snd-map-object-glass">snd_Map_Object_Glass</a><a href="#brdf-parallax">BRDF Parallax</a><a href="#brdf-dirtscroll">BRDF DirtScroll</a><a href="#signboard-pattern">Signboard Pattern</a><a href="#water">Water</a><a href="#lod-farmap-is-not-one-shader-replacement">LOD / FarMap is not one shader replacement</a><a href="#source-owned-writer-qualification">Source-owned writer qualification</a><a href="#runtime-boundary">Runtime boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"materials-&-shaders-specialized-map-material-abis-window-glass-parallax-dirtscroll-signboard"};</script><script src="../assets/site.js" defer></script></body></html>

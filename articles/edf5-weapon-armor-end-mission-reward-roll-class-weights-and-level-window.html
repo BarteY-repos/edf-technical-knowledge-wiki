@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 — the weapon-and-armor result roll Picking up a green or red item box is not the same operation as receiving a particular weapon or armor increase. In the "><title>EDF5 weapon and armor loot: the end-of-mission roll and class/level eligibility | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Pickups and rewards</div><h1>EDF5 weapon and armor loot: the end-of-mission roll and class/level eligibility</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Pickups and rewards</span></div><div class="referencebadge">Technical reference · Source-declared grades; this edition does not add native game runtime testing</div><div id="articleBody"><p>Picking up a green or red item box is not the same operation as receiving a particular weapon or armor increase. In the investigated EDF5 executable, <code>DropItemManager::Unit</code> accounts for crates during play, while the native <code>1991D0</code> result routine later allocates weapon and armor rewards into save records. This makes the result screen a <strong>second stage</strong> of the loot system.</p>
+<h2 id="when-boxes-become-rewards">When boxes become rewards</h2>
+<p>Weapon and armor pickups increment distinct mission counts (<code>DropItemManager+0xA88</code> and <code>+0xA8C</code>). The result entry collects them, combines retained counts where applicable, seeds an independent Mersenne Twister and assigns the reward categories. Weapon entries carry <strong>eight star bytes</strong>; persistence merges those into saved weapon progression by keeping each statistic's maximum grade rather than replacing a higher existing grade with a lower one.</p>
+<p>Spawn and reward counts are subject to separate limits. The result routine cannot roll more boxes than were actually spawned in the current mission: the manager records weapon and armor spawn totals at <code>+0xAD8</code> and <code>+0xADC</code>. The original 1024 pickup cap does not mean 1024 distinct weapons are guaranteed or available.</p>
+<h2 id="which-class-receives-a-box">Which class receives a box?</h2>
+<p>The source's four-class weighted allocation starts each class at <strong>100</strong> for both weapon and armor. The locally played class is raised to <strong>600</strong> for weapon crates and <strong>250</strong> for armor crates. With exactly <strong>one local player</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Reward type</th>
+  <th style="text-align:right">Played class</th>
+  <th style="text-align:right">Each of the three other classes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Weapon</td>
+  <td style="text-align:right"><code>600/900 = 66.67%</code></td>
+  <td style="text-align:right"><code>100/900 = 11.11%</code></td>
+</tr>
+<tr>
+  <td>Armor</td>
+  <td style="text-align:right"><code>250/550 = 45.45%</code></td>
+  <td style="text-align:right"><code>100/550 = 18.18%</code></td>
+</tr>
+</tbody>
+</table>
+<p>These probabilities are for <strong>class assignment of an eligible box</strong> and change with additional local players and game state. They are not final probabilities for a particular weapon or star grade.</p>
+<h2 id="level-range-and-candidate-eligibility">Level range and candidate eligibility</h2>
+<p>A mission's position within the selected list gives a normalized progression fraction <code>t = missionIndex / (missionCount - 1)</code>. EDF5 reads a low/high/spread triple from <code>defaultpackage/config.sgo</code>'s <code>ModeList[mode][6][difficulty][2]</code>. The source-derived model uses:</p>
+<ul>
+<li><code>center = low + (high - low) × t</code></li>
+<li><code>width = max(0.05, 0.05 × (high - low))</code></li>
+<li>lower edge roughly <code>max(0, center - spread)</code>; upper edge includes a narrow positive allowance for star-bearing weapons</li>
+</ul>
+<p>The routine also checks <strong>class category</strong>, acquisition status, source MissionPack (<code>ModeList[mode][8]</code>) and weapon-table row eligibility. Ordinary weapons may appear across packs, whereas pack-owned weapon rows are constrained to their intended pack. A JP wiki comparison found exact predicted lowest/highest levels in <strong>473 of 550</strong> sampled cells and predictions within one level in the other 77; this is supporting correlation, not independent binary proof of every edge case.</p>
+<h2 id="failure-state-retention-is-different">Failure-state retention is different</h2>
+<p>A separate EDF5 Mission Failed routine calculates a fraction of collected crates that may be retained: <strong>Easy 100%, Normal 75%, Hard 50%, Hardest 25%, Inferno 0%</strong>, truncating the number of crates. This is a result-screen count path, not a change to crate spawning itself. The source audit did not fully trace the later handoff from this screen to final rolling, so do not infer further award semantics from this fraction alone.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf5-drop-items</code>, facts <code>dropitem-collect-counters</code>, <code>loot-roll-entry</code>, <code>loot-roll-class-share</code>, <code>loot-roll-level-window</code>, <code>loot-roll-level-window-check</code>, <code>loot-roll-candidates</code>, <code>loot-roll-caps-spawned</code>, <code>loot-failed-mission-kept</code>; static reverse engineering by novae (ajane), supported by the referenced Japanese EDF5 drop-range tests. All RVAs refer to <code>steam-5d11de53</code>. No fresh in-game roll was performed.</p>
+<h2 id="further-native-game-references">Further native-game references</h2>
+<ul>
+<li><a href="edf5-native-mission-script-states-failed-results-and-save-commit.html">Original EDF5 failure and result path</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf5-drop-items, kh-edf5-decals and kh-edf5-stingers-webs (steam-5d11de53), curator novae/ajane and credited contributors</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#when-boxes-become-rewards">When boxes become rewards</a><a href="#which-class-receives-a-box">Which class receives a box?</a><a href="#level-range-and-candidate-eligibility">Level range and candidate eligibility</a><a href="#failure-state-retention-is-different">Failure-state retention is different</a><a href="#further-native-game-references">Further native-game references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-weapon-armor-end-mission-reward-roll-class-weights-and-level-window"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 Genocide Cannon — static RE boundary Evidence level: Static comparison against the private EDF4.1 and EDF6 binary oracles. The runtime symptom is real, "><title>EDF 4.1 Genocide Cannon — static RE boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF 4.1 Genocide Cannon — static RE boundary</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Static binary RE; runtime discriminator pending</div><div id="articleBody"><p><strong>Evidence level:</strong> Static comparison against the private EDF4.1 and EDF6 binary oracles. The runtime symptom is real, but the evidence does <strong>not</strong> justify a new source-only patch yet.</p>
+<h2 id="runtime-symptom">Runtime symptom</h2>
+<p>The reported failure is unusually specific: the Genocide Cannon's visible beam/projectile/hitbox exists, but the expected impact explosion is not visibly reproduced.</p>
+<p>This originally made the bridge's high-level bullet setup look suspicious. Later binary reconciliation eliminated most of those obvious candidates.</p>
+<h2 id="recovered-edf4-1-finalcannon-contract">Recovered EDF4.1 FinalCannon contract</h2>
+<p>The source setup is:</p>
+<ul>
+<li>factory: <code>RocketBullet01_LowLight</code>;</li>
+<li>speed: <code>0.01</code>;</li>
+<li>life: <code>1800</code>;</li>
+<li>damage: <code>70 * s</code>;</li>
+<li>explosion radius: <code>60</code>;</li>
+<li>visual size: <code>100</code>;</li>
+<li>source color preserved;</li>
+<li>source Genocide custom parameter preserved;</li>
+<li>fire direction: <code>Down()</code> from the cannon muzzle.</li>
+</ul>
+<p>The R13 bridge already preserves those high-level fields.</p>
+<h2 id="contact-and-explosion-path">Contact and explosion path</h2>
+<p>Static RE shows that EDF4.1 and EDF6 Rocket/LowLight follow the same broad mechanism:</p>
+<ol>
+<li>the Rocket performs the physics/contact query;</li>
+<li>a contact record is stored;</li>
+<li>terminal/contact handling chooses generic explosion presentation;</li>
+<li>mode 2 selects the large-explosion branch, otherwise the normal branch.</li>
+</ol>
+<p><code>RocketBullet01_LowLight</code> is presentation-oriented in both generations. It does not establish a separate EDF4.1-only contact/destruction subsystem that is obviously missing in EDF6.</p>
+<h2 id="config-default-parity">Config-default parity</h2>
+<p>The relevant source initializer defaults match the EDF6 parameter constructor used by the bridge:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th style="text-align:right">EDF4.1 source</th>
+  <th style="text-align:right">EDF6 bridge/default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>collision/radius factor</td>
+  <td style="text-align:right">1.0</td>
+  <td style="text-align:right">1.0</td>
+</tr>
+<tr>
+  <td>speed factor</td>
+  <td style="text-align:right">1.0</td>
+  <td style="text-align:right">1.0</td>
+</tr>
+<tr>
+  <td>hit-stop</td>
+  <td style="text-align:right">0.5</td>
+  <td style="text-align:right">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>The bridge then overwrites the same material fields the source FinalCannon overwrites.</p>
+<h2 id="falsified-or-unsupported-patch-directions">Falsified or unsupported patch directions</h2>
+<p>The current evidence does <strong>not</strong> support fixing the symptom by:</p>
+<ul>
+<li>replacing <code>RocketBullet01_LowLight</code>;</li>
+<li>inventing another explosion radius or size;</li>
+<li>changing direction;</li>
+<li>extending the four-field source custom parameter;</li>
+<li>changing collision/radius or speed factors;</li>
+<li>assuming EDF6 lacks Explosion/BigExplosion primitives;</li>
+<li>treating the visible beam itself as proof that the Rocket obtained a contact record.</li>
+</ul>
+<h2 id="required-runtime-discriminator">Required runtime discriminator</h2>
+<p>The next useful runtime test must separate four questions:</p>
+<ol>
+<li>Did the Rocket itself obtain a contact record?</li>
+<li>Did area damage occur at the impact position?</li>
+<li>Was gameplay damage correct while only the explosion presentation was absent?</li>
+<li>Was the visible beam/hitbox a separate Lightning/beam component rather than the Rocket path under investigation?</li>
+</ol>
+<p>Those outcomes lead to different fixes. Until one is observed, a broad R14 bullet patch would be speculative.</p>
+<h2 id="current-decision">Current decision</h2>
+<p><strong>Keep R13. No Genocide-specific R14 delta is evidence-backed.</strong></p>
+<h2 id="more-precise-edf6-bullet-contact-state-distinctions">More precise EDF6 bullet contact-state distinctions</h2>
+<p>A later source/runtime-instrumentation audit mapped additional native EDF6 states that can distinguish superficially similar outcomes. This is <strong>static engine evidence plus an unexecuted diagnostic design</strong>, not an in-game capture of the missing explosion:</p>
+<table>
+<thead>
+<tr>
+  <th>State or pathway in inspected EDF6</th>
+  <th>Observed native representation</th>
+  <th>What it does not prove alone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Map-ray stop/shortening</td>
+  <td><code>BulletMtSystem</code> path around RVA <code>0x234D20</code> sets the <strong><code>0x04</code> bit in flags at <code>+0xAF4</code></strong></td>
+  <td>Visible explosion, actual damage or correct terrain response</td>
+</tr>
+<tr>
+  <td>Object hit query</td>
+  <td><code>BulletControl+0x990</code> shape-cast collector; result count at collector <code>+0x0C</code>, capped by native path at <strong><code>0x32</code></strong></td>
+  <td>A registered shape-cast candidate is not guaranteed accepted damage</td>
+</tr>
+<tr>
+  <td>Movement / lifetime</td>
+  <td>Movement type at <code>+0xAF0</code>; raw state <code>+0xB04</code>; lived frames <code>+0xC38</code>; lifetime <code>+0xB48</code></td>
+  <td>An early terminal transition is not proof of a collision</td>
+</tr>
+<tr>
+  <td>LowLight native update</td>
+  <td>Existing Rocket-native <code>OnUpdate</code> path (slot <strong>5</strong>) can be observed without altering native return semantics</td>
+  <td>Neither a display error nor a missing contact is proven by code presence</td>
+</tr>
+</tbody>
+</table>
+<p>Consequently, <strong>map-ray stop</strong>, <strong>shape-cast candidate</strong>, <strong>terminal-before-lifetime</strong>, <strong>accepted damage</strong> and <strong>rendered explosion</strong> are five different outcomes. The port's reported missing impact effect remains open. Changing projectile size/radius, choosing another bullet class or inferring collision solely from its visible beam remains unsupported.</p>
+<p>Source: <code>R11_TESTER_FEEDBACK_COVERAGE_AUDIT_2026-11-15.md</code>, carried into the later R12 source checkpoint. Offset meanings are restricted to the audited EDF6 build and have not been established as public API guarantees.</p>
+<h2 id="r175-three-original-finalcannon-sgo-variants-two-projectile-contracts">R175 three original FinalCannon SGO variants: two projectile contracts</h2>
+<p>The native EDF4.1 <code>UFOMOTHER401_FINALCANNONPANEL{L,M,S}.SGO</code> records were examined separately. <strong>All three</strong> report class <code>UfoMother401_FinalCannon01</code> and the same two factory/parameter families:</p>
+<table>
+<thead>
+<tr>
+  <th>SGO role</th>
+  <th>Genocide projectile</th>
+  <th>Source custom parameter</th>
+  <th>Other targeted attack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Final Cannon L</td>
+  <td><code>RocketBullet01_LowLight</code></td>
+  <td><code>[2, 0, 0, 0.0005]</code></td>
+  <td><code>LightningBullet01</code>, <code>[1.5, 1.0, 1.0, 0.15, 1]</code></td>
+</tr>
+<tr>
+  <td>Final Cannon M</td>
+  <td>same</td>
+  <td>same</td>
+  <td>same</td>
+</tr>
+<tr>
+  <td>Final Cannon S</td>
+  <td>same</td>
+  <td>same</td>
+  <td>same</td>
+</tr>
+</tbody>
+</table>
+<p>The array lengths differ: the native <strong>four-element Genocide parameter</strong> is <strong>not</strong> the native <strong>five-element Lightning parameter</strong>. This matters when separating a visible lightning/beam event from the actual Rocket contact/explosion chain. The previously documented speed <code>0.01</code>, lifetime <code>1800</code> and explosion radius <code>60</code> belong to the studied <strong>Genocide</strong> setup, not to every Lightning object. Per-source SGO hashes and exact parameters are in <code>data/R175_EDF41_MOTHER401_FINAL_CANNON_THREE_NATIVE_SGO_PARAMETERS.csv</code>.</p>
+<p>This <strong>agrees with</strong>, rather than supersedes, the existing static LowLight reconstruction. It does not identify which physical projectile contacted the environment, whether area damage was accepted or why the converted encounter lacked the visual impact. Thus the older runtime failure remains <strong>open</strong>, and a different bullet factory or parameter retune is still unsupported. Source: <code>R13_FUNCTIONALITY_R6_GENOCIDE_SOURCE_CONTRACT_AUDIT.json</code>, checked against the later source-side contact diagnostics. No new gameplay measurements were performed.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF41_R13_OFFLINE_RECON_2026-11-06.md</li><li>Library: EDF41_RUNTIME_FEEDBACK_MISSION40_TRIAGE_2026-11-05.md</li><li>Native EDF4.1 Mother401/Shield Bearer exact-build SGO and SHKT source corpus; canonical EDF41.exe / EDF6 EDF.dll R12–R13 static RE and revision reconciliation, 2026-11-05/15; R175 finite provenance inventories</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#runtime-symptom">Runtime symptom</a><a href="#recovered-edf4-1-finalcannon-contract">Recovered EDF4.1 FinalCannon contract</a><a href="#contact-and-explosion-path">Contact and explosion path</a><a href="#config-default-parity">Config-default parity</a><a href="#falsified-or-unsupported-patch-directions">Falsified or unsupported patch directions</a><a href="#required-runtime-discriminator">Required runtime discriminator</a><a href="#current-decision">Current decision</a><a href="#more-precise-edf6-bullet-contact-state-distinctions">More precise EDF6 bullet contact-state distinctions</a><a href="#r175-three-original-finalcannon-sgo-variants-two-projectile-contracts">R175 three original FinalCannon SGO variants: two projectile contracts</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-edf-4-1-genocide-cannon-static-re-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

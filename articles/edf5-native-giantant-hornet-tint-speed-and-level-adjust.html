@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Ant and hornet variants are configured, not separate C++ classes The EDF5 SGOs distinguish ants and hornets through model selection, tint parameters, level adju"><title>EDF5 ant and hornet variants: textures, speeds, base durability and level adjustment | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Enemies / subtypes</div><h1>EDF5 ant and hornet variants: textures, speeds, base durability and level adjustment</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Enemies / subtypes</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>The EDF5 SGOs distinguish ants and hornets through model selection, tint parameters, level adjustment, movement and AI settings. Two definitions that share a model may behave differently, while two appearance variants can use the same engine class.</p>
+<h2 id="ants">Ants</h2>
+<table>
+<thead>
+<tr>
+  <th>EDF5 SGO</th>
+  <th style="text-align:right">Base <code>game_object_durability</code></th>
+  <th>Defining source properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>giantant01</code>, <code>giantant01b</code></td>
+  <td style="text-align:right">60</td>
+  <td>Black ant; <code>01b</code> changes <code>ant_AiSetting</code> to <code>[1,10,30]</code></td>
+</tr>
+<tr>
+  <td><code>giantant01netlightsyncmode</code></td>
+  <td style="text-align:right">60</td>
+  <td>Black-ant model; different <code>ant_NetworkIsLightSyncMode</code></td>
+</tr>
+<tr>
+  <td><code>giantant02b</code></td>
+  <td style="text-align:right">180</td>
+  <td>Red ant model, red-hit effect</td>
+</tr>
+<tr>
+  <td><code>giantant03b</code></td>
+  <td style="text-align:right">270</td>
+  <td>Purple/dark-crimson variation of red model; diffuse <code>(0.25,0.5,0.5,1)</code>; movement speed <code>0.45</code></td>
+</tr>
+<tr>
+  <td><code>giantant04</code></td>
+  <td style="text-align:right">15</td>
+  <td>Full-size ant model with green tint <code>(0.5,1,0.5,1)</code>; movement speed <code>0.8</code></td>
+</tr>
+<tr>
+  <td><code>giantant04sb</code></td>
+  <td style="text-align:right">15</td>
+  <td>Half-size model <code>ari_half.mdb</code>; <code>ant_ex_DamageScale=2.5</code>; grab/capture animation parameters</td>
+</tr>
+</tbody>
+</table>
+<p>The small Green Ant is <strong>not</strong> simply the full-size Green Ant scaled uniformly: it selects another model and has extra grab/capture parameters. Gold Ant base entries are included in the downloadable SGO catalogue; their runtime health is further modified by <code>game_object_level_adjust</code> and game difficulty.</p>
+<h2 id="hornets">Hornets</h2>
+<table>
+<thead>
+<tr>
+  <th>EDF5 SGO</th>
+  <th style="text-align:right">Base durability</th>
+  <th>Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>giantbee01</code> and <code>giantbee01charge</code></td>
+  <td style="text-align:right">45</td>
+  <td>Same model; differ in <code>bee_FlyAngle</code> and <code>bee_FlySideMoveSpeed</code></td>
+</tr>
+<tr>
+  <td><code>giantbee02charge</code></td>
+  <td style="text-align:right">90</td>
+  <td>Red tint (diffuse starts <code>1.25,0.1</code>); level adjustment <strong>1.5</strong></td>
+</tr>
+<tr>
+  <td><code>giantbeequeen</code></td>
+  <td style="text-align:right">3000</td>
+  <td>Ordinary hornet queen, no red-queen adjustment</td>
+</tr>
+<tr>
+  <td><code>giantbeequeen02</code></td>
+  <td style="text-align:right">3000</td>
+  <td>Red/Demon Queen tint and level adjustment <strong>1.5</strong></td>
+</tr>
+</tbody>
+</table>
+<p>For example, the red hornet's source-adjusted baseline is <strong>90 × 1.5 = 135</strong>, not simply 90. These are source-side base quantities; online scaling, stage multipliers and per-mission overrides must not be ignored when predicting actual HP.</p>
+<p><strong>Evidence:</strong> native SGO root comparisons; EDF5 Knowledge Hub facts <code>edf5-ant-hornet-subtypes</code> and <code>edf5-hornet-subtypes</code>, static. In-game subtype naming in the notes is attributed to contributor knowledge, not newly retested here.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#ants">Ants</a><a href="#hornets">Hornets</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-native-giantant-hornet-tint-speed-and-level-adjust"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Troubleshooting First identify the failing layer Symptom Useful first checks Map renders but collision fails MAD/Havok shape, registry, root and runtime body co"><title>Troubleshooting | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">Troubleshooting</a></div><h1>Troubleshooting</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">Troubleshooting</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="first-identify-the-failing-layer">First identify the failing layer</h2>
+<table>
+<thead>
+<tr>
+  <th>Symptom</th>
+  <th>Useful first checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Map renders but collision fails</td>
+  <td>MAD/Havok shape, registry, root and runtime body composition — <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Collision and navigation architecture</a></td>
+</tr>
+<tr>
+  <td>Model parses but game crashes</td>
+  <td>Typed loader registration, <code>MDB</code> vs <code>.trb</code>, and CMPL payload — <a href="cross-game-conversion-why-a-parseable-mdb-can-still-crash.html">Loader dispatch case</a></td>
+</tr>
+<tr>
+  <td>Mission LIST works but gameplay is black</td>
+  <td>Mission path/provider, <code>BEFORE.BVM</code> UI fade and AC start — <a href="missions-%26-scripting-edf41-before-bvm-black-screen-ui-order.html">BEFORE scenes</a></td>
+</tr>
+<tr>
+  <td>AI walks into geometry</td>
+  <td>NAV donor mismatch, <code>NVMD</code> and mission route — <a href="maps-%26-navigation-edf41-r1d-active-body-eligibility-and-oracle-diagnostics.html">Navigation</a></td>
+</tr>
+<tr>
+  <td>Local player works, online peer desyncs</td>
+  <td>Distinguish RUDP, shot/damage event owner and EOS state — <a href="engine-re-%26-networking-edf5-edf6-desync-differential-evidence-vs-false-leads.html">Networking</a></td>
+</tr>
+<tr>
+  <td>Material looks wrong</td>
+  <td>Shader family, typed parameter order, textures and alpha state — <a href="materials-%26-shaders-mdb-shading-parameters-explained.html">MDB material parameters — roughness, metallic and normals</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="reliability-tags">Reliability tags</h2>
+<ul>
+<li><strong>Runtime observed</strong>: a specific installed build and scene were tested.</li>
+<li><strong>Native binary</strong>: facts measured from original target assets or disassembly.</li>
+<li><strong>Source/static</strong>: a converter or serializer generated consistent data offline.</li>
+<li><strong>Hypothesis / open</strong>: not enough evidence for a general rule.</li>
+</ul>
+<p>See <a href="start-quick-reference.html">Evidence standards</a>, <a href="known-traps-critical-negative-evidence-and-provenance.html">Known invalid shortcuts</a> and <a href="open-questions.html">Open questions</a>. Do not turn an accepted compatibility exception, such as omitted <code>3450</code>, back into a global blocker.</p>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="edf6-winmm-import-surface.html">EDF6 native WinMM imports and startup call-path observations</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#first-identify-the-failing-layer">First identify the failing layer</a><a href="#reliability-tags">Reliability tags</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-troubleshooting"};</script><script src="../assets/site.js" defer></script></body></html>

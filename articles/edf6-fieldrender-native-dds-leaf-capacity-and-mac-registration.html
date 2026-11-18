@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 FieldRender terrain: native DDS arrays, FMB leaves and MAC resource registration The EDF6 FieldRender/FMEP terrain path is not an ordinary MDB prop. It spa"><title>EDF6 native FieldRender: DDS arrays, FMB leaves and MAC registration | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>EDF6 native FieldRender: DDS arrays, FMB leaves and MAC registration</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Technical reference · Original native EDF6 corpus + DLL disassembly + separate modified-game runtime diagnostics</div><div id="articleBody"><p>The EDF6 FieldRender/FMEP terrain path is not an ordinary MDB prop. It spans <strong>terrain material and geometry records</strong>, <strong>DDS texture arrays</strong>, and <strong>map-container references</strong>. A correctly decoded part does not establish that the whole chain loads in-game. This reference combines original EDF6 native-asset observations with a separate, explicitly modified-game diagnostic sequence.</p>
+<h2 id="evidence-and-boundaries">Evidence and boundaries</h2>
+<ul>
+<li><strong>Original EDF6 source files:</strong> native FMB leaves and DDS from CAVE501, CAVE503, CAVE601_2, HEIGEN507 and BASE502, plus the directional HEIGEN507_ENKEIUP FMB; the September 2026 native-correlated audit decoded <strong>1,477 leaves without errors</strong> and checked <strong>20 DDS mip payloads against exact block-compressed sizes</strong>.</li>
+<li><strong>Modified EDF6 runtime observations:</strong> an experimental Island4 FieldRender branch encountered two distinct loader faults. This diagnoses resource lookup and native MAC directory parsing but does <strong>not</strong> establish successful custom FMEP gameplay.</li>
+<li><strong>Separate known playable route:</strong> Island4's <strong>static MDB map</strong> had a runtime-positive x20 R4C control; it is not proof that its later FMEP branch worked. The accepted Desert508 baseline is a different native-resource-continuity study, not a generic FMEP source-only recipe.</li>
+</ul>
+<h2 id="native-terrain-dds-the-measured-container-contract">Native terrain DDS: the measured container contract</h2>
+<p>All <strong>20</strong> examined native terrain DDS payloads in this bounded corpus use DX10 headers, 2D texture arrays, complete mip chains, depth 1, <code>flags = 0xA1007</code>, <code>caps = 0x401008</code> and <code>caps2 = 0</code>. The reported size checks were <strong>20/20 exact</strong>, not just header-parse successes.</p>
+<table>
+<thead>
+<tr>
+<th>Texture role</th>
+<th style="text-align:right">Dimensions</th>
+<th style="text-align:right">Mip count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full-resolution color</td>
+<td style="text-align:right">2048 × 2048</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td>LOD color</td>
+<td style="text-align:right">512 × 512</td>
+<td style="text-align:right">10</td>
+</tr>
+<tr>
+<td>Full-resolution normal</td>
+<td style="text-align:right">2048 × 2048</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td>LOD normal</td>
+<td style="text-align:right">128 × 128</td>
+<td style="text-align:right">8</td>
+</tr>
+</tbody>
+</table>
+<p>The array slice count is <strong>map-dependent</strong>, not a universal fixed four-slice rule:</p>
+<table>
+<thead>
+<tr>
+<th>Native EDF6 map</th>
+<th style="text-align:right">Color slices</th>
+<th style="text-align:right">Normal slices</th>
+<th>Reported normal DXGI value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CAVE501</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">3</td>
+<td><code>77</code> (BC3_UNORM)</td>
+</tr>
+<tr>
+<td>CAVE503</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+<td><code>77</code> (BC3_UNORM)</td>
+</tr>
+<tr>
+<td>CAVE601_2</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">3</td>
+<td><code>77</code> (BC3_UNORM)</td>
+</tr>
+<tr>
+<td>HEIGEN507</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">6</td>
+<td><code>71</code> (BC1_UNORM)</td>
+</tr>
+<tr>
+<td>BASE502</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">9</td>
+<td><code>71</code> (BC1_UNORM)</td>
+</tr>
+</tbody>
+</table>
+<p>All five native color profiles are reported as <strong>numeric DXGI <code>71</code></strong>, i.e. <code>BC1_UNORM</code>. <strong>Source terminology correction:</strong> one audit calls that value &quot;BC1 sRGB&quot;; according to the official Microsoft DXGI enumeration, <code>BC1_UNORM_SRGB</code> is <strong>72</strong>, not 71. This article preserves the source's numeric value and does <strong>not</strong> silently turn it into 72 or infer the final shader's color-space sampling policy. The same enumeration distinguishes <code>BC3_UNORM = 77</code> from <code>BC3_UNORM_SRGB = 78</code>.</p>
+<p>Material records contain slice indices; the highest referenced index sets a <strong>minimum</strong> array length, not necessarily its exact native allocation. For example, BASE502's native color array contains 12 slices even though the cited maximum material index requires only 11. The one-material Island4 candidate referenced color slices 0 and 1 and normal slice 0, so its strict minima were <strong>2 color / 1 normal</strong>; its test used <strong>4/4</strong>. Overprovision by itself is not evidence of a broken DDS.</p>
+<h2 id="native-fieldrender-fmb-leaves-capacity-is-not-the-active-material-count">Native FieldRender FMB leaves: capacity is not the active material count</h2>
+<p>The corrected native audit found these wrapper counts; the six rows include one directional FMB without a separate full DDS-profile row:</p>
+<table>
+<thead>
+<tr>
+<th>Original FMB</th>
+<th style="text-align:right">Native leaves</th>
+<th>Measured material-list capacity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CAVE501</td>
+<td style="text-align:right">257</td>
+<td>1×5; 2×203; 3×49</td>
+</tr>
+<tr>
+<td>CAVE503</td>
+<td style="text-align:right">102</td>
+<td>2×6; 3×44; 4×52</td>
+</tr>
+<tr>
+<td>CAVE601_2</td>
+<td style="text-align:right">484</td>
+<td><strong>1×484</strong>, active arity 1, field <code>+0x30 = 1</code></td>
+</tr>
+<tr>
+<td>HEIGEN507</td>
+<td style="text-align:right">256</td>
+<td>Range 2–5</td>
+</tr>
+<tr>
+<td>HEIGEN507_ENKEIUP</td>
+<td style="text-align:right">120</td>
+<td>Range 2–4</td>
+</tr>
+<tr>
+<td>BASE502</td>
+<td style="text-align:right">258</td>
+<td>Range 3–8</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>1,477</strong></td>
+<td><strong>0 decode errors</strong></td>
+</tr>
+</tbody>
+</table>
+<p>A later paired Desert control additionally had <strong>114/114</strong> directional leaves with capacity=1, arity=1, config index 2, and a byte-identical nine-row shader-config block to the studied small terrain candidate. It is an <strong>independent profile check</strong>, not part of the 1,477-leaf corrected-five-map count. The accepted Desert main FMB and the deprecated <code>DESERT508_WORKING_BEST_EFFORT</code> file are <strong>different artifacts</strong>: the latter must not substitute for the former when asserting runtime provenance.</p>
+<p><strong>Interpretation:</strong> native EDF6 definitely permits <code>capacity=1</code>. Do not force a field to 2 because an earlier sample did not show 1. Conversely, do not infer every FMB leaf must use this minimal profile; native leaves with larger lists and material indices exist.</p>
+<h2 id="fmb-tree-and-auxiliary-fields-sample-grounded-rules">FMB tree and auxiliary fields: sample-grounded rules</h2>
+<p>The accepted Desert-versus-small-FMB comparison found an FMB directory whose leaves and internal tree nodes are decoded in <strong>postorder</strong>. Each leaf contributes its leaf ordinal; a type-0 tree node combines two child subtrees and stores the <strong>inclusive range of leaf ordinals</strong>. It does <strong>not</strong> store a split at a raw directory-entry index. The same study decoded a <strong>256-leaf / 255-node</strong> Desert main tree, a <strong>114-leaf / 113-node</strong> directional tree, and a <strong>2-leaf / 1-node</strong> experimental candidate without tree-range errors.</p>
+<p>The native directional Desert profile's nine-row config blob and eight-byte auxiliary block (<code>00 00 00 00 08 00 00 00</code>) were byte-identical to the studied candidate. A source-generated 256-row float4 lookup table had the same broad data domain as the native oracle but <strong>different exact bytes</strong>; no accepted gameplay experiment isolated the LUT as the loader's cause. Exact native geometry/tree format is an independent issue from locating FMB by resource name.</p>
+<h2 id="runtime-loader-chain-why-valid-terrain-files-can-still-crash">Runtime loader chain: why valid terrain files can still crash</h2>
+<p>The modified-game diagnostic sequence illustrates the engine's separate resource-lookup and map-directory contracts. It is included here to identify <strong>native reader semantics</strong>, not as a recipe for developing a particular editor.</p>
+<table>
+<thead>
+<tr>
+<th>Source-controlled observation</th>
+<th>What it shows</th>
+<th>What it does not show</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Island4 initial FMEP tests: <code>EDF+0x1170B7</code>, fault address <code>0x4</code></td>
+<td>Loader derives a sibling <code>.fmb</code> for a referenced <code>.fmep</code>, performs resource lookup, and dereferences <code>record+4</code> with no observed NULL guard; corresponding FMB registration was missing from the MAC's <code>externals.sgo</code></td>
+<td>DDS mip size or leaf capacity was proven wrong</td>
+</tr>
+<tr>
+<td>Adding <code>externals.sgo</code> to MAC</td>
+<td>The next runtime log no longer showed the <code>+0x1170B7</code> signature; the engine progressed past that lookup</td>
+<td>Map successfully rendered, or entire game was stable</td>
+</tr>
+<tr>
+<td>Later observed <code>EDF+0x19026A</code>, fault address <code>0x0</code></td>
+<td>A separate MAC directory-name relative-pointer problem was exposed in the investigated load</td>
+<td>That reported first-chance access violation is necessarily the terminal game crash site</td>
+</tr>
+<tr>
+<td>Corrected MAC directory rel32 (static proof)</td>
+<td>The parser's directory and name pointer bases were reconstructed; bad directory target was 12 bytes off and corrected to 0</td>
+<td>Post-correction gameplay was runtime-qualified</td>
+</tr>
+</tbody>
+</table>
+<p>For this observed native <code>MARC v5</code> directory parser, <strong>MAC header field <code>+0x14</code> is a signed 32-bit displacement relative to the address of that field</strong>, pointing to the first <strong>24-byte directory entry</strong>. At each directory entry, <code>+0x00</code> is itself a signed rel32 from the entry to a UTF-16 resource name. The <code>EDF.dll</code> read site analyzed was <code>EDF+0x1901F0</code>; the loader used a relative-dword load and pointer addition at <code>+0x190226…+0x190233</code>, then read the UTF-16 name at <code>+0x19026A</code>.</p>
+<p>This explains why a three-entry heuristic could appear to work, then fail when a fourth resource changed directory placement. The reported four-entry error targeted <code>0xB21C</code> instead of the correct directory start <code>0xB210</code>, producing a <strong>12-byte pointer displacement</strong> and a zero name-relative field. The corrected value (<code>header+0x14 = 0xB1FC</code>) reaches <code>0xB210</code>. These are a <strong>single measured MAC profile</strong>, not license to assume the same offset for unrelated formats or game builds.</p>
+<p>The exact source-generated <code>externals.sgo</code> registered <code>ss_island4_fmep.fmb</code> while the map object graph referenced <code>ss_island4_fmep.fmep</code>; the resource names play <strong>different roles</strong>. The corrected R2F FIX1 package passed static and transaction checks, but the source record ends at <strong>runtime pending</strong>. In particular, it does <strong>not</strong> prove that the complete experimental FMEP terrain ever rendered successfully in that branch.</p>
+<h2 id="rendering-material-diagnosis-is-a-separate-axis">Rendering/material diagnosis is a separate axis</h2>
+<p>RenderDoc analysis of the <strong>static MDB</strong> Island4 control showed a real artist-material mismatch: its source texture packed <code>roughness / metallic / AO</code> into RGB, but the observed control shader bound that resource as a <strong>reflect/spec-style mask</strong>. A direct runtime dump matched the expected model prefix exactly, ruling out an outdated MDB/RAB for that sample. The tested legacy shader variants did not establish a complete artist-faithful material translation.</p>
+<p>That finding should not be imported wholesale into FMEP's native terrain texture-array ABI. <strong>Static MDB shading, FieldRender DDS slices, FieldRender leaf materials, MAC resource registration, physical MAD collision and HKT/NVMD navigation are distinct contracts</strong>. Fixing one does not prove the others.</p>
+<h2 id="what-is-proved-and-what-remains-open">What is proved, and what remains open</h2>
+<p><strong>Original game evidence:</strong> 20 native DDS payload byte-length matches; 1,477 correctly decoded FMB leaf wrappers; a native valid capacity-one pattern; distinct texture array sizes and normal formats per map. <strong>Binary loader evidence:</strong> precise field-relative MAC directory and name references for the studied EDF6 build. <strong>Modified runtime evidence:</strong> specific missing-FMB and subsequent bad-name failures, with the original missing-FMB signature no longer present after registration. <strong>Not proved:</strong> runtime success of the corrected custom FMEP branch; generic custom FMB authoring for arbitrary maps; stock-game inferences from an experiment-only asset; actual color-space treatment when the numeric DXGI enum is 71.</p>
+<h3 id="primary-research-and-independent-format-reference">Primary research and independent format reference</h3>
+<ul>
+<li><code>/EDF5_EDF6_RESEARCH/research/audits/EDF6_FMEP_NATIVE_DDS_CAPACITY_CORPUS_AUDIT_R2_CORRECTED_2026-09-12.{md,json}</code> — native five-map DDS and six-FMB leaf corpus.</li>
+<li><code>/EDF5_EDF6_RESEARCH/research/audits/EDF6_SWORDSTRIKE_ISLAND4_FMEP_R2A_DESERT_ORACLE_COMPARISON_AUDIT_2026-09-12.{md,json}</code> — accepted Desert controls, FMB tree semantics and shader config/LUT comparisons.</li>
+<li><code>/EDF5_EDF6_RESEARCH/research/audits/EDF6_SWORDSTRIKE_ISLAND4_FMEP_R2F_FIX1_FINAL_PACKAGE_AUDIT_2026-09-12.json</code> — loader evidence, exact MARC relative-pointer chain and runtime pending status.</li>
+<li><code>/EDF5_EDF6_RESEARCH/research/audits/ISLAND4_RENDERDOC_MATERIAL_RCA_2026-09-11.json</code> — separate static-MDB material evidence.</li>
+<li>Microsoft, <a href="https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format">DXGI_FORMAT enumerated values</a> — <code>71</code> vs <code>72</code> and <code>77</code> vs <code>78</code>.</li>
+</ul>
+<p>Related: <a href="maps-%26-navigation-map-container-stack-mac-mapb-mapo-fmb-fmep.html">Map resource stack</a>, <a href="maps-%26-navigation-island4-static-map-scale-material-and-texel-density-case-study.html">Island4 static map case study</a>, <a href="textures-dds-packed-channels-fpr-and-runtime-binding-contracts.html">DDS and packed-channel contracts</a>, <a href="docs-navigation.html">Map/navigation guide</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_FMEP_NATIVE_DDS_CAPACITY_CORPUS_AUDIT_R2_CORRECTED_2026-09-12.json</li><li>EDF6_SWORDSTRIKE_ISLAND4_FMEP_R2A_DESERT_ORACLE_COMPARISON_AUDIT_2026-09-12.json</li><li>EDF6_SWORDSTRIKE_ISLAND4_FMEP_R2F_FIX1_FINAL_PACKAGE_AUDIT_2026-09-12.json</li><li>ISLAND4_RENDERDOC_MATERIAL_RCA_2026-09-11.json</li><li>Microsoft DXGI_FORMAT enumeration</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#evidence-and-boundaries">Evidence and boundaries</a><a href="#native-terrain-dds-the-measured-container-contract">Native terrain DDS: the measured container contract</a><a href="#native-fieldrender-fmb-leaves-capacity-is-not-the-active-material-count">Native FieldRender FMB leaves: capacity is not the active material count</a><a href="#fmb-tree-and-auxiliary-fields-sample-grounded-rules">FMB tree and auxiliary fields: sample-grounded rules</a><a href="#runtime-loader-chain-why-valid-terrain-files-can-still-crash">Runtime loader chain: why valid terrain files can still crash</a><a href="#rendering-material-diagnosis-is-a-separate-axis">Rendering/material diagnosis is a separate axis</a><a href="#what-is-proved-and-what-remains-open">What is proved, and what remains open</a><a href="#primary-research-and-independent-format-reference">　Primary research and independent format reference</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-fieldrender-native-dds-leaf-capacity-and-mac-registration"};</script><script src="../assets/site.js" defer></script></body></html>

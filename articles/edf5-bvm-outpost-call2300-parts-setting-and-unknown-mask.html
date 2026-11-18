@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Disabling an Outpost weapon can address a component group rather than spawn new enemies The original EDF5 BVM call 2300 takes an object, a group argument, an in"><title>EDF5 Outpost part control: BVM call 2300, message 0x8000002B and tentative group-mask mapping | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Missions / multipart objects</div><h1>EDF5 Outpost part control: BVM call 2300, message 0x8000002B and tentative group-mask mapping</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Missions / multipart objects</span></div><div class="referencebadge">Technical reference · Source static analysis; explicitly identified source hypotheses retained</div><div id="articleBody"><p>The original EDF5 BVM call <strong><code>2300</code></strong> takes an object, a group argument, an index and a byte-like flag. The native dispatcher sends message <strong><code>0x8000002B</code></strong> with these fields via the target object's message route. Unlike enemy spawn calls it does <strong>not</strong> create a new enemy. The receiving class implementation was <strong>not conclusively identified</strong> in the source reverse engineering; therefore the precise flag meaning remains unresolved.</p>
+<p>The script supplies group values <strong>1, 2, 4, 8, 16 and 32</strong>. The Outpost SGO's <code>parts_setting</code> contains a third integer field in the range 0–5, with six corresponding groups. A proposed mapping is <strong>group mask = 1 shifted left by that third field</strong>. It is supported by a specific mission count cross-check but remains a <strong>hypothesis</strong>, not a native binary handler proof.</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Proposed mask</th>
+  <th>Observed SGO part category</th>
+  <th style="text-align:right">Count in the studied Outpost configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>1</code></td>
+  <td>Large cannons</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>2</code></td>
+  <td>Medium cannons</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>4</code></td>
+  <td><code>smallcannon1</code></td>
+  <td style="text-align:right">42</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>8</code></td>
+  <td><code>smallcannon2</code></td>
+  <td style="text-align:right">52</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>16</code></td>
+  <td><code>smallcannon3</code></td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>32</code></td>
+  <td><code>smallcannon1_g</code></td>
+  <td style="text-align:right">6</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>M021</code>, the script activates masks 8 and later 4; <strong>52 + 42 = 94</strong> matches the Japanese wiki's Outpost turret tally in that mission. Counting these 94 SGO components as ordinary scripted BVM enemy spawns would misrepresent the source: the whole Outpost and its turrets can be one object hierarchy.</p>
+<p>This page distinguishes three facts: the <strong>actual <code>2300</code> message</strong> is statically established, the <strong>SGO parts grouping</strong> is observed, and the <strong>bitmask interpretation of that message's group field</strong> is unverified.</p>
+<p><strong>Evidence:</strong> <code>bvm-calls-1141-2300</code>, <code>bvm-call-2300-native</code>, <code>outpost-part-group-mask</code> (unverified), <code>outpost-2300-calls-per-mission</code>, <code>bvm-wiki-gaps-explained</code>. Investigated EDF5.exe build only.</p>
+
+<h2 id="e510-fortress-part-resources-design-differences-rather-than-one-interchangeable-object">E510 fortress part resources: design differences rather than one interchangeable object</h2>
+<p>The examined EDF5 standard E510 composition and its EDF5 DLC variant both contain <strong>125 <code>parts_setting</code> entries</strong>. Their top-level part order, numeric part configuration and embedded blobs are identical; <strong>125 resource path references</strong> and <strong>10 resource-list entries</strong> differ. This indicates that the EDF5 DLC difference in the top-level asset is predominantly a <em>resource-selection</em> difference, while its child SGO components can encode <strong>substantially different durability and loot values</strong>.</p>
+<p>When comparing <strong>EDF5 standard</strong> with <strong>EDF6 standard</strong>, three small-cannon resource bindings switch from the green variant <code>E510_FORTRESS_PARTS_SMALLCANNON1_G.SGO</code> to the purple <code>...SMALLCANNON1_P.SGO</code>, at part indices <strong>99, 105 and 111</strong>. These are not color-only aliases: the native green small cannon uses <code>bullet_small_1_green</code> / <code>LaserBullet02</code>, while the purple version uses <code>bullet_small_1_purple</code> / <code>PulseBullet01</code>. The examined EDF6 <code>M055</code> fort composition differs again: six medium-cannon slots use <code>MEDIUMCANNON_2</code>, so it is <strong>not</strong> a safe stand-in for original EDF5 DLC behavior.</p>
+<table>
+<thead>
+<tr>
+  <th>E510 child type</th>
+  <th style="text-align:right">EDF5 DLC durability</th>
+  <th style="text-align:right">EDF5 standard durability</th>
+  <th style="text-align:right">EDF6 standard durability</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Large cannon</td>
+  <td style="text-align:right">2,400</td>
+  <td style="text-align:right">3,600</td>
+  <td style="text-align:right">3,600</td>
+</tr>
+<tr>
+  <td>Medium cannon</td>
+  <td style="text-align:right">1,200</td>
+  <td style="text-align:right">1,800</td>
+  <td style="text-align:right">1,200</td>
+</tr>
+<tr>
+  <td>Small cannon 1</td>
+  <td style="text-align:right">200</td>
+  <td style="text-align:right">300</td>
+  <td style="text-align:right">300</td>
+</tr>
+<tr>
+  <td>Small cannon 1 AA/G/X</td>
+  <td style="text-align:right">400</td>
+  <td style="text-align:right">600</td>
+  <td style="text-align:right">600</td>
+</tr>
+<tr>
+  <td>Small cannon 2</td>
+  <td style="text-align:right">~266.667</td>
+  <td style="text-align:right">400</td>
+  <td style="text-align:right">400</td>
+</tr>
+<tr>
+  <td>Small cannon 3</td>
+  <td style="text-align:right">600</td>
+  <td style="text-align:right">900</td>
+  <td style="text-align:right">900</td>
+</tr>
+</tbody>
+</table>
+<p>The inspected source DLC large/medium cannon <code>drop_item_2</code> values differ too: <strong>3.29 / 2.29</strong> versus EDF6 standard <strong>0.29 / 0.29</strong>. Exact SGO child references, weapon parameters, durability and resource availability must be assessed together, not guessed from an E510 basename. An observed 141-mission <code>app:/object/*.sgo</code> inventory contained <strong>183 unique referenced object basenames</strong> and <strong>five missing from the EDF6 native resource tree</strong>: four belonged to synthetic DM006_2 frog search-radius variants, and one was the <em>original EDF5</em> DLC <code>e510_dlc_fortress.sgo</code> resource. A source-only port must address their identities without falsely calling generated compatibility SGOs native assets.</p>
+<p>This resource and script-mask comparison is <strong>binary/source evidence</strong>, not proof that the unlocated BVM <code>2300</code> message receiver implements every hypothesized bitmask rule. It also does not make EDF5 DLC object data freely redistributable. <strong>Sources:</strong> <code>E510_FORTRESS_DLC_FEATURE_PARITY_AUDIT_2026-08-27.json</code> and <code>R46_SHIPPING141_OBJECT_RESOURCE_EXISTENCE_AUDIT_2026-08-27.json</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14, edf5/mission-vm.md</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/E510_FORTRESS_DLC_FEATURE_PARITY_AUDIT_2026-08-27.json</li><li>/EDF5_EDF6_RESEARCH/research/audits/mission/R46_SHIPPING141_OBJECT_RESOURCE_EXISTENCE_AUDIT_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#e510-fortress-part-resources-design-differences-rather-than-one-interchangeable-object">E510 fortress part resources: design differences rather than one interchangeable object</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-bvm-outpost-call2300-parts-setting-and-unknown-mask"};</script><script src="../assets/site.js" defer></script></body></html>

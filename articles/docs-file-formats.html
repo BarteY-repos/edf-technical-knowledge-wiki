@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="File Formats Overview EDF uses different file formats for different consumers. Loading an archive, parsing a model and registering it as the correct resource ty"><title>File Formats | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="#article-start">File Formats</a></div><h1>File Formats</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Documentation</span><span class="chip">File Formats</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Reference index · Curated reference derived from linked articles; no new game runtime</div><div id="articleBody"><h2 id="overview">Overview</h2>
+<p>EDF uses <strong>different file formats for different consumers</strong>. Loading an archive, parsing a model and registering it as the correct resource type are separate checks. A file with a valid magic number can still fail if the engine chooses a different resource loader.</p>
+<h2 id="format-directory">Format directory</h2>
+<table>
+<thead>
+<tr>
+  <th>Extension / family</th>
+  <th>Purpose</th>
+  <th>Detailed reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>CPK</code></td>
+  <td>CRI archive packaging and mounted source namespaces</td>
+  <td><a href="formats-%26-containers-resource-archives-and-lookup-explained.html">Archives and containers</a></td>
+</tr>
+<tr>
+  <td><code>RAB</code> / <code>MRAB</code></td>
+  <td>Named resource collections; <code>SSA\0</code> layout in studied target profile</td>
+  <td><a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">RAB/MRAB SSA binary layout: header, entries and names</a></td>
+</tr>
+<tr>
+  <td><code>CMPL</code></td>
+  <td>Compressed resource envelope used inside studied archives</td>
+  <td><a href="formats-%26-containers-resource-archives-and-lookup-explained.html">CMPL and archive handling</a></td>
+</tr>
+<tr>
+  <td><code>SGO</code> / <code>DSGO</code></td>
+  <td>Structured resource configuration and typed tree data</td>
+  <td><a href="formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">SGO merge rules</a></td>
+</tr>
+<tr>
+  <td><code>MDB</code></td>
+  <td>Model meshes, bones and material bindings</td>
+  <td><a href="models-%26-mdb-mdb-file-structure-meshes-and-materials-explained.html">MDB model format</a></td>
+</tr>
+<tr>
+  <td><code>CANM</code>, <code>CAS</code>, <code>MAB</code></td>
+  <td>Animation tracks, controller/playback metadata and events</td>
+  <td><a href="animation-canm-cas-and-mab-formats-explained.html">Animation formats — CANM, CAS and MAB</a></td>
+</tr>
+<tr>
+  <td><code>MAPB</code>, <code>MAPO</code></td>
+  <td>Map registrations, placements and linked map object rows</td>
+  <td><a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">Map resource architecture</a></td>
+</tr>
+<tr>
+  <td><code>FMB</code> / <code>FMEP</code></td>
+  <td>Field and terrain geometry/rendering; <strong>not</strong> ordinary MDB</td>
+  <td><a href="maps-%26-navigation-fmb-binary-container-wrappers-tree-and-unknowns.html">FMB terrain and field records</a></td>
+</tr>
+<tr>
+  <td><code>MAD</code>, <code>HKT</code>, <code>NVMD</code></td>
+  <td>Collision/physics and navigation-related payloads</td>
+  <td><a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">Collision and navigation architecture</a></td>
+</tr>
+<tr>
+  <td><code>RMPA</code></td>
+  <td>Map-owned or mission-owned route/spawn data; keep these profiles separate</td>
+  <td><a href="missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">Mission RMPA: binary groups, waypoint IDs and serialization pitfalls</a></td>
+</tr>
+<tr>
+  <td><code>BVM</code>, <code>MISSION.AC</code></td>
+  <td>Mission VM bytecode and target AngelScript</td>
+  <td><a href="missions-%26-scripting-bvm-bytecode-custom-calls-and-api-translation-explained.html">BVM bytecode and custom calls</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="rules-for-parsers-and-converters">Rules for parsers and converters</h2>
+<ol>
+<li>Confirm <strong>format identity and the consumer</strong>, not merely the filename extension.</li>
+<li>Validate endian rules, relative offsets, record counts, bounds and alignment against the correct generation.</li>
+<li>Preserve unknown fields and exact strings whenever their meaning has not been recovered.</li>
+<li>Distinguish <em>round-trip bytes</em>, <em>structural validation</em> and an actual <strong>game-runtime test</strong>.</li>
+</ol>
+<h2 id="version-notes">Version notes</h2>
+<p>File extensions recur across EDF generations but <strong>do not imply identical binary layouts</strong>. Start with the target-specific reference before reusing an EDF5 serializer for EDF6. A common example is MAB pointer-base behavior, and another is the EDF5-versus-EDF6 NVMD record size. Consult <a href="animation-mab-v15-known-structure-and-conversion-boundary.html">MAB v15 — known structure and conversion boundary</a> and <a href="maps-%26-navigation-nvmd-dmvn-binary-format-version-0120-to-0130.html">NVMD / DMVN — binary format v0x120/v0x130</a>.</p>
+<h2 id="added-community-research-reference-japanese-workbook">Added community research reference (Japanese workbook)</h2>
+<ul>
+<li><a href="docs-effects.html">Effects (EFS / ESB / EFARC)</a> — source-specific detail, independently verified where stated</li>
+<li><a href="docs-weapon-localization.html">Weapon Stat Text &amp; Localization</a> — source-specific detail, independently verified where stated</li>
+</ul>
+<h2 id="related-game-mechanics-native-source-references">Related game mechanics (native-source references)</h2>
+<ul>
+<li><a href="edf41-save-folder-slot-and-mission-mode-file-naming.html">EDF4.1 mode-specific MST file naming</a></li>
+<li><a href="edf5-edf6-weapon-table-row-schema-category-localization-id-ownership.html">EDF5 and EDF6 WEAPONTABLE schema</a></li>
+</ul>
+<h2 id="further-edf-game-documentation">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf5-sgo-durability-level-adjust-and-82-record-catalog.html">EDF5 82-group SGO source catalogue</a></li>
+</ul>
+<h2 id="further-edf-game-documentation-2">Further EDF game documentation</h2>
+<ul>
+<li><a href="edf6-havok-2020-tag0-container-sdkv-type-data-index.html">EDF6 TAG0 and serialized section layout</a></li>
+<li><a href="edf6-havok-tna1-tbdy-packed-integer-item-pointer-layout.html">EDF6 TNA1 and ITEM value encoding</a></li>
+<li><a href="edf6-mad-marc-v5-collision-hkt-container.html">EDF6 MAD MARC wrapper</a></li>
+<li><a href="edf6-havok-tagfile-native-item-order-and-padding-properties.html">EDF6 Havok native item order</a></li>
+</ul>
+<h2 id="game-side-bat-diagnostics-separate-from-binary-formats">Game-side BAT diagnostics (separate from binary formats)</h2>
+<p><a href="edf5-edf6-native-bat-debug-scenarios-and-ai-test-fixtures.html">Original EDF5/EDF6 native diagnostic BAT scenario census</a> covers 517 source scenarios, their observed scene directives, 161 same-name comparisons, and references to NPC/vehicle SGOs. It provides <strong>static scene fixture evidence only</strong>: it does not decode <code>.CAS</code>/<code>.CANM</code>/<code>.MAB</code>, verify AI or animation runtime, or establish a player-facing photo mode.</p>
+</div><div class="seealso"><strong>Technical references</strong><p><a href="formats-%26-containers-edf6-achievement-sgo-trophy-dat-kill-counter-ordering.html">EDF6 kill counters and TROPHY.DAT: why variable order matters</a><a href="formats-%26-containers-resource-archives-and-lookup-explained.html">EDF archives and resource lookup: CPK, RAB, MARC and CMPL</a><a href="formats-%26-containers-ssa-rab-mrab-header-and-entry-layout.html">RAB/MRAB SSA binary layout: header, entries and names</a><a href="formats-%26-containers-rab-mrab-merge-at-entry-level-not-at-file-level.html">EDF6 RAB/MRAB composition: named entries, payload identity and cross-file dependencies</a><a href="formats-%26-containers-edf6-alias-free-vfs-provider-root-vs-list-mission-path.html">EDF6 alias-free VFS: why a working MissionPack LIST can still start a black screen</a></p></div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R82 technical source articles linked in the reference</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#overview">Overview</a><a href="#format-directory">Format directory</a><a href="#rules-for-parsers-and-converters">Rules for parsers and converters</a><a href="#version-notes">Version notes</a><a href="#added-community-research-reference-japanese-workbook">Added community research reference (Japanese workbook)</a><a href="#related-game-mechanics-native-source-references">Related game mechanics (native-source references)</a><a href="#further-edf-game-documentation">Further EDF game documentation</a><a href="#further-edf-game-documentation-2">Further EDF game documentation</a><a href="#game-side-bat-diagnostics-separate-from-binary-formats">Game-side BAT diagnostics (separate from binary formats)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"docs-file-formats"};</script><script src="../assets/site.js" defer></script></body></html>

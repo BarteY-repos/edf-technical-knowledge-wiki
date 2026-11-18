@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 generates some vegetation from ground cell data, not MAPB placements Trees, grass and certain small props on an EDF5 map need not have one ordinary MAPB re"><title>EDF5 ground vegetation: FMEX/SHF cell grids, TRB trees and MLB props | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Vegetation and environment</div><h1>EDF5 ground vegetation: FMEX/SHF cell grids, TRB trees and MLB props</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Vegetation and environment</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R132 test</div><div id="articleBody"><p>Trees, grass and certain small props on an EDF5 map need not have one ordinary <code>MAPB</code> record per plant. The ground controllers read <strong>cell grids</strong>, identify plant type and jitter records, then create individual scenery objects at positions derived from the ground. FMEX and SHF ground use <strong>different grid layouts</strong> and height computations.</p>
+<h2 id="fmex-grid">FMEX grid</h2>
+<p>In the studied <code>MapObject_Fmex</code> path, one plant group has an <strong>0x88-byte</strong> description. It includes cell size, column/row counts, X/Z origin, a jitter-index grid and a type grid; <strong>0xFF</strong> in the type grid is empty. Type records are <strong>0xC8 bytes</strong>; a separate jitter record is <strong>16 bytes</strong> (rotation, two planar offsets and size). The visitor combines cell index, jitter, size and ground elevation with the ground transform.</p>
+<p>Visitor implementations treat kind 0 as grass and kind 1 as generated objects. This is <strong>not a promise</strong> that all FMEX resource kinds are understood, only what the recorded dispatcher actually branches on.</p>
+<h2 id="shf-heightfield-grid">SHF heightfield grid</h2>
+<p><code>MapObject_Shf</code> visits a different grow block with a compact <strong>two-byte cell</strong> (type and jitter index), <strong>0x28-byte</strong> type records, and a jitter table. It does not pass jitter size into its tree visitor. Its Y-coordinate is obtained by casting downward from <strong>505 units</strong> over <strong>800 units</strong> at the chosen X/Z; the ray results and the type record's vertical offset decide the placement altitude. FMEX instead uses the ground cell's stored height.</p>
+<h2 id="what-trb-and-mlb-do">What <code>.trb</code> and <code>.mlb</code> do</h2>
+<table>
+<thead>
+<tr>
+  <th>Resource</th>
+  <th>Generated owner</th>
+  <th>Main behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>.trb</code></td>
+  <td><code>MapObject_Tree</code></td>
+  <td>Weighted tree/stump model, deterministic yaw, optional collision capsule</td>
+</tr>
+<tr>
+  <td><code>.mlb</code></td>
+  <td><code>MapObject_AnyObject</code></td>
+  <td>Weighted small model, rotation/offset/color/scale attributes from rules</td>
+</tr>
+</tbody>
+</table>
+<p>Tree selection uses a <strong>64-bit LCG</strong> (<code>state = state × 0x5D588B656C078965 + 0x269EC3</code>), seeded by the placement or cell-derived index. A reload of the same seed can therefore reconstruct the same model choice and orientation. Its yaw and model choice are randomized; the inspected tree visitor <strong>does not use jitter size to scale the tree</strong>. Small <code>.mlb</code> objects have a scale branch, but the source's examples left that scale at 1.</p>
+<p>The source also distinguishes grown <code>MapObject_Tree</code> from map-level <code>MapObject_Trees</code>. These are not interchangeable names or the same damage handler; the independent tree-damage study is <a href="edf5-mapobject-damage-collapse-structure-and-grown-tree-fall.html">here</a>.</p>
+<p><strong>Evidence:</strong> static EDF5 loader and tree-rule RE, not fresh tests of the visual distribution. Source <code>edf5/map-placement.md</code>; facts <code>edf5-grow-walker-fmex</code>, <code>edf5-grow-walker-shf</code>, <code>edf5-grow-object-matrix</code>, <code>edf5-tree-build</code>, <code>edf5-mlb-anyobject</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/map-placement.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#fmex-grid">FMEX grid</a><a href="#shf-heightfield-grid">SHF heightfield grid</a><a href="#what-trb-and-mlb-do">What .trb and .mlb do</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-fmex-shf-generated-tree-mlb-grass-cell-semantics"};</script><script src="../assets/site.js" defer></script></body></html>

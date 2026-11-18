@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Map RMPA — binary format and conversion profiles Scope: map.rmpa stored inside a map container, not mission-owned MISSION.RMPA, nor the unrelated RMPA payload e"><title>Map RMPA — binary format and conversion profiles | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-maps.html">Maps</a></div><h1>Map RMPA — binary format and conversion profiles</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Maintained converter source + historical native profile comparisons (not fresh runtime)</div><div id="articleBody"><p><strong>Scope:</strong> <code>map.rmpa</code> stored inside a map container, <strong>not</strong> mission-owned <code>MISSION.RMPA</code>, nor the unrelated RMPA payload embedded in weather MAE. Cross-game map-RMPA data requires structural conversion, not a header-version edit. These measured recipes target particular native EDF6 map families.</p>
+<h2 id="main-file-and-section-headers">Main file and section headers</h2>
+<p>The retained <code>converter/.../rmpa_tool.py</code> starts its EDF6 output with the four bytes <code>00 50 4D 52</code> (<code>\x00PMR</code>), a big-endian version <code>1</code>, and a <strong>0x30-byte main header</strong>. Section-presence and section-offset pairs follow in fixed order:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Main header</th>
+  <th>Section / meaning</th>
+  <th>Constructed profile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>0x08, 0x0C</code></td>
+  <td>Routes presence and absolute header position</td>
+  <td><code>1</code>, routes at <code>0x30</code></td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>0x10, 0x14</code></td>
+  <td>Shapes</td>
+  <td><code>1</code>, computed aligned offset</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>0x18, 0x1C</code></td>
+  <td>Camera</td>
+  <td><code>1</code>, computed after shape data</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>0x20, 0x24</code></td>
+  <td>Spawns</td>
+  <td><code>1</code>, computed after camera</td>
+</tr>
+</tbody>
+</table>
+<p>Each section has a <strong>0x20-byte header</strong>. Important fields include a string-table <em>relative</em> pointer at section <code>+0x08</code>, record/group count at <code>+0x0C</code>, and records relative pointer at <code>+0x10</code>. The route section additionally carries the overall waypoint count at <code>+0x14</code> and its waypoint base at <code>+0x18</code>.</p>
+<h2 id="routes-and-waypoint-records">Routes and waypoint records</h2>
+<p>The measured target route records are laid out as follows:</p>
+<table>
+<thead>
+<tr>
+  <th>Record</th>
+  <th style="text-align:right">Size</th>
+  <th>Fields / offsets that matter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Route group</td>
+  <td style="text-align:right"><code>0x18</code></td>
+  <td>Name length/pointer, waypoint count, waypoint-index list pointer, back-reference to waypoint table</td>
+</tr>
+<tr>
+  <td>Waypoint</td>
+  <td style="text-align:right"><code>0x30</code></td>
+  <td><code>+0x00</code> ordinal, <code>+0x04</code> next-link count, <code>+0x08</code> next-link pointer, <code>+0x0C</code> group/global id, <code>+0x14</code> name reference, <code>+0x18…0x20</code> position float3, <code>+0x2C</code> metadata/extras reference</td>
+</tr>
+<tr>
+  <td>Extra metadata entry</td>
+  <td style="text-align:right"><code>0x10</code></td>
+  <td>Two <strong>little-endian</strong> relative string offsets at <code>+0x08/+0x0C</code></td>
+</tr>
+<tr>
+  <td>Waypoint-ID list element</td>
+  <td style="text-align:right"><code>0x04</code></td>
+  <td>Big-endian waypoint ordinal; list is aligned to 16 bytes</td>
+</tr>
+</tbody>
+</table>
+<p>The waypoint metadata refers to <code>rmpa_float_WayPointWidth</code> and <code>-1</code>. <strong>The little-endian offsets in extra entries are a genuine exception</strong> within an otherwise big-endian file. Ordinary string refs are relative to the record/field scheme chosen by that section; never assume the whole archive uses one global base.</p>
+<p>The source profile writes waypoint records from <code>0x50</code> and deliberately places the extras after (and partly overlapping the tail of) the waypoint table: <code>extras_base = waypoint_end - 0x30 + 8</code>. The canonical writer serializes extras <strong>before</strong> waypoint rows so subsequent row writes preserve the intended overlap. Any refactor that writes them in the opposite order must prove it generates the same bytes.</p>
+<h2 id="shapes-camera-and-spawn-records">Shapes, camera and spawn records</h2>
+<p>The measured <code>move_limit</code> shape uses a <code>0x14</code> group record, a <strong>0x30-byte shape record</strong>, and a <code>0x5C</code> shape-size body. Its first source rectangle dimensions are preserved from the EDF5 shape data; the target shape header introduces map-specific integer members that must be supplied separately. The camera section may exist as an empty <code>0x20</code> header.</p>
+<p>A spawn record is <strong><code>0x34</code> bytes</strong> and includes global id, position float3, look-at float3, name and a relative trailing reference. Strings are stored near the end as <strong>UTF-16BE</strong>, preceded by a two-byte zero prefix; their offsets are position-sensitive.</p>
+<h2 id="known-explicit-per-map-parameters">Known, explicit per-map parameters</h2>
+<p>These values are from the retained maintained converter's <em>paired-profile comments and code</em>. They are <strong>examples of already measured target profiles</strong>, not an algorithm to derive them from arbitrary EDF5 files.</p>
+<table>
+<thead>
+<tr>
+  <th>Profile</th>
+  <th style="text-align:right"><code>gid_base</code></th>
+  <th style="text-align:right"><code>spawn_gid_base</code></th>
+  <th>Shape record members (<code>+0x14,+0x18,+0x1C</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>CAVE501</code></td>
+  <td style="text-align:right"><code>4</code></td>
+  <td style="text-align:right"><code>0x5B</code></td>
+  <td><code>(3, 0x474, 0x58)</code></td>
+</tr>
+<tr>
+  <td><code>CAVE503</code></td>
+  <td style="text-align:right"><code>4</code></td>
+  <td style="text-align:right"><code>0x30</code></td>
+  <td><code>(0x0A, 0x42C, 0x2D)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both profiles use fixed shape entries <code>+0x0C=9</code>, <code>+0x10=0x310</code>, <code>+0x20=1</code>, <code>+0x24=0x30</code>, <code>+0x28=1</code>, <code>+0x2C=0x54</code> in this writer, with the original rectangle dimensions written as big-endian floats. Some maps require an <strong>extra EDF6-only waypoint</strong> and specific coordinate deltas, supplied explicitly as parameters rather than guessed from source topology.</p>
+<h2 id="a-reliable-conversion-validation-approach">A reliable conversion/validation approach</h2>
+<ol>
+<li>Parse actual EDF5 route/shape/spawn records rather than copying bytes across generations.</li>
+<li>Specify the target native profile or collect it from a paired EDF6 sample: global-id bases, extra waypoint, coordinate deltas and shape parameters.</li>
+<li>Compute aligned section positions, preserve the endianness exception in waypoint extras and recompute all relative offsets after insertion.</li>
+<li>Bounds-check section headers, waypoint tables, strings, next-link lists and spawn tables. The retained <code>validate_edf6_rmpa</code> performs these checks for its measured scope; it does <strong>not</strong> simulate mission AI or guarantee target gameplay.</li>
+<li>Validate in the actual map runtime when claiming floor, navigation, spawning or camera parity.</li>
+</ol>
+<p>The old bare assertion <strong>“RMPA source values were missing”</strong> was too broad: the concrete CAVE501/CAVE503 writer profile <strong>is recoverable from the Library</strong>. What remains unknown is a <strong>general algorithm for arbitrary source maps</strong> and the full external native paired asset corpus, not the constants in these two profiles.</p>
+<p><strong>Evidence:</strong> retained first-party <code>rmpa_tool.py</code> consolidating EDF5→EDF6 map converter and validator (including CAVE501/CAVE503 profile comments), plus the historical 12 August 2026 RMPA loader/validator handoff in <code>R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md</code>. Do not confuse dated early collision hypotheses from that handoff with later collision authority.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: rmpa_tool.py (verified file ID in Library)</li><li>Library: R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md (August 12 RMPA reverse engineering)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#main-file-and-section-headers">Main file and section headers</a><a href="#routes-and-waypoint-records">Routes and waypoint records</a><a href="#shapes-camera-and-spawn-records">Shapes, camera and spawn records</a><a href="#known-explicit-per-map-parameters">Known, explicit per-map parameters</a><a href="#a-reliable-conversion-validation-approach">A reliable conversion/validation approach</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-map-rmpa-native-structure-cave501-cave503-and-conversion-profiles"};</script><script src="../assets/site.js" defer></script></body></html>

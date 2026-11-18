@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Native FMB tree, config variants and authoring boundary Evidence level: Exact native read-only census + reconciled authoring boundary. The recovered native stru"><title>Native FMB tree, config variants and authoring boundary | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-maps.html">Maps</a></div><h1>Native FMB tree, config variants and authoring boundary</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Maps</span></div><div class="referencebadge">Source-backed research / case study · Exact native</div><div id="articleBody"><p><strong>Evidence level:</strong> Exact native read-only census + reconciled authoring boundary. The recovered native structure is stronger than older single-profile assumptions, but it is not yet a universal authored-writer/runtime-parity claim.</p>
+<h2 id="native-fmb-is-not-one-fixed-21-row-profile">Native FMB is not one fixed 21-row profile</h2>
+<p>A later read-only EDF6 census compared five native HEIGEN FMB variants. The key result is that <strong>native FMB shader/config layout is family- and file-specific</strong> rather than globally fixed to one canonical table.</p>
+<p>Observed native variants:</p>
+<table>
+<thead>
+<tr>
+  <th>FMB</th>
+  <th style="text-align:right">Directory entries</th>
+  <th>Geometry records</th>
+  <th style="text-align:right">Config rows</th>
+  <th>Trailer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>IG_HEIGEN507.FMB</code></td>
+  <td style="text-align:right">511</td>
+  <td>255 type-0 + 256 type-2</td>
+  <td style="text-align:right"><strong>27</strong></td>
+  <td><strong>1658 B / 54 strings</strong></td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507_ENKEIBOTTOM.FMB</code></td>
+  <td style="text-align:right">239</td>
+  <td>119 type-0 + 120 type-2</td>
+  <td style="text-align:right">21</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507_ENKEILEFT.FMB</code></td>
+  <td style="text-align:right">235</td>
+  <td>117 type-0 + 118 type-2</td>
+  <td style="text-align:right">21</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507_ENKEIRIGHT.FMB</code></td>
+  <td style="text-align:right">235</td>
+  <td>117 type-0 + 118 type-2</td>
+  <td style="text-align:right">21</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td><code>IG_HEIGEN507_ENKEIUP.FMB</code></td>
+  <td style="text-align:right">239</td>
+  <td>119 type-0 + 120 type-2</td>
+  <td style="text-align:right">21</td>
+  <td>none</td>
+</tr>
+</tbody>
+</table>
+<p>The four ENKEI directional variants can be reconciled against the 21-row ENKEIRIGHT profile only with <strong>config-index remapping</strong> in several cases. The full <code>IG_HEIGEN507.FMB</code> has six additional config rows and a non-empty string/resource trailer, so a strict unmodified 21-row authored parser is not a universal native parser/writer model.</p>
+<p><strong>Implementation rule:</strong> never hard-code “FMB has 21 shader config rows” or assume config index identity transfers between native files. Treat the config table and any dependent leaf binding as part of the exact file/family contract.</p>
+<h2 id="recovered-directory-tree-contract">Recovered directory/tree contract</h2>
+<p>A separate native tree gate passed against CAVE503, HEIGEN ENKEIUP and full HEIGEN:</p>
+<ul>
+<li>directory ordering is <strong>postorder</strong>;</li>
+<li>tree-node anchors encode left/right subtree starts;</li>
+<li>immediate child roots are derived from the node's recorded boundaries (<code>b-1</code> and <code>i-1</code> in the recovered contract);</li>
+<li>parent AABB is the union of child AABBs;</li>
+<li>tested native roots reconstruct from subtree start 0 with only float-scale AABB error.</li>
+</ul>
+<p>This is useful structural authority for validation and source-owned tree generation. It supersedes treating the FMB directory as an opaque flat list or inferring the tree solely from record order without validating AABB closure.</p>
+<h2 id="leaf-capacity-config-binding-is-semantic">Leaf capacity/config binding is semantic</h2>
+<p>The census found repeated leaf-capacity words bound to different config indices across native variants. For example, capacity words such as <code>514</code>, <code>771</code> and <code>1028</code> recur, but their config-index assignments differ between ENKEI files.</p>
+<p><strong>Do not assume:</strong> a capacity word globally identifies one shader/config row. Preserve or derive the file-local binding table.</p>
+<h2 id="trailer-strings-are-not-optional-in-every-native-family">Trailer strings are not optional in every native family</h2>
+<p>The full HEIGEN file carries a 1658-byte trailer containing 54 strings (25 resource-like and 29 labels in the retained census). The directional ENKEI variants have no trailer.</p>
+<p>Therefore a writer that always omits the trailer is only valid for profiles proven to omit it. Conversely, blindly cloning a trailer from another map family would be donor behavior, not source-derived authoring.</p>
+<h2 id="authoring-runtime-boundary">Authoring/runtime boundary</h2>
+<p>The R37 native census explicitly classified all five files as <strong>read-only native evidence</strong> and did not promote a new authored writer. Quickcheck coverage passed for the sampled native variants, but runtime was not tested and full parity was not claimed.</p>
+<p>Use the recovered tree/config/trailer rules to:</p>
+<ol>
+<li>reject structurally impossible authored FMBs;</li>
+<li>avoid fixed-index assumptions;</li>
+<li>generate profile-aware trees/config bindings;</li>
+<li>compare authored output against the correct native family.</li>
+</ol>
+<p>Do <strong>not</strong> infer from this census that arbitrary FMB authoring is runtime-closed, that all native variants are exhausted, or that one HEIGEN config table is a universal EDF6 terrain ABI.</p>
+<h2 id="related-pages">Related pages</h2>
+<ul>
+<li><a href="maps-%26-navigation-map-container-stack-mac-mapb-mapo-fmb-fmep.html">Map container stack: MAC, MAPB, MAPO, FMB and FMEP</a></li>
+<li><a href="maps-%26-navigation-fieldrender-texture-arrays-and-local-slot-transport.html">FieldRender texture arrays and local-slot transport</a></li>
+<li><a href="maps-%26-navigation-map-semantic-fixtures-asset-catalogs-and-ownership-boundaries.html">Map semantic fixtures, asset catalogs and ownership boundaries</a></li>
+</ul>
+<h2 id="binary-fmb-envelope-and-compressed-wrapper-offsets">Binary FMB envelope and compressed wrapper offsets</h2>
+<p>The independent <a href="maps-%26-navigation-fmb-binary-container-wrappers-tree-and-unknowns.html">FMB binary record reference</a> describes the measured <code>FMB\0</code> header, directory offset table, compressed <code>CMPL</code> wrappers and decoded <code>+0x58</code> config-byte caveat. It explains why the native variant census above is incompatible with unconditional config-index copying.</p>
+<h2 id="material-projection-indices-are-separately-bound">Material projection indices are separately bound</h2>
+<p>The retained <a href="maps-edf6-fieldrender-planar-material-orientation-and-texture-slice-reference.html">native ENKEIRIGHT material 0 profile</a> directly demonstrates the <code>(0,1)</code> orientation pair and distinct color/detail texture-array slices. A writer or reader that normalizes both projections to orientation 0 loses information, even if the 21-row config-table family is correct.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R37_FMB_NATIVE_VARIANT_CENSUS_2026-10-16.json</li><li>NATIVE_FMB_TREE_CONTRACT_GATE_2026-09-11.json</li><li>R37_FMB_QUICKCHECK_RESULTS_2026-10-16.json</li><li>Library: /EDF5_EDF6_RESEARCH/converter/fmb/fmb_tool.py</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#native-fmb-is-not-one-fixed-21-row-profile">Native FMB is not one fixed 21-row profile</a><a href="#recovered-directory-tree-contract">Recovered directory/tree contract</a><a href="#leaf-capacity-config-binding-is-semantic">Leaf capacity/config binding is semantic</a><a href="#trailer-strings-are-not-optional-in-every-native-family">Trailer strings are not optional in every native family</a><a href="#authoring-runtime-boundary">Authoring/runtime boundary</a><a href="#related-pages">Related pages</a><a href="#binary-fmb-envelope-and-compressed-wrapper-offsets">Binary FMB envelope and compressed wrapper offsets</a><a href="#material-projection-indices-are-separately-bound">Material projection indices are separately bound</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-native-fmb-tree-config-variants-and-authoring-boundary"};</script><script src="../assets/site.js" defer></script></body></html>

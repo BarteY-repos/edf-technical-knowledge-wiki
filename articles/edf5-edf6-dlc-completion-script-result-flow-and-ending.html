@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 versus EDF6: DLC mission completion and the ending presentation The last mission of a downloadable-content campaign may complete normally, set the correct "><title>EDF5 versus EDF6 DLC completion: MainScript result flow and ending cues | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Mission results and DLC presentation</div><h1>EDF5 versus EDF6 DLC completion: MainScript result flow and ending cues</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Mission results and DLC presentation</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived; separates static evidence and the limited modded-runtime results</div><div id="articleBody"><p>The last mission of a downloadable-content campaign may complete normally, set the correct mission result, and still <strong>omit the DLC-specific ending scene and audio</strong>. The retained EDF5/EDF6 <code>MAINSCRIPT.AS</code> comparison explains why this can occur when EDF5 missions are hosted in new EDF6 MissionPack IDs.</p>
+<h2 id="edf5-source-side-behavior">EDF5 source-side behavior</h2>
+<p>For the final mission of a DLC campaign, the recovered EDF5 MainScript uses a post-mission <code>DLCEnding()</code> path when <code>GetContentID()!=0</code>. Its named presentation resources are:</p>
+<ul>
+<li>Ending UI: <code>app:/ui/lyt_EndingDLC.sgo</code>.</li>
+<li>Music cue: <code>BGM_E5S08_EndingTelopOnline</code>.</li>
+</ul>
+<p>This is a <strong>result-side/MainScript event</strong>, not simply a special enemy-death event placed inside the last mission's <code>MISSION.AC</code> or <code>MISSION.BVM</code>.</p>
+<h2 id="why-edf6-behaves-differently-with-new-pack-ids">Why EDF6 behaves differently with new pack IDs</h2>
+<p>The examined stock EDF6 MainScript handles the recognized content identifiers <code>0</code>, <code>1</code>, and <code>2</code> after the last mission. When EDF5's DLC1 and DLC2 content is instead hosted as custom identifiers <code>4</code> and <code>5</code>, those custom IDs do not select an equivalent DLC-ending branch in the native handler. The mission can still proceed to ordinary result processing. This is a <strong>cross-generation/custom-ID compatibility boundary</strong>, not a claim that official EDF6 DLC modes omit their own endings.</p>
+<h2 id="distinguish-final-mission-clear-from-dlc-ending">Distinguish final mission clear from DLC ending</h2>
+<p>Native <code>MISSION/ASCOMMON.H</code> exposes two <strong>distinct in-mission clear presentations</strong>:</p>
+<table>
+<thead>
+<tr>
+  <th>Call</th>
+  <th>Cue/layout</th>
+  <th style="text-align:right">Wait</th>
+  <th>Result classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>MissionClear_EDF5()</code></td>
+  <td><code>Jingle_MissionCleared</code>, <code>lyt_HUiMissionCleared.sgo</code></td>
+  <td style="text-align:right">6 s</td>
+  <td><code>MISSION_RESULT_CLEAR</code></td>
+</tr>
+<tr>
+  <td><code>FinalMissionClear_EDF5()</code></td>
+  <td><code>Jingle_MissionClearedFinal</code>, <code>lyt_HUiMissionComplete.sgo</code></td>
+  <td style="text-align:right">10 s</td>
+  <td><code>MISSION_RESULT_CLEAR</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both terminate through <code>internal_Exit(MISSION_RESULT_CLEAR)</code>; the latter differs in UI/audio/time but <strong>does not reproduce</strong> the separate EDF5 <code>DLCEnding()</code> MainScript path. The original inspected EDF5 DLC final-mission BVMs use ordinary <code>MissionClear</code>, so replacing it with <code>FinalMissionClear_EDF5</code> would change the authored in-mission sequence rather than restore source fidelity.</p>
+<h2 id="presentation-resource-checks">Presentation resource checks</h2>
+<p>The <code>lyt_EndingDLC.sgo</code> UI layout is present in the examined EDF6 resource corpus. However, the retained archive did <strong>not</strong> contain the target audio-bank ACB bytes needed to prove that EDF6 can actually resolve <code>BGM_E5S08_EndingTelopOnline</code> at runtime. Presence of a named cue in source text is <strong>not</strong> evidence that the target audio bank implements it.</p>
+<p>A source-preserving custom MainScript branch for custom content IDs 4/5 was statically prepared in the research. This page does not present that as stock behavior or as a fully tested ending. A global MainScript override may also have compatibility effects unrelated to DLC endings.</p>
+<p><strong>Source provenance:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_TESTER_FEEDBACK_R6_RELEASE_POLICY_2026-09-27.md</code> and <code>EDF5_EDF6_TESTER_FEEDBACK_R5_OFFLINE_CHECKPOINT_2026-09-27.md</code>, backed by comparisons of EDF5/EDF6 <code>MAINSCRIPT.AS</code> and EDF6 <code>MISSION/ASCOMMON.H</code>. No new in-game audio/end-scene test was performed for this article.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_TESTER_FEEDBACK_R6_RELEASE_POLICY_2026-09-27.md</li><li>/EDF5_EDF6_RESEARCH/research/active/MISSION/DLC_AUDIT/EDF5_EDF6_TESTER_FEEDBACK_R5_OFFLINE_CHECKPOINT_2026-09-27.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#edf5-source-side-behavior">EDF5 source-side behavior</a><a href="#why-edf6-behaves-differently-with-new-pack-ids">Why EDF6 behaves differently with new pack IDs</a><a href="#distinguish-final-mission-clear-from-dlc-ending">Distinguish final mission clear from DLC ending</a><a href="#presentation-resource-checks">Presentation resource checks</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-dlc-completion-script-result-flow-and-ending"};</script><script src="../assets/site.js" defer></script></body></html>

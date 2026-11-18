@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 enemy attack and vehicle weapon-placement experiments — exact workbook source cases Scope: Japanese contributor workbook observations and extracted configu"><title>EDF6 enemy &amp; vehicle weapon configurations — workbook experiments | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Enemy contact, boss guns and vehicle attachments</div><h1>EDF6 enemy &amp; vehicle weapon configurations — workbook experiments</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Objects &amp; Enemies</span><span class="chip">Enemy contact, boss guns and vehicle attachments</span></div><div class="referencebadge">Source-backed research / case study · Workbook sample field values and experiment notes; no new installed-game runtime</div><div id="articleBody"><p><strong>Scope:</strong> Japanese contributor workbook observations and extracted configuration snippets. This is <strong>not</strong> a newly checked Sandlot native binary; the values are as recorded by the contributor. Game runtime, build version and multiplayer behavior were not reproduced here. Preserve named/unknown fields without inventing universal class contracts.</p>
+<h2 id="e660-large-pillbug-contact-attack-plus-spinning-effect">E660 large pillbug: contact attack plus spinning effect</h2>
+<p>Source: <code>解析!A1904:K1928</code>. In the contributor's <code>E660</code> attack configuration, the nested <code>attack/contact_damage</code> object is <strong>not a single literal damage number</strong>. Its <code>damage</code> expression contains numeric literals <code>50</code> and <code>30</code>, loads <code>mark84</code> and <code>mark2</code>, and uses the arithmetic instructions <code>fsma</code> followed by <code>mul</code>. The surrounding runtime marks are not resolved here; reporting <strong>50 as the enemy's actual final damage would be unsupported</strong>.</p>
+<table>
+<thead>
+<tr>
+  <th>Field or node</th>
+  <th>Recorded data</th>
+  <th>Interpretation limited to this experiment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>contact_damage.blast_scale</code></td>
+  <td><code>1</code></td>
+  <td>Contributor describes infantry knockback; <strong>not</strong> an explosion radius</td>
+</tr>
+<tr>
+  <td><code>contact_damage.vehicle_blast_scale</code></td>
+  <td>approximately <code>0.002</code></td>
+  <td>Tentatively vehicle knockback scale, not independently calibrated</td>
+</tr>
+<tr>
+  <td><code>contact_damage.enable_speed</code></td>
+  <td><code>10</code></td>
+  <td>Contributor reports hit detection being disabled below this body-speed threshold; unit/build not independently proven</td>
+</tr>
+<tr>
+  <td><code>spin.target_speed</code></td>
+  <td><code>0.200000003</code></td>
+  <td>Spin target parameter</td>
+</tr>
+<tr>
+  <td><code>spin.interpolation_speed</code></td>
+  <td><code>0.0040000002</code></td>
+  <td>Spin interpolation parameter</td>
+</tr>
+<tr>
+  <td><code>spin.attenuation_speed</code></td>
+  <td><code>0.01</code></td>
+  <td>Spin attenuation parameter</td>
+</tr>
+<tr>
+  <td><code>spin.smoke_effect_name</code></td>
+  <td><code>attack.esb</code></td>
+  <td>Referenced effect</td>
+</tr>
+<tr>
+  <td><code>spin.smoke_effect_scale</code></td>
+  <td><code>5</code></td>
+  <td>Effect scale</td>
+</tr>
+<tr>
+  <td><code>spin.eye_effect_name</code></td>
+  <td><code>attack_eye_flash_M.esb</code></td>
+  <td>Eye/flash effect reference</td>
+</tr>
+</tbody>
+</table>
+<p>The source distinguishes <strong>motion-dependent contact damage</strong>, <strong>knockback</strong>, <strong>spinning</strong> and <strong>visual effects</strong>. The original game damage function, the runtime interpretation of <code>mark84/mark2</code> and whether the same configuration is shared by other enemies are open.</p>
+<h2 id="e516-big-grey-boss-hand-muzzle-projectile-pairs-and-battery-configuration">E516 Big Grey boss: hand muzzle, projectile pairs and battery configuration</h2>
+<p>Source: <code>解析!A1933:O2010</code>. In <code>E516_BIGGREYBOSS_HANDMUZZLE</code>, the contributor extracted a <code>bullet_object</code> with <code>BeamBullet01</code> and a nested array of <strong>indexed parameter/value pairs</strong>. In this sample the mapped keys include speed (<code>0</code> → <code>8</code>), lifetime (<code>1</code> → <code>90</code>), size (<code>8</code> → <code>1.2</code>), and other properties not fully decoded. <code>12</code> carries a 4-component color vector <code>(2,1,2,1)</code>; <code>14</code> points to an impact sound cue. The exact native effect of those values has not been retested; the contributor also reports that changing one earlier integer to <code>1</code> crashed the tested setup.</p>
+<p>The separate <code>gun_battery_config</code> includes a muzzle-name reference, <code>bullet_object</code>, an integer <code>240</code> described in the source as a burst-count-like parameter, float <code>0.1</code> described as power, a firing sound cue, interval-like integer <code>1</code>, and named <code>charge_param=180</code>. <strong>Do not infer seconds or actual projectiles per burst from the raw integers alone.</strong> A <code>gun_battery_group_list</code> references <code>gun_battery_config</code>, <code>laser_gun_battery_config</code> and <code>spear_gun_battery_config</code>; contributor experiments tentatively relate one group selector to choosing enemy targets versus muzzle direction. The latter behavior is not a confirmed engine-wide enum.</p>
+<p>These are examples of how a boss weapon separates <strong>projectile identity and overrides</strong>, <strong>battery timing</strong>, <strong>targeting</strong>, and <strong>sound</strong>. They do not establish all weapon-class field schemas.</p>
+<h2 id="vehicle-weapon-placement-mab-within-the-weapon-resource">Vehicle weapon placement: MAB within the weapon resource</h2>
+<p>Source: <code>解析!A1127:M1161</code>. The workbook describes an <code>extra</code> MAB-like payload inside a vehicle weapon SGO and gives a test-edited Blacker cannon example. The XML view labels a <code>MAB</code> header with <code>version=&quot;6&quot;</code>, an export bone <code>01</code> whose parent is <code>v_Null</code>, and transforms:</p>
+<table>
+<thead>
+<tr>
+  <th>Part</th>
+  <th>Test-modified values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>location</code></td>
+  <td><code>(10, 0, 2.8, 1)</code></td>
+</tr>
+<tr>
+  <td><code>scale</code></td>
+  <td><code>(0.05, 0.05, 0.25, 1)</code></td>
+</tr>
+<tr>
+  <td><code>rotation</code></td>
+  <td><code>(0, 0, 0, 1)</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The author explicitly changed these values for an experiment</strong>, so they are not stock EDF6 placement offsets. The source guesses that lateral, vertical and forward translations may use world-size units; no canonical unit or universal MAB schema is proven by this sample. An <code>extra</code> embedded MAB is a <strong>weapon-attachment transform</strong>, not automatically a full skeletal animation file.</p>
+<h2 id="combat-wagon-camera-bone-relative-offsets-and-unresolved-modeling-issue">Combat Wagon camera: bone-relative offsets and unresolved modeling issue</h2>
+<p>Source: <code>解析!A772:AG834</code>, mainly tabulated at <code>A775:I785</code> with screenshot comparisons. The primary camera is associated with bone <code>robo_head</code>; the sample offsets include vertical <code>10</code>, lateral <code>5</code>, depth <code>-23</code>, and an additional selector or scale-like field <code>1</code>. The contributor changed one field at a time (height <code>0</code>, lateral <code>30</code>, depth <code>-6</code>, other field <code>0.5</code>) and compared camera images. Look-at offset examples include lateral <code>-0.65</code> and depth <code>5.95</code>. The source flags a <strong>possible underlying model bone-orientation problem</strong> and does not prove that editing only the camera offsets solves every vehicle's perspective.</p>
+<h2 id="cross-generation-caution-and-provenance">Cross-generation caution and provenance</h2>
+<p>This contributor research contains precise named objects, field values, observations and negative outcomes, but is <strong>not native EDF5↔EDF6 parity evidence by itself</strong>. Equivalent class names may parse different numeric layouts in different game builds. Do not infer restored EDF4.1 NPC behavior, a verified EDF6 runtime fix or correct Havok physics from these workbook cells. See the separate <a href="animation-canm-cas-and-mab-formats-explained.html">MAB/CANM/CAS format reference</a>, <a href="edf6-efs-esb-emitter-graph-particles-curves-and-renderinfo.html">EDF6 particle/effect graph</a> and <a href="cross-game-conversion-edf-4-1-vehicle404-target-runtime-contract.html">friendly vehicles resource authority</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>mod製作メモ.xlsx: 解析!A772:AG834, A1127:M1161, A1904:O2010; SHA-256 d78ab415…54447c5</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#e660-large-pillbug-contact-attack-plus-spinning-effect">E660 large pillbug: contact attack plus spinning effect</a><a href="#e516-big-grey-boss-hand-muzzle-projectile-pairs-and-battery-configuration">E516 Big Grey boss: hand muzzle, projectile pairs and battery configuration</a><a href="#vehicle-weapon-placement-mab-within-the-weapon-resource">Vehicle weapon placement: MAB within the weapon resource</a><a href="#combat-wagon-camera-bone-relative-offsets-and-unresolved-modeling-issue">Combat Wagon camera: bone-relative offsets and unresolved modeling issue</a><a href="#cross-generation-caution-and-provenance">Cross-generation caution and provenance</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-enemy-contact-boss-gun-and-vehicle-attachment-source-experiments"};</script><script src="../assets/site.js" defer></script></body></html>

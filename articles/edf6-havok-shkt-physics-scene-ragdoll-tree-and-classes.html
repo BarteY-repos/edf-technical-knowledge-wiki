@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A SHKT is an object graph, not only a mesh or a skeleton The typical EDF6 object/weapon SHKT file has an hkRootLevelContainer with a named variant called “Physi"><title>EDF6 SHKT physics scenes: hknp systems, ragdolls and the native class census | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Physics / object files</div><h1>EDF6 SHKT physics scenes: hknp systems, ragdolls and the native class census</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Physics / object files</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>The typical EDF6 object/weapon <code>SHKT</code> file has an <code>hkRootLevelContainer</code> with a named variant called <strong>“Physics Data”</strong> or <strong>“Physics Scene Data”</strong>. Its class is <code>hknpPhysicsSceneData</code>, which points to one or more system data nodes. Those nodes hold material tables, motion properties, body CInfos, attachment relations, constraints and the overall physics-system name.</p>
+<p>The system node is either ordinary <strong><code>hknpPhysicsSystemData</code></strong> or, for ragdolls, <strong><code>hknpRagdollData</code></strong> with additional skeleton, bone-to-body mapping and body-tag arrays. <code>hknpBodyCinfo</code> properties are not identical to authored render-mesh metadata. Some shape graphs use <code>hknpConvexShape</code>, <code>hknpConvexHull</code>, <code>hknpCompoundShape</code>, <code>hknpCapsuleShape</code>, <code>hknpCompressedMeshShape</code> and simple primitives.</p>
+<h2 id="survey-sizes">Survey sizes</h2>
+<p>The source enumerated <strong>316 SHKT/HKT physics scene files</strong> and over 100 native type classes (108 in the reported census). Examples of files containing types:</p>
+<table>
+<thead>
+<tr>
+  <th>Havok type</th>
+  <th style="text-align:right">Files containing type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>hknpPhysicsSceneData</code></td>
+  <td style="text-align:right">316</td>
+</tr>
+<tr>
+  <td><code>hknpPhysicsSystemData</code></td>
+  <td style="text-align:right">238</td>
+</tr>
+<tr>
+  <td><code>hknpRagdollData</code></td>
+  <td style="text-align:right">78</td>
+</tr>
+<tr>
+  <td><code>hknpBodyCinfoWithAttachment</code></td>
+  <td style="text-align:right">316</td>
+</tr>
+<tr>
+  <td><code>hknpMaterial</code></td>
+  <td style="text-align:right">316</td>
+</tr>
+<tr>
+  <td><code>hknpMotionProperties</code></td>
+  <td style="text-align:right">294</td>
+</tr>
+<tr>
+  <td><code>hknpRefMassDistribution</code></td>
+  <td style="text-align:right">151</td>
+</tr>
+<tr>
+  <td><code>hknpRefDragProperties</code></td>
+  <td style="text-align:right">145</td>
+</tr>
+<tr>
+  <td><code>hknpConvexShape</code> / <code>hknpConvexHull</code></td>
+  <td style="text-align:right">288</td>
+</tr>
+<tr>
+  <td><code>hknpCompoundShape</code></td>
+  <td style="text-align:right">212</td>
+</tr>
+<tr>
+  <td><code>hknpCapsuleShape</code></td>
+  <td style="text-align:right">91</td>
+</tr>
+<tr>
+  <td><code>hknpCompressedMeshShape</code></td>
+  <td style="text-align:right">58</td>
+</tr>
+</tbody>
+</table>
+<p>The class list also contains legacy-named <code>hkpRagdollConstraintData</code> and <code>hkpLimitedHingeConstraintData</code> embedded as constraint schemas. Their presence <strong>does not imply</strong> that the file's entire physics scene uses an old <code>hkpPhysicsData</code> root.</p>
+<p>A particularly useful negative finding: <strong><code>_HAS_HKA</code> in a filename does not guarantee an <code>hkaSkeleton</code></strong>. None of the eleven suffix-matched files in this census had one, while 78 other files did. Only the actual tagfile type graph establishes this.</p>
+<p><strong>Source:</strong> <code>edf6/havok-format.md</code>, <code>shkt-object-tree</code>, <code>havok-class-census</code>. Static native corpus survey, not a new in-game collision experiment.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf6/havok-format.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#survey-sizes">Survey sizes</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-havok-shkt-physics-scene-ragdoll-tree-and-classes"};</script><script src="../assets/site.js" defer></script></body></html>

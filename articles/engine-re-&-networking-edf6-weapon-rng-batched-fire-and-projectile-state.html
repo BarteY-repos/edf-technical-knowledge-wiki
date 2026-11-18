@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 weapon RNG, batched fire and remote projectile reconstruction A remote weapon shot is not necessarily a copy of a sender-owned projectile. EDF6 supports di"><title>EDF6 weapon RNG, batched fire and remote projectile reconstruction | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 weapon RNG, batched fire and remote projectile reconstruction</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Exact EDF6 binary analysis, qualified vanilla weapon corpus; network fix not runtime proven</div><div id="articleBody"><p>A remote weapon shot is not necessarily a copy of a sender-owned projectile. EDF6 supports <strong>direct fire</strong> and <strong>batched fire with receiver-local reconstruction</strong>; the latter may reproduce the number of shots without reproducing all of their original random or class-internal state. This distinction is important when investigating mismatched firing direction, lightning paths, flame motion or explosion timing.</p>
+<p>The offsets below belong to the analyzed EDF6 <code>EDF.dll</code> build (SHA-256 prefix <code>0d5092393a1b…</code>). They are <em>observations of that build</em>, not portable structure offsets for every release.</p>
+<h2 id="the-weapon-random-number-generator">The weapon random-number generator</h2>
+<p>The process has a global RNG state. Construction of a new Weapon derives its live seed from an advance of that global state. The Weapon instance then maintains its own 64-bit state at <code>Weapon+0xBC8</code>.</p>
+<p>The recovered linear-congruential update is:</p>
+<pre><code class="language-text">state = (state * 0x5D588B656C078965 + 0x269EC3) mod 2^64
+</code></pre>
+<p>For the analyzed common firing path, RNG consumption depends on the event:</p>
+<table>
+<thead>
+<tr>
+  <th>Event</th>
+  <th>Weapon RNG effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Weapon <code>OnUpdate</code></td>
+  <td>One advance</td>
+</tr>
+<tr>
+  <td>FireSpreadType <code>1</code> or <code>3</code> spread step</td>
+  <td>One additional random-spread advance</td>
+</tr>
+<tr>
+  <td>FireSpreadType <code>0</code>, <code>2</code> or <code>4</code></td>
+  <td>No random-spread advance at this step</td>
+</tr>
+<tr>
+  <td>Each created projectile</td>
+  <td>Another advance; an upper-derived value is handed to the projectile</td>
+</tr>
+<tr>
+  <td>A new Weapon instance</td>
+  <td>A new seed lineage derived from process-global RNG</td>
+</tr>
+</tbody>
+</table>
+<p>In the analyzed direct-fire packet policy, flag <code>Weapon+0x153C &amp; 0x08</code> causes the sender to transmit the <strong>pre-spread</strong> Weapon RNG value. The receiver restores that value before calling the shared projectile-creation logic. That is a concrete mechanism for deterministic spread when this bit is active.</p>
+<p><strong>Not all fire policies include that bit.</strong> A receiver calculating a shot later with a different RNG history need not reproduce the sender's original outcome.</p>
+<h2 id="direct-subtype0-versus-batched-subtype1">Direct subtype0 versus batched subtype1</h2>
+<table>
+<thead>
+<tr>
+  <th>Property</th>
+  <th>Direct subtype0</th>
+  <th>Batched subtype1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Initial transform</td>
+  <td>Policy-dependent direct sender/local transform</td>
+  <td>Recreated locally on receiver; no equivalent transmitted sender muzzle transform</td>
+</tr>
+<tr>
+  <td>Pre-spread RNG</td>
+  <td>Can be transported/restored when the direct-policy bit is enabled</td>
+  <td>No active pre-spread seed restoration in the examined Basic, Charge, PreCharge or Gatling paths</td>
+</tr>
+<tr>
+  <td>Timing</td>
+  <td>Direct fire action</td>
+  <td>Publication deferred for six subsequent Weapon updates after delay arm</td>
+</tr>
+<tr>
+  <td>Delivery record</td>
+  <td>Direct fire may select retained/non-retained path by policy</td>
+  <td>Non-retained lower fire lane</td>
+</tr>
+<tr>
+  <td>Loss behavior</td>
+  <td>Depends on selected direct policy</td>
+  <td>A lost <em>final</em> publication is not automatically retransmitted by the subtype1 sender</td>
+</tr>
+</tbody>
+</table>
+<p>Subtype1 tracks a <strong>locally realized shot counter</strong> (<code>Weapon+0xBD0</code>) and a <strong>received cumulative target</strong> (<code>Weapon+0x1544</code>). A later higher target can make a receiver catch up on missed projectile-count positions, and lower received targets are rejected. This is <em>count reconciliation</em>, not exact replay of each historical shot.</p>
+<p>For Charge / PreCharge, extension data is read as pending state and committed only for accepted count updates. A later cumulative counter does not reconstruct every missing intermediate charge value. Accordingly, a later reconstruction can use a newer accepted charge state, changing fire count, accuracy, speed, damage, explosion or size parameters on affected weapon paths.</p>
+<h3 id="weapon-configurations-that-can-change-policy-with-stars">Weapon configurations that can change policy with stars</h3>
+<p>A qualified scan of <strong>1,315 active <code>WEAPONTABLE</code> configurations</strong>, including roughly <strong>2.9 million correlated reachable star states</strong>, found 157 weapons always using subtype1, 172 capable of reaching subtype1, and <strong>15 that can switch from subtype1 to direct fire</strong> depending on star-scaled values. Examples include Penetrator, Buster Shot, Double Lance, Twin Lance, Lightning Bow variants and Raijin.</p>
+<p>A weapon's base SGO or name is therefore not sufficient to infer its active networking policy; the evaluated star parameters matter. The detailed evaluator and all policy counts are documented in <a href="engine-re-%26-networking-shipped-weapon-sync-policy-and-star-envelope.html">weapon synchronization policies</a>.</p>
+<h3 id="the-six-subtype1-weapons-with-rng-sensitive-initial-spread">The six subtype1 weapons with RNG-sensitive initial spread</h3>
+<p>The complete active-weapon scan identifies <strong>six</strong> always-subtype1 weapon configurations with <code>FireSpreadType</code> <strong>1 or 3</strong>. This is a bounded list of initial-spread cases, <strong>not</strong> a list of every subtype1 weapon with RNG-sensitive projectile behaviour.</p>
+<table>
+<thead>
+<tr>
+  <th>Active SGO</th>
+  <th>Weapon name</th>
+  <th>Weapon family</th>
+  <th style="text-align:right">FireSpreadType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>AWEAPON194.SGO</code></td>
+  <td>Wide Acid Gun</td>
+  <td>BasicShoot</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>MPACK_B_WEAPON016.SGO</code></td>
+  <td>Extreme Acid Gun</td>
+  <td>BasicShoot</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>PWEAPON019.SGO</code></td>
+  <td>Phalanx U1</td>
+  <td>ChargeShoot</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>PWEAPON032.SGO</code></td>
+  <td>Phalanx W2</td>
+  <td>ChargeShoot</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>PWEAPON068.SGO</code></td>
+  <td>Destroyer Blaster W</td>
+  <td>PreChargeShoot</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>PWEAPON117.SGO</code></td>
+  <td>Lightning Rapid Bow T2</td>
+  <td>ChargeShoot</td>
+  <td style="text-align:right">1</td>
+</tr>
+</tbody>
+</table>
+<p>The class-method audit found no additional seed-restoring <code>Weapon+0xBC8</code> writer in BasicShoot, ChargeShoot or PreChargeShoot. Gatling's class packet helper is called with its seed-serialization flag cleared. These findings apply to the analyzed four ordinary weapon-family paths; specialized Drone/SubDrone implementations are separate.</p>
+<p>The current Weapon RNG stream can <strong>reconverge</strong> after delayed receiver catch-up when seed, update and projectile-step histories match, while the original spread <strong>sample</strong> does not: the receiver samples at the later reconstruction phase. Random spread reduces an upper-state sample into one of <strong>10,000</strong> buckets, so accidental equality is possible but not protocol-enforced. New Weapon construction reseeds from process-global RNG; ordinary reload does not reset the same Weapon instance to a fixed seed in the audited paths.</p>
+<h2 id="the-projectile-has-its-own-rng-state">The projectile has its own RNG state</h2>
+<p>The initial random value for a projectile is stored at <strong><code>BulletBase::InitParam+0x1A0</code></strong>. The constructor copies it to the final live <strong><code>BulletBase+0x130</code></strong>. These are different address bases: interpreting <code>+0x1A0</code> as an offset in the finished Bullet object is incorrect.</p>
+<p>Three observed projectile classes consume random state or the resulting constructor values beyond their initial trajectory:</p>
+<table>
+<thead>
+<tr>
+  <th>Projectile class</th>
+  <th>RNG-dependent internal behavior</th>
+  <th>What later ordinary network state does not restore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>FlameBullet02</code></td>
+  <td>Constructor-initialized motion scalars used by <code>OnUpdate</code></td>
+  <td>Class motion scalars (including <code>+0x11D0/+0x11D8</code>)</td>
+</tr>
+<tr>
+  <td><code>LightningBullet01</code></td>
+  <td>Randomized path/current position and further state advancement</td>
+  <td>Bullet RNG/path history, including <code>Bullet+0x130</code></td>
+</tr>
+<tr>
+  <td><code>SolidExpBullet01</code></td>
+  <td>Randomly initialized detonation countdown; expiration launches a <code>BlowHit01</code> effect</td>
+  <td>Detonation countdown (<code>+0xF00</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Of the evaluated active weapon corpus, <strong>40 weapons can reach subtype1</strong> while using one of these three AmmoClass families: 30 always subtype1 and 10 with star-dependent subtype1/direct switching. An additional subtlety: this problem can occur even with <strong>non-random initial FireSpreadType 0</strong>. The divergence is then caused by <em>post-construction projectile behavior</em>, not initial aiming spread.</p>
+<p>Later synchronization of the <em>current Weapon RNG value</em> does not rewrite an already-created Bullet's historical RNG-derived constructor state. A receiver may ultimately have the right shot count and still simulate different class behavior.</p>
+<h2 id="what-networkbullet-can-and-cannot-repair">What NetworkBullet can and cannot repair</h2>
+<p>EDF6 can send later projectile updates under several selector bits at <code>Bullet+0xE8C</code>:</p>
+<table>
+<thead>
+<tr>
+  <th>Selector</th>
+  <th>Transmitted class of state</th>
+  <th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code> (bit <code>0x2</code>)</td>
+  <td>Common spatial position/motion snapshot</td>
+  <td>Can update common trajectory state, not hidden class history</td>
+</tr>
+<tr>
+  <td><code>1</code> (bit <code>0x1</code>)</td>
+  <td>External-object contact/reference frame</td>
+  <td>Can re-anchor projectile position to a contacted object</td>
+</tr>
+<tr>
+  <td><code>2</code> (bit <code>0x4</code>)</td>
+  <td>Missile collision/contact record (point, normal, object identity)</td>
+  <td>Can affect reflection/trajectory; only enabled by examined MissileBullet01/02 constructors</td>
+</tr>
+</tbody>
+</table>
+<p>Shipping NetworkBullet selectors use <strong>Sandlot mode0 retained reliability</strong> over physically unreliable EOS P2P. Sequence/ACK/retransmission can recover serialized selector bytes after a transient physical loss. This does not create the missing Flame, Lightning or SolidExp fields, which are absent from those payloads in the examined paths.</p>
+<p>See <a href="engine-re-%26-networking-networkbullet-selector-contact-and-state-boundaries.html">selector payloads and contact behavior</a> and <a href="engine-re-edf5-edf6-sandlot-rudp-and-reconnect-lifecycle.html">application-layer reliability</a>.</p>
+<h2 id="how-to-investigate-an-apparent-aim-shot-desync">How to investigate an apparent aim/shot desync</h2>
+<p>Trace these layers separately, rather than forcing the Soldier's orientation everywhere:</p>
+<ol>
+<li>The local and remote <code>Weapon</code> identity, <code>FireSpreadType</code> and current star-evaluated sync policy.</li>
+<li>The sender muzzle/per-shot transform and whether a direct packet transports the pre-spread RNG.</li>
+<li>Whether creation follows direct subtype0 or six-update subtype1.</li>
+<li>The <code>Weapon+0xBD0</code> realized count and <code>+0x1544</code> target; if Charge/PreCharge, pending versus committed extension state.</li>
+<li>The projectile's <strong>initial</strong> constructor RNG-derived state and the later class-specific consumers.</li>
+<li>Only then, NetworkBullet selector delivery, later trajectory/contact updates and Sandlot reliable-message acknowledgment.</li>
+</ol>
+<p><strong>Evidence boundary:</strong> These are exact static/native binary reconstructions for the specified build and a qualified shipped-weapon corpus. They do <strong>not</strong> demonstrate that a runtime fix for live network desynchronization has been implemented or validated. The minimum state to add to the protocol and the safest injection point remain open.</p>
+<h2 id="controlled-verification-examples-without-treating-the-plan-as-a-runtime-result">Controlled verification examples, without treating the plan as a runtime result</h2>
+<p>For a practical same-build comparison, use four source-studied cases: M2 Raven as a non-random-spread subtype1 control, MR111 Fang as full-sender direct subtype0, Penetrator F as a single weapon with <strong>three star-dependent policies</strong>, and Wide Acid Gun as a receiver-local RNG-sensitive subtype1 control. The full source-derived star-slot states, event RVAs and expected timelines are in <a href="engine-re-edf6-fire-sync-runtime-discriminator-matrix.html">fire-sync runtime discriminator matrix</a>. Those traces were <em>proposed</em> and statically qualified as a probe, not reported as successful paired gameplay observations.</p>
+<h2 id="why-most-rng-sensitive-projectile-state-is-not-random-initial-spread">Why most RNG-sensitive projectile state is not random initial spread</h2>
+<p>The R14 shipped-data crosswalk found <strong>40 active weapons</strong> capable of entering subtype1 with <code>FlameBullet02</code>, <code>LightningBullet01</code> or <code>SolidExpBullet01</code>: <strong>30 always subtype1</strong> and <strong>10 star-dependent</strong>. Their <code>FireSpreadType</code> distribution was <strong>38 spread0, one spread1 and one spread2</strong>. This is a bounded intersection of those three projectile-class families with subtype1 reachability, <strong>not</strong> the same set as the six always-subtype1 weapons with RNG-sensitive <em>initial spread</em> discussed above.</p>
+<p>Consequently the main post-spawn divergence mechanism in this class subset can occur even when the weapon itself fires with nonrandom spread. The sender and receiver may create the Bullet at different points in their Weapon RNG progression; the initial value is passed via <code>BulletBase::InitParam+0x1A0</code> into live <code>BulletBase+0x130</code>. The three derived classes can then initialize flame motion, lightning path or explosive fuse time differently. Later equal shot counts or successful Sandlot ACKs do not reconstruct that missing constructor history.</p>
+<p><strong>Source authority:</strong> <code>ENGINE_RE/EDF6_ENGINE_RE_R14_PROJECTILE_RNG_CONSUMER_CHECKPOINT_2026-09-29.md</code>, preserved and delimited by later R15–R17 findings. This count is a source-static weapon-corpus result, not an observed 40-weapon network runtime trial.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li><li>EDF6_ENGINE_RE_R11_SUBTYPE1_LOSS_RECOVERY_CHECKPOINT_2026-09-28.md</li><li>EDF6_ENGINE_RE_R13_RNG_LIFECYCLE_CHECKPOINT_2026-09-29.md</li><li>EDF6_ENGINE_RE_R14_PROJECTILE_RNG_CONSUMER_CHECKPOINT_2026-09-29.md</li><li>EDF6_ENGINE_RE_R15_NETWORKBULLET_RECONCILIATION_CHECKPOINT_2026-09-29.md</li><li>EDF6_ENGINE_RE_R16_SELECTOR2_CONTACT_OUTCOME_CHECKPOINT_2026-09-29.md</li><li>EDF6_ENGINE_RE_R17_DELIVERY_LOSS_RECOVERY_CHECKPOINT_2026-09-29.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-weapon-random-number-generator">The weapon random-number generator</a><a href="#direct-subtype0-versus-batched-subtype1">Direct subtype0 versus batched subtype1</a><a href="#weapon-configurations-that-can-change-policy-with-stars">　Weapon configurations that can change policy with stars</a><a href="#the-six-subtype1-weapons-with-rng-sensitive-initial-spread">　The six subtype1 weapons with RNG-sensitive initial spread</a><a href="#the-projectile-has-its-own-rng-state">The projectile has its own RNG state</a><a href="#what-networkbullet-can-and-cannot-repair">What NetworkBullet can and cannot repair</a><a href="#how-to-investigate-an-apparent-aim-shot-desync">How to investigate an apparent aim/shot desync</a><a href="#controlled-verification-examples-without-treating-the-plan-as-a-runtime-result">Controlled verification examples, without treating the plan as a runtime result</a><a href="#why-most-rng-sensitive-projectile-state-is-not-random-initial-spread">Why most RNG-sensitive projectile state is not random initial spread</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-edf6-weapon-rng-batched-fire-and-projectile-state"};</script><script src="../assets/site.js" defer></script></body></html>

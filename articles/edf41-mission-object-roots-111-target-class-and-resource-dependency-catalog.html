@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF 4.1 mission object families — 111 source roots and their dependencies What this catalog actually counts The bounded research corpus contains 111 distinct mi"><title>EDF 4.1 mission object roots — 111 SGO/class/dependency records | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Objects &amp; asset identities</div><h1>EDF 4.1 mission object roots — 111 SGO/class/dependency records</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Cross-game Conversion</span><span class="chip">Objects &amp; asset identities</span><span class="chip">EDF 4.1</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Offline exact source-derived metadata; target class mappings, not native EDF4.1 symbols</div><div id="articleBody"><h2 id="what-this-catalog-actually-counts">What this catalog actually counts</h2>
+<p>The bounded research corpus contains <strong>111 distinct mission-referenced EDF 4.1 object SGO roots</strong>, associated with <strong>325 distinct logical dependency files</strong>. It was reconstructed from an audited EDF 4.1 asset/mission collection and the All Forces-derived compatibility reference. This is a <strong>cross-generation asset reference</strong>, not an official list of every object in the original game.</p>
+<p><strong>Interpret the columns carefully:</strong> <code>source_root</code> is the SGO identity in the research corpus. The <code>EDF6 compatibility class</code> is the <strong>target-side class mapping</strong>, <strong>not necessarily the original EDF 4.1 native C++ class</strong>. <code>Mission refs</code> counts references found in the audited converted mission corpus, <strong>not unique original missions, spawn counts, or in-game appearances</strong>. Multiple SGO roots may occur in the same mission.</p>
+<h2 id="proven-dataset-boundaries">Proven dataset boundaries</h2>
+<table>
+<thead>
+<tr>
+  <th>Measure</th>
+  <th style="text-align:right">In the audited corpus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Base-section object roots</td>
+  <td style="text-align:right">91</td>
+</tr>
+<tr>
+  <td>DLC1 object roots</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td>DLC2 object roots</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td>Distinct target-class labels</td>
+  <td style="text-align:right">23</td>
+</tr>
+<tr>
+  <td>Unique logical dependencies under <code>OBJECT/</code></td>
+  <td style="text-align:right">277</td>
+</tr>
+<tr>
+  <td>Unique logical dependencies under <code>WEAPON/EDF41_NPC/</code></td>
+  <td style="text-align:right">48</td>
+</tr>
+<tr>
+  <td>Total distinct logical dependencies</td>
+  <td style="text-align:right">325</td>
+</tr>
+<tr>
+  <td>Source-root / mission-reference incidences (not distinct missions)</td>
+  <td style="text-align:right">852</td>
+</tr>
+</tbody>
+</table>
+<p>These 325 file identities comprise <strong>175 SGO, 58 SHKT, 45 CAS, 31 RAB and 16 MRAB</strong> paths. A single shared model or animation can be referenced by many object variants; the <strong>821 object-to-file edges</strong> are therefore not 821 unique files. All 48 weapon-side files are dependencies of mission NPC equipment; their location under <code>WEAPON/</code> does not imply that the player can equip them.</p>
+<h2 id="most-frequent-target-classes-in-this-corpus">Most frequent target classes in this corpus</h2>
+<table>
+<thead>
+<tr>
+  <th>EDF6 compatibility class</th>
+  <th style="text-align:right">Source-root variants</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">21</td>
+</tr>
+<tr>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">17</td>
+</tr>
+<tr>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>GiantAnt</code></td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>AntHill</code></td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>Nephila</code></td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>Vehicle501_FortressRobo</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>UfoCarrier508</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>UfoSmall515</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>UfoSmall507</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>GiantBee</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>SpiderNet</code></td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>Vehicle601_Tank</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>Transporter_Formation</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>MovingFortress</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>UfoMother301</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>UfoRobo</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>BigNest</code></td>
+  <td style="text-align:right">1</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>EDF6_Berserker_Large</code> variants include the Hector family in this particular cross-generation mapping; that label <strong>does not establish</strong> that EDF 4.1 originally named the class this way. Large counts for <code>UfoMother401</code> likewise include mission- and DLC-specific variant SGOs. Neither count is a native original-game enemy population statistic.</p>
+<h2 id="per-object-source-root-inventory">Per-object source root inventory</h2>
+<p>The following values are <strong>source asset identities and target class mappings</strong>, not unverified assertions about native class implementations. The downloadable CSV also contains the complete list of logical dependency paths for each root.</p>
+<table>
+<thead>
+<tr>
+  <th>Source SGO root</th>
+  <th>Research section</th>
+  <th>EDF6 compatibility class</th>
+  <th style="text-align:right">Mission refs</th>
+  <th style="text-align:right">Logical files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>VEHICLE301_TANK_AI.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Vehicle601_Tank</code></td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_AF.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">73</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_AF_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_FL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_FL_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_RL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_RL_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_SG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_SG_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">35</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_SN.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_SN_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SC_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">12</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SMC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SMC_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SP.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td><code>AIHEAVYARMOR_SP_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>HeavyArmor</code></td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_IZN.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_IZN_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_LANCE.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_LANCE_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_LR.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">25</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_LR_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_MS.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_MS_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_TB.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>AIPALEWING_TB_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>PaleWing</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">7</td>
+</tr>
+<tr>
+  <td><code>ANTHILL301.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AntHill</code></td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>DEIROI401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>DEIROI401S.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>DEIROI401_2.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>DEIROI401L.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>DEIROI401_3.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Deiroi</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>ALIENTRAILER401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>ALIENTRAILER401_L.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td><code>ALIENTRAILER401_FIXED.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>ALIENTRAILER401_FIXEDXL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>ALIENTRAILER401_XL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AlienTrailer</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_OMG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>AIARMYSOLDIER_OMG_LEADER.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>AssultSoldier</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td><code>VEHICLE501_FORTRESSROBO.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Vehicle501_FortressRobo</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>VEHICLE501_FORTRESSROBO_AI.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Vehicle501_FortressRobo</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>UFOCARRIER301.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoCarrier508</code></td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>UFOCARRIER401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoCarrier508</code></td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>UFO301.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoSmall515</code></td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>UFO301ACE.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoSmall515</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>UFO401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoSmall507</code></td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>TRANSPORTER401_FORMATION.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>Transporter_Formation</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>HECTOR301CC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301CG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301CL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301GC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301GG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301GL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301LC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301LG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR301LL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401CC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401CG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401CS.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401GG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401GL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401LC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401LG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401LL.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401LS.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401SC.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401SG.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>HECTOR401SS.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>EDF6_Berserker_Large</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>ALIEN4LEGTANK301.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>MovingFortress</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>DRAGONBIG401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41_DRAGONSMALL401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>EDF41_REDSMALLDRAGON.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>EDF41_YERROWSMALLDRAGON.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER301.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother301</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">19</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">35</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M009.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M012.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">13</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M019.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M201.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">23</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M412.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M550.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M551.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M552.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M553.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M554.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M555.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M556.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M557.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+<tr>
+  <td><code>UFOMOTHER401M602.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">34</td>
+</tr>
+<tr>
+  <td><code>UFOROBO401.SGO</code></td>
+  <td>Base corpus</td>
+  <td><code>UfoRobo</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/GIANTANT04.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>GiantAnt</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/GIANTANT04SB.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>GiantAnt</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/GIANTBEEQUEEN02.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>GiantBee</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/ANTHILL301UG.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>AntHill</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/NEPHILA02L.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>Nephila</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/SPIDERNET160_FIT.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>SpiderNet</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/SPIDERNET80_FIT.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>SpiderNet</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/DRAGONSMALL401_HS.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/REDSMALLDRAGON_HS.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP01/YERROWSMALLDRAGON_HS.SGO</code></td>
+  <td>DLC1</td>
+  <td><code>DragonSmall</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/ANTHILL301LARGEMP02.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>BigNest</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/ANTHILL301UGMP02.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>AntHill</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/GIANTANT04.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>GiantAnt</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/GIANTANT04SBMP02.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>GiantAnt</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/GIANTBEEQUEEN02.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>GiantBee</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/NEPHILA02L.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>Nephila</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/NEPHILA03L.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>Nephila</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/UFO401ACE.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>UfoSmall507</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/UFOMOTHER401_DLC_M809.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">34</td>
+</tr>
+<tr>
+  <td><code>EDF41MP02/UFOMOTHER401_DLC_MP503.SGO</code></td>
+  <td>DLC2</td>
+  <td><code>UfoMother401</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">11</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-to-read-the-dependency-families">How to read the dependency families</h2>
+<p>A single mission actor can require a root SGO plus its model RAB/MRAB, animation CAS, physics SHKT and weapon-side SGO or model. The same dependency may be shared across many actors. A class name alone is therefore insufficient to infer which original animation, collision body, weapon or mission behavior was used.</p>
+<p>The dataset is named <code>data/EDF41_MISSION_OBJECT_R6_111_ROOTS_R146.csv</code> in the distributed archive. It lists every root, target class, mission-reference count, logical file count and each logical dependency path. It contains metadata only, not game assets.</p>
+<h2 id="related-native-mechanisms-and-limitations">Related native mechanisms and limitations</h2>
+<ul>
+<li><a href="cross-game-conversion-edf-4-1-mission-object-source-only-closure.html">EDF 4.1 mission object source closure</a> — why the finite dependency set matters and why it does not imply runtime parity.</li>
+<li><a href="missions-%26-scripting-edf-4-1-friendly-npc-hybrid-runtime-contract.html">EDF 4.1 friendly NPC gameplay</a> — recruitment and object/actor distinctions.</li>
+<li><a href="cross-game-conversion-edf-4-1-vehicle404-target-runtime-contract.html">EDF 4.1 friend vehicles 402/403/404</a> — paired SGO source differences.</li>
+<li><a href="edf41-edf5-edf6-native-vehicle-seats-boarding-and-class-masks.html">Three-generation vehicle seats</a> — native seat versus class identity.</li>
+</ul>
+<p><strong>Source and evidence:</strong> <code>EDF41_OBJECTS_R6_2026-11-01_SOURCE_ONLY.zip</code>, file <code>reference/MISSION_OBJECT_CLOSURE.json</code>, and its <code>ALL_FORCES_OBJECTS_REFERENCE.json</code> sibling. Both originate from an offline source-only compatibility audit of EDF 4.1 / EDF 6 asset inputs; these data alone do <strong>not</strong> establish game-runtime equivalence or full native EDF 4.1 resource completeness. No original game binary/model/texture/media payload is reproduced here.</p>
+<h2 id="companion-cross-object-cas-mrab-sharing">Companion: cross-object CAS/MRAB sharing</h2>
+<p>The <a href="animation-edf41-mission-object-cas-mrab-61-resource-graph.html">complete animation-resource graph</a> inverts the 111-root dependency set to show all <strong>45 unique CAS and 16 MRAB paths</strong>, per-resource reuse, all 23 target-class groups and the 11 source roots with no direct CAS edge. These are source-only logical links and do not establish that a clip or CAS controller works in EDF6 at runtime.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: /EDF41_EDF6_RESEARCH/OBJECTS_R6_2026-11-01/EDF41_OBJECTS_R6_2026-11-01_SOURCE_ONLY.zip :: reference/MISSION_OBJECT_CLOSURE.json</li><li>Library: /EDF41_EDF6_RESEARCH/OBJECTS_R6_2026-11-01/README.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-this-catalog-actually-counts">What this catalog actually counts</a><a href="#proven-dataset-boundaries">Proven dataset boundaries</a><a href="#most-frequent-target-classes-in-this-corpus">Most frequent target classes in this corpus</a><a href="#per-object-source-root-inventory">Per-object source root inventory</a><a href="#how-to-read-the-dependency-families">How to read the dependency families</a><a href="#related-native-mechanisms-and-limitations">Related native mechanisms and limitations</a><a href="#companion-cross-object-cas-mrab-sharing">Companion: cross-object CAS/MRAB sharing</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-mission-object-roots-111-target-class-and-resource-dependency-catalog"};</script><script src="../assets/site.js" defer></script></body></html>

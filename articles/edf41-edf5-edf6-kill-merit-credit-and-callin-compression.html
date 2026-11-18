@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Enemy kills, merit points and support-weapon reloads Some support equipment and vehicles recharge through kill merit rather than elapsed time. The number displa"><title>Kill merit and Air Raider credits across three generations: score inputs and the 1500-point compression | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Gameplay economy</div><h1>Kill merit and Air Raider credits across three generations: score inputs and the 1500-point compression</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Gameplay economy</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-scoped static analysis; no R129 gameplay test</div><div id="articleBody"><p>Some support equipment and vehicles recharge through <strong>kill merit</strong> rather than elapsed time. The number displayed as an enemy's base HP or its level-adjusted durability is not automatically the number of credits earned. The mechanics also changed between EDF4.1 and the later games.</p>
+<h2 id="which-object-contributes-merit">Which object contributes merit?</h2>
+<table>
+<thead>
+<tr>
+  <th>Generation</th>
+  <th>Native rule established by the cited build</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EDF4.1</td>
+  <td>Raw <code>game_object_durability</code></td>
+  <td>No <code>game_object_destroy_score_adjust</code> key is read by the examined executable</td>
+</tr>
+<tr>
+  <td>EDF5</td>
+  <td>Raw durability × <code>game_object_destroy_score_adjust</code></td>
+  <td>The adjustment defaults to 1; level adjustment is not part of merit</td>
+</tr>
+<tr>
+  <td>EDF6</td>
+  <td>Raw durability × <code>game_object_destroy_score_adjust</code></td>
+  <td>Same model as EDF5 with different object-field offsets</td>
+</tr>
+</tbody>
+</table>
+<p>At an enemy's death, the engine credits the relevant <strong>hostile teams</strong> through the TeamManager. An object without a team (<code>-1</code>) does not credit a team through this path. This is why the merit rule must not be interpreted as a blanket &quot;every destroyed object gives every player the same credit&quot; statement.</p>
+<p>For EDF5, source examples are <strong>Silver Spider: 450 × 5 = 2250</strong>, <strong>Gold Ant: 30 × 5 = 150</strong>, and <strong>Colonist: 500 × 0.84 = 420</strong>. The separate <code>game_object_level_adjust</code> can scale HP but is not multiplied into the merit reward.</p>
+<p>The original EDF4.1 Japanese merit table mostly agrees with object durability, with a few exceptions. Retiarius webs are described as granting zero in the community source, but the reason that their destruction does not pass through the usual team-credit route remains <strong>unverified in the executable</strong>. Do not infer it from the presence of an SGO durability field.</p>
+<h2 id="why-a-huge-kill-does-not-give-its-full-cost-immediately">Why a huge kill does not give its full cost immediately</h2>
+<p>In <strong>EDF5 and EDF6</strong>, credit-charged equipment (<code>ReloadType = 2</code>) compares the TeamManager's accumulated merit against the total last observed by the weapon. For the new increment <code>d</code>, the observed conversion is:</p>
+<p>[
+C(d) = \begin{cases}
+d, &amp; d \leq 1500 \
+1500 + \operatorname{int}((d-1500)^{0.8}), &amp; d &gt; 1500.
+\end{cases}
+]</p>
+<p>The code performs its integer conversion as part of the update. It then reduces the weapon's outstanding reload cost using <code>C(d)</code> and stores the latest team total. <strong>Compression happens to the accumulated increment between two weapon updates</strong>, so a large batch of kills can be compressed together.</p>
+<table>
+<thead>
+<tr>
+  <th>Source example (EDF5)</th>
+  <th style="text-align:right">Raw merit credited</th>
+  <th style="text-align:right">Reload credit gained</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>One Silver Spider</td>
+  <td style="text-align:right">2250</td>
+  <td style="text-align:right">1699</td>
+</tr>
+<tr>
+  <td>One Erginus</td>
+  <td style="text-align:right">32000</td>
+  <td style="text-align:right">5367</td>
+</tr>
+<tr>
+  <td>100 Black Ants killed together</td>
+  <td style="text-align:right">6000</td>
+  <td style="text-align:right">2336</td>
+</tr>
+</tbody>
+</table>
+<p>The EDF6 source has the same 1500 threshold and exponent 0.8 at a different routine address. Its TeamManager total is maintained locally for the current machine's game state, so identical credit reload behavior on every online peer cannot be inferred solely from the equation.</p>
+<h2 id="what-remains-uncertain">What remains uncertain</h2>
+<p>The EDF4.1 damage/death routine supports durability-only team merit, but the original EDF4.1 <strong>call-in reload</strong> was not fully reversed in the cited study. The EDF5/EDF6 compression rule must not be retroactively asserted as EDF4.1 behavior. Also, source examples come from specific PC builds; field layouts are not portable offsets.</p>
+<p><strong>Evidence and attribution:</strong> <code>kh-edf41-enemies</code> (<code>edf41-kill-merit-durability</code>, <code>edf41-wiki-merit-table</code>, <code>edf41-web-no-merit</code>); <code>kh-edf5-combat</code> (<code>kill-merit-team-credit</code>, <code>merit-from-sgo</code>, <code>credit-reload-merit-compression</code>, <code>merit-cut-examples</code>); <code>kh-edf6-combat</code> (<code>edf6-kill-merit</code>, <code>edf6-credit-merit-compression</code>, <code>credit-reload-tick</code>).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub: kh-edf41-enemies</li><li>EDF Knowledge Hub: kh-edf5-combat</li><li>EDF Knowledge Hub: kh-edf6-combat</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#which-object-contributes-merit">Which object contributes merit?</a><a href="#why-a-huge-kill-does-not-give-its-full-cost-immediately">Why a huge kill does not give its full cost immediately</a><a href="#what-remains-uncertain">What remains uncertain</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-kill-merit-credit-and-callin-compression"};</script><script src="../assets/site.js" defer></script></body></html>

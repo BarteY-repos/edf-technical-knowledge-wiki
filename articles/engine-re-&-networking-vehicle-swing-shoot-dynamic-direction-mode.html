@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 vehicle-mounted weapons: dynamic fire_model_direction mode 2 The fire_model_direction parameter is not simply a constant that can be read once from a weapo"><title>EDF6 vehicle-mounted weapons: dynamic `fire_model_direction` mode 2 | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>EDF6 vehicle-mounted weapons: dynamic `fire_model_direction` mode 2</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Engine RE &amp; Networking</span><span class="chip">Gameplay &amp; AI</span></div><div class="referencebadge">Technical reference · Exact EDF6 binary/class-specific behavior; no fresh runtime test</div><div id="articleBody"><p>The <code>fire_model_direction</code> parameter is not simply a constant that can be read once from a weapon's SGO/MAB record. EDF6 has a <strong>runtime override</strong> used by the <code>VehicleSwingShoot</code> weapon family. A model converter or weapon inspector that treats every value as static can therefore miss an active firing-direction mode.</p>
+<h2 id="static-configuration-versus-effective-mode">Static configuration versus effective mode</h2>
+<p>In the qualified vanilla corpus, the recovered classic SGO <code>fire_model_direction</code> values embedded in DSGO extra/MAB were:</p>
+<table>
+<thead>
+<tr>
+  <th>Static mode</th>
+  <th style="text-align:right">Number of configurations</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>0</code></td>
+  <td style="text-align:right">1,708</td>
+</tr>
+<tr>
+  <td><code>1</code></td>
+  <td style="text-align:right">125</td>
+</tr>
+<tr>
+  <td><code>2</code></td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>normal configuration parser only creates modes 0 or 1</strong>. However, the native <code>VehicleSwingShoot</code> code deliberately selects <strong>mode 2 at runtime</strong>, so zero mode-2 entries in the shipping configuration scan does not mean the mode is unused.</p>
+<h2 id="runtime-mechanism">Runtime mechanism</h2>
+<p>The analyzed <code>VehicleSwingShoot</code> class uses the common per-shot transform/vector table:</p>
+<ul>
+<li>table stride: <code>0xF0</code> bytes per entry;</li>
+<li><code>entry+0xD0</code>: dynamic override direction/basis;</li>
+<li><code>entry+0xE0</code>: direction selector, set to <code>2</code> by <code>VehicleSwingShoot</code>;</li>
+<li>shared <code>0x6969A0</code>: consumes the mode-2 override basis on its direction path;</li>
+<li><code>Weapon+0x370</code>: <code>FireBurstCount</code>;</li>
+<li><code>Weapon+0xE18</code>: remaining burst count.</li>
+</ul>
+<p>The swing progress is derived from remaining shots relative to the burst count, allowing the firing basis to change through a burst. The examined class does not immediately restore selector mode 0/1 within the same instance after selecting the dynamic mode.</p>
+<p>The exact native configuration examples are <code>V605_BARGA_C_CANNON.SGO</code>, its <code>_AI</code> counterpart, and <code>_DLC</code>. They are statically mode 1 but dynamically mode-2-capable.</p>
+<h2 id="consequences-for-tools-and-modding">Consequences for tools and modding</h2>
+<ul>
+<li>Read the <strong>configured</strong> mode and the <strong>effective per-shot runtime</strong> mode separately.</li>
+<li>Do not validate a weapon inspector by counting only static <code>fire_model_direction=2</code> records.</li>
+<li>When investigating a Barga cannon's shot orientation, capture the dynamic basis and remaining burst count instead of interpreting the configuration value as the whole firing contract.</li>
+<li>Do not generalize this override to every weapon with a burst counter: the exact writer evidence is class-specific.</li>
+</ul>
+<p>For the rest of the firing pipeline see <a href="engine-re-%26-networking-weapon-fire-projectile-direction-authority.html">weapon fire transforms</a> and <a href="engine-re-%26-networking-edf6-weapon-rng-batched-fire-and-projectile-state.html">Weapon RNG / batched projectile reconstruction</a>.</p>
+<p><strong>Evidence:</strong> exact EDF6 native binary tracing for the analyzed <code>EDF.dll</code> build, plus three identified shipped <code>VehicleSwingShoot</code> configs. Other uninspected implementations and game revisions are not implied.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF6_ENGINE_RE_R12_MODE2_CHECKPOINT_2026-09-29.md</li><li>EDF6_ENGINE_RE_R10_SHIPPED_WEAPON_POLICY_CHECKPOINT_2026-09-28.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#static-configuration-versus-effective-mode">Static configuration versus effective mode</a><a href="#runtime-mechanism">Runtime mechanism</a><a href="#consequences-for-tools-and-modding">Consequences for tools and modding</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"engine-re-&-networking-vehicle-swing-shoot-dynamic-direction-mode"};</script><script src="../assets/site.js" defer></script></body></html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5→EDF6 HKT: graph edges, clearance caches and numeric decoding A source navigation graph can look valid in a high-level HKT inspector and still be misinterpr"><title>EDF5→EDF6 HKT: coarse graph edges, clearance caches and hkHalf16 values | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Havok navigation and streaming</div><h1>EDF5→EDF6 HKT: coarse graph edges, clearance caches and hkHalf16 values</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Havok navigation and streaming</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-derived and exact bounded runtime evidence separated</div><div id="articleBody"><p>A source navigation graph can look valid in a high-level HKT inspector and still be misinterpreted if a parser uses the wrong element widths. The <code>NG_DLC_EDFROOM03</code> / <code>DM019</code> comparison is a concrete case: graph topology, narrow flags, cache arrays and Havok's 16-bit real encoding have distinct rules. These observations describe <strong>paired EDF5-to-EDF6 navigation data</strong>, not a universal reconstruction of EDF6's proprietary navmesh baking process.</p>
+<h2 id="graph-connectivity-is-independently-countable">Graph connectivity is independently countable</h2>
+<p>The examined DM019 low/high navmeshes retain a coarse inter-cluster graph that can be reproduced directly from current face cluster adjacency:</p>
+<table>
+<thead>
+<tr>
+  <th>Graph</th>
+  <th style="text-align:right">Edges derived from face adjacency</th>
+  <th style="text-align:right">Stored edges</th>
+  <th style="text-align:right">Missing</th>
+  <th style="text-align:right">Extra</th>
+  <th style="text-align:right">Duplicates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>LOW</td>
+  <td style="text-align:right"><strong>84</strong></td>
+  <td style="text-align:right">84</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>HIGH</td>
+  <td style="text-align:right"><strong>374</strong></td>
+  <td style="text-align:right">374</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Both versions used <strong>8-byte graph edge records</strong> in this particular compatibility comparison. The source DM019 record's <code>byte2</code> flag and <code>byte3</code> padding were zero in the audited set; native EDFROOM01's comparable <code>flags16</code> fields were also zero. No “padding interpreted as active flag” defect was demonstrated here.</p>
+<p><strong>Consequence:</strong> rebuilding the exact same cluster graph from unchanged face adjacency cannot add missing connectivity. A real route defect may lie elsewhere: underlying faces, streaming links, agent queries, clearance, or the target selection logic. The graph check is a <em>structural invariant</em>, not a diagnosis of why an NPC chose a target behind a wall.</p>
+<h2 id="hkhalf16-is-not-ieee-float16-and-not-four-byte-float32"><code>hkHalf16</code> is not IEEE float16 and not four-byte float32</h2>
+<p>One earlier decoder consumed <strong>four bytes</strong> when reading a two-byte <code>hkHalf16</code> <code>bEdgeCost</code>, inadvertently incorporating the next two bytes and reporting false numeric graph differences. In the examined Havok type family, <code>hkHalf16</code> represents the <strong>upper 16 bits of an IEEE float32 value</strong>; reconstruction places the stored 16 bits in the high half and zeroes the lower 16 bits. It is not an IEEE binary16 conversion.</p>
+<p>For example, a stored high-half word <code>0x3F4C</code> reconstructed as <code>0x3F4C0000</code> is a float32 value, not the number obtained by decoding <code>0x3F4C</code> as IEEE half precision. A byte-exact round-trip and a semantic decoder must implement their respective roles independently.</p>
+<p>Correctly decoding this field removed false numerical mismatches during the DM019 comparison. It <strong>did not repair EDF6 gameplay</strong>, because the affected source serialization already retained the relevant raw data.</p>
+<h2 id="clearance-arrays-element-abi-versus-generated-semantics">Clearance arrays: element ABI versus generated semantics</h2>
+<p>The audited EDF5→EDF6 pair included these physical arrays:</p>
+<table>
+<thead>
+<tr>
+  <th>Array</th>
+  <th>Inspected element type</th>
+  <th>Important interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>faceOffsets</code></td>
+  <td><code>uint32</code></td>
+  <td>Index/range lookup, not real-valued clearance</td>
+</tr>
+<tr>
+  <td><code>edgePairClearances</code></td>
+  <td><code>uint8</code></td>
+  <td>Per-edge-pair clearance byte</td>
+</tr>
+<tr>
+  <td><code>mcpData</code></td>
+  <td>2-byte record</td>
+  <td>First byte: interpolant, second: clearance</td>
+</tr>
+<tr>
+  <td><code>vertexClearances</code></td>
+  <td><code>uint8</code></td>
+  <td>Per-vertex clearance byte</td>
+</tr>
+</tbody>
+</table>
+<p>Those <strong>element widths are compatible</strong> in this bounded pair, even though the enclosing cache structures and target generation behavior may differ. A precomputed EDF5 clearance value can be syntactically valid yet semantically stale for an EDF6 navmesh or agent profile.</p>
+<p>A controlled source-only experiment omitted clearance seed datasets and initial cache objects while retaining <strong>10 LOW / 10 HIGH navmesh records</strong>. The resulting HKT remained structurally comparable outside that intentional omission. This proves a feasible <em>wire-level subtraction</em>; it is not a positive in-game fix for AI targeting or route selection.</p>
+<h2 id="evidence-hierarchy">Evidence hierarchy</h2>
+<ul>
+<li><strong>Static:</strong> graph edge counts matched source face adjacency (84/374); no extra/missing/duplicate coarse edges; correct <code>hkHalf16</code> decoding; 2-byte <code>mcpData</code> and documented array widths.</li>
+<li><strong>Runtime-negative in the broader room test:</strong> changing faceData/NVMD section identity did not correct spiders' wall-targeting symptom.</li>
+<li><strong>Unresolved:</strong> whether a particular cache, query filter or <code>hkaiNavMesh</code> variant changes AI line of sight. Structural HKT validity is not evidence for one specific perception mechanism.</li>
+</ul>
+<p>See <a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">HKT/NVMD native rebake versus compatibility</a> and <a href="maps-%26-navigation-physical-walls-navmesh-and-ai-targeting-case-study.html">physical wall versus AI targeting</a>.</p>
+<p><strong>Source evidence:</strong> <code>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/EDFROOM_GRAPH_AND_CLEARANCE_AUDIT_2026-08-25.json</code>, <code>runtime/EDFROOM_R2N_NO_CLEARANCE_SEED_MANIFEST.json</code>, and the independently observed negative wall test <code>runtime/EDFROOM_R2I_RUNTIME_NEGATIVE_2026-08-25.json</code>. The numerical findings are scoped to the examined maps and file versions.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>/EDF5_EDF6_RESEARCH/research/active/EDFROOM/audits/EDFROOM_GRAPH_AND_CLEARANCE_AUDIT_2026-08-25.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#graph-connectivity-is-independently-countable">Graph connectivity is independently countable</a><a href="#hkhalf16-is-not-ieee-float16-and-not-four-byte-float32">hkHalf16 is not IEEE float16 and not four-byte float32</a><a href="#clearance-arrays-element-abi-versus-generated-semantics">Clearance arrays: element ABI versus generated semantics</a><a href="#evidence-hierarchy">Evidence hierarchy</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-hkt-coarse-graph-clearance-and-half16-encoding"};</script><script src="../assets/site.js" defer></script></body></html>

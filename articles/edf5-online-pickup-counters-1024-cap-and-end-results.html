@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF5 online loot has both a pickup event and a reward counter A crate visually disappearing is not by itself proof that a player&#39;s final reward counter increase"><title>EDF5 weapon and armor pickup counters: 1024 cap, host authority and result tally | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Loot / mission results</div><h1>EDF5 weapon and armor pickup counters: 1024 cap, host authority and result tally</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Loot / mission results</span></div><div class="referencebadge">Technical reference · Source static evidence with unverified behavior labelled; no new in-game R133 test</div><div id="articleBody"><p>A crate visually disappearing is not by itself proof that a player's final reward counter increased. EDF5 performs item collection, checks authority/session state, then credits health, weapons or armor through different paths. The end-of-mission result subsequently applies a <strong>difficulty/mode-dependent retention factor</strong>.</p>
+<h2 id="counted-categories-and-native-limits">Counted categories and native limits</h2>
+<p>In the examined <code>DropItemManager</code> the relevant fields include:</p>
+<table>
+<thead>
+<tr>
+  <th>Field</th>
+  <th>Recorded meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>+0xA84</code></td>
+  <td>Total counted weapon + armor pickups</td>
+</tr>
+<tr>
+  <td><code>+0xA88</code></td>
+  <td>Weapon pickup count</td>
+</tr>
+<tr>
+  <td><code>+0xA8C</code></td>
+  <td>Armor pickup count</td>
+</tr>
+<tr>
+  <td><code>+0xA90/+0xA94</code></td>
+  <td>Additional result components included in the end tally</td>
+</tr>
+</tbody>
+</table>
+<p>For a weapon or armor pickup, the code increments category and total counters only when the authority test succeeds and <strong>the total counter is below <code>0x400</code> (1024)</strong>. Health categories instead heal the player via the collect path. This cap belongs to the inspected EDF5 executable; the results of mods that change those immediates are not the game's stock behavior.</p>
+<h2 id="mission-result-calculation">Mission result calculation</h2>
+<p>The result routine reads the weapon and armor counters, multiplies by a retention factor indexed through the current mode/difficulty state, and adds the separate result components. One branch has a zero retention factor. The source inferred the index was difficulty, but did not prove every mode's displayed output via an in-game experiment.</p>
+<p>In multiplayer, <strong>do not assume every non-host copy's counters match</strong>: the same source left the non-host semantics of the session authority callback unresolved. Confirmed shared item awards are a different claim from perfectly identical intermediate counters on every machine.</p>
+<p><strong>Sources:</strong> <code>edf5/online.md</code>, <code>pickup-award-counters</code>, <code>result-tally-detail</code>, <code>nonhost-counters</code>; <code>steam-5d11de53</code> static disassembly. See <a href="edf5-online-crate-pickup-types-host-dedup-remote-mark.html">pickup event protocol</a> and <a href="edf5-weapon-armor-end-mission-reward-roll-class-weights-and-level-window.html">EDF5 weapon reward roll</a>.</p>
+<h2 id="related-native-edf-game-references">Related native EDF game references</h2>
+<ul>
+<li><a href="#article-start">EDF5 result timing and local-player gate</a></li>
+</ul>
+<h2 id="local-control-gate-and-result-sync-uncertainty-consolidated">Local-control gate and result-sync uncertainty (consolidated)</h2>
+<p>The per-frame pickup check is <strong>local-controller gated</strong>: in the audited EDF5 build, the player controller pointer at <code>SoldierBase+0x240</code> identifies local control. Remote soldier avatars do not independently run the local pickup contact test on every peer. A confirmed pickup references a <strong>player network ID</strong> (audited <code>SoldierBase+0xF8</code>), not the crate creator or the last attacker.</p>
+<p>The <code>0x400</code> total limit is an <strong>audited stock executable counter threshold</strong>, not a statement about guaranteed result-screen rewards or equality of all intermediate peer counters. The code processes confirmed pickups locally, but <strong>non-host counter equality</strong> and a request arriving <strong>after result synchronization</strong> remained unresolved in the source study. The presence of a debug-console command named <code>drop_item</code> is not evidence that it runs during ordinary missions. Sources: EDF5 <code>edf5/online.md</code>, <code>pickup-local-players-only</code>, <code>local-controller-slot</code>, <code>pickup-award-counters</code>, <code>result-tally-detail</code>, <code>nonhost-counters</code> (unverified), <code>late-pickup-requests</code> (unverified), <code>debug-command-table</code> (static).</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub (2026-11-14): edf5/online.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#counted-categories-and-native-limits">Counted categories and native limits</a><a href="#mission-result-calculation">Mission result calculation</a><a href="#related-native-edf-game-references">Related native EDF game references</a><a href="#local-control-gate-and-result-sync-uncertainty-consolidated">Local-control gate and result-sync uncertainty (consolidated)</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-online-pickup-counters-1024-cap-and-end-results"};</script><script src="../assets/site.js" defer></script></body></html>

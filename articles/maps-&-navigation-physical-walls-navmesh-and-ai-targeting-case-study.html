@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="AI targeting through walls — collision versus navigation A monster firing at an NPC through a solid wall does not, by itself, prove that the wall&#39;s collision me"><title>AI targeting through walls — collision versus navigation | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-navigation.html">Navigation</a></div><h1>AI targeting through walls — collision versus navigation</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Maps &amp; Navigation</span><span class="chip">Navigation</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Runtime-negative experiment / exact source geometry</div><div id="articleBody"><p>A monster firing at an NPC through a solid wall does <strong>not</strong>, by itself, prove that the wall's collision mesh is missing. EDFROOM/DM019 gave a useful real-game demonstration of why EDF's <strong>physical collision</strong>, <strong>navigation data</strong>, <strong>target selection</strong>, <strong>line-of-sight checks</strong> and <strong>projectile collision</strong> must be examined as separate systems.</p>
+<h2 id="the-observed-behavior">The observed behavior</h2>
+<p>The EDF5-derived EDFROOM mission was brought to a state where the wall physically existed in EDF6: actors could not pass through it, and spider web projectiles collided with it. However, in a particular RoomB area some spiders still aimed and fired <em>toward</em> allied NPCs on the other side. The observed effect was localized, especially evident for spider-to-NPC interactions, and should not be generalized to every enemy or map.</p>
+<p>That observation establishes a narrow fact:</p>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>What the observation supports</th>
+  <th>What it cannot prove</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Collision (<code>MAD</code> / Havok)</td>
+  <td>The wall blocks actors and tested projectiles</td>
+  <td>All collision shapes/material flags are native-exact</td>
+</tr>
+<tr>
+  <td>Projectile physics</td>
+  <td>The tested webs hit/stop at the wall</td>
+  <td>Enemy AI checked the wall before selecting a target</td>
+</tr>
+<tr>
+  <td>AI perception/targeting</td>
+  <td>Spiders attempted attacks toward occluded NPCs</td>
+  <td>Which specific perception/LOS/agent query returned the wrong result</td>
+</tr>
+<tr>
+  <td>NAVMESH HKT/NVMD</td>
+  <td>Potential route and graph inputs worth investigating</td>
+  <td>A missing walkable face or edge is necessarily the cause</td>
+</tr>
+</tbody>
+</table>
+<p>The map's lighting and wall-mounted enemy-spawner orientation were <strong>separate mission-script issues</strong>, not explanations for a physically missing wall. The <code>2001 → CreateEnemy2</code> mapping was runtime-confirmed for the spawner context.</p>
+<h2 id="correct-structure-is-not-the-same-as-correct-gameplay">Correct structure is not the same as correct gameplay</h2>
+<p>Several seemingly promising file-format fixes were real <strong>structural</strong> corrections but did not fix the AI symptom:</p>
+<ul>
+<li>The correspondence between HKT face data and NVMD Section C was corrected, yet the targeted runtime check was negative.</li>
+<li>Source-derived static AABB trees were checked across <strong>10 low and 10 high tiles</strong>. Leaves covered their intended faces, nodes were reachable and no missing/duplicate face-tree relationships explained the symptom.</li>
+<li>Incorrect research decoding of narrow integers and <code>hkHalf16</code> values caused earlier absurd graph/clearance interpretations. Correcting the decoder repaired the analysis, not the game.</li>
+<li>An early hypothesis of a simple missing ~1.75 m RoomB boundary was superseded after separating physical overlap, internal seams and streaming geometry.</li>
+</ul>
+<p>This is a reproducible lesson for any map converter: <strong>a parser invariant may be valuable even when the behavior under investigation remains unchanged</strong>.</p>
+<h2 id="a-real-streaming-connection-passed-through-solid-geometry">A real streaming connection passed through solid geometry</h2>
+<p>The audited <strong>high</strong> navmesh had a connection between section UIDs <strong>2 and 3</strong>, joining <code>(face 24, edge 74)</code> to <code>(face 195, edge 735)</code> near RoomB. The shortest bridge between the relevant edges measured about <strong>1.114206 m</strong>, of which approximately <strong>1.108306 m</strong> lay inside the closed convex wall collider — <strong>99.47%</strong> penetration.</p>
+<p>A conservative, source-derived detector identified a bridge only if:</p>
+<pre><code class="language-text">solid penetration length &gt;= 0.05 m
+AND
+penetration length / bridge length &gt;= 0.90
+AND
+source collision binding is a supported closed convex shape
+</code></pre>
+<p>It uses source HKT + source MAD/MAC spatial context and rejects ambiguous cases. It must <strong>not</strong> treat every intersection with a surface mesh/MOPP as a valid inside/outside test: a mesh surface does not necessarily represent a closed solid volume.</p>
+<p>The detector selected three analogous source relations in its audited scope (DM019 high, <code>IG_EDFROOM01</code> low, <code>IG_EDFROOM02</code> high) and none in the listed CAVE503, HEIGEN507, NW_EUROPE01, KAIGAN502, SANGAKU506 and DESERT508 controls. This is <strong>offline consistency evidence</strong>, not a general algorithm for generating EDF6 streaming links.</p>
+<h2 id="the-decisive-negative-runtime-experiment">The decisive negative runtime experiment</h2>
+<p>A narrowly scoped diagnostic removed exactly that one high-HKT connection and its two AABB records. The serialized difference was <strong>80 bytes</strong>: one 16-byte connection plus two 32-byte AABBs. The low HKT, ordinary navmesh faces/edges, graph, static tree, clearance and NVMD were kept unchanged.</p>
+<p>The later in-game observation was <strong>negative</strong>: spiders still aimed/fired at allied NPCs through/toward the wall, while their web projectiles struck the barrier. Therefore the crossed-solid connection was a genuine structural anomaly <strong>but not a demonstrated root cause of that AI symptom</strong>. It should not be silently removed from every map as a proposed gameplay fix.</p>
+<h3 id="what-is-still-unknown">What is still unknown</h3>
+<p>The responsible AI query/target-visibility or LOS rule was not resolved. It may depend on the target type, agent class, route query or state inside the engine. None of these possibilities has yet been uniquely demonstrated. The low/high HKT variants are not proven to map one-to-one to spider-versus-other-enemy navigation; their observed <code>erosionRadius</code> values do not justify that claim.</p>
+<h2 id="how-to-debug-similar-issues">How to debug similar issues</h2>
+<ol>
+<li>Verify <strong>physical blocking</strong> separately: actors, projectiles and the relevant wall surfaces.</li>
+<li>Observe who targets whom (enemy→player versus enemy→NPC), not only where projectiles stop.</li>
+<li>Test mission creation/spawner orientation independently from map geometry.</li>
+<li>Validate HKT/NVMD face identity, graph, streaming, static trees and clearance with corrected decoders.</li>
+<li>Use <strong>one-variable runtime tests</strong> to decide whether a structural repair changes actual AI behavior.</li>
+<li>Only then investigate AI perception, LOS, navigation query and target selection in the exact engine build.</li>
+</ol>
+<p>EDFROOM's <code>IG_EDFROOM01/02</code> map family did <strong>not</strong> have FMB; collision/navigation investigation used HKT/NVMD/MAD/MAC, with models in other resource containers. Don't invent an FMB dependency for these maps.</p>
+<p><strong>Evidence boundary:</strong> collision/projectile observations and the negative runtime experiment are gameplay evidence; the crossing detector and byte/geometry measurements are offline/source evidence. The cause of AI-versus-NPC wall targeting remains <strong>unresolved</strong>.</p>
+<p>See <a href="maps-%26-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.html">HKT/NVMD compatibility versus native rebake</a>, <a href="maps-%26-navigation-havok-collision-and-navigation-architecture.html">MAD collision contracts</a> and <a href="maps-%26-navigation-map-formats-and-runtime-consumers-explained.html">map formats</a>.</p>
+<h2 id="measured-physical-geometry-and-graph-controls">Measured physical geometry and graph controls</h2>
+<p>The converted EDFROOM collision corpus preserved <strong>297,951 logical triangles</strong> after a documented degeneracy filter, and its 101 compressed meshes passed a bounded shape-key/broadphase check (166,084 expected and reachable unique keys). More importantly, <strong>20</strong> examined wall/corridor records retained zero shared-section seams despite source-to-target coordinate quantization. The measured candidate still showed correct projectile/actor blocking in the user's runtime observation. These facts reinforce the distinction between physically present walls and AI targeting, but do not demonstrate global collision exactness. See <a href="edf5-edf6-edfroom-mad-wall-quantization-and-triangle-conservation.html">EDFROOM MAD physical collision case</a>.</p>
+<p>The DM019 coarse inter-cluster graph contained exactly <strong>84 LOW</strong> and <strong>374 HIGH</strong> edges derived from current face adjacency, without extra/missing edges. A source <code>hkHalf16</code> decoding error had previously made narrow costs appear inconsistent; correcting the decoder repaired analysis only, not the actual AI behavior. See <a href="edf5-edf6-hkt-coarse-graph-clearance-and-half16-encoding.html">HKT graph/cache decoding</a>.</p>
+<h2 id="r176-observed-enemy-to-ally-asymmetry-without-claiming-a-new-ai-rule">R176 — observed enemy-to-ally asymmetry, without claiming a new AI rule</h2>
+<p>The original user observation for the EDFROOM/DM019 spider room supplies more context than a generic &quot;can attack through walls&quot; statement:</p>
+<ul>
+<li>When spiders were targeting the <strong>player</strong>, they were <strong>not</strong> reported to shoot the player through the wall. The anomaly was specifically noticed when they aimed/fired webs <strong>toward allied NPCs</strong> behind it.</li>
+<li>Spiders could move toward the obstruction and accumulate by a room corner; one spider then <strong>turned toward the player after noticing them</strong>, switching from its previous apparent allied-NPC target.</li>
+<li>During the later <strong>R2O high-only shortcut-removal runtime test</strong>, several spiders still aimed and fired toward the obstructed allied NPCs. The observer <strong>did not notice</strong> allies firing back in that particular observation. This is <em>not</em> a universal statement that friendly AI never targets spiders across walls.</li>
+<li>The webs still hit the physical wall. Neither these observations nor the negative R2O experiment demonstrates a missing <code>MAD</code> wall, projectile pass-through, broken AI collision for every target, or a specific defective line-of-sight function.</li>
+</ul>
+<p>This narrows the diagnostic evidence to <strong>target-type-dependent AI perception/selection and possibly agent-specific path/LOS queries</strong>. It does <strong>not</strong> establish which function or native query returned an inappropriate result. Evidence: <code>EDFROOM_AI_WALL_RUNTIME_OBSERVATION_2026-08-25.json</code> (original gameplay observation) and <code>EDFROOM_R2O_RUNTIME_NEGATIVE_2026-08-26.json</code> (subsequent negative one-variable gameplay experiment). The test took place in a <em>modified EDF5-derived mission running in EDF6</em>, not as a verified defect in a clean retail mission.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>Library: EDF5_EDF6_FULL_SESSION_HANDOFF_NAVMESH_MISSION_CFG_2026-08-25.md (geometry, controls, corpus)</li><li>Library: EDFROOM_R2O_RUNTIME_NEGATIVE_2026-08-26 research authority (reported in later current-state ledgers)</li><li>R52: maps-&amp;-navigation-navmesh-hkt-nvmd-compatibility-vs-native-rebake.md</li><li>Original EDFROOM / DM019 R2O gameplay observation (2026-08-25/26) versus superseded static source-HKT hypotheses; bounded modified-game runtime; R176 provenance census</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-observed-behavior">The observed behavior</a><a href="#correct-structure-is-not-the-same-as-correct-gameplay">Correct structure is not the same as correct gameplay</a><a href="#a-real-streaming-connection-passed-through-solid-geometry">A real streaming connection passed through solid geometry</a><a href="#the-decisive-negative-runtime-experiment">The decisive negative runtime experiment</a><a href="#what-is-still-unknown">　What is still unknown</a><a href="#how-to-debug-similar-issues">How to debug similar issues</a><a href="#measured-physical-geometry-and-graph-controls">Measured physical geometry and graph controls</a><a href="#r176-observed-enemy-to-ally-asymmetry-without-claiming-a-new-ai-rule">R176 — observed enemy-to-ally asymmetry, without claiming a new AI rule</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"maps-&-navigation-physical-walls-navmesh-and-ai-targeting-case-study"};</script><script src="../assets/site.js" defer></script></body></html>

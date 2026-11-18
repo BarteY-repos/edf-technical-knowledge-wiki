@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="SGO, DSGO and resource-schema boundaries Evidence level: Reconciled binary/corpus rules from the unified assertion ledger and later mission/resource evidence. C"><title>SGO, DSGO and resource-schema boundaries | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-file-formats.html">File Formats</a></div><h1>SGO, DSGO and resource-schema boundaries</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Formats &amp; Containers</span><span class="chip">File Formats</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Source-backed research / case study · Reconciled</div><div id="articleBody"><p><strong>Evidence level:</strong> Reconciled binary/corpus rules from the unified assertion ledger and later mission/resource evidence.</p>
+<h2 id="container-grammar-is-not-resource-semantics">Container grammar is not resource semantics</h2>
+<p><strong>Implementation rule:</strong> Treat SGO/DSGO as container/serialization families. Shared container grammar does <strong>not</strong> imply that fields, versions, enums or object schemas are interchangeable between resources.</p>
+<p>A converter must know both:</p>
+<ol>
+<li>how to losslessly parse/write the container; and</li>
+<li>the schema of the specific resource carried inside it.</li>
+</ol>
+<p>Do not derive a resource conversion law from a version number alone.</p>
+<h2 id="mission-list-resources">Mission LIST resources</h2>
+<p><strong>Observed native behavior:</strong> EDF6 mission <code>LIST</code> resources use DSGO in the qualified mission pipeline. The retained lossless path is block-oriented and should preserve unknown data rather than rebuilding it from guessed semantics.</p>
+<p><strong>Implementation rule:</strong> Deployment truth comes from the actual binary <code>LIST.SGO</code>/DSGO payload. Companion JSON, editor exports or stale manifests are secondary if they disagree with the deployed binary.</p>
+<h2 id="text-name-resources-the-same-sgo-suffix-does-not-mean-the-same-binary">Text/name resources: the same <code>.SGO</code> suffix does not mean the same binary</h2>
+<p>The resource name tells you its <strong>purpose</strong>; the file header tells you which serialization family to decode. In the measured mission-pack profiles, ordinary language/name-description tables such as <code>MISSIONLIST.OFFLINE.TXT.EN.SGO</code> use <strong>classic SGO version 258</strong>, while the corresponding mission-list <code>...LIST.SGO</code> is <strong>DSGO</strong>. Treating every file with an <code>.SGO</code> suffix as the same serializer can produce a parseable-looking JSON conversion but an invalid game resource.</p>
+<table>
+<thead>
+<tr>
+  <th>Resource role</th>
+  <th>Observed binary format</th>
+  <th>Confidence / constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Normal mission-pack <code>...TXT.&lt;LANG&gt;.SGO</code></td>
+  <td>Classic <code>SGO</code>, version <strong>258</strong></td>
+  <td>Verified for the studied pack grammar</td>
+</tr>
+<tr>
+  <td>Normal mission-pack <code>...LIST.SGO</code></td>
+  <td><strong>DSGO</strong></td>
+  <td>Verified for the studied mission list format</td>
+</tr>
+<tr>
+  <td>Deployed <code>E2_BASE_OVERRIDE/...TXT.*.SGO</code></td>
+  <td><strong>DSGO</strong> in observed files</td>
+  <td>File magic confirmed; whether all such overrides are <em>actually loaded</em> is untested</td>
+</tr>
+<tr>
+  <td>Other configuration <code>*.SGO</code> files</td>
+  <td>Resource-specific SGO or DSGO grammar</td>
+  <td>Inspect actual magic and schema; extension alone is insufficient</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Practical rule:</strong> identify the magic and resource schema first; then apply the correct version/serializer and inspect the round-trip data. This is a <em>profile-specific finding</em>, not a claim that a universal <code>TXT = SGO-258</code> law applies to every EDF mission deployment.</p>
+<h2 id="schema-specific-conversions">Schema-specific conversions</h2>
+<p><strong>Do not assume:</strong> Numeric field similarity means semantic identity. Examples across the corpus include resource-specific enum/value translations, different embedded object types and target-only fields.</p>
+<p>Weather DSGO values are particularly profile-specific; there is no accepted blind copy or scale rule.</p>
+<h3 id="desert-destruction-prop-template-case">Desert destruction-prop template case</h3>
+<p>One late clean Desert conversion line observes an EDF5 destruction/collision prop template with <strong>33 variables</strong> and an EDF6 target form with <strong>34 variables</strong>, inserting a target record <code>(0x682, 1, 4, 0xFFFFFFFF)</code> at <strong>index 17</strong>. The paired MAPO/destruction-group work uses this as a resource-family conversion.</p>
+<p>This is <strong>not</strong> a global <code>SGO 33 → 34</code> law. Shared props may use target-native templates while source-unique Desert props require the measured upgrade; unrelated SGO resources must be treated by their own schema.</p>
+<h2 id="provenance-and-source-only-output">Provenance and source-only output</h2>
+<p>A source-only converter may reconstruct a valid target resource using independently derived schema knowledge. Using native EDF6 resources as research oracles does not permit shipping them as production donors/templates.</p>
+<p><strong>Implementation rule:</strong> Preserve unknown fields losslessly when possible, document target-only synthesis explicitly and fail closed where a semantic field cannot be justified.</p>
+<h2 id="baseline-relative-semantic-merging-for-legacy-sgo-dsgo-overrides">Baseline-relative semantic merging for legacy SGO/DSGO overrides</h2>
+<p>Two mods can supply whole-file replacements for one <code>CONFIG.SGO</code> even when they change <strong>different logical fields</strong>. Overriding one file with the other loses data. Conversely, blindly appending or byte-merging arrays can corrupt ordered or coupled resource semantics.</p>
+<p>A researched <em>offline</em> merge approach is:</p>
+<pre><code class="language-text">vanilla SGO/DSGO V ----\
+mod A replacement MA ----&gt; semantic parse -&gt; diff against V -&gt; merge -&gt; serialize
+mod B replacement MB ---/
+</code></pre>
+<p>The parser/serializer must preserve the <strong>specific SGO or DSGO format</strong>; these are not automatically interchangeable. In the demonstrated workflow, a common <code>sgott</code> semantic JSON representation provides the merge view, with binary serialization delegated back to the corresponding existing formatter.</p>
+<p><strong>Identity precedence</strong> for independently edited records:</p>
+<ol>
+<li>Top-level named variables: match by <strong>semantic name</strong>, not physical slot. Real paired EDF files may reorder these variables without changing their names.</li>
+<li>Known tables (e.g. mission ModeList or CONFIG weapon tables): use a <strong>schema-defined stable key</strong> whenever established.</li>
+<li>Record arrays: infer a unique stable identifier only if baseline overlap makes it unambiguous.</li>
+<li>Fixed-shape unnamed tuples: index merging is acceptable when tuple sizes are equal.</li>
+<li>Variable-length arrays without stable identity: <strong>fail closed</strong> rather than guessing what a moved row means.</li>
+</ol>
+<table>
+<thead>
+<tr>
+  <th>Changes relative to baseline</th>
+  <th>Treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Different fields/records</td>
+  <td>Merge</td>
+</tr>
+<tr>
+  <td>Same field, same resulting value</td>
+  <td>Deduplicate</td>
+</tr>
+<tr>
+  <td>Same field, differing resulting values</td>
+  <td>Conflict</td>
+</tr>
+<tr>
+  <td>Delete versus update of the same item</td>
+  <td>Conflict</td>
+</tr>
+<tr>
+  <td>Different newly keyed records</td>
+  <td>Merge, provided keys are stable</td>
+</tr>
+<tr>
+  <td>Ambiguous variable-length insertions</td>
+  <td>Manual/schema-level reconciliation</td>
+</tr>
+</tbody>
+</table>
+<p>The six initial semantic-merge PoC scenarios passed <strong>offline</strong>, including reordered top-level names, independent fields, disjoint record insertions and true conflicts. A later exact Air Raider + EDF5-port CONFIG case also showed a <strong>zero-conflict</strong> 112-byte Air Raider-owned delta composed with MissionPack ModeList additions, without rewriting unrelated scopes (see <a href="formats-%26-containers-config-sgo-three-way-air-raider-mission-pack-merge.html">the concrete CONFIG example</a>).</p>
+<p><strong>Do not assume:</strong> a generic last-writer-wins preview is a valid production conflict policy. A deterministic output can still be semantically wrong. The initial algorithm PoC was not itself a successful in-game qualification.</p>
+<p>For a reader-oriented worked example of <strong>baseline-relative semantic three-way merging</strong> and failure cases, see <a href="formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">SGO/DSGO merging by semantic identity</a>. The exact Air Raider plus EDF5 mission-port <code>CONFIG.SGO</code> proof is <em>offline and profile-scoped</em>, not an automatic arbitrary-resource promise.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>R6_UNIFIED_KNOWLEDGE_ASSERTION_LEDGER.json</li><li>EDF5_EDF6_MEGA_WIKI_R6_2026-08-26.md</li><li>SGO_LEGACY_DELTA_MERGE_POC_2026-09-01.md</li><li>AIR_RAIDER_EDF5PORT_CONFIG_MERGE_AUDIT_2026-09-01.json</li><li>Paired mission-pack TXT/LIST resource profiles in R6_ALL_HANDOFFS_CHRONOLOGICAL_FULLTEXT.md</li><li>R6 conflict reconciliation: E2 base-override TXT scope exception</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#container-grammar-is-not-resource-semantics">Container grammar is not resource semantics</a><a href="#mission-list-resources">Mission LIST resources</a><a href="#text-name-resources-the-same-sgo-suffix-does-not-mean-the-same-binary">Text/name resources: the same .SGO suffix does not mean the same binary</a><a href="#schema-specific-conversions">Schema-specific conversions</a><a href="#desert-destruction-prop-template-case">　Desert destruction-prop template case</a><a href="#provenance-and-source-only-output">Provenance and source-only output</a><a href="#baseline-relative-semantic-merging-for-legacy-sgo-dsgo-overrides">Baseline-relative semantic merging for legacy SGO/DSGO overrides</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"formats-&-containers-sgo-dsgo-and-resource-schema-boundaries"};</script><script src="../assets/site.js" defer></script></body></html>

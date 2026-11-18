@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="A class name is not necessarily the name the game uses EDF5 uses at least three naming layers for its enemies. The C++ class or xgs_scene_object_class is the en"><title>EDF5 enemy names: SGO classes, kill counters, statistics labels and mission briefings | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf5.html">EDF 5</a> / Enemies / identification</div><h1>EDF5 enemy names: SGO classes, kill counters, statistics labels and mission briefings</h1><div class="meta"><span class="chip">EDF 5</span><span class="chip">Game technical references</span><span class="chip">Enemies / identification</span></div><div class="referencebadge">Technical reference · Source analysis only (unless a source fact is contributor-verified); no new EDF runtime test</div><div id="articleBody"><p>EDF5 uses at least three naming layers for its enemies. The <strong>C++ class</strong> or <code>xgs_scene_object_class</code> is the engine's implementation family, an <strong>SGO</strong> is the particular configured object, and a <strong>localized name</strong> may be present in the statistics screen or a mission briefing. The three are not interchangeable.</p>
+<h2 id="how-names-are-grounded">How names are grounded</h2>
+<p>An enemy definition's <code>game_object_kill_counter</code> can name a statistics counter. The English text table <code>etc/texttable_xbox.en.txt_sgo</code> includes <code>StatusInfo_&lt;counter&gt;</code> entries that describe the corresponding game statistic. Examples from the source comparison include:</p>
+<table>
+<thead>
+<tr>
+  <th>Source counter/class family</th>
+  <th>English statistics label</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>GiantAnt</code></td>
+  <td>Aggressive Alien Species αs</td>
+</tr>
+<tr>
+  <td><code>GiantSpider</code></td>
+  <td>Aggressive Alien Species βs</td>
+</tr>
+<tr>
+  <td><code>GiantDango</code></td>
+  <td>Aggressive Alien Species γs</td>
+</tr>
+<tr>
+  <td><code>GiantBee</code></td>
+  <td>Flying Aggressors</td>
+</tr>
+<tr>
+  <td><code>GiantAntQueen</code></td>
+  <td>Mother Monsters</td>
+</tr>
+<tr>
+  <td><code>GiantBeeQueen</code></td>
+  <td>Queens</td>
+</tr>
+<tr>
+  <td><code>Nephila</code></td>
+  <td>Araneas Defeated</td>
+</tr>
+<tr>
+  <td><code>Humanoid</code> frog / grey</td>
+  <td>Colonists / Cosmonauts</td>
+</tr>
+<tr>
+  <td><code>BigGreyBoss</code></td>
+  <td>Silver Man</td>
+</tr>
+<tr>
+  <td><code>UfoCarrier508</code></td>
+  <td>Teleportation Ships</td>
+</tr>
+<tr>
+  <td><code>MovingFortress</code></td>
+  <td>Outpost Bases</td>
+</tr>
+</tbody>
+</table>
+<p>The exact family/counter mapping is defined by each SGO; the names above are a reader-facing paraphrase of the recorded label census, not a claim that all subtypes get their own status counter.</p>
+<p>Specific <strong>variants</strong> are sometimes named only in <code>missionlist.*.txt.en.sgo</code> briefing text, for example “red drones,” “heavy-armored aliens,” “bombers,” “golden aggressors” and “silver aggressors.” Names that appear in an external radar catalogue but not in either game's localizable strings are <strong>catalogue/wiki names</strong>, not proven official UI labels. The <code>AntHillKillCount</code> localization says “Teleportation Devices” even though the associated <code>e517_antHill</code> SGO is catalogued as a giant ant hill.</p>
+<h2 id="important-mismatches">Important mismatches</h2>
+<p>The EDF5 class <strong><code>DragonSmall</code> is the Tadpole</strong>, not a dragon enemy in EDF5's played campaign. <code>Nephila</code> refers to the web-spitting <strong>Aranea</strong> (the related EDF4.1 type is often called Retiarius). Treating an internal class or filename as a literal bestiary label would misidentify both.</p>
+<p>The original contributor verified the general Tadpole/Aranea identification from game knowledge; the exact kill-counter localization and briefing scans are <strong>static source analyses</strong>, not a fresh screenshot comparison with the English game UI.</p>
+<p><strong>Source:</strong> EDF Knowledge Hub <code>edf5/object-classes.md</code>, facts <code>edf5-enemy-names</code>, <code>kill-counter-names</code>, <code>briefing-subtype-names</code>, <code>anthill-label-teleportation-devices</code>. Build <code>steam-5d11de53</code>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub 2026-11-14: edf5/object-classes.md</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#how-names-are-grounded">How names are grounded</a><a href="#important-mismatches">Important mismatches</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-native-sgo-identity-statistic-names-and-briefings"};</script><script src="../assets/site.js" defer></script></body></html>

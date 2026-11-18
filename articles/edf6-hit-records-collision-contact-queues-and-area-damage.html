@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="EDF6 — how a collision becomes damage A projectile collision, a GameDamageInfo record and an HP change are three different stages of EDF6 combat. The source ide"><title>EDF6 hit records: contact-point vectors, direct-hit queues and blast damage | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-edf6.html">EDF 6</a> / Damage and combat</div><h1>EDF6 hit records: contact-point vectors, direct-hit queues and blast damage</h1><div class="meta"><span class="chip">EDF 6</span><span class="chip">Game technical references</span><span class="chip">Damage and combat</span></div><div class="referencebadge">Technical reference · Contributor static analysis / source-graded observations; no new game runtime in R124</div><div id="articleBody"><p>A projectile collision, a <code>GameDamageInfo</code> record and an HP change are <strong>three different stages</strong> of EDF6 combat. The source identifies a native hit message (<code>0x10000000</code>) that carries an attacker handle, team, damage, impact position, damage flags and a vector of <strong>individual contact points with rigid-body identities</strong>. A broadphase intersection alone is not yet that message.</p>
+<h2 id="what-the-hit-record-contains">What the hit record contains</h2>
+<p>In the examined <code>steam-678ccb46</code> build, key offsets of the 0x90-byte record are:</p>
+<table>
+<thead>
+<tr>
+  <th style="text-align:right">Record offset</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td style="text-align:right"><code>+0x10/+0x18</code></td>
+  <td>Weak attacker object reference</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x20</code></td>
+  <td>Hit type; type 4 forces an unconditional part rate</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x24</code></td>
+  <td>Team, <code>−1</code> means no team rule</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x30</code></td>
+  <td>World-space impact position</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x50</code></td>
+  <td>Base damage; negative can represent healing</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x58</code></td>
+  <td>Blast amount/radius-related field in relevant paths</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x60</code></td>
+  <td>Bitfield affecting forced hits, rate and special treatment</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x68</code></td>
+  <td>Shield multiplier</td>
+</tr>
+<tr>
+  <td style="text-align:right"><code>+0x70</code></td>
+  <td>Contact-point vector; <strong>0x30 bytes per contact</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Each contact entry stores a world point and <strong>Havok body ID</strong>. The ID is local to that machine's physics world, not an online global identity. Bosses that only accept hits on one specific part can translate the body ID into a ragdoll body index and reject other contacts; checking only the collision position cannot reproduce that native rule.</p>
+<h2 id="direct-projectile-hit-sequence">Direct projectile hit sequence</h2>
+<p>In a shape-cast hit, EDF6 first obtains the world impact fraction, point, normal and body. It resolves the body to a <code>SceneObject</code> and, when eligible, records that object and its contact into the bullet's own <strong>direct-hit queue</strong>. A queue entry is keyed by target. A second collision against a target already queued merges the contact points and does <strong>not</strong> simply double the queued damage. The queue is settled synchronously in the relevant bullet update/collision path; it is not a universal all-frame deferred hit bus.</p>
+<p>The bullet's hit record lives in the bullet core (<code>core+0x730</code>, in the source the core is the bullet at <code>+0x140</code>), whereas the queue is at <code>core+0x6E0</code>. Some explosion-only bullets clear the direct-hit queue and use a separate blast path. A render-only contact or nearest bounding-box candidate should never be counted as a confirmed gameplay hit.</p>
+<h2 id="area-damage-is-another-query">Area damage is another query</h2>
+<p><code>GameDamageInfo::ApplyAreaDamage</code> performs a region query around its position and radius. Depending on the caller, it uses a collision-layer filter, a team rule, optional ignored object and optional already-hit set. The area query produces candidate game objects; the damage path then queues hit events for those that qualify. Stock caller examples include boss deaths and bullet explosions. <strong>A visual <code>Explosion_Big</code> call does not, by itself, invoke this damage query</strong>; see <a href="edf6-effectgenutil-visual-explosions-lights-and-damage-separation.html">visual explosions</a>.</p>
+<h2 id="evidence-boundary">Evidence boundary</h2>
+<p>All offsets and call order refer to the surveyed EDF6 DLL. The source explicitly corrected an earlier mistaken identification of one stack argument: it is collision filter data, not a camera frame. This article follows that later correction. No new game or network capture was performed.</p>
+<p><strong>Sources and credit:</strong> <code>kh-edf6-damage-model</code> facts <code>hit-record-layout</code>, <code>hit-points-bodies</code>, <code>bullet-hit-queue</code>, <code>direct-hit-to-damage-path</code>, <code>area-damage-call</code>, <code>damage-function-part-rate</code>, <code>vehicle-weapon-owner</code>; novae (ajane), original contributors. See <a href="edf6-armored-humanoids-multipart-bosses-and-shield-hit-handling.html">special body-part damage</a>.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14 — kh-edf6-damage-model (original fact attribution retained)</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-the-hit-record-contains">What the hit record contains</a><a href="#direct-projectile-hit-sequence">Direct projectile hit sequence</a><a href="#area-damage-is-another-query">Area damage is another query</a><a href="#evidence-boundary">Evidence boundary</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf6-hit-records-collision-contact-queues-and-area-damage"};</script><script src="../assets/site.js" defer></script></body></html>

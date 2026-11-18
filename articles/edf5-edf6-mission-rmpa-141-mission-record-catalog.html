@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission RMPA across 141 EDF5 missions: routes, shapes and spawns Scope and provenance. These are measured reference EDF6 mission RMPA files paired with the clea"><title>Mission RMPA 141-mission record catalogue: paths, regions and spawns | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / Missions &amp; Scripting</div><h1>Mission RMPA 141-mission record catalogue: paths, regions and spawns</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Missions &amp; Scripting</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Source-corpus/static reverse-engineering; no new game runtime test</div><div id="articleBody"><p><strong>Scope and provenance.</strong> These are measured <strong>reference EDF6 mission RMPA files paired with the clean EDF5 source corpus</strong> for the 112-base-union, 15-DLC1 and 14-DLC2 set. They are not counts hardwired into the RMPA specification or proof that 141 missions were finished in EDF6 gameplay. Exact rows are in the companion CSV.</p>
+<h2 id="what-this-corpus-actually-contains">What this corpus actually contains</h2>
+<table>
+<thead>
+<tr>
+  <th>Record class</th>
+  <th style="text-align:right">Observed across 141 missions</th>
+  <th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Route groups</td>
+  <td style="text-align:right">511</td>
+  <td>Paths owned by missions, not map NAV polygons</td>
+</tr>
+<tr>
+  <td>Waypoints</td>
+  <td style="text-align:right">5,103</td>
+  <td>Route members using global <code>waypoint.no</code> in EDF6</td>
+</tr>
+<tr>
+  <td>Shape groups</td>
+  <td style="text-align:right">305</td>
+  <td>Mission-owned named regions / shape collections</td>
+</tr>
+<tr>
+  <td>Shapes</td>
+  <td style="text-align:right">1,355</td>
+  <td>Named regions with type, GID and payload</td>
+</tr>
+<tr>
+  <td>Spawn groups</td>
+  <td style="text-align:right">685</td>
+  <td>Mission-owned spawn collections</td>
+</tr>
+<tr>
+  <td>Spawn records</td>
+  <td style="text-align:right">3,387</td>
+  <td>Named spawns with two coordinate vectors</td>
+</tr>
+</tbody>
+</table>
+<p>The paired source/target audit preserved route GIDs, route <code>next</code> topology and widths for <strong>5,103/5,103</strong> waypoints; shape type/GID for <strong>1,355/1,355</strong> and spawn GIDs for <strong>3,386/3,387</strong>. The sole recorded spawn-GID exception is <code>DM018</code> player 27 → 0 in the historical reference port. Do not conflate the semantic ID with the sequential <code>waypoint.no</code> field.</p>
+<h2 id="per-mission-catalogue">Per-mission catalogue</h2>
+<p>The numbers below come from <em>reference target RMPAs</em>, not from an inferred mission difficulty or gameplay spawn budget. <code>Δ</code> is the count of <strong>reference-port tuning records</strong> (route + shape + spawn) against the clean EDF5 source. A zero does not mean that the mission is identical in all other assets.</p>
+<table>
+<thead>
+<tr>
+  <th>Pack</th>
+  <th>Mission</th>
+  <th style="text-align:right">Route groups</th>
+  <th style="text-align:right">Waypoints</th>
+  <th style="text-align:right">Shapes</th>
+  <th style="text-align:right">Spawns</th>
+  <th style="text-align:right">Reference Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>MP03</td>
+  <td><code>M000</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">62</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M001</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">57</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M003</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">63</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">88</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M004</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">159</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M005</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">85</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M006</code></td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M006_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M007</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M007_5</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M008</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">130</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M009</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">49</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">9</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M010</code></td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">90</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M011</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M012</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M013</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M014</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015</code></td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">104</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015_2</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">65</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">49</td>
+  <td style="text-align:right">10</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M015_3</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">542</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M016</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M017</code></td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">123</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">37</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M017_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M018</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M019</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M019_5</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">45</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M020</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M020_5</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">73</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M021</code></td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">45</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M022</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">53</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M023</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M024</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M025</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M026</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M027</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">39</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M028</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">49</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M029</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M030</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M031</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">52</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M032_5</code></td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">93</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M033</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">30</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M034</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">90</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">75</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M034_3</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M034_5</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">6</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M035</code></td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">392</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">50</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M036</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">54</td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M037</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M038</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">78</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M039</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">43</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M041</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">45</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M042</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M042_2</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">54</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M042_5</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">39</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M043</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M044</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">38</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M045</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M046_1</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M046_2</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">30</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M046_3</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M047</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M047_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">70</td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M048</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M049</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M050</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M051</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M052</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M053</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">39</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">30</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M054</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M054_5</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">24</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M055</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">39</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M056</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M057</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M058</code></td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">94</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M059</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">56</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M060</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">82</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M061</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">35</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M062</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M063</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M063_5</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">41</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M064</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M065</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M066</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M067</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">30</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M068</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M069</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">66</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M070</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">64</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M071</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">61</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_1</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_2</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">60</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_3</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M072_4</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M073_5</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M074</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M075</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">50</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">54</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M076</code></td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">82</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M078</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">18</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M079</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">94</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">84</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M080</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M081</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">46</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M082</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M083</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">53</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M090</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">96</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M091</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M091_2</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M091_3</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">36</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">21</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M091_4</code></td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">77</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M098</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M099</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M200</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M201</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M202</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">92</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M203</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">71</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP03</td>
+  <td><code>M204</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">47</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM001</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">14</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM003</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM003_2</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">38</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM003_3</code></td>
+  <td style="text-align:right">19</td>
+  <td style="text-align:right">245</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">68</td>
+  <td style="text-align:right">5</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM005</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">106</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">38</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM007</code></td>
+  <td style="text-align:right">3</td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">29</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM008</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM011</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM013</code></td>
+  <td style="text-align:right">7</td>
+  <td style="text-align:right">23</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM013_2</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM014</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM015</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">22</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM018</code></td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">20</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">17</td>
+  <td style="text-align:right">3</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM019</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP04</td>
+  <td><code>DM020</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">2</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">32</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM002</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">12</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM005_2</code></td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">90</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">15</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM006_2</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">50</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM007_2</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">44</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM009</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM010</code></td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">38</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">8</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM012</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">45</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM014_2</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">4</td>
+  <td style="text-align:right">11</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM016</code></td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">16</td>
+  <td style="text-align:right">26</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM017</code></td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">51</td>
+  <td style="text-align:right">9</td>
+  <td style="text-align:right">48</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM021</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">1</td>
+  <td style="text-align:right">6</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM022</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">13</td>
+  <td style="text-align:right">27</td>
+  <td style="text-align:right">0</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM023</code></td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">67</td>
+  <td style="text-align:right">5</td>
+  <td style="text-align:right">31</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>MP05</td>
+  <td><code>DM024</code></td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">0</td>
+  <td style="text-align:right">10</td>
+  <td style="text-align:right">28</td>
+  <td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="how-to-interpret-exceptions">How to interpret exceptions</h2>
+<ul>
+<li>Five target route groups and eleven target spawn groups are empty. Separately, the pair audit finds 21 <strong>reference-only</strong> empty groups (5 route + 5 shape + 11 spawn) in 18 missions; these are not necessarily identical inventory concepts.</li>
+<li>Almost every shape has standard target <code>Usage</code> / <code>通常</code> metadata (<strong>1,354 of 1,355</strong>). <code>M061</code> has the single exceptional camera-named reference shape without that descriptor; it is not evidence for a generic no-metadata rule.</li>
+<li>The adjacent <a href="edf5-edf6-mission-rmpa-reference-tuning-and-ac-dependencies.html">reference-tuning casebook</a> lists why static name closure and actual gameplay behavior must be kept separate.</li>
+<li><a href="missions-%26-scripting-mission-rmpa-binary-records-groups-and-global-identities.html">MISSION.RMPA binary layout</a> describes record sizes, alignment and the route-local-to-file-global numbering conversion.</li>
+</ul>
+<p><strong>Source:</strong> <code>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_TARGET_PROFILE_SHIPPING141_AUDIT_2026-08-27.json</code> and <code>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_SHIPPING141_REFERENCE_PAIR_AUDIT_2026-08-27.json</code>. Read-only audit of an already recovered corpus; no new native game test in R118.</p>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_TARGET_PROFILE_SHIPPING141_AUDIT_2026-08-27.json</li><li>EDF5_EDF6_RESEARCH/research/active/MISSION_RMPA/R1/MISSION_RMPA_SHIPPING141_REFERENCE_PAIR_AUDIT_2026-08-27.json</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#what-this-corpus-actually-contains">What this corpus actually contains</a><a href="#per-mission-catalogue">Per-mission catalogue</a><a href="#how-to-interpret-exceptions">How to interpret exceptions</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf5-edf6-mission-rmpa-141-mission-record-catalog"};</script><script src="../assets/site.js" defer></script></body></html>

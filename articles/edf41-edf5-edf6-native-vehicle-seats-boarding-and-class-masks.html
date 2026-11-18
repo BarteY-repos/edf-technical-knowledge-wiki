@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Vehicle boarding across EDF4.1, EDF5 and EDF6: seat masks and ownership Evidence: Native VehicleBase/soldier analysis in the EDF Knowledge Hub, with build-scope"><title>Vehicle boarding in EDF4.1, 5 and 6: seats, class masks and team gates | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 581 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-compatibility.html">Conversion</a> / <a href="docs-gameplay.html">Gameplay &amp; AI</a></div><h1>Vehicle boarding in EDF4.1, 5 and 6: seats, class masks and team gates</h1><div class="meta"><span class="chip">Conversion</span><span class="chip">Game technical references</span><span class="chip">Gameplay &amp; AI</span><span class="chip">EDF 4.1</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Static/source-backed community evidence; verified test results identified separately; no R117 native runtime tests</div><div id="articleBody"><p><strong>Evidence:</strong> Native <code>VehicleBase</code>/soldier analysis in the <em>EDF Knowledge Hub</em>, with build-scoped observations for EDF4.1 (<code>steam-57aab039</code>), EDF5 (<code>steam-5d11de53</code>) and EDF6 (<code>steam-678ccb46</code>). This is a <strong>comparative game-mechanics reference</strong>, not a guide to any custom vehicle plugin.</p>
+<h2 id="the-same-sgo-concepts-do-not-imply-identical-runtime-structures">The same SGO concepts do not imply identical runtime structures</h2>
+<p>All three games recognize source concepts such as <code>vehicle_riding_position</code>, <code>vehicle_weapon_setting</code>, <code>animation_model</code>, <code>ragdoll</code> and <code>vehicle_damage_effect</code>. However, the in-memory structures and native seat authorization changed:</p>
+<table>
+<thead>
+<tr>
+  <th>Observed detail</th>
+  <th>EDF4.1</th>
+  <th>EDF5</th>
+  <th>EDF6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Seat record stride</td>
+  <td><strong>0x180</strong> bytes</td>
+  <td><strong>0x340</strong> bytes</td>
+  <td><strong>0x340</strong> bytes</td>
+</tr>
+<tr>
+  <td>Seat table within <code>VehicleBase</code></td>
+  <td>data/count at <code>+0x328/+0x338</code></td>
+  <td>data/count at <code>+0x418/+0x428</code></td>
+  <td>seats at <code>+0x608</code>; count <code>+0x618</code></td>
+</tr>
+<tr>
+  <td>Boarding class gate</td>
+  <td><code>human.vehicle_mask &amp; seat.mask</code></td>
+  <td>richer seat authorization (source also compares player class/team)</td>
+  <td><code>human+0x31C &amp; seat+0x34 &amp; seat+0x30 != 0</code></td>
+</tr>
+<tr>
+  <td>Team test in seat eligibility</td>
+  <td><strong>Absent</strong> from the examined EDF4.1 <code>CanRide</code></td>
+  <td>Present in the native seat authorization family</td>
+  <td>Present; includes the special team-5 and bit-7 rule</td>
+</tr>
+<tr>
+  <td>AI vehicle rider</td>
+  <td><code>DummyVehicleRider</code> in identified creation paths</td>
+  <td><code>DummyVehicleRider</code>-based path</td>
+  <td>Includes native <code>RideAi</code>/vehicle-specific behavior</td>
+</tr>
+</tbody>
+</table>
+<p>These are memory-layout observations, not offsets to use indiscriminately in a different game version.</p>
+<h2 id="edf4-1-a-comparatively-simple-class-mask-and-distance-test">EDF4.1: a comparatively simple class-mask and distance test</h2>
+<p><code>CanRide</code> checks that the human's <code>game_object_vehicle_mask</code> intersects the seat mask, that the seat has no rider, and that the human is close enough to the MAB-derived riding point. In the examined build the point-radius threshold includes an additional 0.5. Unlike EDF5/6, this particular <code>CanRide</code> path has <strong>no team gate</strong> and no second seat mask.</p>
+<p>A separate <code>FindSeat</code> route chooses the first eligible seat and updates a per-seat change-bit field. The vehicle's team may follow the highest-numbered live occupied rider in the audited update loop. This is relevant to native AI/vehicle relation changes, not evidence of a universal player-vehicle command system.</p>
+<h2 id="edf6-masks-are-class-identities-not-seat-numbers">EDF6: masks are class identities, not seat numbers</h2>
+<p>The inspected EDF6 <code>game_object_vehicle_mask</code> values use one bit for each infantry class:</p>
+<table>
+<thead>
+<tr>
+  <th>Class</th>
+  <th style="text-align:right">Source mask bit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Ranger</td>
+  <td style="text-align:right">1</td>
+</tr>
+<tr>
+  <td>Wing Diver</td>
+  <td style="text-align:right">2</td>
+</tr>
+<tr>
+  <td>Fencer</td>
+  <td style="text-align:right">4</td>
+</tr>
+<tr>
+  <td>Air Raider</td>
+  <td style="text-align:right">8</td>
+</tr>
+</tbody>
+</table>
+<p>A seat is eligible only if the <strong>intersection of all three masks</strong> is nonzero (<code>human class mask</code>, seat class mask and seat access mask). Occupancy is checked through the native weak rider control. Vehicles in team 5 have a special eligibility path; for a different team, an additional seat bit-7 permission can apply. The precise checks are in the source appendix; the team relationship is not equivalent to a bare “vehicle friendly/hostile” bool.</p>
+<p>The EDF6 vehicle stores the rider at <code>seat+0x260</code>. Seat change bits are separate from occupancy and allow the native code to select <strong>boarding</strong> versus <strong>leaving</strong> sounds; hearing a boarding sound on a non-boarding action may therefore indicate a stale or misapplied seat-change state rather than an audio resource problem.</p>
+<h2 id="displayed-seat-name-and-rider-animation-are-different-resources">Displayed seat name and rider animation are different resources</h2>
+<p>In the audited EDF6 seat configuration, <code>vehicle_riding_position[i][3]</code> is a <strong>text-table key</strong> such as “Pilot Seat” or “Machine Gun - Left”. It is not the animation name. The rider's visual pose is selected using the seat locator's MAB parameters (<code>Animation</code>, <code>DispCharacter</code>) and the rider's CAS animation state.</p>
+<p>This distinction matters when an imported vehicle shows the right seat label but the wrong character pose, or plays a boarding sound despite no actual rider transition.</p>
+<h2 id="network-ride-events-are-distinct-from-physics-ownership">Network ride events are distinct from physics ownership</h2>
+<p>EDF4.1 has explicit online vehicle ride/leave events with a seat index and sequence/counter; EDF5 likewise has online ride events. EDF6 retains event-driven ride state with its own native fields. A visible vehicle in the scene does not prove that a remote player has the same seat assignment or weapon-input authority. Cross-generation multiplayer parity therefore requires a seat-event and entity-owner check, not just geometry.</p>
+<h2 id="source-and-limitations">Source and limitations</h2>
+<ul>
+<li><a href="kh-edf41-vehicles.html">EDF4.1 native vehicle observations</a>: <code>edf41-vehiclebase-ctor-keys</code>, <code>edf41-boarding-checks</code>, <code>edf41-ride-net-events</code>.</li>
+<li><a href="kh-edf5-vehicles.html">EDF5 native vehicle observations</a>: <code>edf5-vehiclebase-ctor-keys</code>, <code>edf5-boarding-checks</code> and ride events.</li>
+<li><a href="kh-edf6-vehicles.html">EDF6 native vehicle observations</a>: <code>boarding-checks</code>, <code>seat-class-masks</code>, <code>seat-name-rider-pose</code>, <code>vehicle-seat-change-bits</code>.</li>
+<li><a href="cross-game-conversion-edf4-1-vehicles-v301-v408-v406-runtime-abi.html">EDF4.1 vehicles ported into EDF6: separate class contracts</a>.</li>
+</ul>
+<p><strong>Attribution:</strong> novae (ajane), <em>EDF Knowledge Hub</em> (2026-11-14, revision <code>54f89cd</code>) and original per-fact third-party contributors. No new online or vehicle runtime test is claimed.</p>
+<h2 id="related-native-edf6-networking-systems">Related native EDF6 networking systems</h2>
+<ul>
+<li><a href="edf6-air-raider-online-delivery-transporters-and-derived-network-identity.html">Online vehicle delivery and registration</a></li>
+</ul>
+<h2 id="additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</h2>
+<ul>
+<li><a href="edf6-vehicle-native-gear-fuel-and-recoil-data.html">Gear, fuel and recoil data in EDF6</a></li>
+</ul>
+</div><details class="source-details"><summary>Evidence and source references</summary><p>Technical claims retain their source/evidence scope. Some internal inputs are not included in the public package.</p><ul class="sourcelist"><li>EDF Knowledge Hub export 2026-11-14, revision 54f89cd, compiled by novae (ajane), with original per-fact contributors</li><li>Current R117 editorial cross-check against retained EDF game research</li></ul></details></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-same-sgo-concepts-do-not-imply-identical-runtime-structures">The same SGO concepts do not imply identical runtime structures</a><a href="#edf4-1-a-comparatively-simple-class-mask-and-distance-test">EDF4.1: a comparatively simple class-mask and distance test</a><a href="#edf6-masks-are-class-identities-not-seat-numbers">EDF6: masks are class identities, not seat numbers</a><a href="#displayed-seat-name-and-rider-animation-are-different-resources">Displayed seat name and rider animation are different resources</a><a href="#network-ride-events-are-distinct-from-physics-ownership">Network ride events are distinct from physics ownership</a><a href="#source-and-limitations">Source and limitations</a><a href="#related-native-edf6-networking-systems">Related native EDF6 networking systems</a><a href="#additional-native-edf6-mechanics-references">Additional native EDF6 mechanics references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"edf41-edf5-edf6-native-vehicle-seats-boarding-and-class-masks"};</script><script src="../assets/site.js" defer></script></body></html>
