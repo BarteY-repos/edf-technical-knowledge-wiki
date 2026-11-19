@@ -37,7 +37,39 @@
    }
   });
  }
- const topicNames=['File Formats','Shaders','Models','Textures','Animation','Audio','Maps','Collision & Physics','Navigation','Missions','Scripting','Networking','Gameplay & AI','Resource Loading','Performance','Conversion','Troubleshooting'];
+ // R207: keep original claim-level credits available without repeating them in every reading path.
+ function compactClaimCredits(){
+  const article=$('#out article');
+  if(!article)return;
+  const rows=[...article.querySelectorAll('#articleBody p')].filter(p=>{
+   const first=p.firstElementChild;
+   return first?.tagName==='STRONG' && /^Attribution:\s*$/i.test(first.textContent.trim()) && /^Attribution:\s*/i.test(p.textContent.trim());
+  });
+  for(const p of rows)p.classList.add('claim-credit');
+  if(rows.length)document.body.classList.add('credits-collapsed');
+  if(cfg.article==='materials-used')return;
+  const footer=document.createElement('footer');
+  footer.className='materials-footer';
+  const blurb=document.createElement('p');
+  blurb.innerHTML='Sources and acknowledgments: <a href="'+prefix+'materials-used.html">Materials used</a>.';
+  footer.appendChild(blurb);
+  if(rows.length){
+   const toggle=document.createElement('button');
+   toggle.type='button';
+   toggle.className='credits-toggle';
+   toggle.setAttribute('aria-pressed','false');
+   toggle.textContent='Show claim credits';
+   toggle.addEventListener('click',()=>{
+    const visible=document.body.classList.toggle('credits-collapsed');
+    toggle.textContent=visible?'Show claim credits':'Hide claim credits';
+    toggle.setAttribute('aria-pressed',String(!visible));
+   });
+   footer.appendChild(toggle);
+  }
+  article.appendChild(footer);
+ }
+ compactClaimCredits();
+  const topicNames=['File Formats','Shaders','Models','Textures','Animation','Audio','Maps','Collision & Physics','Navigation','Missions','Scripting','Networking','Gameplay & AI','Resource Loading','Performance','Conversion','Troubleshooting'];
  const groups=['Universal','EDF 4.1','EDF 5','EDF 6','Conversion'];
  const aliases={
   'edf5-online-crate-spawn-pickup-protocol-end-to-end-states':'edf5-online-crate-pickup-types-host-dedup-remote-mark',
@@ -68,6 +100,7 @@
   for(const id of ['docs-home','docs-universal','docs-edf41','docs-edf5','docs-edf6','docs-compatibility','docs-community-knowledge-hub']){
    const a=byId.get(id);if(a)html+=link(a,id==='docs-home'||id==='docs-community-knowledge-hub');
   }
+  html+='<a class="docnav featured '+(cfg.article==='materials-used'?'active':'')+'" href="'+prefix+'materials-used.html">Materials used</a>';
   html+='<div class="sectionheading">Topics</div>';
   for(const name of topicNames){const a=topicDoc.get(name);if(a&&(!domain.value||domain.value===name))html+=link(a,true)}
   const fixed=new Set(['docs-home','docs-universal','docs-edf41','docs-edf5','docs-edf6','docs-compatibility','docs-community-knowledge-hub',...topicNames.map(x=>topicDoc.get(x)?.id)]);

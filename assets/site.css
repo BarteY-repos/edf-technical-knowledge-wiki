@@ -42,3 +42,9 @@ br.source-clause-break{display:block;content:"";margin-bottom:.35rem}
  .articles{min-width:0;overflow-wrap:anywhere}
  .articles img,.articles video{max-width:100%;height:auto}
 }
+
+/* R207: source acknowledgments stay accessible without dominating article text. */
+body.credits-collapsed #articleBody p.claim-credit{display:none}
+.materials-footer{border-top:1px solid var(--line);margin:38px 0 0;padding:12px 0;color:var(--muted);font-size:13px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.materials-footer p{margin:0}.materials-footer .credits-toggle{font-size:12px;padding:5px 9px}
+.credits-names{line-height:1.85}.materials-list li{margin:10px 0}
