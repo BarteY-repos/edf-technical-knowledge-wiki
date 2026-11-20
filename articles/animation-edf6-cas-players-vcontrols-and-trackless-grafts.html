@@ -20,11 +20,11 @@
 </tr>
 <tr>
   <td style="text-align:right"><code>+0x04</code></td>
-  <td>Mode flag; <code>0</code> plain variable, <code>1</code> follows a tcontrol</td>
+  <td>Variable storage type in the EDF6 native-controller reading: <code>0</code> float, <code>1</code> int, <code>2</code> matrix</td>
 </tr>
 <tr>
   <td style="text-align:right"><code>+0x08</code></td>
-  <td>Variable kind</td>
+  <td>Role/tag <code>0..3</code> in the sampled CAS files; proposed internal/input/constant/tuning meanings are a name-based inference, not an engine branch on this word</td>
 </tr>
 <tr>
   <td style="text-align:right"><code>+0x0C</code></td>
@@ -32,17 +32,17 @@
 </tr>
 <tr>
   <td style="text-align:right"><code>+0x10</code></td>
-  <td>Additional word / tcontrol index when applicable</td>
+  <td>Initial <code>int32</code> value in the native VControl interpretation; do not treat it as a generic TControl index</td>
 </tr>
 </tbody>
 </table>
-<p>A bounded graft may copy <strong>plain</strong> donor variables that the source CAS lacks. Variables coupled to another tcontrol require extra index rewriting and were intentionally refused by the retained safe implementation.</p>
+<p><strong>Source conflict resolved:</strong> the retained source-only <code>cas_graft.py</code> copies only donor VControls whose <code>+0x04</code> word is <code>0</code>; it rejects all other values. Its comment interprets <code>+0x04 = 1</code> as a variable following a TControl, with <code>+0x10</code> as its index. The independent EDF6 CAS parser/Ghidra account instead identifies <code>+0x04</code> as the variable's <em>float/int/matrix type</em> and <code>+0x10</code> as an integer initial value. The source-only graft's conservative <code>+0x04 = 0</code> restriction remains a valid description of what that code copies, but the asserted universal TControl coupling is <strong>not established</strong>. Int and matrix variables require separate type-aware compatibility checks.</p>
 <h2 id="trackless-grafting-for-target-runtime-compatibility">Trackless grafting for target-runtime compatibility</h2>
 <p>The source-compatible approach does <strong>not</strong> copy the donor's animation motion onto the EDF4.1 model. It inserts only missing <em>named player/controller structures</em> and appends <strong>trackless CANM clips</strong> preserving their donor <strong>names, loop flag, duration, step and frame count</strong>. The target class can find and trigger the required control paths without moving alien donor bones.</p>
 <p>The measured graft procedure:</p>
 <ol>
 <li>Parse the source-compatible EDF6 CAS and the EDF6 donor CAS; reject other/unknown generations.</li>
-<li>Find target-required <code>anmgroup</code> names and plain <code>vcontrol</code> names that are missing from the source CAS.</li>
+<li>Find target-required <code>anmgroup</code> names and eligible float-type (<code>+0x04 = 0</code>) <code>vcontrol</code> names missing from the source CAS.</li>
 <li>Append donor animation groups and their associated <code>tcontrols</code>, <strong>renumbering</strong> control indices against the target's existing table.</li>
 <li>Append corresponding CANM clips, but with <strong>zero tracks</strong>, and remap old clip indices inside appended tcontrols.</li>
 <li>Recompute signed relative offsets for strings and records after the new clip table has grown.</li>

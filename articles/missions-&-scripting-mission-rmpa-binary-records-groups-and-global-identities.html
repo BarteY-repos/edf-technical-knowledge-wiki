@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Mission RMPA: binary groups, waypoint IDs and serialization pitfalls Scope: The EDF5 → EDF6 source-only mission RMPA profile established from paired mission res"><title>Mission RMPA: binary groups, waypoint IDs and serialization pitfalls | EDF 4.1 / 5 / 6 Technical Knowledge Wiki</title><link rel="stylesheet" href="../assets/site.css"></head><body><a class="skip-link" href="#out">Skip to main content</a><header><strong><a class="brand" href="../index.html">EDF Technical Knowledge Wiki</a></strong><input id="q" type="search" placeholder="Search Shaders, MDB, Missions… (Ctrl+K)" aria-label="Search"><div class="tools"><select id="version" aria-label="Game or scope"><option value="">All games</option><option value="Universal">Universal</option><option value="EDF 4.1">EDF 4.1</option><option value="EDF 5">EDF 5</option><option value="EDF 6">EDF 6</option><option value="Conversion">Conversion</option></select><select id="domain" aria-label="Topic"><option value="">All topics</option></select><select id="evidence" aria-label="Evidence"><option value="">All evidence</option><option>Runtime</option><option>Exact native</option><option>Reconciled</option><option>Reference</option><option>Unresolved</option></select><button id="notesToggle" aria-pressed="false" title="Show detailed research and case-study entries in the sidebar">Research pages</button><button id="theme">Dark / Light</button></div></header><main><aside><div class="warn"><strong>Browse topics or games.</strong> Universal explains shared concepts; game pages show version-specific rules. Research notes are available separately. <a href="../all-articles.html">All 595 articles</a>.</div><div id="nav"><p class="meta">Loading article navigation…</p></div></aside><section id="out" class="articles" tabindex="-1"><article id="article-start"><div class="breadcrumb"><a href="../index.html">Documentation</a> / <a href="docs-universal.html">Universal</a> / <a href="docs-missions.html">Missions</a></div><h1>Mission RMPA: binary groups, waypoint IDs and serialization pitfalls</h1><div class="meta"><span class="chip">Universal</span><span class="chip">Missions &amp; Scripting</span><span class="chip">Missions</span><span class="chip">EDF 5</span><span class="chip">EDF 6</span></div><div class="referencebadge">Technical reference · Reconciled: source-owned writer + exact paired corpus</div><div id="articleBody"><p><strong>Scope:</strong> The EDF5 → EDF6 source-only mission RMPA profile established from paired mission resources and the retained <code>rmpa_source_only.py</code> writer. Mission RMPA is <strong>not the same format contract</strong> as map RMPA or the RMPA embedded in an MAE weather resource.</p>
 <h2 id="file-and-group-layout">File and group layout</h2>
-<p>The measured EDF6 output begins with a <strong>0x30-byte file header</strong>. Its principal 32-bit fields are <strong>big-endian</strong> (unlike the little-endian NVMD file). The first four bytes are <code>00 50 4D 52</code> (<code>\0PMR</code>), followed by version <strong>1</strong>.</p>
+<p>The older source-only writer emits a <strong>0x30-byte initial header span</strong>, whereas the newer native-parser reconstruction identifies a <strong>0x28-byte logical file header</strong> (signature/version and four section count/offset pairs). The extra 8 bytes of writer footprint are not proven native header fields. Principal fields are <strong>big-endian</strong>, unlike the little-endian NVMD family. The magic is <code>00 50 4D 52</code> (<code>\0PMR</code>) and the examined version is <strong>1</strong>.</p>
 <p>Four top-level group sections are referenced independently: <strong>routes, shapes, camera and spawn points</strong>. The audited writer places the first route type header at <code>0x30</code> and the first waypoint record at <code>0x50</code>.</p>
 <table>
 <thead>
@@ -15,12 +15,12 @@
 <tr>
   <td>File header</td>
   <td><code>0x30</code> bytes</td>
-  <td>Version and group offsets/counts</td>
+  <td>Older writer's initial span; native logical header is <code>0x28</code></td>
 </tr>
 <tr>
   <td>Group type header</td>
   <td><code>0x20</code> bytes</td>
-  <td>Group and string-table references</td>
+  <td>Older writer's group-type span; native route section <code>0x1C</code>, other section <code>0x14</code></td>
 </tr>
 <tr>
   <td>Waypoint</td>
@@ -35,7 +35,7 @@
 <tr>
   <td>Shape</td>
   <td><code>0x24</code>-byte header plus <code>0x40</code>-byte payload; standard <code>0x10</code> metadata</td>
-  <td>Shape name/type and geometry</td>
+  <td>Older writer footprint; native shape payload is <code>0x38</code>, a distinct record-level measure</td>
 </tr>
 <tr>
   <td>Spawn point</td>
@@ -44,7 +44,7 @@
 </tr>
 </tbody>
 </table>
-<p>Some small descriptors are stored <strong>little-endian even though primary records are big-endian</strong>. An implementation must inspect each field rather than treating the whole file as one homogeneous byte order.</p>
+<p>Some small descriptors are stored <strong>little-endian even though primary records are big-endian</strong>. In the measured native profile, <strong>signed property-string offsets inside 8-byte property entries are little-endian and entry-relative</strong>. A route <em>type-header</em> string pointer is reported at <code>+0x18</code>; the <code>+0x1C</code> pointer cited in older notes belongs to an <em>enumeration subheader</em>, not that type header. These offsets are relative to their respective record bases. Do not treat the older <code>0x20</code> group writer, native <code>0x1C</code>/<code>0x14</code> sections and map-owned RMPA as interchangeable layouts.</p>
 <h2 id="why-route-ids-change-in-a-conversion">Why route IDs change in a conversion</h2>
 <p>EDF5 route groups can number waypoints locally. The studied EDF6 profile uses <strong>one flattened global waypoint sequence</strong>. A local outgoing <code>next</code> reference must be translated by the containing route group's starting position.</p>
 <p><strong>For <code>MISSION.RMPA</code> specifically</strong>, the independently audited <code>mission_rmpa_source_only.py</code> builder flattens waypoint records across source route groups in file order and assigns <code>waypoint.no = 0, 1, …, N−1</code>. Each source <code>waypoint.gid</code> remains a <strong>separate, preserved identity</strong>, and route-local <code>next</code> indices are rebased to global waypoint indices by adding the route group's cumulative start offset. The 141-mission source/target audit confirms this global numbering, GID conservation, next-link rebasing and width conservation for <strong>5,103/5,103</strong> waypoints.</p>
@@ -52,7 +52,7 @@
 <h2 id="alignment-and-string-addressing">Alignment and string addressing</h2>
 <p>In the inspected <strong>mission</strong> writer, per-waypoint next-link arrays are padded to <strong>16-byte</strong> alignment when nonempty, and the <strong>route-group membership arrays also begin at 16-byte boundaries</strong>. The shape and spawn areas have independent 16-byte alignment rules. The shared UTF-16BE string table begins with the writer's <strong>two-byte zero anchor</strong>; an alleged eight-byte route-list prefix belongs to a different studied writer/packing context and is <strong>not</strong> a rule of this mission RMPA implementation.</p>
 <p>String records are UTF-16BE in the examined source-only profile, with a two-byte zero prefix. Several references are <strong>record-relative or field-relative</strong>, not absolute file pointers. Treat the base of each offset as part of its individual record's specification.</p>
-<p>One older RMPA description conflated a type-header field with an enumeration-subheader field near <code>0x1C</code>; the later correction stressed that <strong>field offsets are meaningful only relative to the correct structure base</strong>. Do not paste a context-free <code>0x18</code>/<code>0x1C</code> pointer rule into all RMPA variants.</p>
+<p>The record-relative offset base is part of the field contract. For the native route type header, resolve its <code>+0x18</code> string reference from that type header; do not substitute an enumeration subheader's <code>+0x1C</code> reference or an absolute file offset. Map-owned and MAE RMPA require separately proven record layouts.</p>
 <h2 id="validation">Validation</h2>
 <ol>
 <li>Check <code>\0PMR</code> and version, all four group ranges, and internal section counts.</li>

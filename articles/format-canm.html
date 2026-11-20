@@ -34,8 +34,34 @@
 </tr>
 </tbody></table>
 <p>The cross-generation research also measured <strong>28-byte clips</strong>, <strong>8-byte tracks</strong> and four target channel kinds. These measurements belong to the examined conversion profiles. A simple version-field change is not equivalent to decoding older values and serializing the target channel representation.</p>
+<h2 id="worked-sampling-example">Worked example: reading animation samples</h2>
+<p>Consider an <strong>illustrative EDF6 clip</strong> with four pose samples and a sample interval of <code>0.1</code> engine time units. Normally the stored clip duration is <code>(4 - 1) × 0.1 = 0.3</code> time units. The interval says how far apart samples are; it is not a separate playback-speed multiplier.</p>
+<ol>
+<li>At time <code>t = 0.15</code>, the sampler computes <code>t / interval = 1.5</code>.</li>
+<li>The integer part, <code>1</code>, selects the second stored sample (indices start at zero).</li>
+<li>The fractional part, <code>0.5</code>, blends halfway toward the third sample.</li>
+</ol>
+<p>The clip duration controls the higher-level lifetime or completion time; the sample interval controls how quickly the stored poses are traversed. The documented EDF6 runtime treats these as separate values. If the declared sample count exceeds the real channel data, an unchecked sample read can reach adjacent bytes and produce invalid poses. This is an explanation of the published runtime findings, not a new in-game test.</p>
 <h2 id="clip-and-track-records">Clip and track records</h2>
-<p>The studied CANM family begins with a <strong><code>0x20</code>-byte header</strong>. Its <strong>28-byte clip records</strong> hold a name reference, duration, sampling/frame interval, frame count and track count/location. A track occupies <strong>8 bytes</strong> and links a bone to at most three channels:</p>
+<p>The studied CANM family begins with a <strong><code>0x20</code>-byte header</strong>. Header offsets below are file-relative because the header starts at file offset zero; table-entry references elsewhere are relative to their containing entry in the documented source format.</p>
+<table><thead><tr><th>Header offset</th><th>Type</th><th>Field</th></tr></thead><tbody>
+<tr><td><code>+0x00</code></td><td><code>char[4]</code></td><td><code>CANM</code> signature</td></tr>
+<tr><td><code>+0x04</code></td><td><code>u32</code></td><td>Version: studied <code>0x200</code> / <code>0x300</code></td></tr>
+<tr><td><code>+0x08</code> / <code>+0x0C</code></td><td><code>u32</code> × 2</td><td>Animation-clip count / clip table offset</td></tr>
+<tr><td><code>+0x10</code> / <code>+0x14</code></td><td><code>u32</code> × 2</td><td>Channel count / channel table offset</td></tr>
+<tr><td><code>+0x18</code> / <code>+0x1C</code></td><td><code>u32</code> × 2</td><td>Bone-name count / bone-name table offset</td></tr>
+</tbody></table>
+<p>Each <strong><code>0x1C</code>-byte clip record</strong> has a separate playback clock and sample layout:</p>
+<table><thead><tr><th>Clip offset</th><th>Type</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>+0x00</code></td><td><code>u32</code></td><td>Loop flag (observed <code>0</code> or <code>1</code>)</td></tr>
+<tr><td><code>+0x04</code></td><td><code>i32</code></td><td>Relative UTF-16LE animation-name reference</td></tr>
+<tr><td><code>+0x08</code></td><td><code>f32</code></td><td>Clip lifetime/completion time</td></tr>
+<tr><td><code>+0x0C</code></td><td><code>f32</code></td><td>Sample interval</td></tr>
+<tr><td><code>+0x10</code></td><td><code>u32</code></td><td>Declared playback sample count</td></tr>
+<tr><td><code>+0x14</code> / <code>+0x18</code></td><td><code>u32</code> / <code>i32</code></td><td>Track count / relative track-table offset</td></tr>
+</tbody></table>
+<p>For multi-sample looping clips, the researched sampler wraps across <code>N - 1</code> sample intervals; for non-looping clips it clamps at the final sample pair. Single-sample clips need their own interval handling. The three fields lifetime, interval and count are consumed independently. The usual relationship <code>lifetime = (N - 1) × interval</code> describes the examined multi-sample files, not a loader-enforced invariant.</p>
+<p>A track occupies <strong>8 bytes</strong> and links a bone to at most three channels:</p>
 <table>
 <thead>
 <tr>
@@ -48,24 +74,25 @@
 <td>Identifies the animated target bone in the owning model context</td>
 </tr>
 <tr>
-<td><code>int16</code> translation channel index</td>
-<td><code>-1</code> means no translation channel</td>
+<td><code>uint16</code> translation channel index</td>
+<td><code>0xFFFF</code> means no translation channel (often represented as signed <code>-1</code> by tools)</td>
 </tr>
 <tr>
-<td><code>int16</code> rotation channel index</td>
-<td><code>-1</code> means no rotation channel</td>
+<td><code>uint16</code> rotation channel index</td>
+<td><code>0xFFFF</code> means no rotation channel</td>
 </tr>
 <tr>
-<td><code>int16</code> scale channel index</td>
-<td><code>-1</code> means no scale channel</td>
+<td><code>uint16</code> scale channel index</td>
+<td><code>0xFFFF</code> means no scale channel</td>
 </tr>
 </tbody></table>
-<p>An index only establishes a channel connection. Its payload still has to be decoded using the relevant CANM version and channel kind.</p>
+<p>An index only establishes a channel connection. Its payload still has to be decoded using the relevant CANM version and channel kind. The examined EDF6 runtime bone-mapping cache uses an <strong>8-bit matched-bone index</strong>; that suggests a practical ceiling of 255 mapped bones for that consumer, <strong>not</strong> a <code>u8</code> file field or a proven universal format limit.</p>
 <h2 id="how-the-channel-values-are-encoded">How the channel values are encoded</h2>
 <h3 id="source-generation-canm-0x200">Source-generation CANM <code>0x200</code></h3>
 <p>The examined <strong><code>0x20</code>-byte channel</strong> includes a keyed/static indicator, key count, three float32 base components, three float32 step/multiplier components and a key-data offset. Animated XYZ components are quantized as <code>uint16</code> values. The source reconstruction evaluates a component as:</p>
 <p><code>float32(base + float32(key_uint16 * step))</code></p>
 <p>For the studied animated rotation channels, the reconstructed XYZ values are Euler <strong>radians</strong>, with the source rotation composition <code>Rz · Ry · Rx</code>. The float32 evaluation sequence is material when comparing exact converted output.</p>
+<p><strong>Legacy exception to check:</strong> the EDF_Tools-derived <code>CANM v512</code> source note also describes a channel tag <code>625</code> (<code>0x271</code>) with four uncompressed <code>float32</code> values per frame (<code>0x10</code> bytes/key). This is a <em>guide-reported alternate encoding</em>, not EDF6's <code>kind 2/3</code> and not a demonstrated member of every EDF4.1/EDF5 file. The retained R10 HF4 R9 converter accepts only the separately measured old keyed/static flag <code>0/1</code> profile and rejects other channel tags. Do not silently decode <code>625</code> as three <code>uint16</code> Euler values or claim that the converter covers it.</p>
 <h3 id="target-generation-canm-0x300">Target-generation CANM <code>0x300</code></h3>
 <p>The measured channel expands to <strong><code>0x30</code> bytes</strong>: eight float32 values representing base and multiplier XYZW, followed by four signed 32-bit fields (key offset, kind, count and reserved).</p>
 <table>
@@ -98,6 +125,7 @@
 </tr>
 </tbody></table>
 <p>The studied native quaternion loading path requires <strong>16-byte alignment</strong> of quaternion key blocks. These record kinds and alignment constraints come from the retained target-generation corpus, not from a new parser or a claim about arbitrary future CANM variants.</p>
+<p><strong>November 2026 alignment correction:</strong> the <em>channel table itself</em> must also start at a <strong>16-byte-aligned address</strong> in the examined EDF6 loader. Track evaluation uses an aligned SIMD read (<code>movaps</code>) of channel quaternion/base values; the <code>0x30</code>-byte row stride preserves alignment only if the table start is aligned. The source compared a stock aligned table (for example <code>0x1680</code>) with a tool-generated CAS table at <code>0x6DDE4</code> (<code>4 mod 16</code>) and a matching crash dump. This is a source-reported dump and engine-code observation, not a fresh test here. Do not confuse <em>channel table alignment</em> with the separate quaternion key-block requirement.</p>
 <h2 id="why-a-numerical-conversion-needs-evidence">Why a numerical conversion needs evidence</h2>
 <p>In the documented EDF5/EDF6 work, animated quaternion values are not always bit-exactly reconstructible from already quantized source values. The measured conversion uses float32 Euler-to-quaternion behavior, and its correctness must be assessed within that precision boundary.</p>
 <p>Separately, a structurally valid clip can still fail to animate the intended target if its skeleton, controller names or other cross-references are wrong. Those dependencies belong to the <strong>whole animation resource graph</strong>, not the CANM bytes alone.</p>
@@ -116,6 +144,8 @@
 <li><a href="./animation-edf6-cas-players-vcontrols-and-trackless-grafts.html">CAS controllers and trackless grafts</a> — dependent controller constraints.</li>
 <li><a href="./format-cas.html">CAS — companion format</a>.</li>
 <li><a href="./animation-cas-canm-cross-generation-structure-and-key-conversion.html">Original measured CAS/CANM record and quantization study</a> — includes the exact numerical corpus and known exceptions.</li>
+<li><a href="https://github.com/KCreator/Earth-Defence-Force-Documentation/wiki/CANM-Format">Community CANM field reference</a> — original header, clip, channel and relative-offset descriptions, including the July 2026 timing update.</li>
 </ul>
 <p><strong>Provenance:</strong> Curated from the existing R193 animation documentation and its cited measured conversion research. This page adds no independent native or runtime finding.</p>
-<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-cas.html">CAS: animation players/controllers</a></li><li><a href="format-mab.html">MAB: animation events and locators</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-documented-role">The documented role</a><a href="#edf5-and-edf6-channel-differences">EDF5 and EDF6 channel differences</a><a href="#clip-and-track-records">Clip and track records</a><a href="#how-the-channel-values-are-encoded">How the channel values are encoded</a><a href="#source-generation-canm-0x200">　Source-generation CANM 0x200</a><a href="#target-generation-canm-0x300">　Target-generation CANM 0x300</a><a href="#why-a-numerical-conversion-needs-evidence">Why a numerical conversion needs evidence</a><a href="#reading-order-and-validation">Reading order and validation</a><a href="#source-backed-technical-chapters">Source-backed technical chapters</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-canm"};</script><script src="../assets/site.js" defer></script></body></html>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-cas.html">CAS: animation players/controllers</a></li><li><a href="format-mab.html">MAB: animation events and locators</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#the-documented-role">The documented role</a><a href="#edf5-and-edf6-channel-differences">EDF5 and EDF6 channel differences</a><a href="#worked-sampling-example">Worked example: animation samples</a><a href="#clip-and-track-records">Clip and track records</a><a href="#how-the-channel-values-are-encoded">How the channel values are encoded</a><a href="#source-generation-canm-0x200">　Source-generation CANM 0x200</a><a href="#target-generation-canm-0x300">　Target-generation CANM 0x300</a><a href="#why-a-numerical-conversion-needs-evidence">Why a numerical conversion needs evidence</a><a href="#reading-order-and-validation">Reading order and validation</a><a href="#source-backed-technical-chapters">Source-backed technical chapters</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-canm"};</script><script src="../assets/site.js" defer></script></body></html>
+

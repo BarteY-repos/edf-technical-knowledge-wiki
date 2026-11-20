@@ -8,6 +8,14 @@
 <li>A filename ending in <code>.SGO</code> is <strong>not sufficient</strong> to choose the decoder. EDF6 also has DSGO-encoded resources whose names end in <code>.SGO</code>.</li>
 </ul>
 <p>These are observed profiles, not a claim that every EDF generation or every resource uses an identical layout.</p>
+<p>The conventional SGO header exposed by the community format reference has the following <strong>six 32-bit words</strong> (<code>0x18</code> bytes). Read integer fields using the byte order established from the signature:</p>
+<table><thead><tr><th>Offset</th><th>Field</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>+0x00</code></td><td><code>char[4]</code></td><td><code>SGO\0</code> (little-endian profile) or reversed signature in the documented big-endian profile</td></tr>
+<tr><td><code>+0x04</code></td><td><code>u32</code></td><td>Version (observed <code>0x102</code> in the EDF5/EDF6 classic profile)</td></tr>
+<tr><td><code>+0x08</code> / <code>+0x0C</code></td><td><code>u32</code> × 2</td><td>Top-level variable count / variable-table position</td></tr>
+<tr><td><code>+0x10</code> / <code>+0x14</code></td><td><code>u32</code> × 2</td><td>Named-variable count / name-table position</td></tr>
+</tbody></table>
+<p>The separate name lookup has <strong>8-byte entries</strong>: a string reference at <code>+0x00</code> (relative to that entry in the examined layout) and a top-level variable index at <code>+0x04</code>. Validate that the index and decoded UTF-16 name stay within the file; the name-table count need not be silently substituted for the value count. The older source notes possible differences in EDF 2017, so this table is not a claim about that earlier generation.</p>
 <h2 id="the-basic-node-model">The basic node model</h2>
 <p>The documented little-endian SGO format uses a <strong>12-byte node</strong> containing three fields: <code>int type</code>, <code>int a</code>, and <code>uint b</code>. The interpretation of <code>a</code> and <code>b</code> depends on <code>type</code>.</p>
 <table>
@@ -45,6 +53,14 @@
 </tr>
 </tbody></table>
 <p>In the documented EDF6 layout, the top-level values are sorted by <strong>name</strong> using ordinal ordering. The name table references values by index and stores offsets relative to its own entries. Child blocks follow the top-level table in depth-first order; the name table and pooled names/string values follow later. The cited byte-for-byte round-trip result applies to the examined layout, not arbitrary unknown variants.</p>
+<h2 id="worked-typed-tree-example">Worked example: a small typed data tree</h2>
+<p>Imagine a <strong>fictional</strong> configuration with three named values. These names are for teaching the data model, not actual EDF field names:</p>
+<table><thead><tr><th>Name</th><th>SGO node type</th><th>Decoded value</th></tr></thead><tbody>
+<tr><td><code>Count</code></td><td><code>1</code> — integer</td><td><code>10</code></td></tr>
+<tr><td><code>Scale</code></td><td><code>2</code> — float</td><td><code>1.5</code></td></tr>
+<tr><td><code>Label</code></td><td><code>3</code> — string</td><td><code>"Sample"</code></td></tr>
+</tbody></table>
+<p>These values can be nested under a type-<code>0</code> array node. The parser learns how to read each value from its node type; the game decides what a name like <code>Scale</code> means through the resource-specific schema. The binary file stores a node table, relative offsets and name strings, not this illustrative table or JSON text.</p>
 <h2 id="what-sgo-files-contain">What SGO files contain</h2>
 <p>SGO is a container for <em>resource-specific</em> data. The research corpus includes configuration, layout/UI and object/weapon resource examples. A field that is meaningful in one resource&#39;s schema cannot be assumed to have the same meaning in another.</p>
 <p>For a concrete mission example, the studied <code>MISSIONLIST.OFFLINE.TXT.EN.SGO</code>-style name/description tables use classic SGO version 258. The associated <code>...LIST.SGO</code> resource uses DSGO instead. The resource name, binary signature and known schema must all be considered.</p>
@@ -66,6 +82,8 @@
 <li><a href="./formats-%26-containers-sgo-dsgo-and-resource-schema-boundaries.html">SGO/DSGO schemas and conversion boundaries</a> — why a serializer does not define the resource schema.</li>
 <li><a href="./formats-%26-containers-sgo-dsgo-merge-by-semantic-identity-not-byte-offset.html">SGO/DSGO semantic merging</a> — advanced, resource-aware merge rules, <strong>not</strong> the starting point for learning SGO.</li>
 <li><a href="./edf5-sgo-durability-level-adjust-and-82-record-catalog.html">EDF5 SGO resource-record catalog</a> — one source-scoped application, not a universal format schema.</li>
+<li><a href="https://github.com/KCreator/Earth-Defence-Force-Documentation/wiki/SGO-Format-(ENG)">Community SGO structural reference</a> — original header, variable and name-table field inventory.</li>
 </ul>
 <p><strong>Provenance:</strong> Reorganized from existing EDF5/EDF6 format research and the R193 reconciled SGO/DSGO reference. No additional reverse engineering or runtime qualification is claimed.</p>
-<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-dsgo.html">DSGO: distinct typed-resource family</a></li><li><a href="format-fmep.html">FMEP: terrain registration context</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#identifying-an-sgo-file">Identifying an SGO file</a><a href="#the-basic-node-model">The basic node model</a><a href="#what-sgo-files-contain">What SGO files contain</a><a href="#reading-or-converting-an-sgo-safely">Reading or converting an SGO safely</a><a href="#relationship-to-dsgo">Relationship to DSGO</a><a href="#technical-references-and-evidence-scope">Technical references and evidence scope</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-sgo"};</script><script src="../assets/site.js" defer></script></body></html>
+<section class="related-format-reading"><h2 id="related-format-references">Related format references</h2><p>These are nearby topics, not interchangeable binary formats or proof of cross-game compatibility.</p><ul><li><a href="format-dsgo.html">DSGO: distinct typed-resource family</a></li><li><a href="format-fmep.html">FMEP: terrain registration context</a></li></ul><p><a href="docs-file-formats.html#format-directory">All 20 documented formats</a></p></section></div></article></section><section id="searchResults" class="articles" hidden></section><aside class="right"><div id="toc" class="toc"><div class="group">On this page</div><a href="#identifying-an-sgo-file">Identifying an SGO file</a><a href="#the-basic-node-model">The basic node model</a><a href="#worked-typed-tree-example">Worked example: a small typed data tree</a><a href="#what-sgo-files-contain">What SGO files contain</a><a href="#reading-or-converting-an-sgo-safely">Reading or converting an SGO safely</a><a href="#relationship-to-dsgo">Relationship to DSGO</a><a href="#technical-references-and-evidence-scope">Technical references and evidence scope</a><a href="#related-format-references">Related format references</a></div></aside></main><script>window.EDF_SITE={prefix:"../",article:"format-sgo"};</script><script src="../assets/site.js" defer></script></body></html>
+
