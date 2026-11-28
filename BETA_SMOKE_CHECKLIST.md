@@ -1,4 +1,22 @@
-# Beta RC1 — final acceptance checklist
+# Beta RC2 — final acceptance checklist
+
+**Candidate:** 28 November 2026; local review branch only.
+
+### Preflight receipt (static checks, 28 November 2026)
+
+| Check | Result | Scope |
+| --- | --- | --- |
+| Reconciled new source fact IDs | PASS | 1,993 / 1,993; EDF4.1 365, EDF5 400, EDF6 1,228 |
+| HTML, local links, fragments, search identity | PASS | 598 HTML; 594 articles; 595 index entries; no missing local targets |
+| JavaScript syntax and patch whitespace | PASS | `node --check assets/site.js`, `git diff --check` |
+| SHA256 release manifest | PASS after regeneration | `sha256sum -c SHA256SUMS.txt` |
+| Local HTTP server | PASS | Python `http.server`, ordinary 127.0.0.1 request |
+| Chromium/Playwright desktop + 390 px | BLOCKED | Chromium launcher exists, browser binary absent (`/usr/lib/chromium/chromium`) |
+| Human credits/reuse and owner authorization | PENDING | Must be completed separately |
+
+The HTTP server preflight is **not** a replacement for an actual browser.
+Keep every untested browser checkbox below unchecked until a person or
+usable browser environment runs the exact RC2 files.
 
 Run this against the actual **HTTP(S) preview URL**, not a `file://` tab.
 Record the date, browser/version, device/viewport and failing URL or query.
@@ -31,6 +49,12 @@ Record the date, browser/version, device/viewport and failing URL or query.
 
 - [ ] Confirm the homepage lists source contributors correctly and says the
       site is unofficial; review `materials-used.html` for attribution.
+- [ ] Confirm the Knowledge Hub original-wording labels are visible and
+      distinguish its compiled records from independently credited originals.
+- [ ] Inspect the targeted third-party expression matches (including
+      `heli-flight-input`, `heli-fire-rider`, and `mode-save-keys-format`);
+      remove unlicensed copied prose if found, without removing technical
+      facts. An absent blanket permission is not a contributor prohibition.
 - [ ] Confirm no original retail game assets, source ZIPs, private Havok SDK
       material or protected contributor images were bundled.
 - [ ] Confirm known open questions and evidence limits are not advertised as

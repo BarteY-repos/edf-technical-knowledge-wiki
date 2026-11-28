@@ -24,6 +24,6 @@ Then open `http://localhost:8000/`. Opening `index.html` directly as a `file://`
 
 ## Beta status and feedback
 
-The site is an evolving reference, **not** a claim that all EDF engine behavior has been independently verified in-game. See [beta notes](RELEASE_NOTES.md) and the [test checklist](BETA_SMOKE_CHECKLIST.md) for RC1 provenance, limitations and checks. Corrections and reproducible technical findings are welcome through [GitHub Issues](https://github.com/BarteY-repos/edf-technical-knowledge-wiki/issues).
+The site is an evolving reference, **not** a claim that all EDF engine behavior has been independently verified in-game. See [beta notes](RELEASE_NOTES.md) and the [test checklist](BETA_SMOKE_CHECKLIST.md) for the prepared RC2 reconciliation, limitations and remaining publication gates. The linked public site may still show the older RC1 baseline until an authorized release is deployed. Corrections and reproducible technical findings are welcome through [GitHub Issues](https://github.com/BarteY-repos/edf-technical-knowledge-wiki/issues).
 
 **License:** No project license has been selected or granted at this time. Please do not assume permission to reuse this repository's content or any credited third-party material.
